@@ -212,6 +212,20 @@
     });
     loginScreen.style.display = 'none';
     app.classList.add('logged-in');
+    const manager = ['administrador','direcao','secretaria'].includes(role);
+    ['trip-form','student-form','vehicle-form','teacher-form'].forEach(id => {
+      const form = document.getElementById(id);
+      if (form) form.style.display = manager ? 'grid' : 'none';
+    });
+    const approvalOption = document.querySelector('#trip-status option:last-child');
+    if (approvalOption) approvalOption.disabled = !['administrador','direcao'].includes(role);
+    renderTrips();
+    renderStudents();
+    renderAuthorizations();
+    renderVehicles();
+    renderTeachers();
+    renderAttendance();
+    renderReports();
     openPage('inicio');
   }
   function leaveApp() {
@@ -258,7 +272,9 @@
     tripBody.innerHTML = trips.map(t => {
       const cls = t.status === 'Aprovada' ? 'approved' : t.status === 'Pendente' ? 'pending' : 'planned';
       const date = t.date ? t.date.split('-').reverse().join('/') : '—';
-      return '<tr><td>' + safeText(t.name) + '</td><td>' + safeText(t.destination) + '</td><td>' + date + '</td><td>' + Number(t.students) + '</td><td><span class="status ' + cls + '">' + safeText(t.status) + '</span></td><td><button type="button" data-trip-delete="' + t.id + '" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button></td></tr>';
+      const manager = ['administrador','direcao','secretaria'].includes(sessionStorage.getItem('sgve-demo-role'));
+      const action = manager ? '<button type="button" data-trip-delete="' + t.id + '" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button>' : '—';
+      return '<tr><td>' + safeText(t.name) + '</td><td>' + safeText(t.destination) + '</td><td>' + date + '</td><td>' + Number(t.students) + '</td><td><span class="status ' + cls + '">' + safeText(t.status) + '</span></td><td>' + action + '</td></tr>';
     }).join('');
     document.getElementById('trip-count').textContent = trips.length + (trips.length === 1 ? ' viagem' : ' viagens');
   }
@@ -302,7 +318,8 @@
     try { localStorage.setItem('sgve-demo-students', JSON.stringify(students)); } catch (_) {}
   }
   function renderStudents() {
-    studentBody.innerHTML = students.map(s => '<tr><td>' + safeText(s.name) + '</td><td>' + safeText(s.className) + '</td><td><span class="status approved">Ativo</span></td><td><button type="button" data-student-delete="' + s.id + '" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button></td></tr>').join('');
+    const manager = ['administrador','secretaria'].includes(sessionStorage.getItem('sgve-demo-role'));
+    studentBody.innerHTML = students.map(s => '<tr><td>' + safeText(s.name) + '</td><td>' + safeText(s.className) + '</td><td><span class="status approved">Ativo</span></td><td>' + (manager ? '<button type="button" data-student-delete="' + s.id + '" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button>' : '—') + '</td></tr>').join('');
     document.getElementById('student-count').textContent = students.length + (students.length === 1 ? ' estudante' : ' estudantes');
   }
   document.getElementById('student-form').addEventListener('submit', function (event) {
@@ -339,10 +356,11 @@
     const visible = role === 'responsavel' ? authorizations.filter(a => a.student === 'Aluno Exemplo 01') : authorizations;
     document.getElementById('authorization-table-body').innerHTML = visible.map(a => {
       const cls = a.status === 'Autorizada' ? 'approved' : a.status === 'Pendente' ? 'pending' : 'planned';
-      const control = role === 'responsavel'
+      const canUpdate = ['responsavel','administrador','direcao','secretaria'].includes(role);
+      const control = canUpdate
         ? '<select data-auth-status="' + a.id + '" aria-label="Situação da autorização" style="height:34px;padding:5px;border:1px solid #dfe8e1;border-radius:6px"><option ' + (a.status==='Pendente'?'selected':'') + '>Pendente</option><option ' + (a.status==='Autorizada'?'selected':'') + '>Autorizada</option><option ' + (a.status==='Não autorizada'?'selected':'') + '>Não autorizada</option></select>'
         : '<span class="status ' + cls + '">' + safeText(a.status) + '</span>';
-      return '<tr><td>' + safeText(a.student) + '</td><td>' + safeText(a.trip) + '</td><td>' + safeText(a.date) + '</td><td>' + control + '</td><td>' + (role === 'responsavel' ? 'Atualizar status' : '—') + '</td></tr>';
+      return '<tr><td>' + safeText(a.student) + '</td><td>' + safeText(a.trip) + '</td><td>' + safeText(a.date) + '</td><td>' + control + '</td><td>' + (canUpdate ? 'Atualizar status' : '—') + '</td></tr>';
     }).join('');
     if (!visible.length) document.getElementById('authorization-table-body').innerHTML = '<tr><td colspan="5">Nenhuma autorização vinculada a este perfil de demonstração.</td></tr>';
   }
@@ -365,7 +383,8 @@
   let vehicles = defaultVehicles;
   try { vehicles = JSON.parse(localStorage.getItem('sgve-demo-vehicles') || 'null') || defaultVehicles; } catch (_) {}
   function renderVehicles() {
-    document.getElementById('vehicle-table-body').innerHTML = vehicles.map(v => '<tr><td>' + safeText(v.name) + '</td><td>' + safeText(v.type) + '</td><td>' + Number(v.capacity) + ' lugares</td><td><span class="status approved">Cadastrado</span></td><td><button type="button" data-vehicle-delete="' + v.id + '" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button></td></tr>').join('');
+    const manager = ['administrador','direcao','secretaria'].includes(sessionStorage.getItem('sgve-demo-role'));
+    document.getElementById('vehicle-table-body').innerHTML = vehicles.map(v => '<tr><td>' + safeText(v.name) + '</td><td>' + safeText(v.type) + '</td><td>' + Number(v.capacity) + ' lugares</td><td><span class="status approved">Cadastrado</span></td><td>' + (manager ? '<button type="button" data-vehicle-delete="' + v.id + '" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button>' : '—') + '</td></tr>').join('');
   }
   document.getElementById('vehicle-form').addEventListener('submit', function (event) {
     event.preventDefault();
@@ -394,7 +413,8 @@
   let teachers = defaultTeachers;
   try { teachers = JSON.parse(localStorage.getItem('sgve-demo-teachers') || 'null') || defaultTeachers; } catch (_) {}
   function renderTeachers() {
-    document.getElementById('teacher-table-body').innerHTML = teachers.map(t => '<tr><td>' + safeText(t.name) + '</td><td>' + safeText(t.subject) + '</td><td>' + safeText(t.trip) + '</td><td><button type="button" data-teacher-delete="' + t.id + '" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button></td></tr>').join('');
+    const manager = ['administrador','direcao','secretaria'].includes(sessionStorage.getItem('sgve-demo-role'));
+    document.getElementById('teacher-table-body').innerHTML = teachers.map(t => '<tr><td>' + safeText(t.name) + '</td><td>' + safeText(t.subject) + '</td><td>' + safeText(t.trip) + '</td><td>' + (manager ? '<button type="button" data-teacher-delete="' + t.id + '" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button>' : '—') + '</td></tr>').join('');
   }
   document.getElementById('teacher-form').addEventListener('submit', function (event) {
     event.preventDefault();
