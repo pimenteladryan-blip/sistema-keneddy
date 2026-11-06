@@ -106,7 +106,17 @@
 <div class="table-wrap"><table><thead><tr><th>Estudante</th><th>Viagem</th><th>Data</th><th>Situação</th><th>Atualizar</th></tr></thead><tbody id="authorization-table-body"></tbody></table></div>
 <p id="authorization-feedback" role="status" style="font-size:10px;color:#26734a;margin:12px 0 0"></p></div>
 <div class="prototype-note"><span>i</span><p>Esta demonstração não coleta assinaturas nem armazena documentos. Em uma versão real, autorizações exigem validação institucional, privacidade e trilha de auditoria.</p></div></section>
-      <section class="page-view placeholder-view" id="page-transportes"><div class="placeholder-icon">▣</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Transportes</h1><p>Área destinada ao cadastro e acompanhamento dos veículos e dados de transporte.</p><span class="status planned">Próxima etapa</span></section>
+      <section class="page-view" id="page-transportes"><div class="page-heading"><div><p class="eyebrow">LOGÍSTICA</p><h1>Transportes</h1><p class="subheading">Organize veículos fictícios para as viagens.</p></div></div>
+<div class="panel" style="margin-bottom:16px"><div class="panel-heading"><div><p class="eyebrow">FROTA DE EXEMPLO</p><h2>Adicionar veículo</h2></div></div>
+<form id="vehicle-form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end">
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Identificação<input id="vehicle-name" required maxlength="40" placeholder="Ex.: Ônibus DEMO-03" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Tipo<select id="vehicle-type" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"><option>Ônibus</option><option>Micro-ônibus</option><option>Van</option></select></label>
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Capacidade<input id="vehicle-capacity" type="number" min="1" max="100" value="40" required style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
+<button class="login-submit" type="submit" style="height:40px;margin:0">Cadastrar veículo</button>
+</form><p id="vehicle-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div>
+<div class="panel"><div class="panel-heading"><div><p class="eyebrow">VEÍCULOS CADASTRADOS</p><h2>Frota demonstrativa</h2></div></div>
+<div class="table-wrap"><table><thead><tr><th>Identificação</th><th>Tipo</th><th>Capacidade</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="vehicle-table-body"></tbody></table></div></div>
+<div class="prototype-note"><span>i</span><p>Veículos e capacidades são exemplos. Este protótipo não verifica documentação, inspeções, habilitações ou disponibilidade real da frota.</p></div></section>
       <section class="page-view placeholder-view" id="page-professores"><div class="placeholder-icon">♙</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Professores</h1><p>Área destinada à consulta e organização dos professores responsáveis pelas atividades.</p><span class="status planned">Próxima etapa</span></section>
       <section class="page-view placeholder-view" id="page-relatorios"><div class="placeholder-icon">▥</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Relatórios</h1><p>Área de relatórios de viagens, participantes e prestação de contas.</p><span class="status planned">Próxima etapa</span></section>
       <section class="page-view placeholder-view" id="page-usuarios"><div class="placeholder-icon">⚙</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Usuários</h1><p>Área destinada à gestão de contas e níveis de acesso do sistema.</p><span class="status planned">Próxima etapa</span></section>
@@ -309,6 +319,35 @@
     document.getElementById('authorization-feedback').textContent = 'Status atualizado apenas neste navegador.';
   });
   renderAuthorizations();
+
+  const defaultVehicles = [
+    {id:1,name:'Ônibus DEMO-01',type:'Ônibus',capacity:40},
+    {id:2,name:'Van DEMO-02',type:'Van',capacity:15}
+  ];
+  let vehicles = defaultVehicles;
+  try { vehicles = JSON.parse(localStorage.getItem('sgve-demo-vehicles') || 'null') || defaultVehicles; } catch (_) {}
+  function renderVehicles() {
+    document.getElementById('vehicle-table-body').innerHTML = vehicles.map(v => '<tr><td>' + safeText(v.name) + '</td><td>' + safeText(v.type) + '</td><td>' + Number(v.capacity) + ' lugares</td><td><span class="status approved">Cadastrado</span></td><td><button type="button" data-vehicle-delete="' + v.id + '" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button></td></tr>').join('');
+  }
+  document.getElementById('vehicle-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const vehicle = {id:Date.now(),name:document.getElementById('vehicle-name').value.trim(),type:document.getElementById('vehicle-type').value,capacity:Number(document.getElementById('vehicle-capacity').value)};
+    if (!vehicle.name || !Number.isInteger(vehicle.capacity) || vehicle.capacity < 1) return;
+    vehicles.push(vehicle);
+    try { localStorage.setItem('sgve-demo-vehicles', JSON.stringify(vehicles)); } catch (_) {}
+    renderVehicles();
+    this.reset();
+    document.getElementById('vehicle-feedback').textContent = 'Veículo fictício cadastrado neste navegador.';
+  });
+  document.getElementById('vehicle-table-body').addEventListener('click', function (event) {
+    const button = event.target.closest('[data-vehicle-delete]');
+    if (!button) return;
+    vehicles = vehicles.filter(v => String(v.id) !== button.dataset.vehicleDelete);
+    try { localStorage.setItem('sgve-demo-vehicles', JSON.stringify(vehicles)); } catch (_) {}
+    renderVehicles();
+    document.getElementById('vehicle-feedback').textContent = 'Veículo removido.';
+  });
+  renderVehicles();
   const savedRole = sessionStorage.getItem('sgve-demo-role');
   if (sessionStorage.getItem('sgve-demo-session') === 'authenticated' && savedRole && accounts[savedRole]) enterApp(savedRole);
 })();
