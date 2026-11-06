@@ -9,10 +9,12 @@ Aplicação web para apoiar a organização de viagens escolares do Colégio Est
 - Perfis: administrador, direção, secretaria, professor, responsável e estudante.
 - Cadastro de turmas do Ensino Fundamental e Ensino Médio, incluindo cursos Regular, Técnico ADM e Técnico DS.
 - Cadastro mínimo de estudantes (nome e turma).
-- Criação de contas com permissões limitadas por perfil.
-- Associação de responsável a estudante pela API; responsáveis consultam apenas estudantes vinculados.
-- Estudantes consultam apenas o próprio cadastro quando uma conta estiver vinculada.
-- Auditoria de ações de cadastro e autenticação.
+- Criação de contas com permissões limitadas por perfil e associação de responsáveis a estudantes.
+- Planejamento de viagens com destino, objetivo pedagógico, datas, capacidade e status.
+- Vínculo de turmas e estudantes às viagens.
+- Envio de rascunhos para aprovação e aprovação exclusiva da direção/administração.
+- Consulta de viagens limitada aos vínculos de cada perfil.
+- Auditoria de ações de cadastro, autenticação e aprovação.
 - Testes automatizados e GitHub Actions.
 - Configuração inicial para Render com armazenamento persistente.
 
@@ -34,8 +36,8 @@ Não existe senha administrativa padrão. Não envie o arquivo `.env` ao GitHub.
 
 ## Próximas etapas
 
-Gestão de viagens e aprovação, atribuição de professores às turmas, vínculo de estudantes às viagens, autorizações, presença de saída/retorno, transporte e relatórios.
+Atribuição de professores às viagens/turmas, autorizações digitais e registro em papel, presença de saída/retorno, transporte e relatórios.
 
 ## Segurança e privacidade
 
-Este projeto ainda é um protótipo em desenvolvimento e **não está aprovado para dados reais de crianças ou adolescentes**. Use apenas dados fictícios. O cadastro atual limita os dados de estudante a nome e turma; não adicione documentos, endereço, telefone ou dados sensíveis. Professores ainda não recebem listas de turma, pois a atribuição de turmas será implementada antes de liberar esse acesso. Antes de qualquer implantação institucional, são obrigatórias revisão técnica e de segurança, avaliação de privacidade/LGPD, definição de base legal e retenção, backups testados, validação da escola e controle de acesso operacional. O limite de tentativas de login atual é local à instância e não substitui rate limiting distribuído.
+Este projeto ainda é um protótipo em desenvolvimento e **não está aprovado para dados reais de crianças ou adolescentes**. Use apenas dados fictícios. O cadastro atual limita os dados de estudante a nome e turma; não adicione documentos, endereço, telefone ou dados sensíveis. Professores só consultam viagens atribuídas; a atribuição de equipe e turmas precisa ser concluída antes do uso operacional. Antes de qualquer implantação institucional, são obrigatórias revisão técnica e de segurança, avaliação de privacidade/LGPD, definição de base legal e retenção, backups testados, validação da escola e controle de acesso operacional. O limite de tentativas de login atual é local à instância e não substitui rate limiting distribuído.
