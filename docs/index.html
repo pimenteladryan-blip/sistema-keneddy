@@ -1,110 +1,69 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#145c3b">
-  <meta name="description" content="Sistema de Gerenciamento de Viagens Escolares">
-  <title>SGVE | Colégio Presidente Kennedy</title>
-  <link rel="stylesheet" href="./styles.css">
-  <script src="./demo.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#145c3b">
+<meta name="description" content="Protótipo do Sistema de Gestão de Viagens Escolares do Colégio Estadual Presidente Kennedy">
+<title>SGVE | Colégio Estadual Presidente Kennedy</title>
+<link rel="stylesheet" href="./styles.css">
+<script src="./demo.js" defer></script>
 </head>
 <body>
-  <main class="page-shell">
-    <aside class="brand-panel">
-      <a class="school-brand" href="#" aria-label="SGVE Kennedy"><span class="brand-mark">K</span><span><strong>COLÉGIO KENNEDY</strong><small>PONTA GROSSA · PARANÁ</small></span></a>
-      <div class="brand-message"><p class="eyebrow">GESTÃO ESCOLAR</p><h1>Organizar hoje. Construir novas experiências.</h1><p class="brand-copy">Planejamento e acompanhamento das viagens escolares em um só lugar.</p></div>
-      <div class="brand-footer">Sistema de Gerenciamento de Viagens Escolares</div>
-    </aside>
-    <section class="content-panel">
-      <div class="topline"><span class="status-dot"></span> AMBIENTE DE DEMONSTRAÇÃO <span>·</span> Colégio Estadual Presidente Kennedy</div>
-      <section id="login-view" class="auth-card">
-        <p class="eyebrow green">BEM-VINDO AO SGVE</p><h2>Acesse sua conta</h2>
-        <p class="muted">Entre para visualizar o painel de gestão das viagens escolares.</p>
-        <form id="login-form">
-          <label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="username" maxlength="254" placeholder="seuemail@exemplo.com" required>
-          <label for="password">Senha</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" placeholder="Digite sua senha" required>
-          <button type="submit" id="login-button">Entrar no sistema</button><p id="login-message" class="message" role="alert" aria-live="polite"></p>
-        </form>
-        <div class="demo-notice"><span class="notice-icon">i</span><p><strong>Modo demonstração</strong><br>Use qualquer e-mail e senha. Os dados ficam somente neste navegador. Não informe dados reais de estudantes.</p></div>
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" href="#inicio"><span class="brand-symbol">K</span><span><strong>SGVE</strong><small>Gestão de Viagens Escolares</small></span></a>
+    <div class="school-tag">ESCOLA ESTADUAL</div>
+    <p class="menu-title">MENU PRINCIPAL</p>
+    <nav class="side-nav" aria-label="Menu principal">
+      <button class="nav-item active" data-page="inicio"><span>⌂</span>Início</button>
+      <button class="nav-item" data-page="viagens"><span>↗</span>Viagens</button>
+      <button class="nav-item" data-page="alunos"><span>♧</span>Alunos</button>
+      <button class="nav-item" data-page="autorizacoes"><span>▤</span>Autorizações</button>
+      <button class="nav-item" data-page="transportes"><span>▣</span>Transportes</button>
+      <button class="nav-item" data-page="professores"><span>♙</span>Professores</button>
+      <button class="nav-item" data-page="relatorios"><span>▥</span>Relatórios</button>
+      <button class="nav-item" data-page="usuarios"><span>⚙</span>Usuários</button>
+    </nav>
+    <div class="sidebar-bottom"><span class="school-seal">K</span><div><strong>Colégio Estadual</strong><small>Presidente Kennedy · Ponta Grossa/PR</small></div></div>
+  </aside>
+  <main class="main-area">
+    <header class="topbar"><div class="mobile-brand"><span class="brand-symbol small">K</span><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="profile"><span class="avatar">A</span><span><strong>Administrador</strong><small>Protótipo</small></span><button id="profile-menu" aria-label="Opções do perfil">⌄</button></div></header>
+    <section class="page-content">
+      <section class="page-view active" id="page-inicio">
+        <div class="page-heading"><div><p class="eyebrow">PAINEL ADMINISTRATIVO</p><h1>Visão geral</h1><p class="subheading">Resumo demonstrativo do sistema.</p></div><span class="date-chip" id="today-label">ANO LETIVO 2026</span></div>
+        <div class="stats-grid">
+          <article class="stat-card"><span class="stat-icon green-icon">↗</span><div><span>Viagens cadastradas</span><strong>3</strong><small>no sistema</small></div></article>
+          <article class="stat-card"><span class="stat-icon blue-icon">♧</span><div><span>Alunos de exemplo</span><strong>4</strong><small>cadastros fictícios</small></div></article>
+          <article class="stat-card"><span class="stat-icon gold-icon">✓</span><div><span>Viagens aprovadas</span><strong>1</strong><small>aguardando execução</small></div></article>
+          <article class="stat-card"><span class="stat-icon orange-icon">◷</span><div><span>Pendentes</span><strong>1</strong><small>aguardando análise</small></div></article>
+        </div>
+        <div class="content-grid">
+          <section class="panel trips-panel"><div class="panel-heading"><div><p class="eyebrow">ACOMPANHAMENTO</p><h2>Próximas viagens</h2></div><button class="text-button" data-go="viagens">Ver todas as viagens <span>→</span></button></div>
+            <div class="trip-list">
+              <article class="trip-item"><div class="trip-date"><strong>12</strong><span>NOV</span></div><div class="trip-info"><strong>Visita ao Museu</strong><span>⌖ Museu Histórico</span><small>35 alunos</small></div><span class="status planned">Planejada</span></article>
+              <article class="trip-item"><div class="trip-date"><strong>18</strong><span>NOV</span></div><div class="trip-info"><strong>Passeio Educativo</strong><span>⌖ Parque Estadual</span><small>42 alunos</small></div><span class="status approved">Aprovada</span></article>
+              <article class="trip-item"><div class="trip-date"><strong>25</strong><span>NOV</span></div><div class="trip-info"><strong>Feira de Ciências</strong><span>⌖ Centro de Eventos</span><small>28 alunos</small></div><span class="status pending">Pendente</span></article>
+            </div>
+          </section>
+          <section class="panel quick-panel"><div class="panel-heading"><div><p class="eyebrow">ACESSO RÁPIDO</p><h2>Atalhos</h2></div></div>
+            <button class="quick-link" data-go="viagens"><span class="quick-icon">＋</span><span><strong>Consultar viagens</strong><small>Visualizar o planejamento</small></span><b>→</b></button>
+            <button class="quick-link" data-go="alunos"><span class="quick-icon">♧</span><span><strong>Consultar alunos</strong><small>Ver estudantes de exemplo</small></span><b>→</b></button>
+            <button class="quick-link" data-go="autorizacoes"><span class="quick-icon">▤</span><span><strong>Autorizações</strong><small>Acompanhar situação</small></span><b>→</b></button>
+          </section>
+        </div>
+        <div class="prototype-note"><span>i</span><p><strong>Ambiente demonstrativo</strong> Esta é uma interface de protótipo. Os dados exibidos são fictícios e não são persistidos em um banco de dados nesta versão.</p></div>
       </section>
-      <section id="dashboard-view" class="dashboard hidden">
-        <header class="welcome-row">
-          <div><p class="eyebrow green">PAINEL DE CONTROLE</p><h2 id="welcome-title">Olá!</h2><p id="user-role" class="muted"></p></div>
-          <button class="button-secondary" id="logout-button" type="button">Sair</button>
-        </header>
-        <div class="overview-cards"><article class="overview-card"><span class="overview-icon">▦</span><div><small>TURMAS</small><strong id="overview-classes">0</strong></div></article><article class="overview-card"><span class="overview-icon">♧</span><div><small>ESTUDANTES</small><strong id="overview-students">0</strong></div></article><article class="overview-card"><span class="overview-icon">⌁</span><div><small>VIAGENS</small><strong id="overview-trips">0</strong></div></article></div>
-        <nav class="tabs" aria-label="Módulos do sistema"><p class="nav-caption">MENU PRINCIPAL</p>
-          <button type="button" class="tab active" data-tab="classes-panel"><span>▦</span> Turmas</button>
-          <button type="button" class="tab" data-tab="students-panel"><span>♧</span> Estudantes</button>
-          <button type="button" class="tab" data-tab="trips-panel"><span>⌁</span> Viagens</button>
-          <button type="button" class="tab" data-tab="users-panel" id="users-tab"><span>♙</span> Contas</button><div class="nav-school-note"><strong>SGVE KENNEDY</strong><small>Gestão de viagens escolares</small></div>
-        </nav>
-        <section id="classes-panel" class="module-panel">
-          <div class="section-heading"><div><p class="eyebrow green">ORGANIZAÇÃO ESCOLAR</p><h3>Turmas</h3></div><span id="classes-count" class="count-pill">0</span></div>
-          <form id="class-form" class="inline-form">
-            <fieldset class="choice-field"><legend>Etapa</legend><div class="choice-group"><label class="choice"><input type="radio" name="level" value="fundamental" checked required><span>Ensino Fundamental</span></label><label class="choice"><input type="radio" name="level" value="medio" required><span>Ensino Médio</span></label></div></fieldset>
-            <label>Ano/série<input name="grade" maxlength="30" placeholder="Ex.: 6º ano ou 1ª série" required></label>
-            <fieldset class="choice-field"><legend>Curso</legend><div class="choice-group"><label class="choice"><input type="radio" name="course" value="regular" checked><span>Regular</span></label><label class="choice"><input type="radio" name="course" value="adm"><span>Técnico ADM</span></label><label class="choice"><input type="radio" name="course" value="ds"><span>Técnico DS</span></label></div></fieldset>
-            <label>Turma<input name="section" maxlength="12" placeholder="Ex.: A" required></label>
-            <label>Ano letivo<input name="school_year" type="number" min="2020" max="2100" value="2026" required></label>
-            <button type="submit">Cadastrar turma</button>
-          </form>
-          <p id="class-message" class="message" role="status"></p><div id="classes-list" class="data-list"><p class="muted">Carregando turmas...</p></div>
-        </section>
-        <section id="students-panel" class="module-panel hidden">
-          <div class="section-heading"><div><p class="eyebrow green">CADASTRO ESCOLAR</p><h3>Estudantes</h3></div><span id="students-count" class="count-pill">0</span></div>
-          <form id="student-form" class="inline-form">
-            <label>Nome completo<input name="full_name" maxlength="120" required></label>
-            <label>Turma<select name="class_id" id="student-class" required><option value="">Selecione uma turma</option></select></label>
-            <button type="submit">Cadastrar estudante</button>
-          </form>
-          <p id="student-message" class="message" role="status"></p><div id="students-list" class="data-list"><p class="muted">Carregando estudantes...</p></div>
-          <p class="privacy-note">Cadastro mínimo: nome e turma. Não informe documentos, endereço, telefone ou outros dados pessoais nesta versão.</p>
-        </section>
-        <section id="trips-panel" class="module-panel hidden">
-          <div class="section-heading"><div><p class="eyebrow green">PLANEJAMENTO</p><h3>Viagens escolares</h3></div><span id="trips-count" class="count-pill">0</span></div>
-          <form id="trip-form" class="inline-form">
-            <label>Título<input name="title" maxlength="120" placeholder="Ex.: Visita ao museu" required></label>
-            <label>Destino<input name="destination" maxlength="160" required></label>
-            <label>Objetivo pedagógico<input name="educational_purpose" maxlength="500" required></label>
-            <label>Saída<input name="departure_at" type="datetime-local" required></label>
-            <label>Retorno<input name="return_at" type="datetime-local" required></label>
-            <label>Capacidade<input name="capacity" type="number" min="1" max="5000" value="40" required></label>
-            <button type="submit">Criar rascunho</button>
-          </form>
-          <p id="trip-message" class="message" role="status"></p>
-          <div id="trip-assignment" class="assignment-area">
-            <h4>Vincular turmas e participantes</h4>
-            <form id="trip-class-form" class="inline-form compact-form">
-              <label>Viagem<select name="trip_id" id="trip-class-trip" required></select></label>
-              <label>Turma<select name="class_id" id="trip-class-select" required></select></label>
-              <button type="submit">Vincular turma</button>
-            </form>
-            <form id="trip-student-form" class="inline-form compact-form">
-              <label>Viagem<select name="trip_id" id="trip-student-trip" required></select></label>
-              <label>Estudante<select name="student_id" id="trip-student-select" required></select></label>
-              <button type="submit">Vincular estudante</button>
-            </form>
-          </div>
-          <div id="trips-list" class="data-list"><p class="muted">Carregando viagens...</p></div>
-          <p class="privacy-note">O fluxo atual cria rascunhos, vincula turmas/estudantes e envia para aprovação. Autorizações e presença serão adicionadas em outra etapa.</p>
-        </section>
-        <section id="users-panel" class="module-panel hidden">
-          <div class="section-heading"><div><p class="eyebrow green">ACESSO AO SISTEMA</p><h3>Criar conta</h3></div></div>
-          <form id="user-form" class="inline-form">
-            <label>Nome<input name="name" maxlength="100" required></label>
-            <label>E-mail<input name="email" type="email" maxlength="254" required></label>
-            <fieldset class="choice-field"><legend>Perfil</legend><div class="choice-group role-choices"><label class="choice"><input type="radio" name="role" value="teacher" checked required><span>Professor</span></label><label class="choice"><input type="radio" name="role" value="guardian"><span>Responsável</span></label><label class="choice"><input type="radio" name="role" value="student"><span>Estudante</span></label><label class="choice" data-admin-only><input type="radio" name="role" value="secretariat"><span>Secretaria</span></label><label class="choice" data-admin-only><input type="radio" name="role" value="direction"><span>Direção</span></label><label class="choice" data-admin-only><input type="radio" name="role" value="admin"><span>Administrador</span></label></div></fieldset>
-            <label>Senha inicial<input name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
-            <button type="submit">Criar conta</button>
-          </form>
-          <p id="user-message" class="message" role="status"></p>
-          <p class="privacy-note">A senha deve ter pelo menos 14 caracteres. Entregue as credenciais de forma privada e nunca as envie pelo repositório.</p>
-        </section>
-      </section>
-      <footer class="content-footer">SGVE · Colégio Estadual Presidente Kennedy · Ponta Grossa/PR</footer>
+      <section class="page-view" id="page-viagens"><div class="page-heading"><div><p class="eyebrow">PLANEJAMENTO ESCOLAR</p><h1>Viagens</h1><p class="subheading">Consulte as viagens demonstrativas cadastradas.</p></div></div><div class="panel"><div class="table-wrap"><table><thead><tr><th>Viagem</th><th>Destino</th><th>Data</th><th>Alunos</th><th>Situação</th></tr></thead><tbody><tr><td>Visita ao Museu</td><td>Museu Histórico</td><td>12/11/2026</td><td>35</td><td><span class="status planned">Planejada</span></td></tr><tr><td>Passeio Educativo</td><td>Parque Estadual</td><td>18/11/2026</td><td>42</td><td><span class="status approved">Aprovada</span></td></tr><tr><td>Feira de Ciências</td><td>Centro de Eventos</td><td>25/11/2026</td><td>28</td><td><span class="status pending">Pendente</span></td></tr></tbody></table></div></div></section>
+      <section class="page-view" id="page-alunos"><div class="page-heading"><div><p class="eyebrow">COMUNIDADE ESCOLAR</p><h1>Alunos</h1><p class="subheading">Consulta de estudantes fictícios do protótipo.</p></div></div><div class="panel"><div class="table-wrap"><table><thead><tr><th>Estudante</th><th>Turma</th><th>Situação</th></tr></thead><tbody><tr><td>Aluno Exemplo 01</td><td>1ª série A</td><td><span class="status approved">Ativo</span></td></tr><tr><td>Aluno Exemplo 02</td><td>1ª série A</td><td><span class="status approved">Ativo</span></td></tr><tr><td>Aluno Exemplo 03</td><td>2ª série B</td><td><span class="status approved">Ativo</span></td></tr><tr><td>Aluno Exemplo 04</td><td>3ª série A</td><td><span class="status approved">Ativo</span></td></tr></tbody></table></div></div></section>
+      <section class="page-view placeholder-view" id="page-autorizacoes"><div class="placeholder-icon">▤</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Autorizações</h1><p>Esta área será usada para acompanhar as autorizações dos responsáveis pelas viagens escolares.</p><span class="status planned">Próxima etapa</span></section>
+      <section class="page-view placeholder-view" id="page-transportes"><div class="placeholder-icon">▣</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Transportes</h1><p>Área destinada ao cadastro e acompanhamento dos veículos e dados de transporte.</p><span class="status planned">Próxima etapa</span></section>
+      <section class="page-view placeholder-view" id="page-professores"><div class="placeholder-icon">♙</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Professores</h1><p>Área destinada à consulta e organização dos professores responsáveis pelas atividades.</p><span class="status planned">Próxima etapa</span></section>
+      <section class="page-view placeholder-view" id="page-relatorios"><div class="placeholder-icon">▥</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Relatórios</h1><p>Área de relatórios de viagens, participantes e prestação de contas.</p><span class="status planned">Próxima etapa</span></section>
+      <section class="page-view placeholder-view" id="page-usuarios"><div class="placeholder-icon">⚙</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Usuários</h1><p>Área destinada à gestão de contas e níveis de acesso do sistema.</p><span class="status planned">Próxima etapa</span></section>
+      <footer class="page-footer">SGVE · Protótipo versão 0.1 <span>Interface demonstrativa · Colégio Estadual Presidente Kennedy</span></footer>
     </section>
   </main>
+</div>
 </body>
 </html>
