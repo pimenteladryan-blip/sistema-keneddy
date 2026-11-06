@@ -106,6 +106,32 @@
   #login-screen .login-form-side{padding:20px 19px 24px!important}
 }
 
+
+/* Identidade visual do Colégio Estadual Presidente Kennedy */
+#login-screen.login-screen{
+ background:
+   radial-gradient(ellipse at 7% 12%,#d5e7d9 0,transparent 27%),
+   radial-gradient(ellipse at 94% 88%,#dbe9de 0,transparent 30%),
+   repeating-linear-gradient(135deg,#ffffff18 0 2px,transparent 2px 26px),
+   #eaf0eb!important;
+}
+#login-screen .login-brand-panel{
+ background:
+   radial-gradient(ellipse at 85% 15%,#ffffff14 0 1px,transparent 2px 100%),
+   radial-gradient(circle at 15% 85%,#2b8858 0,transparent 44%),
+   linear-gradient(145deg,#176b45 0%,#0b3c29 100%)!important;
+}
+#login-screen .login-mascot{
+ width:min(100%,440px)!important;height:auto!important;max-height:430px!important;
+ object-fit:contain!important;filter:drop-shadow(0 18px 14px #031c1245)!important;
+}
+@media(max-width:800px){
+ #login-screen .login-mascot{width:210px!important;max-height:190px!important}
+}
+@media(max-width:430px){
+ #login-screen .login-mascot{width:165px!important;max-height:155px!important}
+}
+
 </style>
 
 </head>
@@ -115,31 +141,7 @@
     <div class="login-brand"><span class="brand-symbol">K</span><span><strong>SGVE</strong><small>Gestão de Viagens Escolares</small></span></div>
     <div class="login-intro"><div class="login-kicker">COLÉGIO ESTADUAL PRESIDENTE KENNEDY</div><h1>Organização e cuidado em cada viagem.</h1><p>Uma plataforma para acompanhar o planejamento das viagens escolares, com informações organizadas em um só lugar.</p>
       <div class="login-illustration" aria-label="Mascote cachorro usando uniforme verde e branco do Kennedy">
-        <svg class="login-mascot" viewBox="0 0 340 360" role="img" aria-label="Cachorro cinza mascote usando uniforme escolar verde do Kennedy">
-          <ellipse cx="171" cy="337" rx="118" ry="13" fill="#062e20" opacity=".18"/>
-          <path d="M88 94 Q35 14 22 77 Q10 151 83 180Z" fill="#858b96" stroke="#343d43" stroke-width="7"/>
-          <path d="M252 94 Q305 14 318 77 Q330 151 257 180Z" fill="#858b96" stroke="#343d43" stroke-width="7"/>
-          <path d="M35 83 Q65 91 82 143 L65 151 Q29 128 35 83Z" fill="#d9a6a8"/>
-          <path d="M305 83 Q275 91 258 143 L275 151 Q311 128 305 83Z" fill="#d9a6a8"/>
-          <path d="M73 114 Q72 43 170 39 Q268 43 267 114 L259 195 Q246 253 170 260 Q94 253 81 195Z" fill="#b8bdc7" stroke="#343d43" stroke-width="7"/>
-          <path d="M91 139 Q110 111 142 130 Q154 149 137 166 Q109 180 91 157Z" fill="#343d43"/>
-          <ellipse cx="132" cy="159" rx="15" ry="19" fill="#fff"/><ellipse cx="135" cy="160" rx="7" ry="11" fill="#202a30"/>
-          <ellipse cx="210" cy="159" rx="15" ry="19" fill="#fff"/><ellipse cx="213" cy="160" rx="7" ry="11" fill="#202a30"/>
-          <circle cx="138" cy="154" r="4" fill="#fff"/><circle cx="216" cy="154" r="4" fill="#fff"/>
-          <path d="M133 193 Q170 169 207 193 Q205 230 170 233 Q135 230 133 193Z" fill="#f1f0ed"/>
-          <ellipse cx="170" cy="191" rx="18" ry="13" fill="#20282d"/>
-          <path d="M154 214 Q170 228 186 214" fill="none" stroke="#343d43" stroke-width="5" stroke-linecap="round"/>
-          <path d="M101 250 Q67 269 73 324 L111 335 L137 286 L203 286 L229 335 L267 324 Q273 269 239 250 Q207 235 170 240 Q133 235 101 250Z" fill="#12613f" stroke="#343d43" stroke-width="7"/>
-          <path d="M143 244 L170 271 L197 244 L187 236 L170 251 L153 236Z" fill="#f4f7f1" stroke="#343d43" stroke-width="4" stroke-linejoin="round"/>
-          <path d="M157 267 L170 281 L183 267" fill="none" stroke="#e7eee8" stroke-width="5"/>
-          <path d="M80 278 Q47 294 52 322 Q57 344 90 339 L116 324 L109 292Z" fill="#b8bdc7" stroke="#343d43" stroke-width="7"/>
-          <path d="M260 278 Q293 294 288 322 Q283 344 250 339 L224 324 L231 292Z" fill="#b8bdc7" stroke="#343d43" stroke-width="7"/>
-          <rect x="187" y="285" width="37" height="34" rx="5" fill="#f5f7f2" stroke="#d8e5da" stroke-width="3"/>
-          <text x="205.5" y="306" text-anchor="middle" font-size="10" font-weight="900" fill="#12613f">CEPK</text>
-          <path d="M120 323 Q170 339 220 323" fill="none" stroke="#e5eee7" stroke-width="5"/>
-          <path d="M98 69 Q105 23 170 20 Q235 23 242 69 L231 85 Q170 65 109 85Z" fill="#16834f" stroke="#343d43" stroke-width="7"/>
-          <path d="M113 67 Q170 43 227 67" fill="none" stroke="#8ed39d" stroke-width="8"/>
-        </svg>
+        <img class="login-mascot" src="./assets/mascote-kennedy.webp" alt="Mascote oficial do Colégio Estadual Presidente Kennedy, cachorro cinza com boné verde CEPK" loading="eager">
         <div class="login-illustration-caption"><strong>O Kennedy vai com você!</strong> Nosso mascote acompanha cada viagem com alegria e cuidado.</div>
       </div>
     </div>
