@@ -34,6 +34,26 @@ CREATE TABLE IF NOT EXISTS classes (
   UNIQUE(level, grade, course, section, school_year)
 );
 
+CREATE TABLE IF NOT EXISTS students (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  full_name TEXT NOT NULL,
+  class_id INTEGER NOT NULL REFERENCES classes(id),
+  user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE SET NULL,
+  active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0,1)),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_students_class ON students(class_id, active);
+
+CREATE TABLE IF NOT EXISTS student_guardians (
+  student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+  guardian_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  relationship_label TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(student_id, guardian_user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_student_guardians_guardian ON student_guardians(guardian_user_id);
+
 CREATE TABLE IF NOT EXISTS trips (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
