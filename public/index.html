@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#145c3b">
+  <meta name="description" content="Sistema de Gerenciamento de Viagens Escolares">
+  <title>SGVE | Colégio Presidente Kennedy</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    <section class="brand-panel" aria-label="Identificação do sistema">
+      <div class="brand-mark" aria-hidden="true">SG</div>
+      <p class="eyebrow">COLÉGIO ESTADUAL PRESIDENTE KENNEDY</p>
+      <h1>Viagens escolares com organização e cuidado.</h1>
+      <p class="brand-copy">Planejamento, autorizações e acompanhamento em um só lugar.</p>
+      <div class="brand-footer">Sistema de Gerenciamento de Viagens Escolares</div>
+    </section>
+    <section class="content-panel">
+      <div class="topline"><span class="status-dot"></span> Portal institucional</div>
+      <section id="login-view" class="auth-card">
+        <p class="eyebrow green">BEM-VINDO AO SGVE</p>
+        <h2>Acesse sua conta</h2>
+        <p class="muted">Entre com as credenciais fornecidas pela administração da escola.</p>
+        <form id="login-form">
+          <label for="email">E-mail</label>
+          <input id="email" name="email" type="email" autocomplete="username" maxlength="254" required>
+          <label for="password">Senha</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" required>
+          <button type="submit" id="login-button">Entrar no sistema</button>
+          <p id="login-message" class="message" role="alert" aria-live="polite"></p>
+        </form>
+        <p class="helper">Não possui acesso? Procure a secretaria ou a direção.</p>
+      </section>
+      <section id="dashboard-view" class="dashboard hidden">
+        <div class="welcome-row">
+          <div><p class="eyebrow green">PAINEL INICIAL</p><h2 id="welcome-title">Olá!</h2>
+            <p class="muted">A estrutura inicial do SGVE está pronta.</p></div>
+          <button class="button-secondary" id="logout-button" type="button">Sair</button>
+        </div>
+        <div class="summary-grid">
+          <article class="summary-card"><span class="summary-icon">01</span><p>Viagens</p><strong>Em preparação</strong><small>Módulo planejado</small></article>
+          <article class="summary-card"><span class="summary-icon">02</span><p>Autorizações</p><strong>Em preparação</strong><small>Módulo planejado</small></article>
+          <article class="summary-card"><span class="summary-icon">03</span><p>Presenças</p><strong>Em preparação</strong><small>Módulo planejado</small></article>
+        </div>
+        <div class="notice"><strong>Primeira versão</strong>
+          <p>O acesso e a base de segurança estão implementados. Os módulos escolares serão adicionados nas próximas etapas.</p></div>
+        <p id="user-role" class="role-label"></p>
+      </section>
+      <footer class="content-footer">Acesso restrito a usuários autorizados.</footer>
+    </section>
+  </main>
+</body>
+</html>
