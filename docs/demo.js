@@ -16,11 +16,13 @@ function showDashboard(user){
  $('#welcome-title').textContent='Olá, '+user.name+'!';$('#user-role').textContent='Perfil de acesso: '+roles[user.role];
  ['#class-form','#student-form','#trip-form','#trip-assignment','#users-tab'].forEach(s=>$(s).classList.toggle('hidden',!manager()));
  document.querySelectorAll('[data-admin-only]').forEach(o=>o.hidden=user.role!=='admin');
+ document.querySelectorAll('[data-admin-only] input').forEach(o=>o.disabled=user.role!=='admin');
  render();
 }
 function render(){
  const can=manager();
  const classes=db.classes, students=db.students, trips=db.trips;
+ $('#overview-classes').textContent=classes.length;$('#overview-students').textContent=students.length;$('#overview-trips').textContent=trips.length;
  $('#classes-count').textContent=classes.length;$('#students-count').textContent=students.length;$('#trips-count').textContent=trips.length;
  const classLabel=c=>(c.level==='fundamental'?'Fundamental':'Médio')+' · '+c.grade+' · '+(c.course==='adm'?'Técnico ADM':c.course==='ds'?'Técnico DS':'Regular')+' · Turma '+c.section+' · '+c.school_year;
  $('#classes-list').innerHTML=classes.length?classes.map(c=>'<article class="data-row"><strong>'+esc(classLabel(c))+'</strong></article>').join(''):'<p class="muted">Nenhuma turma cadastrada.</p>';
