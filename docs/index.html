@@ -66,10 +66,10 @@
 }
 .login-brand .brand-symbol{
   display:grid;place-items:center;
-  border:2px solid #f1cf70;
+  border:1px solid #b9d9c0;
   border-radius:16px;
-  background:linear-gradient(145deg,#f1cf70,#d9a92e);
-  color:#174b32;
+  background:linear-gradient(145deg,#e6f4e8,#cfe8d4);
+  color:#276b42;
   box-shadow:0 8px 24px #001b0d40;
 }
 .login-brand strong{letter-spacing:.2em}
@@ -328,9 +328,9 @@ body.light-mode .login-field input:focus,body.light-mode .login-field select:foc
 }
 body.light-mode .login-submit{background:linear-gradient(110deg,#70b985,#579b6d);box-shadow:0 8px 18px #579b6d25}
 body.light-mode .login-submit:hover{background:linear-gradient(110deg,#62a978,#4b8d61)}
-body.light-mode .login-disclaimer{background:#fbfaf1;border-color:#e7e9d8;color:#728078}
-body.light-mode .login-disclaimer strong{color:#355a43}
-body.light-mode .login-disclaimer>span:first-child{background:#f3e8bd;color:#755d19}
+body.light-mode .login-disclaimer{background:#eff8f0;border-color:#d8eadb;color:#728078}
+body.light-mode .login-disclaimer strong{color:#276b42}
+body.light-mode .login-disclaimer>span:first-child{background:#dff0e3;color:#276b42}
 body.light-mode .status.planned{background:#f1f3f1;color:#647168}
 body.light-mode .status.approved{background:#e8f4ec;color:#26734a}
 body.light-mode .status.pending{background:#fff4df;color:#986b1d}
@@ -588,6 +588,10 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
     const enteredPassword = document.getElementById('login-password').value;
     if (registerMode) {
       const fullName = registerNameInput.value.trim();
+      if (!['professor','responsavel','estudante'].includes(role)) {
+        error.textContent = 'Por segurança, o cadastro público está disponível apenas para Professor, Responsável ou Estudante.';
+        return;
+      }
       if (!fullName || enteredPassword.length < 6) {
         error.textContent = 'Informe seu nome e uma senha com pelo menos 6 caracteres.';
         return;
