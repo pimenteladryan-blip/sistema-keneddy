@@ -9,5 +9,17 @@ function openPage(name){
 }
 document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>openPage(b.dataset.page)));
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>openPage(b.dataset.go)));
-document.querySelector('#profile-menu').addEventListener('click',()=>alert('Perfil demonstrativo: Administrador'));
+document.querySelector('#demo-login-form').addEventListener('submit',event=>{
+ event.preventDefault();
+ const role=document.querySelector('#login-role').value;
+ document.querySelector('.profile strong').textContent=role;
+ document.querySelector('.profile small').textContent='Acesso demonstrativo';
+ document.querySelector('#login-screen').style.display='none';
+ document.querySelector('#app-shell').classList.add('logged-in');
+});
+document.querySelector('#profile-menu').addEventListener('click',()=>{
+ document.querySelector('#app-shell').classList.remove('logged-in');
+ document.querySelector('#login-screen').style.display='grid';
+ document.querySelector('#login-role').value='Administrador';
+});
 document.querySelector('#today-label').textContent='ANO LETIVO 2026';
