@@ -3,7 +3,7 @@
 
 **Instituição de referência:** Colégio Estadual Presidente Kennedy — Ponta Grossa/PR  
 **Repositório:** https://github.com/pimenteladryan-blip/sistema-keneddy  
-**Status:** Fundação e cadastros iniciais implementados; fluxos de viagem ainda pendentes.
+**Status:** Fundação, cadastros e fluxo inicial de viagens implementados.
 
 ## Objetivo
 Aplicação web responsiva para organizar viagens escolares, participantes, autorizações, frequência, transporte e relatórios. Como poderá tratar dados de crianças e adolescentes, não deve ser usada com dados reais antes de revisão técnica, validação institucional e avaliação de privacidade/LGPD.
@@ -12,21 +12,21 @@ Aplicação web responsiva para organizar viagens escolares, participantes, auto
 - **Administrador:** configuração e gestão completa de contas.
 - **Direção:** aprova viagens e acompanha relatórios; pode administrar cadastros.
 - **Secretaria:** mantém cadastros escolares e organiza viagens; não cria contas administrativas.
-- **Professor:** consulta somente registros operacionais que forem atribuídos ao seu perfil.
-- **Responsável legal:** consulta viagens vinculadas e registra autorização/recusa.
-- **Estudante:** consulta somente informações liberadas e vinculadas à sua conta.
+- **Professor:** consulta somente viagens atribuídas ao seu perfil.
+- **Responsável legal:** consulta somente viagens ligadas aos estudantes sob sua responsabilidade.
+- **Estudante:** consulta somente viagens vinculadas ao próprio cadastro.
 
 As permissões são verificadas no servidor. Esconder opções na interface não é considerado controle de segurança.
 
 ## Módulos e situação
 1. **Fundação e acesso — implementado:** Node.js, Express, SQLite, login, sessões, CSRF, perfis e testes.
 2. **Cadastros iniciais — implementado:** turmas, estudantes com dados mínimos, contas e associação de responsáveis.
-3. **Gestão de viagens — próximo:** proposta, destino, finalidade pedagógica, datas, capacidade, turmas, equipe, transporte e aprovação da direção.
-4. **Participantes e autorizações:** vincular estudantes à viagem; autorização digital do responsável e registro administrativo de autorização em papel.
-5. **Presença:** listas de saída e retorno, com usuário e horário do registro.
-6. **Transporte:** cadastro operacional de veículos e condutores, com acesso restrito.
-7. **Financeiro e relatórios:** custos e contribuições opcionais; exportação com minimização de dados.
-8. **Implantação:** revisão de segurança, privacidade, acessibilidade, backups, monitoramento e aprovação institucional.
+3. **Gestão inicial de viagens — implementado:** criação de rascunho, vínculo de turmas/estudantes, envio para aprovação e aprovação pela direção/administração.
+4. **Autorizações — próximo:** autorização digital do responsável e registro administrativo de autorização em papel, com histórico.
+5. **Presença — próximo:** listas de saída e retorno, com usuário e horário do registro.
+6. **Equipe e transporte — pendente:** atribuição de professores, veículos e condutores com acesso restrito.
+7. **Financeiro e relatórios — pendente:** custos e contribuições opcionais; exportação com minimização de dados.
+8. **Implantação — pendente:** revisão de segurança, privacidade, acessibilidade, backups, monitoramento e aprovação institucional.
 
 ## Etapas escolares
 - Ensino Fundamental: 6º ao 9º ano.
@@ -44,7 +44,8 @@ As permissões são verificadas no servidor. Esconder opções na interface não
 ## Segurança e privacidade
 - Usar somente dados fictícios em desenvolvimento.
 - Cadastro inicial de estudante contém apenas nome e turma.
-- Professores não consultam listas gerais; a atribuição de turmas deve ser implementada antes de liberar suas listas.
+- Responsáveis e estudantes só consultam viagens ligadas aos próprios vínculos.
+- Professores só consultam viagens atribuídas; a atribuição de equipe precisa ser concluída antes de liberar listas.
 - Não publicar documentos, endereços, telefones, autorizações ou listas de estudantes.
 - Definir finalidade, base legal, retenção, correção e eliminação dos dados.
 - Revisar controle de acesso, rate limiting, CSRF, sessões e logs.
@@ -55,4 +56,4 @@ As permissões são verificadas no servidor. Esconder opções na interface não
 GPS em tempo real, aplicativo nativo, integração automática com sistemas oficiais e processamento de pagamentos.
 
 ## Próxima entrega
-Implementar cadastro de viagens, aprovação pela direção e vínculo de turmas/estudantes à viagem, mantendo permissões verificadas no servidor.
+Implementar autorizações digitais e registro de documentos em papel, com acesso restrito ao responsável vinculado e trilha de auditoria.
