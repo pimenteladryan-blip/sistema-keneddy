@@ -17,10 +17,13 @@ function showDashboard(user) {
   const canManage = ['admin', 'direction', 'secretariat'].includes(user.role);
   document.querySelector('#class-form').classList.toggle('hidden', !canManage);
   document.querySelector('#student-form').classList.toggle('hidden', !canManage);
+  document.querySelector('#trip-form').classList.toggle('hidden', !canManage);
+  document.querySelector('#trip-assignment').classList.toggle('hidden', !canManage);
   document.querySelector('#users-tab').classList.toggle('hidden', !canManage);
   document.querySelectorAll('[data-admin-only]').forEach(option => { option.hidden = user.role !== 'admin'; });
   loadClasses();
   loadStudents();
+  loadTrips();
 }
 function showLogin() {
   currentUser = null;
@@ -63,6 +66,14 @@ async function loadClasses() {
       '<option value="' + item.id + '">' + escapeHtml(classLabel(item)) + '</option>'
     ).join('');
     if (previous) select.value = previous;
+    const tripClassSelect = document.querySelector('#trip-class-select');
+    if (tripClassSelect) {
+      const selectedClass = tripClassSelect.value;
+      tripClassSelect.innerHTML = '<option value="">Selecione uma turma</option>' + data.classes.map(item =>
+        '<option value="' + item.id + '">' + escapeHtml(classLabel(item)) + '</option>'
+      ).join('');
+      if (selectedClass) tripClassSelect.value = selectedClass;
+    }
   } catch (error) { list.textContent = error.message; }
 }
 async function loadStudents() {
@@ -74,8 +85,88 @@ async function loadStudents() {
       '<article class="data-row"><strong>' + escapeHtml(item.full_name) + '</strong><span>' +
       escapeHtml(classLabel(item)) + '</span></article>'
     ).join('') : '<p class="muted">Nenhum estudante cadastrado ou vinculado a este perfil.</p>';
+    const tripStudentSelect = document.querySelector('#trip-student-select');
+    if (tripStudentSelect) {
+      const previous = tripStudentSelect.value;
+      tripStudentSelect.innerHTML = '<option value="">Selecione um estudante</option>' + data.students.map(item =>
+        '<option value="' + item.id + '">' + escapeHtml(item.full_name + ' · ' + classLabel(item)) + '</option>'
+      ).join('');
+      if (previous) tripStudentSelect.value = previous;
+    }
   } catch (error) { list.textContent = error.message; }
 }
+
+function dateLabel(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 'Data não informada' : date.toLocaleString('pt-BR');
+}
+async function loadTrips() {
+  const list = document.querySelector('#trips-list');
+  try {
+    const data = await api('/api/trips');
+    document.querySelector('#trips-count').textContent = String(data.trips.length);
+    const canManage = currentUser && ['admin', 'direction', 'secretariat'].includes(currentUser.role);
+    list.innerHTML = data.trips.length ? data.trips.map(trip => {
+      let action = '';
+      if (canManage && trip.status === 'draft') action = '<button type="button" class="small-action" data-trip-action="submit" data-trip-id="' + trip.id + '">Enviar para aprovação</button>';
+      if (currentUser && ['admin', 'direction'].includes(currentUser.role) && trip.status === 'pending_approval') action = '<button type="button" class="small-action" data-trip-action="approve" data-trip-id="' + trip.id + '">Aprovar viagem</button>';
+      return '<article class="trip-card"><div class="trip-card-main"><div class="trip-title-row"><strong>' + escapeHtml(trip.title) + '</strong><span class="status-pill status-' + escapeHtml(trip.status) + '">' + escapeHtml(trip.statusLabel) + '</span></div><p>' + escapeHtml(trip.destination) + '</p><small>Saída: ' + escapeHtml(dateLabel(trip.departure_at)) + '</small><small>Retorno: ' + escapeHtml(dateLabel(trip.return_at)) + '</small><small>Participantes: ' + trip.participant_count + ' / ' + trip.capacity + '</small></div>' + action + '</article>';
+    }).join('') : '<p class="muted">Nenhuma viagem cadastrada.</p>';
+    const options = '<option value="">Selecione uma viagem</option>' + data.trips.filter(t => t.status === 'draft').map(t =>
+      '<option value="' + t.id + '">' + escapeHtml(t.title + ' · ' + t.destination) + '</option>'
+    ).join('');
+    document.querySelector('#trip-class-trip').innerHTML = options;
+    document.querySelector('#trip-student-trip').innerHTML = options;
+  } catch (error) { list.textContent = error.message; }
+}
+document.querySelector('#trip-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  payload.capacity = Number(payload.capacity);
+  payload.departure_at = new Date(payload.departure_at).toISOString();
+  payload.return_at = new Date(payload.return_at).toISOString();
+  try {
+    const result = await api('/api/trips', { method: 'POST', body: JSON.stringify(payload) });
+    event.currentTarget.reset();
+    showMessage('#trip-message', result.message);
+    await loadTrips();
+  } catch (error) { showMessage('#trip-message', error.message, true); }
+});
+document.querySelector('#trip-class-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  try {
+    const result = await api('/api/trips/' + Number(payload.trip_id) + '/classes', {
+      method: 'POST', body: JSON.stringify({ class_id: Number(payload.class_id) })
+    });
+    showMessage('#trip-message', result.message);
+  } catch (error) { showMessage('#trip-message', error.message, true); }
+});
+document.querySelector('#trip-student-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  try {
+    const result = await api('/api/trips/' + Number(payload.trip_id) + '/students', {
+      method: 'POST', body: JSON.stringify({ student_id: Number(payload.student_id) })
+    });
+    showMessage('#trip-message', result.message);
+    await loadTrips();
+  } catch (error) { showMessage('#trip-message', error.message, true); }
+});
+document.querySelector('#trips-list').addEventListener('click', async event => {
+  const button = event.target.closest('[data-trip-action]');
+  if (!button) return;
+  button.disabled = true;
+  try {
+    const result = await api('/api/trips/' + button.dataset.tripId + '/' + button.dataset.tripAction, { method: 'POST', body: '{}' });
+    showMessage('#trip-message', result.message);
+    await loadTrips();
+  } catch (error) {
+    showMessage('#trip-message', error.message, true);
+    button.disabled = false;
+  }
+});
+
 document.querySelectorAll('.tab').forEach(button => button.addEventListener('click', () => {
   document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab === button));
   document.querySelectorAll('.module-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== button.dataset.tab));
