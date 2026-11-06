@@ -84,7 +84,7 @@ async function bootstrapAdmin() {
   const email = String(process.env.ADMIN_EMAIL || '').trim().toLowerCase();
   const password = String(process.env.ADMIN_PASSWORD || '');
   const name = String(process.env.ADMIN_NAME || 'Administrador').trim();
-  if (!email && !password) return;
+  if (!password) return;
   if (!email || !password || password.length < 14) {
     throw new Error('Configure ADMIN_EMAIL e ADMIN_PASSWORD com pelo menos 14 caracteres.');
   }
