@@ -259,7 +259,7 @@ button{font-family:'DM Sans','Segoe UI',Arial,sans-serif}
   box-shadow:0 5px 18px #0003;font:700 11px 'DM Sans',sans-serif;
   cursor:pointer;transition:all .2s;
 }
-.theme-toggle:hover{transform:translateY(-1px);border-color:#65c994}
+.theme-toggle:hover{transform:translateY(-1px);border-color:#65c994}.theme-switch-track{display:inline-flex;align-items:center;width:30px;height:17px;padding:2px;border-radius:99px;background:#3c7858}.theme-switch-track span{display:block;width:13px;height:13px;border-radius:50%;background:#fff;transition:transform .2s}body.light-mode .theme-switch-track{background:#d7a936}body.light-mode .theme-switch-track span{transform:translateX(13px)}
 .theme-toggle .theme-icon{font-size:15px;line-height:1}
 body.light-mode{
   color-scheme:light;
@@ -340,7 +340,7 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
 
 </head>
 <body>
-<button class="theme-toggle" id="theme-toggle" type="button" aria-label="Ativar tema claro" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☀</span><span class="theme-label">Modo claro</span></button>
+<button class="theme-toggle" id="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button>
 <section class="login-screen" id="login-screen">
   <div class="login-brand-panel">
     <div class="login-brand"><span class="brand-symbol">K</span><span><strong>SGVE</strong><small>Gestão de Viagens Escolares</small></span></div>
@@ -861,9 +861,9 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
   function applyTheme(mode){
     const light = mode === 'light';
     document.body.classList.toggle('light-mode', light);
-    icon.textContent = light ? '☾' : '☀';
-    label.textContent = light ? 'Modo escuro' : 'Modo claro';
-    button.setAttribute('aria-label', light ? 'Ativar tema escuro' : 'Ativar tema claro');
+    icon.textContent = light ? '☀' : '☾';
+    label.textContent = light ? 'Tema claro' : 'Tema escuro';
+    button.setAttribute('aria-label', light ? 'Mudar para tema escuro' : 'Mudar para tema claro');
     button.setAttribute('aria-pressed', String(light));
   }
   let saved = 'dark';
