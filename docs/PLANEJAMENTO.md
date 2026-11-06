@@ -57,3 +57,18 @@ GPS em tempo real, aplicativo nativo, integração automática com sistemas ofic
 
 ## Próxima entrega
 Implementar autorizações digitais e registro de documentos em papel, com acesso restrito ao responsável vinculado e trilha de auditoria.
+
+## Funcionalidades do protótipo estático (GitHub Pages)
+
+A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
+- Login local com seleção de Administrador, Direção, Secretaria, Professor, Responsável e Estudante.
+- Visão de viagens, cadastro e exclusão de viagens e alteração de situação por Direção/Administração.
+- Cadastro e consulta de estudantes fictícios e turmas.
+- Acompanhamento de autorizações demonstrativas.
+- Cadastro e remoção de veículos de exemplo.
+- Cadastro de professores e associação a viagens.
+- Lista demonstrativa de presença por viagem.
+- Indicadores e exportação de relatórios CSV.
+- Consulta dos perfis de demonstração e restauração dos dados locais.
+
+**Limites importantes:** GitHub Pages não executa o servidor nem conecta ao SQLite. O login e as permissões dessa demonstração são apenas simulações no navegador; os registros ficam no `localStorage` do próprio navegador e não sincronizam entre dispositivos. Não usar nomes, contatos, documentos, autorizações ou qualquer dado real de estudantes. A autenticação e as permissões reais precisam ser feitas no servidor antes de qualquer uso institucional.
