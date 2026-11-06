@@ -101,7 +101,11 @@
 </form><p id="student-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div>
 <div class="panel"><div class="panel-heading"><div><p class="eyebrow">REGISTROS FICTÍCIOS</p><h2>Estudantes</h2></div><span class="status planned" id="student-count">4 estudantes</span></div>
 <div class="table-wrap"><table><thead><tr><th>Estudante</th><th>Turma</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="student-table-body"></tbody></table></div></div></section>
-      <section class="page-view placeholder-view" id="page-autorizacoes"><div class="placeholder-icon">▤</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Autorizações</h1><p>Esta área será usada para acompanhar as autorizações dos responsáveis pelas viagens escolares.</p><span class="status planned">Próxima etapa</span></section>
+      <section class="page-view" id="page-autorizacoes"><div class="page-heading"><div><p class="eyebrow">DOCUMENTAÇÃO ESCOLAR</p><h1>Autorizações</h1><p class="subheading">Acompanhe o status das autorizações fictícias.</p></div></div>
+<div class="panel"><div class="panel-heading"><div><p class="eyebrow">CONTROLE DE AUTORIZAÇÕES</p><h2>Autorizações de exemplo</h2></div><span class="status planned">Dados fictícios</span></div>
+<div class="table-wrap"><table><thead><tr><th>Estudante</th><th>Viagem</th><th>Data</th><th>Situação</th><th>Atualizar</th></tr></thead><tbody id="authorization-table-body"></tbody></table></div>
+<p id="authorization-feedback" role="status" style="font-size:10px;color:#26734a;margin:12px 0 0"></p></div>
+<div class="prototype-note"><span>i</span><p>Esta demonstração não coleta assinaturas nem armazena documentos. Em uma versão real, autorizações exigem validação institucional, privacidade e trilha de auditoria.</p></div></section>
       <section class="page-view placeholder-view" id="page-transportes"><div class="placeholder-icon">▣</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Transportes</h1><p>Área destinada ao cadastro e acompanhamento dos veículos e dados de transporte.</p><span class="status planned">Próxima etapa</span></section>
       <section class="page-view placeholder-view" id="page-professores"><div class="placeholder-icon">♙</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Professores</h1><p>Área destinada à consulta e organização dos professores responsáveis pelas atividades.</p><span class="status planned">Próxima etapa</span></section>
       <section class="page-view placeholder-view" id="page-relatorios"><div class="placeholder-icon">▥</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Relatórios</h1><p>Área de relatórios de viagens, participantes e prestação de contas.</p><span class="status planned">Próxima etapa</span></section>
@@ -273,6 +277,38 @@
     document.getElementById('student-feedback').textContent = 'Estudante removido do protótipo.';
   });
   renderStudents();
+
+  const defaultAuthorizations = [
+    {id:1,student:'Aluno Exemplo 01',trip:'Visita ao Museu',date:'12/11/2026',status:'Pendente'},
+    {id:2,student:'Aluno Exemplo 02',trip:'Passeio Educativo',date:'18/11/2026',status:'Autorizada'},
+    {id:3,student:'Aluno Exemplo 03',trip:'Feira de Ciências',date:'25/11/2026',status:'Pendente'},
+    {id:4,student:'Aluno Exemplo 04',trip:'Visita ao Museu',date:'12/11/2026',status:'Não autorizada'}
+  ];
+  let authorizations = defaultAuthorizations;
+  try { authorizations = JSON.parse(localStorage.getItem('sgve-demo-authorizations') || 'null') || defaultAuthorizations; } catch (_) {}
+  function renderAuthorizations() {
+    const role = sessionStorage.getItem('sgve-demo-role');
+    const visible = role === 'responsavel' ? authorizations.filter(a => a.student === 'Aluno Exemplo 01') : authorizations;
+    document.getElementById('authorization-table-body').innerHTML = visible.map(a => {
+      const cls = a.status === 'Autorizada' ? 'approved' : a.status === 'Pendente' ? 'pending' : 'planned';
+      const control = role === 'responsavel'
+        ? '<select data-auth-status="' + a.id + '" aria-label="Situação da autorização" style="height:34px;padding:5px;border:1px solid #dfe8e1;border-radius:6px"><option ' + (a.status==='Pendente'?'selected':'') + '>Pendente</option><option ' + (a.status==='Autorizada'?'selected':'') + '>Autorizada</option><option ' + (a.status==='Não autorizada'?'selected':'') + '>Não autorizada</option></select>'
+        : '<span class="status ' + cls + '">' + safeText(a.status) + '</span>';
+      return '<tr><td>' + safeText(a.student) + '</td><td>' + safeText(a.trip) + '</td><td>' + safeText(a.date) + '</td><td>' + control + '</td><td>' + (role === 'responsavel' ? 'Atualizar status' : '—') + '</td></tr>';
+    }).join('');
+    if (!visible.length) document.getElementById('authorization-table-body').innerHTML = '<tr><td colspan="5">Nenhuma autorização vinculada a este perfil de demonstração.</td></tr>';
+  }
+  document.getElementById('authorization-table-body').addEventListener('change', function (event) {
+    const select = event.target.closest('[data-auth-status]');
+    if (!select) return;
+    const record = authorizations.find(a => String(a.id) === select.dataset.authStatus);
+    if (!record) return;
+    record.status = select.value;
+    try { localStorage.setItem('sgve-demo-authorizations', JSON.stringify(authorizations)); } catch (_) {}
+    renderAuthorizations();
+    document.getElementById('authorization-feedback').textContent = 'Status atualizado apenas neste navegador.';
+  });
+  renderAuthorizations();
   const savedRole = sessionStorage.getItem('sgve-demo-role');
   if (sessionStorage.getItem('sgve-demo-session') === 'authenticated' && savedRole && accounts[savedRole]) enterApp(savedRole);
 })();
