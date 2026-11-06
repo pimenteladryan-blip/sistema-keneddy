@@ -38,6 +38,7 @@
         <nav class="tabs" aria-label="Módulos do sistema">
           <button type="button" class="tab active" data-tab="classes-panel">Turmas</button>
           <button type="button" class="tab" data-tab="students-panel">Estudantes</button>
+          <button type="button" class="tab" data-tab="trips-panel">Viagens</button>
           <button type="button" class="tab" data-tab="users-panel" id="users-tab">Contas</button>
         </nav>
         <section id="classes-panel" class="module-panel">
@@ -61,6 +62,34 @@
           </form>
           <p id="student-message" class="message" role="status"></p><div id="students-list" class="data-list"><p class="muted">Carregando estudantes...</p></div>
           <p class="privacy-note">Cadastro mínimo: nome e turma. Não informe documentos, endereço, telefone ou outros dados pessoais nesta versão.</p>
+        </section>
+        <section id="trips-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">PLANEJAMENTO</p><h3>Viagens escolares</h3></div><span id="trips-count" class="count-pill">0</span></div>
+          <form id="trip-form" class="inline-form">
+            <label>Título<input name="title" maxlength="120" placeholder="Ex.: Visita ao museu" required></label>
+            <label>Destino<input name="destination" maxlength="160" required></label>
+            <label>Objetivo pedagógico<input name="educational_purpose" maxlength="500" required></label>
+            <label>Saída<input name="departure_at" type="datetime-local" required></label>
+            <label>Retorno<input name="return_at" type="datetime-local" required></label>
+            <label>Capacidade<input name="capacity" type="number" min="1" max="5000" value="40" required></label>
+            <button type="submit">Criar rascunho</button>
+          </form>
+          <p id="trip-message" class="message" role="status"></p>
+          <div id="trip-assignment" class="assignment-area">
+            <h4>Vincular turmas e participantes</h4>
+            <form id="trip-class-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-class-trip" required></select></label>
+              <label>Turma<select name="class_id" id="trip-class-select" required></select></label>
+              <button type="submit">Vincular turma</button>
+            </form>
+            <form id="trip-student-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-student-trip" required></select></label>
+              <label>Estudante<select name="student_id" id="trip-student-select" required></select></label>
+              <button type="submit">Vincular estudante</button>
+            </form>
+          </div>
+          <div id="trips-list" class="data-list"><p class="muted">Carregando viagens...</p></div>
+          <p class="privacy-note">O fluxo atual cria rascunhos, vincula turmas/estudantes e envia para aprovação. Autorizações e presença serão adicionadas em outra etapa.</p>
         </section>
         <section id="users-panel" class="module-panel hidden">
           <div class="section-heading"><div><p class="eyebrow green">ACESSO AO SISTEMA</p><h3>Criar conta</h3></div></div>
