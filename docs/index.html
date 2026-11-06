@@ -141,7 +141,23 @@
 <p style="color:#7a887f;font-size:11px;line-height:1.7">Os arquivos contêm apenas os dados demonstrativos criados no navegador. Não use dados pessoais ou registros reais.</p>
 <div style="display:flex;flex-wrap:wrap;gap:10px"><button class="login-submit" id="export-trips" style="width:auto;padding:0 18px;margin:0">Exportar viagens CSV</button><button class="login-submit" id="export-students" style="width:auto;padding:0 18px;margin:0">Exportar estudantes CSV</button><button class="login-submit" id="export-auth" style="width:auto;padding:0 18px;margin:0">Exportar autorizações CSV</button></div>
 <p id="report-feedback" role="status" style="font-size:10px;color:#26734a;margin:12px 0 0"></p></div></section>
-      <section class="page-view placeholder-view" id="page-usuarios"><div class="placeholder-icon">⚙</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Usuários</h1><p>Área destinada à gestão de contas e níveis de acesso do sistema.</p><span class="status planned">Próxima etapa</span></section>
+      <section class="page-view" id="page-usuarios"><div class="page-heading"><div><p class="eyebrow">ADMINISTRAÇÃO</p><h1>Usuários</h1><p class="subheading">Contas de demonstração e seus níveis de acesso.</p></div></div>
+<div class="panel"><div class="panel-heading"><div><p class="eyebrow">PERFIS DISPONÍVEIS</p><h2>Contas de teste</h2></div><span class="status planned">Somente demonstração</span></div>
+<div class="table-wrap"><table><thead><tr><th>Perfil</th><th>E-mail de teste</th><th>Permissões na interface</th></tr></thead><tbody>
+<tr><td>Administrador</td><td>admin@sgve.demo</td><td>Todos os módulos</td></tr>
+<tr><td>Direção</td><td>direcao@sgve.demo</td><td>Gestão, aprovações e relatórios</td></tr>
+<tr><td>Secretaria</td><td>secretaria@sgve.demo</td><td>Cadastros e organização</td></tr>
+<tr><td>Professor</td><td>professor@sgve.demo</td><td>Viagens e frequência</td></tr>
+<tr><td>Responsável</td><td>responsavel@sgve.demo</td><td>Viagens e autorização vinculada de exemplo</td></tr>
+<tr><td>Estudante</td><td>estudante@sgve.demo</td><td>Consulta de viagens</td></tr>
+</tbody></table></div>
+<p style="margin:14px 0 0;color:#7a887f;font-size:10px;line-height:1.7">Senha demonstrativa comum: <strong>Kennedy2026</strong>. Não são contas reais e não devem ser usadas para proteger dados.</p>
+</div>
+<div class="panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">MANUTENÇÃO DO PROTÓTIPO</p><h2>Reiniciar dados locais</h2></div></div>
+<p style="color:#7a887f;font-size:11px;line-height:1.7">Apaga viagens, estudantes, autorizações, veículos, professores e frequências criados neste navegador e restaura os exemplos iniciais.</p>
+<button class="login-submit" id="reset-demo-data" style="width:auto;padding:0 18px;margin:0;background:#8b3b32">Restaurar dados de exemplo</button>
+<p id="users-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div>
+</section>
       <footer class="page-footer">SGVE · Protótipo versão 0.1 <span>Interface demonstrativa · Colégio Estadual Presidente Kennedy</span></footer>
     </section>
   </main>
@@ -454,6 +470,12 @@
     document.getElementById('attendance-feedback').textContent = 'Presença atualizada localmente para esta viagem.';
   });
   renderAttendance();
+
+  document.getElementById('reset-demo-data').addEventListener('click', function () {
+    if (!window.confirm('Restaurar os dados fictícios? Os registros criados neste navegador serão apagados.')) return;
+    ['sgve-demo-trips','sgve-demo-students','sgve-demo-authorizations','sgve-demo-vehicles','sgve-demo-teachers','sgve-demo-attendance'].forEach(key => localStorage.removeItem(key));
+    document.getElementById('users-feedback').textContent = 'Dados locais apagados. Atualize a página para carregar os exemplos iniciais.';
+  });
   const savedRole = sessionStorage.getItem('sgve-demo-role');
   if (sessionStorage.getItem('sgve-demo-session') === 'authenticated' && savedRole && accounts[savedRole]) enterApp(savedRole);
 })();
