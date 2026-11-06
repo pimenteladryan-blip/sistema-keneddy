@@ -11,43 +11,72 @@
 </head>
 <body>
   <main class="page-shell">
-    <section class="brand-panel" aria-label="Identificação do sistema">
+    <section class="brand-panel">
       <div class="brand-mark" aria-hidden="true">SG</div>
       <p class="eyebrow">COLÉGIO ESTADUAL PRESIDENTE KENNEDY</p>
       <h1>Viagens escolares com organização e cuidado.</h1>
-      <p class="brand-copy">Planejamento, autorizações e acompanhamento em um só lugar.</p>
+      <p class="brand-copy">Planejamento, cadastros e acompanhamento em um só lugar.</p>
       <div class="brand-footer">Sistema de Gerenciamento de Viagens Escolares</div>
     </section>
     <section class="content-panel">
       <div class="topline"><span class="status-dot"></span> Portal institucional</div>
       <section id="login-view" class="auth-card">
-        <p class="eyebrow green">BEM-VINDO AO SGVE</p>
-        <h2>Acesse sua conta</h2>
+        <p class="eyebrow green">BEM-VINDO AO SGVE</p><h2>Acesse sua conta</h2>
         <p class="muted">Entre com as credenciais fornecidas pela administração da escola.</p>
         <form id="login-form">
-          <label for="email">E-mail</label>
-          <input id="email" name="email" type="email" autocomplete="username" maxlength="254" required>
-          <label for="password">Senha</label>
-          <input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" required>
-          <button type="submit" id="login-button">Entrar no sistema</button>
-          <p id="login-message" class="message" role="alert" aria-live="polite"></p>
+          <label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="username" maxlength="254" required>
+          <label for="password">Senha</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" required>
+          <button type="submit" id="login-button">Entrar no sistema</button><p id="login-message" class="message" role="alert" aria-live="polite"></p>
         </form>
         <p class="helper">Não possui acesso? Procure a secretaria ou a direção.</p>
       </section>
       <section id="dashboard-view" class="dashboard hidden">
-        <div class="welcome-row">
-          <div><p class="eyebrow green">PAINEL INICIAL</p><h2 id="welcome-title">Olá!</h2>
-            <p class="muted">A estrutura inicial do SGVE está pronta.</p></div>
+        <header class="welcome-row">
+          <div><p class="eyebrow green">PAINEL INICIAL</p><h2 id="welcome-title">Olá!</h2><p id="user-role" class="muted"></p></div>
           <button class="button-secondary" id="logout-button" type="button">Sair</button>
-        </div>
-        <div class="summary-grid">
-          <article class="summary-card"><span class="summary-icon">01</span><p>Viagens</p><strong>Em preparação</strong><small>Módulo planejado</small></article>
-          <article class="summary-card"><span class="summary-icon">02</span><p>Autorizações</p><strong>Em preparação</strong><small>Módulo planejado</small></article>
-          <article class="summary-card"><span class="summary-icon">03</span><p>Presenças</p><strong>Em preparação</strong><small>Módulo planejado</small></article>
-        </div>
-        <div class="notice"><strong>Primeira versão</strong>
-          <p>O acesso e a base de segurança estão implementados. Os módulos escolares serão adicionados nas próximas etapas.</p></div>
-        <p id="user-role" class="role-label"></p>
+        </header>
+        <nav class="tabs" aria-label="Módulos do sistema">
+          <button type="button" class="tab active" data-tab="classes-panel">Turmas</button>
+          <button type="button" class="tab" data-tab="students-panel">Estudantes</button>
+          <button type="button" class="tab" data-tab="users-panel" id="users-tab">Contas</button>
+        </nav>
+        <section id="classes-panel" class="module-panel">
+          <div class="section-heading"><div><p class="eyebrow green">ORGANIZAÇÃO ESCOLAR</p><h3>Turmas</h3></div><span id="classes-count" class="count-pill">0</span></div>
+          <form id="class-form" class="inline-form">
+            <label>Etapa<select name="level" required><option value="fundamental">Ensino Fundamental</option><option value="medio">Ensino Médio</option></select></label>
+            <label>Ano/série<input name="grade" maxlength="30" placeholder="Ex.: 6º ano ou 1ª série" required></label>
+            <label>Curso<select name="course"><option value="regular">Regular</option><option value="adm">Técnico ADM</option><option value="ds">Técnico DS</option></select></label>
+            <label>Turma<input name="section" maxlength="12" placeholder="Ex.: A" required></label>
+            <label>Ano letivo<input name="school_year" type="number" min="2020" max="2100" value="2026" required></label>
+            <button type="submit">Cadastrar turma</button>
+          </form>
+          <p id="class-message" class="message" role="status"></p><div id="classes-list" class="data-list"><p class="muted">Carregando turmas...</p></div>
+        </section>
+        <section id="students-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">CADASTRO ESCOLAR</p><h3>Estudantes</h3></div><span id="students-count" class="count-pill">0</span></div>
+          <form id="student-form" class="inline-form">
+            <label>Nome completo<input name="full_name" maxlength="120" required></label>
+            <label>Turma<select name="class_id" id="student-class" required><option value="">Selecione uma turma</option></select></label>
+            <button type="submit">Cadastrar estudante</button>
+          </form>
+          <p id="student-message" class="message" role="status"></p><div id="students-list" class="data-list"><p class="muted">Carregando estudantes...</p></div>
+          <p class="privacy-note">Cadastro mínimo: nome e turma. Não informe documentos, endereço, telefone ou outros dados pessoais nesta versão.</p>
+        </section>
+        <section id="users-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">ACESSO AO SISTEMA</p><h3>Criar conta</h3></div></div>
+          <form id="user-form" class="inline-form">
+            <label>Nome<input name="name" maxlength="100" required></label>
+            <label>E-mail<input name="email" type="email" maxlength="254" required></label>
+            <label>Perfil<select name="role" required>
+              <option value="teacher">Professor</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
+              <option value="secretariat" data-admin-only>Secretaria</option><option value="direction" data-admin-only>Direção</option><option value="admin" data-admin-only>Administrador</option>
+            </select></label>
+            <label>Senha inicial<input name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
+            <button type="submit">Criar conta</button>
+          </form>
+          <p id="user-message" class="message" role="status"></p>
+          <p class="privacy-note">A senha deve ter pelo menos 14 caracteres. Entregue as credenciais de forma privada e nunca as envie pelo repositório.</p>
+        </section>
       </section>
       <footer class="content-footer">Acesso restrito a usuários autorizados.</footer>
     </section>
