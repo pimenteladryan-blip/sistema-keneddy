@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#145c3b">
+  <meta name="description" content="Sistema de Gerenciamento de Viagens Escolares">
+  <title>SGVE | Colégio Presidente Kennedy</title>
+  <link rel="stylesheet" href="../public/css/styles.css">
+  <script src="./demo.js" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    <section class="brand-panel">
+      <div class="brand-mark" aria-hidden="true">SG</div>
+      <p class="eyebrow">COLÉGIO ESTADUAL PRESIDENTE KENNEDY</p>
+      <h1>Viagens escolares com organização e cuidado.</h1>
+      <p class="brand-copy">Planejamento, cadastros e acompanhamento em um só lugar.</p>
+      <div class="brand-footer">Sistema de Gerenciamento de Viagens Escolares</div>
+    </section>
+    <section class="content-panel">
+      <div class="topline"><span class="status-dot"></span> Demonstração — sem banco de dados</div>
+      <section id="login-view" class="auth-card">
+        <p class="eyebrow green">BEM-VINDO AO SGVE</p><h2>Acesse sua conta</h2>
+        <p class="muted">Ambiente de demonstração: use qualquer e-mail e senha para entrar.</p>
+        <form id="login-form">
+          <label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="username" maxlength="254" required>
+          <label for="password">Senha</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" required>
+          <button type="submit" id="login-button">Entrar no sistema</button><p id="login-message" class="message" role="alert" aria-live="polite"></p>
+        </form>
+        <p class="helper">Os dados ficam somente neste navegador e podem ser apagados a qualquer momento. Não use dados reais.</p>
+      </section>
+      <section id="dashboard-view" class="dashboard hidden">
+        <header class="welcome-row">
+          <div><p class="eyebrow green">PAINEL INICIAL</p><h2 id="welcome-title">Olá!</h2><p id="user-role" class="muted"></p></div>
+          <button class="button-secondary" id="logout-button" type="button">Sair</button>
+        </header>
+        <nav class="tabs" aria-label="Módulos do sistema">
+          <button type="button" class="tab active" data-tab="classes-panel">Turmas</button>
+          <button type="button" class="tab" data-tab="students-panel">Estudantes</button>
+          <button type="button" class="tab" data-tab="trips-panel">Viagens</button>
+          <button type="button" class="tab" data-tab="users-panel" id="users-tab">Contas</button>
+        </nav>
+        <section id="classes-panel" class="module-panel">
+          <div class="section-heading"><div><p class="eyebrow green">ORGANIZAÇÃO ESCOLAR</p><h3>Turmas</h3></div><span id="classes-count" class="count-pill">0</span></div>
+          <form id="class-form" class="inline-form">
+            <label>Etapa<select name="level" required><option value="fundamental">Ensino Fundamental</option><option value="medio">Ensino Médio</option></select></label>
+            <label>Ano/série<input name="grade" maxlength="30" placeholder="Ex.: 6º ano ou 1ª série" required></label>
+            <label>Curso<select name="course"><option value="regular">Regular</option><option value="adm">Técnico ADM</option><option value="ds">Técnico DS</option></select></label>
+            <label>Turma<input name="section" maxlength="12" placeholder="Ex.: A" required></label>
+            <label>Ano letivo<input name="school_year" type="number" min="2020" max="2100" value="2026" required></label>
+            <button type="submit">Cadastrar turma</button>
+          </form>
+          <p id="class-message" class="message" role="status"></p><div id="classes-list" class="data-list"><p class="muted">Carregando turmas...</p></div>
+        </section>
+        <section id="students-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">CADASTRO ESCOLAR</p><h3>Estudantes</h3></div><span id="students-count" class="count-pill">0</span></div>
+          <form id="student-form" class="inline-form">
+            <label>Nome completo<input name="full_name" maxlength="120" required></label>
+            <label>Turma<select name="class_id" id="student-class" required><option value="">Selecione uma turma</option></select></label>
+            <button type="submit">Cadastrar estudante</button>
+          </form>
+          <p id="student-message" class="message" role="status"></p><div id="students-list" class="data-list"><p class="muted">Carregando estudantes...</p></div>
+          <p class="privacy-note">Cadastro mínimo: nome e turma. Não informe documentos, endereço, telefone ou outros dados pessoais nesta versão.</p>
+        </section>
+        <section id="trips-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">PLANEJAMENTO</p><h3>Viagens escolares</h3></div><span id="trips-count" class="count-pill">0</span></div>
+          <form id="trip-form" class="inline-form">
+            <label>Título<input name="title" maxlength="120" placeholder="Ex.: Visita ao museu" required></label>
+            <label>Destino<input name="destination" maxlength="160" required></label>
+            <label>Objetivo pedagógico<input name="educational_purpose" maxlength="500" required></label>
+            <label>Saída<input name="departure_at" type="datetime-local" required></label>
+            <label>Retorno<input name="return_at" type="datetime-local" required></label>
+            <label>Capacidade<input name="capacity" type="number" min="1" max="5000" value="40" required></label>
+            <button type="submit">Criar rascunho</button>
+          </form>
+          <p id="trip-message" class="message" role="status"></p>
+          <div id="trip-assignment" class="assignment-area">
+            <h4>Vincular turmas e participantes</h4>
+            <form id="trip-class-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-class-trip" required></select></label>
+              <label>Turma<select name="class_id" id="trip-class-select" required></select></label>
+              <button type="submit">Vincular turma</button>
+            </form>
+            <form id="trip-student-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-student-trip" required></select></label>
+              <label>Estudante<select name="student_id" id="trip-student-select" required></select></label>
+              <button type="submit">Vincular estudante</button>
+            </form>
+          </div>
+          <div id="trips-list" class="data-list"><p class="muted">Carregando viagens...</p></div>
+          <p class="privacy-note">O fluxo atual cria rascunhos, vincula turmas/estudantes e envia para aprovação. Autorizações e presença serão adicionadas em outra etapa.</p>
+        </section>
+        <section id="users-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">ACESSO AO SISTEMA</p><h3>Criar conta</h3></div></div>
+          <form id="user-form" class="inline-form">
+            <label>Nome<input name="name" maxlength="100" required></label>
+            <label>E-mail<input name="email" type="email" maxlength="254" required></label>
+            <label>Perfil<select name="role" required>
+              <option value="teacher">Professor</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
+              <option value="secretariat" data-admin-only>Secretaria</option><option value="direction" data-admin-only>Direção</option><option value="admin" data-admin-only>Administrador</option>
+            </select></label>
+            <label>Senha inicial<input name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
+            <button type="submit">Criar conta</button>
+          </form>
+          <p id="user-message" class="message" role="status"></p>
+          <p class="privacy-note">A senha deve ter pelo menos 14 caracteres. Entregue as credenciais de forma privada e nunca as envie pelo repositório.</p>
+        </section>
+      </section>
+      <footer class="content-footer">Acesso restrito a usuários autorizados.</footer>
+    </section>
+  </main>
+</body>
+</html>
