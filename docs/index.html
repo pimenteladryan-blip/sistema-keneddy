@@ -249,10 +249,98 @@ button{font-family:'DM Sans','Segoe UI',Arial,sans-serif}
   .topbar{background:#151f19}
 }
 
+
+/* Alternância entre tema escuro e claro */
+.theme-toggle{
+  position:fixed;top:18px;right:20px;z-index:10000;
+  display:inline-flex;align-items:center;gap:9px;
+  min-height:40px;padding:0 15px;border:1px solid #456052;
+  border-radius:999px;background:#1b2921;color:#eaf4ed;
+  box-shadow:0 5px 18px #0003;font:700 11px 'DM Sans',sans-serif;
+  cursor:pointer;transition:all .2s;
+}
+.theme-toggle:hover{transform:translateY(-1px);border-color:#65c994}
+.theme-toggle .theme-icon{font-size:15px;line-height:1}
+body.light-mode{
+  color-scheme:light;
+  --green:#12613f;--deep:#0b3e2b;--mint:#eaf4ed;--ink:#1d2b23;
+  --muted:#7a887f;--line:#e6ece7;--bg:#f5f7f5;
+  color:#1d2b23;background:#f5f7f5;
+}
+body.light-mode .theme-toggle{
+  border-color:#d6e2d8;background:#fff;color:#214b35;
+  box-shadow:0 5px 18px #173c2815;
+}
+body.light-mode .topbar{background:#fff;border-color:#e6ece7}
+body.light-mode .breadcrumb{color:#8b968f}
+body.light-mode .breadcrumb strong{color:#33443a}
+body.light-mode .profile strong,body.light-mode .panel-heading h2,
+body.light-mode .trip-info strong,body.light-mode .quick-link strong,
+body.light-mode .stat-card strong,body.light-mode .placeholder-view h1{color:#1d2b23}
+body.light-mode .profile small,body.light-mode .subheading,
+body.light-mode .stat-card span:not(.stat-icon),body.light-mode .stat-card small,
+body.light-mode .trip-info span,body.light-mode .trip-info small,
+body.light-mode .page-footer{color:#7a887f}
+body.light-mode .avatar,body.light-mode .quick-icon,
+body.light-mode .placeholder-icon{background:#eaf4ed;color:#12613f}
+body.light-mode .date-chip,body.light-mode .panel,
+body.light-mode .stat-card,body.light-mode .placeholder-view{
+  background:#fff;border-color:#e6ece7;color:#1d2b23;
+  box-shadow:0 3px 12px #173c2807;
+}
+body.light-mode .trip-date{background:#fbfcfb;border-color:#e6ece7}
+body.light-mode .trip-date strong{color:#1d2b23}
+body.light-mode .trip-item,body.light-mode .quick-link,
+body.light-mode td{border-color:#edf1ed}
+body.light-mode .quick-link{background:#fff;color:#1d2b23}
+body.light-mode .quick-link small{color:#8a968e}
+body.light-mode .prototype-note{background:#f0f7f1;border-color:#dcebe0}
+body.light-mode .prototype-note p{color:#718078}
+body.light-mode .prototype-note strong{color:#355a43}
+body.light-mode .page-footer{border-color:#e6ece7}
+body.light-mode th{color:#849087}
+body.light-mode td{color:#33443a}
+body.light-mode input,body.light-mode select,body.light-mode textarea{
+  color:#25382c;background:#fff;border-color:#dfe8e1;
+}
+body.light-mode .login-screen{background:#f7f8f4}
+body.light-mode .login-brand-panel{
+  border-right-color:#e8bd43;
+  background-image:
+    linear-gradient(90deg,rgba(5,43,25,.88) 0%,rgba(5,43,25,.70) 58%,rgba(5,43,25,.30) 100%),
+    url("https://cdn.dpontanews.com.br/midia/2024/04/30/1759285550532_3260331679437041498504538645176702949629573n_otimized.webp")!important;
+}
+body.light-mode .login-form-side{background:linear-gradient(145deg,#fbfcf8 0%,#edf4ed 100%)}
+body.light-mode .login-form-side:before{border-color:#145c3b18;box-shadow:0 0 0 35px #145c3b08,0 0 0 70px #145c3b05}
+body.light-mode .login-card{
+  background:#fff;border-color:#dce8dd;border-top-color:#e3b83e;
+  box-shadow:0 24px 70px #103e2818;
+}
+body.light-mode .login-card h2{color:#173d2a}
+body.light-mode .login-description,body.light-mode .login-field label{color:#405247}
+body.light-mode .login-card .eyebrow{background:#eaf3eb;color:#145c3b}
+body.light-mode .login-field input,body.light-mode .login-field select{
+  background:#fbfdfb!important;color:#25382c!important;border-color:#d7e3d8!important;
+}
+body.light-mode .login-field input::placeholder{color:#89968d}
+body.light-mode .login-field input:focus,body.light-mode .login-field select:focus{
+  border-color:#23734a!important;box-shadow:0 0 0 4px #23734a18!important;
+}
+body.light-mode .login-submit{background:linear-gradient(110deg,#176541,#0b432d);box-shadow:0 8px 18px #145c3b25}
+body.light-mode .login-submit:hover{background:linear-gradient(110deg,#0f5536,#082f22)}
+body.light-mode .login-disclaimer{background:#fbfaf1;border-color:#e7e9d8;color:#728078}
+body.light-mode .login-disclaimer strong{color:#355a43}
+body.light-mode .login-disclaimer>span:first-child{background:#f3e8bd;color:#755d19}
+body.light-mode .status.planned{background:#f1f3f1;color:#647168}
+body.light-mode .status.approved{background:#e8f4ec;color:#26734a}
+body.light-mode .status.pending{background:#fff4df;color:#986b1d}
+@media(max-width:760px){.theme-toggle{top:12px;right:12px;min-height:35px;padding:0 11px;font-size:10px}}
+
 </style>
 
 </head>
 <body>
+<button class="theme-toggle" id="theme-toggle" type="button" aria-label="Ativar tema claro" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☀</span><span class="theme-label">Modo claro</span></button>
 <section class="login-screen" id="login-screen">
   <div class="login-brand-panel">
     <div class="login-brand"><span class="brand-symbol">K</span><span><strong>SGVE</strong><small>Gestão de Viagens Escolares</small></span></div>
@@ -762,6 +850,30 @@ button{font-family:'DM Sans','Segoe UI',Arial,sans-serif}
   });
   const savedRole = sessionStorage.getItem('sgve-demo-role');
   if (sessionStorage.getItem('sgve-demo-session') === 'authenticated' && savedRole && accounts[savedRole]) enterApp(savedRole);
+})();
+</script>
+<script>
+(function(){
+  const button = document.getElementById('theme-toggle');
+  if (!button) return;
+  const icon = button.querySelector('.theme-icon');
+  const label = button.querySelector('.theme-label');
+  function applyTheme(mode){
+    const light = mode === 'light';
+    document.body.classList.toggle('light-mode', light);
+    icon.textContent = light ? '☾' : '☀';
+    label.textContent = light ? 'Modo escuro' : 'Modo claro';
+    button.setAttribute('aria-label', light ? 'Ativar tema escuro' : 'Ativar tema claro');
+    button.setAttribute('aria-pressed', String(light));
+  }
+  let saved = 'dark';
+  try { saved = localStorage.getItem('sgve-theme-mode') || 'dark'; } catch (_) {}
+  applyTheme(saved);
+  button.addEventListener('click', function(){
+    const next = document.body.classList.contains('light-mode') ? 'dark' : 'light';
+    applyTheme(next);
+    try { localStorage.setItem('sgve-theme-mode', next); } catch (_) {}
+  });
 })();
 </script>
 </body>
