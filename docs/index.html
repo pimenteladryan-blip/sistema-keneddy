@@ -43,6 +43,129 @@
 .login-brand-panel .login-intro p,
 .login-brand-panel .login-kicker{color:#fff!important;text-shadow:0 1px 5px #001b0d66}
 
+
+/* Nova identidade visual da tela de acesso — Kennedy */
+.login-screen{
+  min-height:100svh;
+  grid-template-columns:minmax(0,1.12fr) minmax(380px,.88fr);
+  background:#f7f8f4;
+}
+.login-brand-panel{
+  min-height:100svh;
+  padding:clamp(30px,5vw,72px);
+  border-right:7px solid #e8bd43;
+  background-position:center center!important;
+}
+.login-brand-panel:after{
+  width:560px;height:560px;right:-220px;bottom:-270px;
+  border:1px solid #ffffff30;
+  box-shadow:0 0 0 42px #ffffff0d,0 0 0 84px #ffffff09,0 0 0 126px #ffffff06;
+}
+.login-brand .brand-symbol{
+  display:grid;place-items:center;
+  border:2px solid #f1cf70;
+  border-radius:16px;
+  background:linear-gradient(145deg,#f1cf70,#d9a92e);
+  color:#174b32;
+  box-shadow:0 8px 24px #001b0d40;
+}
+.login-brand strong{letter-spacing:.2em}
+.login-intro{max-width:620px}
+.login-kicker{
+  display:inline-flex;align-items:center;gap:9px;
+  padding:9px 13px;border:1px solid #ffffff55;border-radius:999px;
+  background:#073b2870;color:#fff;
+}
+.login-intro h1{
+  max-width:600px;
+  font-size:clamp(40px,5.1vw,66px);
+  line-height:1.04;
+  text-wrap:balance;
+}
+.login-intro p{max-width:460px;font-size:15px}
+.login-brand-footer{
+  display:flex;align-items:center;gap:10px;
+  font-size:11px;letter-spacing:.04em;
+}
+.login-brand-footer:before{
+  content:"";display:block;width:27px;height:3px;border-radius:3px;background:#e8bd43;
+}
+.login-form-side{
+  position:relative;
+  overflow:hidden;
+  padding:clamp(28px,5vw,70px);
+  background:linear-gradient(145deg,#fbfcf8 0%,#edf4ed 100%);
+}
+.login-form-side:before{
+  content:"";position:absolute;top:-130px;right:-130px;width:310px;height:310px;
+  border:1px solid #145c3b18;border-radius:50%;
+  box-shadow:0 0 0 35px #145c3b08,0 0 0 70px #145c3b05;
+  pointer-events:none;
+}
+.login-card{
+  position:relative;z-index:1;
+  width:min(100%,430px);
+  padding:clamp(28px,3.8vw,46px);
+  border:1px solid #dce8dd;
+  border-top:5px solid #e3b83e;
+  border-radius:20px;
+  background:#fff;
+  box-shadow:0 24px 70px #103e2818;
+}
+.login-card .eyebrow{
+  display:inline-block;margin-bottom:13px;padding:7px 10px;
+  border-radius:6px;background:#eaf3eb;color:#145c3b;
+  font-size:9px;letter-spacing:.13em;
+}
+.login-card h2{color:#173d2a;font-size:30px}
+.login-description{margin:10px 0 25px;font-size:13px}
+.login-field{gap:9px;margin:17px 0}
+.login-field label{color:#284a35;font-size:12px}
+.login-field input,
+.login-field select{
+  min-height:49px!important;
+  border:1px solid #d7e3d8!important;
+  border-radius:10px!important;
+  background:#fbfdfb!important;
+  transition:border-color .18s,box-shadow .18s;
+}
+.login-field input:focus,
+.login-field select:focus{
+  border-color:#23734a!important;
+  box-shadow:0 0 0 4px #23734a18!important;
+  outline:none;
+}
+.login-submit{
+  height:51px;margin-top:12px;border-radius:10px;
+  background:linear-gradient(110deg,#176541,#0b432d);
+  box-shadow:0 8px 18px #145c3b25;
+  font-size:13px;letter-spacing:.02em;
+}
+.login-submit:hover{background:linear-gradient(110deg,#0f5536,#082f22)}
+.login-disclaimer{
+  margin-top:23px;padding:13px 14px;
+  border-color:#e7e9d8;border-radius:10px;
+  background:#fbfaf1;font-size:10px;
+}
+.login-disclaimer>span:first-child{
+  display:grid;place-items:center;flex:0 0 21px;width:21px;height:21px;
+  border-radius:50%;background:#f3e8bd;color:#755d19;
+}
+@media(max-width:760px){
+  .login-screen{grid-template-columns:1fr;min-height:100svh}
+  .login-brand-panel{
+    min-height:265px;padding:23px 22px 27px;
+    border-right:0;border-bottom:6px solid #e8bd43;
+    background-position:center 43%!important;
+  }
+  .login-brand .brand-symbol{width:43px;height:43px;font-size:24px}
+  .login-intro{margin:32px 0 12px}
+  .login-intro h1{font-size:clamp(31px,8vw,42px)}
+  .login-intro p{font-size:12px;line-height:1.65}
+  .login-form-side{padding:28px 17px 42px}
+  .login-card{padding:27px 22px}
+}
+
 </style>
 
 </head>
