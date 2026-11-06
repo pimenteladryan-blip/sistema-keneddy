@@ -91,7 +91,10 @@
 <button class="login-submit" type="submit" style="height:40px;margin:0">Adicionar viagem</button>
 </form><p id="trip-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div>
 <div class="panel"><div class="panel-heading"><div><p class="eyebrow">REGISTROS</p><h2>Viagens cadastradas</h2></div><span class="status planned" id="trip-count">3 viagens</span></div>
-<div class="table-wrap"><table><thead><tr><th>Viagem</th><th>Destino</th><th>Data</th><th>Alunos</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="trip-table-body"></tbody></table></div></div></section>
+<div class="table-wrap"><table><thead><tr><th>Viagem</th><th>Destino</th><th>Data</th><th>Alunos</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="trip-table-body"></tbody></table></div></div><div class="panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">CONTROLE DE PRESENÇA</p><h2>Lista de saída e retorno</h2></div></div>
+<label style="display:grid;gap:6px;max-width:300px;font-size:11px;font-weight:700">Viagem<select id="attendance-trip" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></select></label>
+<div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Estudante</th><th>Turma</th><th>Presença</th></tr></thead><tbody id="attendance-table-body"></tbody></table></div>
+<p id="attendance-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div></section>
       <section class="page-view" id="page-alunos"><div class="page-heading"><div><p class="eyebrow">COMUNIDADE ESCOLAR</p><h1>Alunos</h1><p class="subheading">Cadastre e consulte estudantes fictícios.</p></div></div>
 <div class="panel" style="margin-bottom:16px"><div class="panel-heading"><div><p class="eyebrow">NOVO CADASTRO</p><h2>Adicionar estudante de exemplo</h2></div></div>
 <form id="student-form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;align-items:end">
@@ -421,6 +424,36 @@
   document.getElementById('export-students').addEventListener('click', () => downloadCsv('sgve-estudantes-demo.csv',['Estudante','Turma'],students.map(s=>[s.name,s.className])));
   document.getElementById('export-auth').addEventListener('click', () => downloadCsv('sgve-autorizacoes-demo.csv',['Estudante','Viagem','Data','Situação'],authorizations.map(a=>[a.student,a.trip,a.date,a.status])));
   renderReports();
+
+  let attendance = {};
+  try { attendance = JSON.parse(localStorage.getItem('sgve-demo-attendance') || '{}'); } catch (_) {}
+  const attendanceTrip = document.getElementById('attendance-trip');
+  function renderAttendance() {
+    const current = attendanceTrip.value;
+    attendanceTrip.innerHTML = trips.map(t => '<option value="' + t.id + '">' + safeText(t.name) + '</option>').join('');
+    if (trips.some(t => String(t.id) === current)) attendanceTrip.value = current;
+    const tripId = attendanceTrip.value;
+    const role = sessionStorage.getItem('sgve-demo-role');
+    const canMark = ['administrador','direcao','secretaria','professor'].includes(role);
+    document.getElementById('attendance-table-body').innerHTML = students.map(s => {
+      const present = attendance[tripId] && attendance[tripId][s.id] === true;
+      const control = '<input type="checkbox" data-attendance-student="' + s.id + '" ' + (present?'checked':'') + (canMark?'':' disabled') + ' aria-label="Presença de ' + safeText(s.name) + '">';
+      return '<tr><td>' + safeText(s.name) + '</td><td>' + safeText(s.className) + '</td><td>' + control + (present?' Presente':' Não registrado') + '</td></tr>';
+    }).join('');
+    if (!students.length) document.getElementById('attendance-table-body').innerHTML = '<tr><td colspan="3">Cadastre estudantes fictícios para montar a lista.</td></tr>';
+  }
+  attendanceTrip.addEventListener('change', renderAttendance);
+  document.getElementById('attendance-table-body').addEventListener('change', function (event) {
+    const checkbox = event.target.closest('[data-attendance-student]');
+    if (!checkbox) return;
+    const tripId = attendanceTrip.value;
+    if (!attendance[tripId]) attendance[tripId] = {};
+    attendance[tripId][checkbox.dataset.attendanceStudent] = checkbox.checked;
+    try { localStorage.setItem('sgve-demo-attendance', JSON.stringify(attendance)); } catch (_) {}
+    renderAttendance();
+    document.getElementById('attendance-feedback').textContent = 'Presença atualizada localmente para esta viagem.';
+  });
+  renderAttendance();
   const savedRole = sessionStorage.getItem('sgve-demo-role');
   if (sessionStorage.getItem('sgve-demo-session') === 'authenticated' && savedRole && accounts[savedRole]) enterApp(savedRole);
 })();
