@@ -20,5 +20,9 @@ jobs:
         run: npm install
       - name: Verificar sintaxe
         run: npm run check
+      - name: Verificar JavaScript do protótipo
+        run: |
+          node -e "const fs=require('node:fs'); const html=fs.readFileSync('docs/index.html','utf8'); const scripts=[...html.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)]; if (!scripts.length) throw new Error('Script do protótipo não encontrado'); fs.writeFileSync('/tmp/sgve-demo-inline.js', scripts[0][1]);"
+          node --check /tmp/sgve-demo-inline.js
       - name: Executar testes
         run: npm test
