@@ -79,7 +79,19 @@
         </div>
         <div class="prototype-note"><span>i</span><p><strong>Ambiente demonstrativo</strong> Esta é uma interface de protótipo. Os dados exibidos são fictícios e não são persistidos em um banco de dados nesta versão.</p></div>
       </section>
-      <section class="page-view" id="page-viagens"><div class="page-heading"><div><p class="eyebrow">PLANEJAMENTO ESCOLAR</p><h1>Viagens</h1><p class="subheading">Consulte as viagens demonstrativas cadastradas.</p></div></div><div class="panel"><div class="table-wrap"><table><thead><tr><th>Viagem</th><th>Destino</th><th>Data</th><th>Alunos</th><th>Situação</th></tr></thead><tbody><tr><td>Visita ao Museu</td><td>Museu Histórico</td><td>12/11/2026</td><td>35</td><td><span class="status planned">Planejada</span></td></tr><tr><td>Passeio Educativo</td><td>Parque Estadual</td><td>18/11/2026</td><td>42</td><td><span class="status approved">Aprovada</span></td></tr><tr><td>Feira de Ciências</td><td>Centro de Eventos</td><td>25/11/2026</td><td>28</td><td><span class="status pending">Pendente</span></td></tr></tbody></table></div></div></section>
+      <section class="page-view" id="page-viagens">
+<div class="page-heading"><div><p class="eyebrow">PLANEJAMENTO ESCOLAR</p><h1>Viagens</h1><p class="subheading">Cadastre e acompanhe viagens demonstrativas.</p></div></div>
+<div class="panel" style="margin-bottom:16px"><div class="panel-heading"><div><p class="eyebrow">NOVA VIAGEM</p><h2>Adicionar viagem</h2></div></div>
+<form id="trip-form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end">
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Nome da viagem<input id="trip-name" required maxlength="70" placeholder="Ex.: Visita ao museu" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Destino<input id="trip-destination" required maxlength="80" placeholder="Destino" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Data<input id="trip-date" type="date" required style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Quantidade de alunos<input id="trip-students" type="number" min="1" max="500" required value="30" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Situação<select id="trip-status" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"><option>Planejada</option><option>Pendente</option><option>Aprovada</option></select></label>
+<button class="login-submit" type="submit" style="height:40px;margin:0">Adicionar viagem</button>
+</form><p id="trip-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div>
+<div class="panel"><div class="panel-heading"><div><p class="eyebrow">REGISTROS</p><h2>Viagens cadastradas</h2></div><span class="status planned" id="trip-count">3 viagens</span></div>
+<div class="table-wrap"><table><thead><tr><th>Viagem</th><th>Destino</th><th>Data</th><th>Alunos</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="trip-table-body"></tbody></table></div></div></section>
       <section class="page-view" id="page-alunos"><div class="page-heading"><div><p class="eyebrow">COMUNIDADE ESCOLAR</p><h1>Alunos</h1><p class="subheading">Consulta de estudantes fictícios do protótipo.</p></div></div><div class="panel"><div class="table-wrap"><table><thead><tr><th>Estudante</th><th>Turma</th><th>Situação</th></tr></thead><tbody><tr><td>Aluno Exemplo 01</td><td>1ª série A</td><td><span class="status approved">Ativo</span></td></tr><tr><td>Aluno Exemplo 02</td><td>1ª série A</td><td><span class="status approved">Ativo</span></td></tr><tr><td>Aluno Exemplo 03</td><td>2ª série B</td><td><span class="status approved">Ativo</span></td></tr><tr><td>Aluno Exemplo 04</td><td>3ª série A</td><td><span class="status approved">Ativo</span></td></tr></tbody></table></div></div></section>
       <section class="page-view placeholder-view" id="page-autorizacoes"><div class="placeholder-icon">▤</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Autorizações</h1><p>Esta área será usada para acompanhar as autorizações dos responsáveis pelas viagens escolares.</p><span class="status planned">Próxima etapa</span></section>
       <section class="page-view placeholder-view" id="page-transportes"><div class="placeholder-icon">▣</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Transportes</h1><p>Área destinada ao cadastro e acompanhamento dos veículos e dados de transporte.</p><span class="status planned">Próxima etapa</span></section>
@@ -167,6 +179,55 @@
   document.getElementById('profile-menu').addEventListener('click', leaveApp);
   document.querySelectorAll('[data-page]').forEach(button => button.addEventListener('click', () => openPage(button.dataset.page)));
   document.querySelectorAll('[data-go]').forEach(button => button.addEventListener('click', () => openPage(button.dataset.go)));
+
+  const defaultTrips = [
+    {id:1,name:'Visita ao Museu',destination:'Museu Histórico',date:'2026-11-12',students:35,status:'Planejada'},
+    {id:2,name:'Passeio Educativo',destination:'Parque Estadual',date:'2026-11-18',students:42,status:'Aprovada'},
+    {id:3,name:'Feira de Ciências',destination:'Centro de Eventos',date:'2026-11-25',students:28,status:'Pendente'}
+  ];
+  let trips = defaultTrips;
+  try { trips = JSON.parse(localStorage.getItem('sgve-demo-trips') || 'null') || defaultTrips; } catch (_) {}
+  const tripBody = document.getElementById('trip-table-body');
+  function safeText(value) {
+    return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function saveTrips() {
+    try { localStorage.setItem('sgve-demo-trips', JSON.stringify(trips)); } catch (_) {}
+  }
+  function renderTrips() {
+    tripBody.innerHTML = trips.map(t => {
+      const cls = t.status === 'Aprovada' ? 'approved' : t.status === 'Pendente' ? 'pending' : 'planned';
+      const date = t.date ? t.date.split('-').reverse().join('/') : '—';
+      return '<tr><td>' + safeText(t.name) + '</td><td>' + safeText(t.destination) + '</td><td>' + date + '</td><td>' + Number(t.students) + '</td><td><span class="status ' + cls + '">' + safeText(t.status) + '</span></td><td><button type="button" data-trip-delete="' + t.id + '" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button></td></tr>';
+    }).join('');
+    document.getElementById('trip-count').textContent = trips.length + (trips.length === 1 ? ' viagem' : ' viagens');
+  }
+  document.getElementById('trip-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const trip = {
+      id: Date.now(),
+      name: document.getElementById('trip-name').value.trim(),
+      destination: document.getElementById('trip-destination').value.trim(),
+      date: document.getElementById('trip-date').value,
+      students: Number(document.getElementById('trip-students').value),
+      status: document.getElementById('trip-status').value
+    };
+    if (!trip.name || !trip.destination || !trip.date || !Number.isInteger(trip.students) || trip.students < 1) return;
+    trips.push(trip);
+    saveTrips();
+    renderTrips();
+    this.reset();
+    document.getElementById('trip-feedback').textContent = 'Viagem adicionada ao protótipo deste navegador.';
+  });
+  tripBody.addEventListener('click', function (event) {
+    const button = event.target.closest('[data-trip-delete]');
+    if (!button) return;
+    trips = trips.filter(t => String(t.id) !== button.dataset.tripDelete);
+    saveTrips();
+    renderTrips();
+    document.getElementById('trip-feedback').textContent = 'Registro removido deste navegador.';
+  });
+  renderTrips();
   const savedRole = sessionStorage.getItem('sgve-demo-role');
   if (sessionStorage.getItem('sgve-demo-session') === 'authenticated' && savedRole && accounts[savedRole]) enterApp(savedRole);
 })();
