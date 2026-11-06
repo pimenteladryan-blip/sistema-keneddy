@@ -2,11 +2,6 @@
 name: Publicar demonstração estática
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - "docs/**"
-      - ".github/workflows/pages-demo.yml"
   workflow_dispatch:
 
 permissions:
