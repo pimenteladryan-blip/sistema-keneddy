@@ -55,12 +55,7 @@ app.use((req, res, next) => {
   try {
     const token = parseCookies(req.headers.cookie)[COOKIE_NAME];
     if (!token || token.length > 200) return next();
-    const session = db.prepare(\`
-      SELECT s.id AS session_id, s.csrf_token, s.expires_at,
-             u.id, u.display_name, u.email, u.role, u.active
-      FROM sessions s JOIN users u ON u.id = s.user_id
-      WHERE s.token_hash = ? AND s.expires_at > ?
-    \`).get(sha256(token), new Date().toISOString());
+    const session = db.prepare('SELECT s.id AS session_id, s.csrf_token, s.expires_at, u.id, u.display_name, u.email, u.role, u.active FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?').get(sha256(token), new Date().toISOString());
     if (!session || !session.active) {
       if (session) db.prepare('DELETE FROM sessions WHERE id = ?').run(session.session_id);
       return next();
