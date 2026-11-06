@@ -2,45 +2,40 @@
 
 Aplicação web para apoiar a organização de viagens escolares do Colégio Estadual Presidente Kennedy, em Ponta Grossa/PR.
 
-## Estado atual
+## Funcionalidades implementadas
 
-Esta primeira etapa contém a fundação do projeto:
-- Interface inicial responsiva para computador e celular.
-- Servidor Node.js com Express.
-- Banco SQLite com tabelas iniciais para usuários, sessões, turmas, viagens e auditoria.
-- Login com hash de senha usando scrypt.
-- Sessões aleatórias armazenadas no banco e cookie HttpOnly/SameSite.
-- Proteção CSRF para encerramento de sessão, cabeçalhos de segurança e limite básico de tentativas de login.
-- Health check para hospedagem.
-- Configuração inicial para Render.
-
-O painel ainda é um esqueleto. Cadastros escolares, viagens, autorizações, presença e relatórios serão implementados nas próximas etapas.
-
-## Requisitos
-
-- Node.js 24 ou superior.
-- npm.
+- Interface responsiva para computador e celular.
+- Login com hash de senha scrypt, sessão em cookie HttpOnly/SameSite e token CSRF.
+- Perfis: administrador, direção, secretaria, professor, responsável e estudante.
+- Cadastro de turmas do Ensino Fundamental e Ensino Médio, incluindo cursos Regular, Técnico ADM e Técnico DS.
+- Cadastro mínimo de estudantes (nome e turma).
+- Criação de contas com permissões limitadas por perfil.
+- Associação de responsável a estudante pela API; responsáveis consultam apenas estudantes vinculados.
+- Estudantes consultam apenas o próprio cadastro quando uma conta estiver vinculada.
+- Auditoria de ações de cadastro e autenticação.
+- Testes automatizados e GitHub Actions.
+- Configuração inicial para Render com armazenamento persistente.
 
 ## Executar localmente
 
-1. Instale as dependências com: npm install
-2. Copie .env.example para .env e configure ADMIN_EMAIL e ADMIN_PASSWORD. A senha inicial deve ter pelo menos 14 caracteres.
-3. Inicie com: npm start
-4. Acesse http://localhost:3000.
+Requer Node.js 24 ou superior.
 
-A conta administrativa é criada somente quando ADMIN_EMAIL e ADMIN_PASSWORD são configurados e ainda não existe uma conta com aquele e-mail. Não há senha padrão.
+1. Execute `npm install`.
+2. Copie `.env.example` para `.env`.
+3. Defina `ADMIN_EMAIL` e uma `ADMIN_PASSWORD` com pelo menos 14 caracteres.
+4. Execute `npm start` e acesse `http://localhost:3000`.
+
+Não existe senha administrativa padrão. Não envie o arquivo `.env` ao GitHub.
 
 ## Verificações
 
-- npm run check
-- npm test
+- `npm run check`
+- `npm test`
 
-## Render
+## Próximas etapas
 
-O arquivo render.yaml define o serviço, o health check e um disco persistente para o SQLite. Configure ADMIN_EMAIL e ADMIN_PASSWORD como variáveis secretas no painel do Render. Não coloque senhas ou tokens no repositório.
+Gestão de viagens e aprovação, atribuição de professores às turmas, vínculo de estudantes às viagens, autorizações, presença de saída/retorno, transporte e relatórios.
 
-## Importante — antes de usar dados reais
+## Segurança e privacidade
 
-Este repositório está em desenvolvimento e **não está aprovado para operação com dados reais de estudantes**. O controle de tentativas de login desta versão é mantido em memória e não substitui proteção distribuída. Ainda são necessárias revisão de segurança, política de retenção, backups testados, validação institucional e avaliação de privacidade/LGPD. Use apenas dados fictícios em desenvolvimento e testes. Não publique dados pessoais de estudantes, responsáveis ou funcionários.
-
-Consulte também docs/PLANEJAMENTO.md.
+Este projeto ainda é um protótipo em desenvolvimento e **não está aprovado para dados reais de crianças ou adolescentes**. Use apenas dados fictícios. O cadastro atual limita os dados de estudante a nome e turma; não adicione documentos, endereço, telefone ou dados sensíveis. Professores ainda não recebem listas de turma, pois a atribuição de turmas será implementada antes de liberar esse acesso. Antes de qualquer implantação institucional, são obrigatórias revisão técnica e de segurança, avaliação de privacidade/LGPD, definição de base legal e retenção, backups testados, validação da escola e controle de acesso operacional. O limite de tentativas de login atual é local à instância e não substitui rate limiting distribuído.
