@@ -336,7 +336,7 @@ body.light-mode .status.approved{background:#e8f4ec;color:#26734a}
 body.light-mode .status.pending{background:#fff4df;color:#986b1d}
 @media(max-width:760px){.theme-toggle{top:12px;right:12px;min-height:35px;padding:0 11px;font-size:10px}}
 
-</style>
+.register-toggle{display:block;width:100%;margin-top:13px;padding:10px;border:1px solid #b9d9c0;border-radius:9px;background:#edf7ef;color:#276b42;font-size:12px;font-weight:750}.register-toggle:hover{background:#dff0e3}.login-field[hidden]{display:none!important}\n</style>
 
 </head>
 <body>
@@ -351,12 +351,14 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
     <form class="login-card" id="demo-login-form">
       <p class="eyebrow">ÁREA DE ACESSO</p>
       <h2>Bem-vindo ao SGVE</h2>
-      <p class="login-description">Escolha seu perfil e entre com a conta fictícia correspondente.</p>
+      <p class="login-description" id="login-description">Entre com sua conta ou crie um cadastro para acessar a demonstração.</p>
+      <div class="login-field" id="register-name-field" hidden><label for="register-name">Nome completo</label><input id="register-name" type="text" placeholder="Seu nome completo" autocomplete="name"></div>
       <div class="login-field"><label for="login-role">Tipo de acesso</label><select id="login-role" name="role" required style="width:100%;height:47px;padding:0 13px;border:1px solid #dfe8e1;border-radius:8px;background:#fff;color:#25382c;font:inherit;font-size:12px"><option value="administrador">Administrador</option><option value="direcao">Direção</option><option value="secretaria">Secretaria</option><option value="professor">Professor</option><option value="responsavel">Responsável</option><option value="estudante">Estudante</option></select></div>
       <div class="login-field"><label for="login-email">E-mail</label><input id="login-email" name="email" type="email" placeholder="seu@email.com" autocomplete="username" required></div>
       <div class="login-field"><label for="login-password">Senha</label><input id="login-password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required></div>
       <p id="login-error" class="login-error" role="alert" aria-live="polite"></p>
-      <button class="login-submit" type="submit">Entrar no sistema <span aria-hidden="true">→</span></button>
+      <button class="login-submit" id="login-submit-button" type="submit">Entrar no sistema <span aria-hidden="true">→</span></button>
+      <button type="button" id="register-toggle" class="register-toggle">Criar uma conta</button>
       <div class="login-disclaimer"><span>i</span><div><strong>Conta demonstrativa do perfil selecionado:</strong><br><span id="demo-account-email" style="color:#355a43;font-weight:600">admin@sgve.demo</span><br>Senha para todos os perfis: <strong>Kennedy2026</strong><br><br>Dados fictícios. Login apenas para demonstração, sem segurança de produção.</div></div>
     </form>
   </div>
@@ -501,7 +503,15 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
     estudante: {email:'estudante@sgve.demo', role:'Estudante', pages:['inicio','viagens']}
   };
   const password = 'Kennedy2026';
+  let registeredAccounts = {};
+  try { registeredAccounts = JSON.parse(localStorage.getItem('sgve-demo-accounts') || '{}') || {}; } catch (_) {}
   const login = document.getElementById('demo-login-form');
+  let registerMode = false;
+  const registerNameField = document.getElementById('register-name-field');
+  const registerNameInput = document.getElementById('register-name');
+  const registerToggle = document.getElementById('register-toggle');
+  const loginSubmitButton = document.getElementById('login-submit-button');
+  const loginDescription = document.getElementById('login-description');
   const loginScreen = document.getElementById('login-screen');
   const app = document.getElementById('app-shell');
   const error = document.getElementById('login-error');
@@ -561,15 +571,54 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
     sessionStorage.removeItem('sgve-demo-role');
     fillDemoEmail();
   }
+  registerToggle.addEventListener('click', function () {
+    registerMode = !registerMode;
+    registerNameField.hidden = !registerMode;
+    registerNameInput.required = registerMode;
+    loginSubmitButton.textContent = registerMode ? 'Criar minha conta' : 'Entrar no sistema →';
+    registerToggle.textContent = registerMode ? 'Já tenho uma conta' : 'Criar uma conta';
+    loginDescription.textContent = registerMode ? 'Preencha seus dados para criar uma conta neste navegador.' : 'Entre com sua conta ou crie um cadastro para acessar a demonstração.';
+    document.getElementById('login-password').autocomplete = registerMode ? 'new-password' : 'current-password';
+    error.textContent = '';
+  });
   login.addEventListener('submit', function (event) {
     event.preventDefault();
     const role = roleSelect.value;
-    const account = accounts[role];
     const email = emailInput.value.trim().toLowerCase();
     const enteredPassword = document.getElementById('login-password').value;
-    if (email !== account.email || enteredPassword !== password) {
-      error.textContent = 'Dados incorretos para o perfil selecionado. Confira o e-mail e a senha de teste.';
+    if (registerMode) {
+      const fullName = registerNameInput.value.trim();
+      if (!fullName || enteredPassword.length < 6) {
+        error.textContent = 'Informe seu nome e uma senha com pelo menos 6 caracteres.';
+        return;
+      }
+      if (registeredAccounts[email] || Object.values(accounts).some(item => item.email === email)) {
+        error.textContent = 'Este e-mail já possui cadastro. Faça login.';
+        return;
+      }
+      registeredAccounts[email] = {name:fullName, role, password:enteredPassword};
+      try { localStorage.setItem('sgve-demo-accounts', JSON.stringify(registeredAccounts)); }
+      catch (_) { error.textContent = 'Não foi possível salvar a conta neste navegador.'; return; }
+      registerMode = false;
+      registerNameField.hidden = true;
+      registerNameInput.required = false;
+      loginSubmitButton.textContent = 'Entrar no sistema →';
+      registerToggle.textContent = 'Criar uma conta';
+      loginDescription.textContent = 'Conta criada! Entre com seu e-mail e senha.';
+      document.getElementById('login-password').autocomplete = 'current-password';
+      error.textContent = 'Cadastro criado com sucesso. Agora clique em Entrar no sistema.';
       return;
+    }
+    const demoAccount = accounts[role];
+    const customAccount = registeredAccounts[email];
+    const validDemo = demoAccount && email === demoAccount.email && enteredPassword === password;
+    const validCustom = customAccount && customAccount.role === role && customAccount.password === enteredPassword;
+    if (!validDemo && !validCustom) {
+      error.textContent = 'Dados incorretos. Confira o perfil, o e-mail e a senha.';
+      return;
+    }
+    if (validCustom) {
+      accounts[role] = {...accounts[role], role:customAccount.name};
     }
     error.textContent = '';
     sessionStorage.setItem('sgve-demo-session', 'authenticated');
