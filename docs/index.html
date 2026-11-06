@@ -127,7 +127,17 @@
 </form><p id="teacher-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div>
 <div class="panel"><div class="panel-heading"><div><p class="eyebrow">ATRIBUIÇÕES</p><h2>Equipe e viagens</h2></div></div>
 <div class="table-wrap"><table><thead><tr><th>Professor</th><th>Área</th><th>Viagem atribuída</th><th>Ações</th></tr></thead><tbody id="teacher-table-body"></tbody></table></div></div></section>
-      <section class="page-view placeholder-view" id="page-relatorios"><div class="placeholder-icon">▥</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Relatórios</h1><p>Área de relatórios de viagens, participantes e prestação de contas.</p><span class="status planned">Próxima etapa</span></section>
+      <section class="page-view" id="page-relatorios"><div class="page-heading"><div><p class="eyebrow">ACOMPANHAMENTO</p><h1>Relatórios</h1><p class="subheading">Resumo e exportação dos registros fictícios deste navegador.</p></div></div>
+<div class="stats-grid">
+<article class="stat-card"><span class="stat-icon green-icon">↗</span><div><span>Viagens</span><strong id="report-trip-count">0</strong><small>registros</small></div></article>
+<article class="stat-card"><span class="stat-icon blue-icon">♧</span><div><span>Estudantes</span><strong id="report-student-count">0</strong><small>registros fictícios</small></div></article>
+<article class="stat-card"><span class="stat-icon gold-icon">✓</span><div><span>Autorizações</span><strong id="report-auth-count">0</strong><small>autorizadas</small></div></article>
+<article class="stat-card"><span class="stat-icon orange-icon">▣</span><div><span>Veículos</span><strong id="report-vehicle-count">0</strong><small>cadastrados</small></div></article>
+</div>
+<div class="panel"><div class="panel-heading"><div><p class="eyebrow">EXPORTAÇÃO</p><h2>Baixar relatórios</h2></div></div>
+<p style="color:#7a887f;font-size:11px;line-height:1.7">Os arquivos contêm apenas os dados demonstrativos criados no navegador. Não use dados pessoais ou registros reais.</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px"><button class="login-submit" id="export-trips" style="width:auto;padding:0 18px;margin:0">Exportar viagens CSV</button><button class="login-submit" id="export-students" style="width:auto;padding:0 18px;margin:0">Exportar estudantes CSV</button><button class="login-submit" id="export-auth" style="width:auto;padding:0 18px;margin:0">Exportar autorizações CSV</button></div>
+<p id="report-feedback" role="status" style="font-size:10px;color:#26734a;margin:12px 0 0"></p></div></section>
       <section class="page-view placeholder-view" id="page-usuarios"><div class="placeholder-icon">⚙</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Usuários</h1><p>Área destinada à gestão de contas e níveis de acesso do sistema.</p><span class="status planned">Próxima etapa</span></section>
       <footer class="page-footer">SGVE · Protótipo versão 0.1 <span>Interface demonstrativa · Colégio Estadual Presidente Kennedy</span></footer>
     </section>
@@ -386,6 +396,31 @@
     document.getElementById('teacher-feedback').textContent = 'Atribuição removida.';
   });
   renderTeachers();
+
+  function csvCell(value) { return '"' + String(value ?? '').replace(/"/g, '""') + '"'; }
+  function downloadCsv(filename, headers, rows) {
+    const content = '\\ufeff' + [headers, ...rows].map(row => row.map(csvCell).join(';')).join('\\r\\n');
+    const blob = new Blob([content], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    document.getElementById('report-feedback').textContent = 'Arquivo CSV gerado com dados fictícios.';
+  }
+  function renderReports() {
+    document.getElementById('report-trip-count').textContent = trips.length;
+    document.getElementById('report-student-count').textContent = students.length;
+    document.getElementById('report-auth-count').textContent = authorizations.filter(a => a.status === 'Autorizada').length;
+    document.getElementById('report-vehicle-count').textContent = vehicles.length;
+  }
+  document.getElementById('export-trips').addEventListener('click', () => downloadCsv('sgve-viagens-demo.csv',['Viagem','Destino','Data','Alunos','Situação'],trips.map(t=>[t.name,t.destination,t.date,t.students,t.status])));
+  document.getElementById('export-students').addEventListener('click', () => downloadCsv('sgve-estudantes-demo.csv',['Estudante','Turma'],students.map(s=>[s.name,s.className])));
+  document.getElementById('export-auth').addEventListener('click', () => downloadCsv('sgve-autorizacoes-demo.csv',['Estudante','Viagem','Data','Situação'],authorizations.map(a=>[a.student,a.trip,a.date,a.status])));
+  renderReports();
   const savedRole = sessionStorage.getItem('sgve-demo-role');
   if (sessionStorage.getItem('sgve-demo-session') === 'authenticated' && savedRole && accounts[savedRole]) enterApp(savedRole);
 })();
