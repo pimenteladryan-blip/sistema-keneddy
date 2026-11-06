@@ -25,12 +25,13 @@
     <form class="login-card" id="demo-login-form">
       <p class="eyebrow">ÁREA DE ACESSO</p>
       <h2>Bem-vindo ao SGVE</h2>
-      <p class="login-description">Entre com os dados da conta demonstrativa para acessar o painel.</p>
+      <p class="login-description">Escolha seu perfil e entre com a conta fictícia correspondente.</p>
+      <div class="login-field"><label for="login-role">Tipo de acesso</label><select id="login-role" name="role" required style="width:100%;height:47px;padding:0 13px;border:1px solid #dfe8e1;border-radius:8px;background:#fff;color:#25382c;font:inherit;font-size:12px"><option value="administrador">Administrador</option><option value="direcao">Direção</option><option value="secretaria">Secretaria</option><option value="professor">Professor</option><option value="responsavel">Responsável</option><option value="estudante">Estudante</option></select></div>
       <div class="login-field"><label for="login-email">E-mail</label><input id="login-email" name="email" type="email" placeholder="seu@email.com" autocomplete="username" required></div>
       <div class="login-field"><label for="login-password">Senha</label><input id="login-password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required></div>
       <p id="login-error" class="login-error" role="alert" aria-live="polite"></p>
       <button class="login-submit" type="submit">Entrar no sistema <span aria-hidden="true">→</span></button>
-      <div class="login-disclaimer"><span>i</span><div><strong>Conta de teste:</strong><br>E-mail: admin@sgve.demo<br>Senha: Kennedy2026<br><br>Login local apenas para demonstração. Não use dados ou senhas reais.</div></div>
+      <div class="login-disclaimer"><span>i</span><div><strong>Conta demonstrativa do perfil selecionado:</strong><br><span id="demo-account-email" style="color:#355a43;font-weight:600">admin@sgve.demo</span><br>Senha para todos os perfis: <strong>Kennedy2026</strong><br><br>Dados fictícios. Login apenas para demonstração, sem segurança de produção.</div></div>
     </form>
   </div>
 </section>
@@ -93,56 +94,81 @@
 <script>
 (function () {
   'use strict';
-  const account = { email: 'admin@sgve.demo', password: 'Kennedy2026' };
+  const accounts = {
+    administrador: {email:'admin@sgve.demo', role:'Administrador', pages:['inicio','viagens','alunos','autorizacoes','transportes','professores','relatorios','usuarios']},
+    direcao: {email:'direcao@sgve.demo', role:'Direção', pages:['inicio','viagens','alunos','autorizacoes','transportes','professores','relatorios']},
+    secretaria: {email:'secretaria@sgve.demo', role:'Secretaria', pages:['inicio','viagens','alunos','autorizacoes','transportes','professores','relatorios']},
+    professor: {email:'professor@sgve.demo', role:'Professor', pages:['inicio','viagens']},
+    responsavel: {email:'responsavel@sgve.demo', role:'Responsável', pages:['inicio','viagens','autorizacoes']},
+    estudante: {email:'estudante@sgve.demo', role:'Estudante', pages:['inicio','viagens']}
+  };
+  const password = 'Kennedy2026';
   const login = document.getElementById('demo-login-form');
   const loginScreen = document.getElementById('login-screen');
   const app = document.getElementById('app-shell');
   const error = document.getElementById('login-error');
+  const roleSelect = document.getElementById('login-role');
+  const emailInput = document.getElementById('login-email');
 
-  function enterApp() {
+  function fillDemoEmail() {
+    const account = accounts[roleSelect.value];
+    emailInput.value = account.email;
+    document.getElementById('demo-account-email').textContent = account.email;
+  }
+  roleSelect.addEventListener('change', fillDemoEmail);
+  fillDemoEmail();
+
+  function openPage(name) {
+    const role = sessionStorage.getItem('sgve-demo-role') || 'administrador';
+    const allowed = accounts[role].pages;
+    if (!allowed.includes(name)) return;
+    document.querySelectorAll('.page-view').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === name));
+    const nav = document.querySelector('.nav-item[data-page="' + name + '"]');
+    document.getElementById('breadcrumb-page').textContent = nav ? nav.textContent.trim() : name;
+  }
+  function enterApp(role) {
+    const account = accounts[role];
+    document.querySelector('.profile strong').textContent = account.role;
+    document.querySelector('.profile small').textContent = 'Acesso demonstrativo';
+    document.querySelector('.avatar').textContent = account.role.charAt(0);
+    document.querySelectorAll('.nav-item').forEach(b => {
+      b.hidden = !account.pages.includes(b.dataset.page);
+    });
+    document.querySelectorAll('[data-go]').forEach(b => {
+      b.hidden = !account.pages.includes(b.dataset.go);
+    });
     loginScreen.style.display = 'none';
     app.classList.add('logged-in');
+    openPage('inicio');
   }
   function leaveApp() {
     app.classList.remove('logged-in');
     loginScreen.style.display = 'grid';
-    try { sessionStorage.removeItem('sgve-demo-session'); } catch (_) {}
+    sessionStorage.removeItem('sgve-demo-session');
+    sessionStorage.removeItem('sgve-demo-role');
+    fillDemoEmail();
   }
-
   login.addEventListener('submit', function (event) {
     event.preventDefault();
-    const email = document.getElementById('login-email').value.trim().toLowerCase();
-    const password = document.getElementById('login-password').value;
-    if (email !== account.email || password !== account.password) {
-      error.textContent = 'E-mail ou senha incorretos. Confira os dados da conta de teste.';
+    const role = roleSelect.value;
+    const account = accounts[role];
+    const email = emailInput.value.trim().toLowerCase();
+    const enteredPassword = document.getElementById('login-password').value;
+    if (email !== account.email || enteredPassword !== password) {
+      error.textContent = 'Dados incorretos para o perfil selecionado. Confira o e-mail e a senha de teste.';
       return;
     }
     error.textContent = '';
-    try { sessionStorage.setItem('sgve-demo-session', 'authenticated'); } catch (_) {}
-    enterApp();
+    sessionStorage.setItem('sgve-demo-session', 'authenticated');
+    sessionStorage.setItem('sgve-demo-role', role);
+    enterApp(role);
   });
-
   document.getElementById('profile-menu').addEventListener('click', leaveApp);
-  document.querySelectorAll('[data-page]').forEach(function (button) {
-    button.addEventListener('click', function () {
-      const name = button.dataset.page;
-      document.querySelectorAll('.page-view').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
-      document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b === button));
-      document.getElementById('breadcrumb-page').textContent = button.textContent.trim();
-    });
-  });
-  document.querySelectorAll('[data-go]').forEach(function (button) {
-    button.addEventListener('click', function () {
-      const name = button.dataset.go;
-      document.querySelectorAll('.page-view').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
-      document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === name));
-      const active = document.querySelector('.nav-item[data-page="' + name + '"]');
-      if (active) document.getElementById('breadcrumb-page').textContent = active.textContent.trim();
-    });
-  });
-  try {
-    if (sessionStorage.getItem('sgve-demo-session') === 'authenticated') enterApp();
-  } catch (_) {}
+  document.querySelectorAll('[data-page]').forEach(button => button.addEventListener('click', () => openPage(button.dataset.page)));
+  document.querySelectorAll('[data-go]').forEach(button => button.addEventListener('click', () => openPage(button.dataset.go)));
+  const savedRole = sessionStorage.getItem('sgve-demo-role');
+  if (sessionStorage.getItem('sgve-demo-session') === 'authenticated' && savedRole && accounts[savedRole]) enterApp(savedRole);
 })();
 </script>
 </body>
