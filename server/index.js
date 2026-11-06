@@ -18,7 +18,7 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'"],
       imgSrc: ["'self'", 'data:'], connectSrc: ["'self'"], objectSrc: ["'none'"],
-      frameAncestors: ["'none''], upgradeInsecureRequests: isProduction ? [] : null
+      frameAncestors: ["'none'"], upgradeInsecureRequests: isProduction ? [] : null
     }
   }
 }));
