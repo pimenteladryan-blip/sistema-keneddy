@@ -296,6 +296,8 @@
     trips.push(trip);
     saveTrips();
     renderTrips();
+    renderAttendance();
+    renderReports();
     this.reset();
     document.getElementById('trip-feedback').textContent = 'Viagem adicionada ao protótipo deste navegador.';
   });
@@ -316,6 +318,8 @@
     trips = trips.filter(t => String(t.id) !== button.dataset.tripDelete);
     saveTrips();
     renderTrips();
+    renderAttendance();
+    renderReports();
     document.getElementById('trip-feedback').textContent = 'Registro removido deste navegador.';
   });
   renderTrips();
@@ -345,6 +349,8 @@
     students.push({id:Date.now(),name,className});
     saveStudents();
     renderStudents();
+    renderAttendance();
+    renderReports();
     this.reset();
     document.getElementById('student-feedback').textContent = 'Estudante fictício adicionado neste navegador.';
   });
@@ -354,6 +360,8 @@
     students = students.filter(s => String(s.id) !== button.dataset.studentDelete);
     saveStudents();
     renderStudents();
+    renderAttendance();
+    renderReports();
     document.getElementById('student-feedback').textContent = 'Estudante removido do protótipo.';
   });
   renderStudents();
@@ -387,6 +395,7 @@
     record.status = select.value;
     try { localStorage.setItem('sgve-demo-authorizations', JSON.stringify(authorizations)); } catch (_) {}
     renderAuthorizations();
+    renderReports();
     document.getElementById('authorization-feedback').textContent = 'Status atualizado apenas neste navegador.';
   });
   renderAuthorizations();
@@ -408,6 +417,7 @@
     vehicles.push(vehicle);
     try { localStorage.setItem('sgve-demo-vehicles', JSON.stringify(vehicles)); } catch (_) {}
     renderVehicles();
+    renderReports();
     this.reset();
     document.getElementById('vehicle-feedback').textContent = 'Veículo fictício cadastrado neste navegador.';
   });
@@ -417,6 +427,7 @@
     vehicles = vehicles.filter(v => String(v.id) !== button.dataset.vehicleDelete);
     try { localStorage.setItem('sgve-demo-vehicles', JSON.stringify(vehicles)); } catch (_) {}
     renderVehicles();
+    renderReports();
     document.getElementById('vehicle-feedback').textContent = 'Veículo removido.';
   });
   renderVehicles();
