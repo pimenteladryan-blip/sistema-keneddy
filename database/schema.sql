@@ -71,6 +71,32 @@ CREATE TABLE IF NOT EXISTS trips (
 );
 CREATE INDEX IF NOT EXISTS idx_trips_departure ON trips(departure_at);
 
+CREATE TABLE IF NOT EXISTS trip_classes (
+  trip_id INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+  class_id INTEGER NOT NULL REFERENCES classes(id),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (trip_id, class_id)
+);
+CREATE TABLE IF NOT EXISTS trip_students (
+  trip_id INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+  student_id INTEGER NOT NULL REFERENCES students(id),
+  authorization_status TEXT NOT NULL DEFAULT 'pending'
+    CHECK (authorization_status IN ('pending','authorized','declined','paper_recorded')),
+  departure_present INTEGER CHECK (departure_present IN (0,1)),
+  return_present INTEGER CHECK (return_present IN (0,1)),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (trip_id, student_id)
+);
+CREATE INDEX IF NOT EXISTS idx_trip_students_student ON trip_students(student_id);
+CREATE TABLE IF NOT EXISTS trip_staff (
+  trip_id INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  assignment_label TEXT NOT NULL DEFAULT 'Professor responsável',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (trip_id, user_id)
+);
+
+
 CREATE TABLE IF NOT EXISTS audit_logs (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   actor_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
