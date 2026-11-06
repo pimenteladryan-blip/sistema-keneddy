@@ -117,7 +117,16 @@
 <div class="panel"><div class="panel-heading"><div><p class="eyebrow">VEÍCULOS CADASTRADOS</p><h2>Frota demonstrativa</h2></div></div>
 <div class="table-wrap"><table><thead><tr><th>Identificação</th><th>Tipo</th><th>Capacidade</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="vehicle-table-body"></tbody></table></div></div>
 <div class="prototype-note"><span>i</span><p>Veículos e capacidades são exemplos. Este protótipo não verifica documentação, inspeções, habilitações ou disponibilidade real da frota.</p></div></section>
-      <section class="page-view placeholder-view" id="page-professores"><div class="placeholder-icon">♙</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Professores</h1><p>Área destinada à consulta e organização dos professores responsáveis pelas atividades.</p><span class="status planned">Próxima etapa</span></section>
+      <section class="page-view" id="page-professores"><div class="page-heading"><div><p class="eyebrow">EQUIPE ESCOLAR</p><h1>Professores</h1><p class="subheading">Cadastre a equipe fictícia e associe responsáveis às viagens.</p></div></div>
+<div class="panel" style="margin-bottom:16px"><div class="panel-heading"><div><p class="eyebrow">EQUIPE DE EXEMPLO</p><h2>Adicionar professor</h2></div></div>
+<form id="teacher-form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end">
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Nome fictício<input id="teacher-name" required maxlength="70" placeholder="Ex.: Professor Demonstração" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Área/Disciplina<input id="teacher-subject" required maxlength="50" placeholder="Ex.: História" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Viagem atribuída<select id="teacher-trip" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"><option>Visita ao Museu</option><option>Passeio Educativo</option><option>Feira de Ciências</option></select></label>
+<button class="login-submit" type="submit" style="height:40px;margin:0">Adicionar professor</button>
+</form><p id="teacher-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div>
+<div class="panel"><div class="panel-heading"><div><p class="eyebrow">ATRIBUIÇÕES</p><h2>Equipe e viagens</h2></div></div>
+<div class="table-wrap"><table><thead><tr><th>Professor</th><th>Área</th><th>Viagem atribuída</th><th>Ações</th></tr></thead><tbody id="teacher-table-body"></tbody></table></div></div></section>
       <section class="page-view placeholder-view" id="page-relatorios"><div class="placeholder-icon">▥</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Relatórios</h1><p>Área de relatórios de viagens, participantes e prestação de contas.</p><span class="status planned">Próxima etapa</span></section>
       <section class="page-view placeholder-view" id="page-usuarios"><div class="placeholder-icon">⚙</div><p class="eyebrow">MÓDULO DEMONSTRATIVO</p><h1>Usuários</h1><p>Área destinada à gestão de contas e níveis de acesso do sistema.</p><span class="status planned">Próxima etapa</span></section>
       <footer class="page-footer">SGVE · Protótipo versão 0.1 <span>Interface demonstrativa · Colégio Estadual Presidente Kennedy</span></footer>
@@ -348,6 +357,35 @@
     document.getElementById('vehicle-feedback').textContent = 'Veículo removido.';
   });
   renderVehicles();
+
+  const defaultTeachers = [
+    {id:1,name:'Professor Exemplo 01',subject:'História',trip:'Visita ao Museu'},
+    {id:2,name:'Professor Exemplo 02',subject:'Ciências',trip:'Feira de Ciências'}
+  ];
+  let teachers = defaultTeachers;
+  try { teachers = JSON.parse(localStorage.getItem('sgve-demo-teachers') || 'null') || defaultTeachers; } catch (_) {}
+  function renderTeachers() {
+    document.getElementById('teacher-table-body').innerHTML = teachers.map(t => '<tr><td>' + safeText(t.name) + '</td><td>' + safeText(t.subject) + '</td><td>' + safeText(t.trip) + '</td><td><button type="button" data-teacher-delete="' + t.id + '" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button></td></tr>').join('');
+  }
+  document.getElementById('teacher-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    const teacher = {id:Date.now(),name:document.getElementById('teacher-name').value.trim(),subject:document.getElementById('teacher-subject').value.trim(),trip:document.getElementById('teacher-trip').value};
+    if (!teacher.name || !teacher.subject) return;
+    teachers.push(teacher);
+    try { localStorage.setItem('sgve-demo-teachers', JSON.stringify(teachers)); } catch (_) {}
+    renderTeachers();
+    this.reset();
+    document.getElementById('teacher-feedback').textContent = 'Professor fictício adicionado e associado à viagem.';
+  });
+  document.getElementById('teacher-table-body').addEventListener('click', function (event) {
+    const button = event.target.closest('[data-teacher-delete]');
+    if (!button) return;
+    teachers = teachers.filter(t => String(t.id) !== button.dataset.teacherDelete);
+    try { localStorage.setItem('sgve-demo-teachers', JSON.stringify(teachers)); } catch (_) {}
+    renderTeachers();
+    document.getElementById('teacher-feedback').textContent = 'Atribuição removida.';
+  });
+  renderTeachers();
   const savedRole = sessionStorage.getItem('sgve-demo-role');
   if (sessionStorage.getItem('sgve-demo-session') === 'authenticated' && savedRole && accounts[savedRole]) enterApp(savedRole);
 })();
