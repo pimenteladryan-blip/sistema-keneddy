@@ -274,7 +274,11 @@
       const date = t.date ? t.date.split('-').reverse().join('/') : '—';
       const manager = ['administrador','direcao','secretaria'].includes(sessionStorage.getItem('sgve-demo-role'));
       const action = manager ? '<button type="button" data-trip-delete="' + t.id + '" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button>' : '—';
-      return '<tr><td>' + safeText(t.name) + '</td><td>' + safeText(t.destination) + '</td><td>' + date + '</td><td>' + Number(t.students) + '</td><td><span class="status ' + cls + '">' + safeText(t.status) + '</span></td><td>' + action + '</td></tr>';
+      const canApprove = ['administrador','direcao'].includes(sessionStorage.getItem('sgve-demo-role'));
+      const statusCell = canApprove
+        ? '<select data-trip-status="' + t.id + '" style="height:30px;padding:4px;border:1px solid #dfe8e1;border-radius:6px;font-size:10px"><option ' + (t.status==='Planejada'?'selected':'') + '>Planejada</option><option ' + (t.status==='Pendente'?'selected':'') + '>Pendente</option><option ' + (t.status==='Aprovada'?'selected':'') + '>Aprovada</option></select>'
+        : '<span class="status ' + cls + '">' + safeText(t.status) + '</span>';
+      return '<tr><td>' + safeText(t.name) + '</td><td>' + safeText(t.destination) + '</td><td>' + date + '</td><td>' + Number(t.students) + '</td><td>' + statusCell + '</td><td>' + action + '</td></tr>';
     }).join('');
     document.getElementById('trip-count').textContent = trips.length + (trips.length === 1 ? ' viagem' : ' viagens');
   }
@@ -294,6 +298,17 @@
     renderTrips();
     this.reset();
     document.getElementById('trip-feedback').textContent = 'Viagem adicionada ao protótipo deste navegador.';
+  });
+  tripBody.addEventListener('change', function (event) {
+    const select = event.target.closest('[data-trip-status]');
+    if (!select) return;
+    if (!['administrador','direcao'].includes(sessionStorage.getItem('sgve-demo-role'))) return;
+    const trip = trips.find(t => String(t.id) === select.dataset.tripStatus);
+    if (!trip) return;
+    trip.status = select.value;
+    saveTrips();
+    renderTrips();
+    document.getElementById('trip-feedback').textContent = 'Situação da viagem atualizada.';
   });
   tripBody.addEventListener('click', function (event) {
     const button = event.target.closest('[data-trip-delete]');
