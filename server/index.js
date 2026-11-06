@@ -237,7 +237,7 @@ function getTripStatusLabel(status) {
 app.get('/api/trips', requireAuth, (req, res) => {
   const user = req.auth.user;
   let rows;
-  const select = 'SELECT t.id, t.title, t.destination, t.educational_purpose, t.departure_at, t.return_at, t.capacity, t.status, (SELECT COUNT(*) FROM trip_students ts WHERE ts.trip_id = t.id) AS participant_count FROM trips t';
+  const select = 'SELECT DISTINCT t.id, t.title, t.destination, t.educational_purpose, t.departure_at, t.return_at, t.capacity, t.status, (SELECT COUNT(*) FROM trip_students ts WHERE ts.trip_id = t.id) AS participant_count FROM trips t';
   if (hasRole(user, RECORD_MANAGERS)) {
     rows = db.prepare(select + ' ORDER BY t.departure_at DESC LIMIT 100').all();
   } else if (user.role === 'teacher') {
