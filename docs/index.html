@@ -968,6 +968,76 @@ body.dark-mode .dashboard-notices .notice-item p,
 body.dark-mode .dashboard-notices .notice-item time{filter:none!important}
 body.dark-mode .dashboard-notices .notice-item p{font-weight:550!important;line-height:1.55!important}
 
+
+/* Correções finais de contraste e tema — desktop e mobile */
+.login-theme-toggle{
+  position:absolute!important;top:18px!important;right:18px!important;z-index:10020!important;
+  display:inline-flex!important;visibility:visible!important;opacity:1!important;
+  min-height:40px!important;padding:0 14px!important;border:1px solid #78a98b!important;
+  border-radius:999px!important;background:#062b1b!important;color:#fff!important;
+  box-shadow:0 5px 20px #00190e66!important
+}
+.login-theme-toggle .theme-label{display:inline!important;color:inherit!important;font-size:11px!important;font-weight:800!important}
+.login-theme-toggle .theme-icon{color:inherit!important}
+body.dark-mode #login-screen .login-card{
+  background:#111b15!important;border-color:#344b3b!important;color:#f4f8f5!important;
+  box-shadow:0 22px 65px #0009!important
+}
+body.dark-mode #login-screen .login-card h2,
+body.dark-mode #login-screen .login-card .login-description,
+body.dark-mode #login-screen .login-card .login-field label,
+body.dark-mode #login-screen .login-card p,
+body.dark-mode #login-screen .login-card small{color:#f0f5f1!important;opacity:1!important}
+body.dark-mode #login-screen .login-card .eyebrow{background:#203d2c!important;color:#b9f0ca!important}
+body.dark-mode #login-screen .login-field input,
+body.dark-mode #login-screen .login-field select{
+ background:#07110b!important;color:#fff!important;border:1px solid #526b59!important
+}
+body.dark-mode #login-screen .login-field input::placeholder{color:#b7c6bb!important}
+body.dark-mode #login-screen .login-disclaimer{background:#1c2b20!important;border-color:#415b46!important;color:#e1ebe3!important}
+body.dark-mode #login-screen .login-disclaimer strong,
+body.dark-mode #login-screen .login-disclaimer span{color:#e9f5ec!important}
+body.light-mode #login-screen .login-card h2{color:#102c1c!important}
+body.light-mode #login-screen .login-card .login-description{color:#4b5c50!important;opacity:1!important}
+body.light-mode #login-screen .login-card .login-field label{color:#263f30!important;opacity:1!important}
+body.light-mode #login-screen .login-card .eyebrow{color:#145c3b!important}
+body.light-mode #login-screen .login-disclaimer{color:#34483a!important}
+body.dark-mode #app-shell .main-area{background:#090f0b!important;color:#f1f5f2!important}
+body.dark-mode #app-shell .topbar{background:#111a14!important;border-color:#2c3b30!important;color:#f1f5f2!important}
+body.dark-mode #app-shell .panel,
+body.dark-mode #app-shell .stat-card,
+body.dark-mode #app-shell .date-chip,
+body.dark-mode #app-shell .placeholder-view{
+ background:#111b15!important;border-color:#304236!important;color:#f1f5f2!important
+}
+body.dark-mode #app-shell .dashboard-trips,
+body.dark-mode #app-shell .dashboard-notices,
+body.dark-mode #app-shell .dashboard-calendar{background:#111b15!important;color:#f1f5f2!important}
+body.dark-mode #app-shell .dashboard-notices .panel-heading h2,
+body.dark-mode #app-shell .dashboard-notices .panel-heading h2 *,
+body.dark-mode #app-shell .dashboard-notices .notice-item p,
+body.dark-mode #app-shell .dashboard-trips .trip-info strong,
+body.dark-mode #app-shell .dashboard-calendar .calendar-month strong,
+body.dark-mode #app-shell .dashboard-calendar .calendar-grid b,
+body.dark-mode #app-shell .dashboard-stats .stat-card strong,
+body.dark-mode #app-shell .profile strong,
+body.dark-mode #app-shell .breadcrumb strong{color:#f4f7f5!important;opacity:1!important}
+body.dark-mode #app-shell .dashboard-notices .notice-item time,
+body.dark-mode #app-shell .dashboard-trips .trip-info span,
+body.dark-mode #app-shell .dashboard-trips .trip-info small,
+body.dark-mode #app-shell .profile small,
+body.dark-mode #app-shell .subheading{color:#c1cec5!important;opacity:1!important}
+body.dark-mode #app-shell .dashboard-notices .notice-item{border-top-color:#34463a!important}
+body.dark-mode #app-shell .prototype-note{background:#1b2a20!important;border-color:#3b5542!important}
+body.dark-mode #app-shell .prototype-note p{color:#e0eae3!important}
+body.dark-mode #app-shell .prototype-note strong{color:#fff!important}
+@media(max-width:900px),(pointer:coarse) and (hover:none){
+ .login-theme-toggle{top:12px!important;right:12px!important;min-height:38px!important;padding:0 12px!important}
+ .login-theme-toggle .theme-label{display:inline!important;font-size:10px!important}
+ body.dark-mode #app-shell .dashboard-notices .notice-item p{font-size:12px!important;line-height:1.5!important}
+ body.dark-mode #app-shell .dashboard-notices .notice-item time{font-size:10px!important}
+}
+
 </style>
 
 </head>
