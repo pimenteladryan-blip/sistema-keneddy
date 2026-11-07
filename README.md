@@ -41,3 +41,19 @@ Atribuição de professores às viagens/turmas, autorizações digitais e regist
 ## Segurança e privacidade
 
 Este projeto ainda é um protótipo em desenvolvimento e **não está aprovado para dados reais de crianças ou adolescentes**. Use apenas dados fictícios. O cadastro atual limita os dados de estudante a nome e turma; não adicione documentos, endereço, telefone ou dados sensíveis. Professores só consultam viagens atribuídas; a atribuição de equipe e turmas precisa ser concluída antes do uso operacional. Antes de qualquer implantação institucional, são obrigatórias revisão técnica e de segurança, avaliação de privacidade/LGPD, definição de base legal e retenção, backups testados, validação da escola e controle de acesso operacional. O limite de tentativas de login atual é local à instância e não substitui rate limiting distribuído.
+
+
+## Testar / publicar na internet
+
+> **Ainda não existe um endereço público ativo do sistema.** O botão abaixo inicia a configuração da hospedagem; ele não abre uma instalação já publicada.
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/pimenteladryan-blip/sistema-keneddy)
+
+1. Abra o botão e entre/crie uma conta Render com a ajuda de um responsável ou professor.
+2. Confira os serviços e custos apresentados antes de confirmar. O Blueprint atual usa plano Starter e disco persistente, que podem gerar cobrança.
+3. Quando solicitado, preencha `ADMIN_EMAIL` com um e-mail de teste autorizado e `ADMIN_PASSWORD` com uma senha forte de pelo menos 14 caracteres. Não use senha escolar ou pessoal.
+4. Após a implantação terminar, abra o endereço `*.onrender.com` exibido no painel do Render. Esse será o link direto do sistema.
+5. Para verificar se o servidor está respondendo, acrescente `/api/health` ao endereço.
+
+**Use somente dados fictícios durante os testes.** Não cadastre estudantes reais, informações de responsáveis ou dados da escola sem autorização formal e revisão de segurança/privacidade. Não publique credenciais no GitHub.
+
