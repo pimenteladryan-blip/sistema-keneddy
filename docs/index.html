@@ -815,6 +815,64 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
 #app-shell:not(.logged-in){display:none!important}
 #app-shell.logged-in{display:block!important}
 
+
+/* Tema escuro completo */
+body.dark-mode{color-scheme:dark;--green:#27a66a;--deep:#082d20;--mint:#183a2b;--ink:#edf5ef;--muted:#a1b5a8;--line:#294638;--bg:#0b1711;color:#edf5ef;background:#0b1711}
+body.dark-mode .main-area,body.dark-mode .page-content{background:#0b1711}
+body.dark-mode .topbar{background:#101f17;border-color:#294638}
+body.dark-mode .breadcrumb,body.dark-mode .profile small{color:#9bb0a2}
+body.dark-mode .breadcrumb strong,body.dark-mode .profile strong{color:#edf5ef}
+body.dark-mode .panel,body.dark-mode .stat-card,body.dark-mode .placeholder-view,body.dark-mode .date-chip{background:#14271d;border-color:#294638;color:#edf5ef}
+body.dark-mode .stat-card span:not(.stat-icon),body.dark-mode .stat-card small,body.dark-mode .trip-info span,body.dark-mode .trip-info small,body.dark-mode .subheading,body.dark-mode .page-footer,body.dark-mode th{color:#a1b5a8}
+body.dark-mode .stat-card strong,body.dark-mode .trip-info strong,body.dark-mode .panel-heading h2,body.dark-mode .quick-link strong,body.dark-mode .placeholder-view h1{color:#f0f7f2}
+body.dark-mode .trip-item,body.dark-mode .quick-link,body.dark-mode td{border-color:#294638}
+body.dark-mode .quick-link{background:transparent;color:#edf5ef}
+body.dark-mode .quick-link small,body.dark-mode td{color:#c3d2c8}
+body.dark-mode .trip-date{background:#102219;border-color:#294638}
+body.dark-mode .trip-date strong{color:#edf5ef}
+body.dark-mode .prototype-note{background:#172c20;border-color:#31533d}
+body.dark-mode .prototype-note p{color:#b6c9bc}
+body.dark-mode .prototype-note strong{color:#d9f0df}
+body.dark-mode input,body.dark-mode select,body.dark-mode textarea{background:#102219!important;color:#edf5ef!important;border-color:#355444!important}
+body.dark-mode input::placeholder,body.dark-mode textarea::placeholder{color:#8fa598}
+body.dark-mode .theme-toggle{background:#183a2b;color:#eaf4ed;border-color:#42644f}
+body.dark-mode .login-screen{background:#0b1711}
+body.dark-mode .login-form-side{background:linear-gradient(145deg,#102219,#0b1711)}
+body.dark-mode .login-card{background:#14271d;border-color:#294638;color:#edf5ef}
+body.dark-mode .login-card h2{color:#f0f7f2}
+body.dark-mode .login-description,body.dark-mode .login-field label{color:#b6c9bc}
+body.dark-mode .login-field input{background:#102219;color:#edf5ef;border-color:#355444}
+body.dark-mode .login-disclaimer{background:#172c20;border-color:#31533d;color:#b6c9bc}
+body.dark-mode .login-disclaimer strong{color:#d9f0df}
+body.dark-mode .register-toggle{background:#183a2b;border-color:#355444;color:#d9f0df}
+body.dark-mode .account-dialog{background:#14271d;color:#edf5ef;border-color:#355444}
+body.dark-mode .account-current,body.dark-mode .account-row{background:#102219;border-color:#294638}
+body.dark-mode .account-help,body.dark-mode .account-current small{color:#a1b5a8}
+body.dark-mode .account-row small{color:#a1b5a8}
+body.dark-mode .account-close{color:#d9e8de}
+
+
+/* Painel de conta e sessões do dispositivo */
+.account-overlay{position:fixed;inset:0;z-index:20000;display:grid;place-items:center;padding:18px;background:#020b07b8;backdrop-filter:blur(5px)}
+.account-overlay[hidden]{display:none!important}
+.account-dialog{position:relative;width:min(100%,480px);max-height:min(88vh,720px);overflow:auto;padding:30px;border:1px solid #dceade;border-radius:18px;background:#fff;color:#1d2b23;box-shadow:0 25px 90px #0007}
+.account-close{position:absolute;right:16px;top:12px;border:0;background:transparent;color:#66766c;font-size:28px}
+.account-eyebrow{margin:0 0 6px;color:#278052;font-size:10px;font-weight:850;letter-spacing:.14em}
+.account-dialog h2{margin:0 0 18px;font-size:26px}
+.account-current{display:flex;align-items:center;gap:14px;padding:15px;border:1px solid #dceade;border-radius:12px;background:#f2f8f3}
+.account-avatar{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border-radius:50%;background:#0c4b30;color:#fff;font-weight:800;font-size:20px}
+.account-current strong,.account-current small,.account-state{display:block}
+.account-current small{margin:4px 0;color:#718477;font-size:12px}
+.account-state{color:#23804d;font-size:10px;font-weight:750}
+.account-dialog h3{margin:22px 0 4px;font-size:14px}
+.account-help{margin:0 0 10px;color:#718477;font-size:11px}
+.account-list{display:grid;gap:7px;max-height:210px;overflow:auto}
+.account-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid #e1eae3;border-radius:9px;background:#fbfdfb}
+.account-row strong,.account-row small{display:block}.account-row strong{font-size:11px}.account-row small{margin-top:3px;color:#718477;font-size:10px}
+.account-row em{font-size:9px;font-style:normal;color:#23804d;font-weight:800}
+.account-logout{width:100%;height:45px;margin-top:20px;border:0;border-radius:9px;background:#a83232;color:#fff;font-weight:800}
+@media(max-width:520px){.account-dialog{padding:24px 18px;border-radius:15px}.account-dialog h2{font-size:23px}}
+
 </style>
 
 </head>
@@ -841,6 +899,17 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
     </form>
   </div>
 </section>
+
+<div class="account-overlay" id="account-overlay" hidden>
+  <section class="account-dialog" role="dialog" aria-modal="true" aria-labelledby="account-dialog-title">
+    <button type="button" class="account-close" id="account-close" aria-label="Fechar">×</button>
+    <p class="account-eyebrow">SGVE · PERFIL</p><h2 id="account-dialog-title">Sua conta</h2>
+    <div class="account-current"><span class="account-avatar" id="account-avatar">A</span><div><strong id="account-name">Administrador</strong><small id="account-email">admin@sgve.demo</small><span class="account-state">● Sessão ativa neste dispositivo</span></div></div>
+    <h3>Contas disponíveis neste dispositivo</h3><p class="account-help">Perfis demonstrativos e contas criadas neste navegador.</p>
+    <div class="account-list" id="account-list"></div>
+    <button type="button" class="account-logout" id="account-logout">Sair da conta</button>
+  </section>
+</div>
 <div class="app-shell" id="app-shell">
   <aside class="sidebar">
     <a class="brand" href="#inicio"><img class="sidebar-seal" src="./cepk-62.svg" alt=""><span><strong>CEPK</strong><small>Colégio Estadual Presidente Kennedy</small></span></a>
@@ -1120,7 +1189,26 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
     sessionStorage.setItem('sgve-demo-role', role);
     enterApp(role);
   });
-  document.getElementById('profile-menu').addEventListener('click', leaveApp);
+  const accountOverlay = document.getElementById('account-overlay');
+  function openAccountPanel(){
+    const role = sessionStorage.getItem('sgve-demo-role') || 'administrador';
+    const active = accounts[role] || accounts.administrador;
+    document.getElementById('account-name').textContent = active.role;
+    document.getElementById('account-email').textContent = active.email;
+    document.getElementById('account-avatar').textContent = active.role.charAt(0);
+    const list = document.getElementById('account-list');
+    const rows = Object.entries(accounts).map(([key, item]) => ({name:item.role,email:item.email,active:key===role}));
+    Object.values(registeredAccounts).forEach(item => {
+      if(item && item.email && !rows.some(row=>row.email===item.email)) rows.push({name:item.name||'Conta cadastrada',email:item.email,active:item.email===active.email});
+    });
+    list.innerHTML = rows.map(item => '<div class="account-row"><div><strong>'+String(item.name).replace(/[&<>"]/g,'')+'</strong><small>'+String(item.email).replace(/[&<>"]/g,'')+'</small></div><em>'+(item.active?'ATIVA':'DISPONÍVEL')+'</em></div>').join('');
+    accountOverlay.hidden = false;
+  }
+  document.getElementById('profile-menu').addEventListener('click', openAccountPanel);
+  document.getElementById('account-close').addEventListener('click',()=>{accountOverlay.hidden=true;});
+  accountOverlay.addEventListener('click',event=>{if(event.target===accountOverlay)accountOverlay.hidden=true;});
+  document.getElementById('account-logout').addEventListener('click',()=>{accountOverlay.hidden=true;leaveApp();});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!accountOverlay.hidden)accountOverlay.hidden=true;});
   // Navegação delegada: mantém os botões do menu e os atalhos funcionais.
   document.addEventListener('click', function (event) {
     const pageButton = event.target.closest('[data-page]');
@@ -1415,6 +1503,7 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
   function applyTheme(mode){
     const light = mode === 'light';
     document.body.classList.toggle('light-mode', light);
+    document.body.classList.toggle('dark-mode', !light);
     icon.textContent = light ? '☀' : '☾';
     label.textContent = light ? 'Tema claro' : 'Tema escuro';
     button.setAttribute('aria-label', light ? 'Mudar para tema escuro' : 'Mudar para tema claro');
