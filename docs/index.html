@@ -7,6 +7,12 @@
 <meta name="description" content="Protótipo do Sistema de Gestão de Viagens Escolares do Colégio Estadual Presidente Kennedy">
 <title>SGVE | Colégio Estadual Presidente Kennedy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./icon.svg">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -359,19 +365,47 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
   .profile button{margin-left:2px}
 }
 
+/* Identidade CEPK 62 anos e layout PWA */
+.login-screen{grid-template-columns:minmax(0,1fr) minmax(390px,.88fr);background:#f4f6f3;gap:0}
+.login-brand-panel{min-height:100svh;padding:clamp(25px,4vw,58px);background-image:linear-gradient(145deg,rgba(3,42,24,.86),rgba(2,30,19,.72)),url("https://cdn.dpontanews.com.br/midia/2024/04/30/1759285550532_3260331679437041498504538645176702949629573n_otimized.webp")!important;background-position:center!important;background-size:cover!important;border-right:7px solid #1b9a4d}
+.login-brand{align-items:center;gap:16px}.login-brand strong{font-family:'Space Grotesk',sans-serif;font-size:24px;letter-spacing:.08em}.login-brand small{font-size:11px;color:#e2f3e8}
+.cepk-seal{width:104px;height:104px;object-fit:contain;filter:drop-shadow(0 5px 15px #001d0e55)}
+.login-intro{max-width:600px;margin:35px 0 25px}.login-intro h1{font-size:clamp(36px,4.4vw,58px);max-width:540px}.login-intro p{font-size:14px;max-width:410px}
+.login-mascot{position:absolute;right:4%;bottom:5%;width:min(37%,310px);max-height:48%;object-fit:contain;filter:drop-shadow(0 14px 20px #001a0c70);pointer-events:none}
+.login-brand-footer{font-weight:700;letter-spacing:.04em}
+.login-form-side{position:relative;min-height:100svh;background:linear-gradient(145deg,#f8faf8,#eaf2eb);padding:32px 24px}
+.login-card{position:relative;width:min(100%,440px);padding:35px 32px;border-radius:20px;border:1px solid #dce9de;box-shadow:0 24px 70px #0c3e2418}
+.login-card-seal{display:block;width:82px;height:82px;margin:0 auto 14px;object-fit:contain}.login-card .eyebrow{text-align:center;line-height:1.5}.login-card h2{text-align:center;font-size:28px}.login-description{text-align:center}
+.login-submit{background:linear-gradient(100deg,#07502d,#08733a);border-radius:9px;font-size:15px;box-shadow:0 7px 18px #0a512b22}
+.pwa-install{width:100%;margin-top:9px;padding:11px;border:1px solid #c9dfce;border-radius:9px;background:#f1f8f2;color:#155c36;font-size:12px;font-weight:800}.pwa-install[hidden]{display:none}
+.sidebar{background:linear-gradient(165deg,#073d27,#031f16)}.sidebar-seal{width:52px;height:52px;object-fit:contain;flex:0 0 52px}.brand strong{font-size:19px}.school-seal-img{width:36px;height:36px;object-fit:contain;flex:0 0 36px}
+.main-area{background:#f2f6f2}.panel,.stat-card{border-radius:13px;box-shadow:0 5px 18px #153b2509}.stat-icon{border-radius:12px}.page-heading h1{font-family:'Space Grotesk',sans-serif}
+@media(max-width:760px){
+.login-screen{display:flex;flex-direction:column;min-height:100svh}.login-brand-panel{min-height:245px;padding:22px 22px 18px;border-right:0;border-bottom:5px solid #15934a}
+.login-brand{gap:11px}.cepk-seal{width:70px;height:70px}.login-brand strong{font-size:19px}.login-brand small{font-size:9px}
+.login-intro{margin:22px 0 0;max-width:72%}.login-kicker{font-size:8px}.login-intro h1{font-size:27px;margin:9px 0}.login-intro p{font-size:10px;line-height:1.55;margin:0}
+.login-mascot{width:34%;right:2%;bottom:10%;max-height:68%}.login-brand-footer{display:block;font-size:8px;margin-top:10px}
+.login-form-side{min-height:auto;padding:23px 15px 30px}.login-card{padding:22px 19px;border-radius:16px}.login-card-seal{width:66px;height:66px;margin-bottom:9px}
+.login-card h2{font-size:23px}.login-description{margin:7px 0 18px}.login-field{margin:13px 0}.login-disclaimer{margin-top:16px;font-size:9px}
+.sidebar{padding:10px 12px 8px}.sidebar .brand{display:none}.side-nav{margin-top:0;gap:4px}.nav-item{min-height:38px;padding:0 10px;font-size:10px}
+.mobile-brand{display:flex;align-items:center;gap:7px}.mobile-seal{display:block;width:30px;height:30px;object-fit:contain}.topbar{height:53px}.profile>span:nth-child(2){display:none}
+.page-content{padding:19px 13px}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.content-grid{grid-template-columns:1fr}
+}
+@media(max-width:380px){.login-intro{max-width:68%}.login-intro h1{font-size:24px}.login-mascot{width:37%}.nav-item{font-size:9px;padding:0 8px}}
+
 </style>
 
 </head>
 <body>
 <section class="login-screen" id="login-screen">
   <div class="login-brand-panel">
-    <div class="login-brand"><span class="brand-symbol">K</span><span><strong>SGVE</strong><small>Gestão de Viagens Escolares</small></span></div>
+    <div class="login-brand"><img class="cepk-seal" src="./cepk-62.svg" alt="CEPK 62 anos"><span><strong>CEPK</strong><small>Colégio Estadual Presidente Kennedy</small></span></div><img class="login-mascot" src="./mascote.svg" alt="Mascote do CEPK">
     <div class="login-intro"><div class="login-kicker">COLÉGIO ESTADUAL PRESIDENTE KENNEDY</div><h1>Organização e cuidado em cada viagem.</h1><p>Uma plataforma para acompanhar o planejamento das viagens escolares, com informações organizadas em um só lugar.</p></div>
-    <div class="login-brand-footer">Ponta Grossa · Paraná</div>
+    <div class="login-brand-footer">Tradição que constrói o futuro! · Ponta Grossa – PR</div>
   </div>
   <div class="login-form-side">
     <form class="login-card" id="demo-login-form">
-      <p class="eyebrow">ÁREA DE ACESSO</p>
+      <img class="login-card-seal" src="./cepk-62.svg" alt="CEPK 62 anos"><p class="eyebrow">SISTEMA DE GESTÃO DE VIAGENS ESCOLARES</p>
       <h2>Bem-vindo ao SGVE</h2>
       <p class="login-description" id="login-description">Entre com sua conta ou crie um cadastro para acessar a demonstração.</p>
       <div class="login-field" id="register-name-field" hidden><label for="register-name">Nome completo</label><input id="register-name" type="text" placeholder="Seu nome completo" autocomplete="name"></div>
@@ -379,7 +413,7 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
       <div class="login-field"><label for="login-email">E-mail</label><input id="login-email" name="email" type="email" placeholder="seu@email.com" autocomplete="username" required></div>
       <div class="login-field"><label for="login-password">Senha</label><input id="login-password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required></div>
       <p id="login-error" class="login-error" role="alert" aria-live="polite"></p>
-      <button class="login-submit" id="login-submit-button" type="submit">Entrar no sistema <span aria-hidden="true">→</span></button>
+      <button class="login-submit" id="login-submit-button" type="submit">↪ &nbsp; Entrar</button><button type="button" class="pwa-install" id="pwa-install" hidden>＋ Instalar SGVE no celular</button>
       <button type="button" id="register-toggle" class="register-toggle">Criar uma conta</button>
       <div class="login-disclaimer"><span>i</span><div><strong>Conta demonstrativa do perfil selecionado:</strong><br><span id="demo-account-email" style="color:#355a43;font-weight:600">admin@sgve.demo</span><br>Senha para todos os perfis: <strong>Kennedy2026</strong><br><br>Dados fictícios. Login apenas para demonstração, sem segurança de produção.</div></div>
     </form>
@@ -387,7 +421,7 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
 </section>
 <div class="app-shell" id="app-shell">
   <aside class="sidebar">
-    <a class="brand" href="#inicio"><span class="brand-symbol">K</span><span><strong>SGVE</strong><small>Gestão de Viagens Escolares</small></span></a>
+    <a class="brand" href="#inicio"><img class="sidebar-seal" src="./cepk-62.svg" alt=""><span><strong>CEPK</strong><small>Colégio Estadual Presidente Kennedy</small></span></a>
     <div class="school-tag">ESCOLA ESTADUAL</div>
     <p class="menu-title">MENU PRINCIPAL</p>
     <nav class="side-nav" aria-label="Menu principal">
@@ -401,10 +435,10 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
       <button class="nav-item" data-page="usuarios"><span>⚙</span>Usuários</button>
     </nav>
     <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button>
-    <div class="sidebar-bottom"><span class="school-seal">K</span><div><strong>Colégio Estadual</strong><small>Presidente Kennedy · Ponta Grossa/PR</small></div></div>
+    <div class="sidebar-bottom"><img class="school-seal-img" src="./cepk-62.svg" alt=""><div><strong>Colégio Estadual</strong><small>Presidente Kennedy · Ponta Grossa/PR</small></div></div>
   </aside>
   <main class="main-area">
-    <header class="topbar"><div class="mobile-brand"><span class="brand-symbol small">K</span><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="profile"><span class="avatar">A</span><span><strong>Administrador</strong><small>Protótipo</small></span><button id="profile-menu" aria-label="Opções do perfil">⌄</button></div></header>
+    <header class="topbar"><div class="mobile-brand"><img class="mobile-seal" src="./cepk-62.svg" alt=""><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="profile"><span class="avatar">A</span><span><strong>Administrador</strong><small>Protótipo</small></span><button id="profile-menu" aria-label="Opções do perfil">⌄</button></div></header>
     <section class="page-content">
       <section class="page-view active" id="page-inicio">
         <div class="page-heading"><div><p class="eyebrow">PAINEL ADMINISTRATIVO</p><h1>Visão geral</h1><p class="subheading">Resumo demonstrativo do sistema.</p></div><span class="date-chip" id="today-label">ANO LETIVO 2026</span></div>
@@ -961,6 +995,14 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
     try { localStorage.setItem('sgve-theme-mode', next); } catch (_) {}
   });
 })();
+</script>
+<script>
+if ("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+let deferredInstallPrompt=null;
+window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();deferredInstallPrompt=event;const b=document.getElementById("pwa-install");if(b)b.hidden=false;});
+const installButton=document.getElementById("pwa-install");
+if(installButton)installButton.addEventListener("click",async()=>{if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installButton.hidden=true;});
+window.addEventListener("appinstalled",()=>{if(installButton)installButton.hidden=true;});
 </script>
 </body>
 </html>
