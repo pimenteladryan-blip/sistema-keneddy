@@ -1123,7 +1123,8 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
       <img class="login-card-seal" src="./cepk-62.svg" alt="CEPK 62 anos"><p class="eyebrow">SISTEMA DE GESTÃO DE VIAGENS ESCOLARES</p>
       <h2>Bem-vindo ao SGVE</h2>
       <p class="login-description" id="login-description">Entre com sua conta ou crie um cadastro para acessar a demonstração.</p>
-      <div class="login-field" id="register-name-field"><label for="register-name">Seu nome</label><input id="register-name" type="text" placeholder="Como quer ser chamado?" autocomplete="name" maxlength="70" required></div>
+      <div class="login-field" id="register-name-field"><label for="register-name">Seu nome completo</label><input id="register-name" type="text" placeholder="Nome completo" autocomplete="name" maxlength="70" required></div>
+      <div class="login-field" id="register-proof-field" hidden><label for="register-proof">Identificação para conferência</label><input id="register-proof" type="text" placeholder="Matrícula, código de vínculo ou identificação institucional" maxlength="100"><small style="color:#829087;font-size:10px;line-height:1.5">A escola usará essa informação para conferir seu vínculo antes de liberar a conta.</small></div>
       <div class="login-field"><label for="login-role">Tipo de acesso</label><select id="login-role" name="role" required style="width:100%;height:47px;padding:0 13px;border:1px solid #dfe8e1;border-radius:8px;background:#fff;color:#25382c;font:inherit;font-size:12px"><option value="administrador">Administrador</option><option value="direcao">Direção</option><option value="secretaria">Secretaria</option><option value="professor">Professor</option><option value="responsavel">Responsável</option><option value="estudante">Estudante</option></select></div>
       <div class="login-field"><label for="login-email">E-mail</label><input id="login-email" name="email" type="email" placeholder="seu@email.com" autocomplete="username" required></div>
       <div class="login-field"><label for="login-password">Senha</label><input id="login-password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required></div>
@@ -1286,6 +1287,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
 </tbody></table></div>
 <p style="margin:14px 0 0;color:#7a887f;font-size:10px;line-height:1.7">Senha demonstrativa comum: <strong>Kennedy2026</strong>. Não são contas reais e não devem ser usadas para proteger dados.</p>
 </div>
+<div class="panel" id="registration-requests-panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">CONTROLE DE ACESSO</p><h2>Solicitações de cadastro</h2><p class="subheading">Confira os dados informados e aprove somente quem tiver vínculo confirmado com a escola.</p></div><span class="status pending" id="registration-pending-count">0 pendentes</span></div><div class="table-wrap"><table><thead><tr><th>Nome</th><th>Perfil solicitado</th><th>E-mail</th><th>Identificação informada</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="registration-requests-body"><tr><td colspan="6">Nenhuma solicitação recebida.</td></tr></tbody></table></div><p id="registration-feedback" role="status" style="font-size:10px;color:#70d5a1;margin:12px 0 0"></p><p style="font-size:10px;color:#9aaba1;line-height:1.6;margin:10px 0 0">Protótipo: os pedidos ficam salvos somente neste navegador. A aprovação não confirma identidade de verdade nem substitui a validação oficial da escola.</p></div>
 <div class="panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">MANUTENÇÃO DO PROTÓTIPO</p><h2>Reiniciar dados locais</h2></div></div>
 <p style="color:#7a887f;font-size:11px;line-height:1.7">Apaga viagens, estudantes, autorizações, veículos, professores e frequências criados neste navegador e restaura os exemplos iniciais.</p>
 <button class="login-submit" id="reset-demo-data" style="width:auto;padding:0 18px;margin:0;background:#8b3b32">Restaurar dados de exemplo</button>
@@ -1310,6 +1312,8 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
   const password = 'Kennedy2026';
   let registeredAccounts = {};
   try { registeredAccounts = JSON.parse(localStorage.getItem('sgve-demo-accounts') || '{}') || {}; } catch (_) {}
+  let registrationRequests = [];
+  try { registrationRequests = JSON.parse(localStorage.getItem('sgve-demo-registration-requests') || '[]') || []; } catch (_) {}
   let profileData = {};
   try { profileData = JSON.parse(localStorage.getItem('sgve-demo-profiles') || '{}') || {}; } catch (_) {}
   function setAvatar(element,name,photo){
@@ -1415,6 +1419,10 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
     registerMode = !registerMode;
     registerNameField.hidden = false;
     registerNameInput.required = true;
+    const proofField = document.getElementById('register-proof-field');
+    const proofInput = document.getElementById('register-proof');
+    if (proofField) proofField.hidden = !registerMode;
+    if (proofInput) proofInput.required = registerMode;
     loginSubmitButton.textContent = registerMode ? 'Criar minha conta' : 'Entrar no sistema →';
     registerToggle.textContent = registerMode ? 'Já tenho uma conta' : 'Criar uma conta';
     loginDescription.textContent = registerMode ? 'Preencha seus dados para criar uma conta neste navegador.' : 'Entre com sua conta ou crie um cadastro para acessar a demonstração.';
@@ -1434,24 +1442,28 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
         error.textContent = 'Por segurança, o cadastro público está disponível apenas para Professor, Responsável ou Estudante.';
         return;
       }
-      if (!fullName || enteredPassword.length < 6) {
-        error.textContent = 'Informe seu nome e uma senha com pelo menos 6 caracteres.';
+      const proof = document.getElementById('register-proof').value.trim();
+      if (!fullName || enteredPassword.length < 6 || !proof) {
+        error.textContent = 'Informe seu nome completo, a identificação solicitada e uma senha com pelo menos 6 caracteres.';
         return;
       }
-      if (registeredAccounts[email] || Object.values(accounts).some(item => item.email === email)) {
-        error.textContent = 'Este e-mail já possui cadastro. Faça login.';
+      if (registeredAccounts[email] || registrationRequests.some(item => item.email === email && item.status !== 'rejected') || Object.values(accounts).some(item => item.email === email)) {
+        error.textContent = 'Este e-mail já possui cadastro ou solicitação. Confira seus dados ou fale com a escola.';
         return;
       }
-      registeredAccounts[email] = {name:fullName, role, password:enteredPassword};
-      try { localStorage.setItem('sgve-demo-accounts', JSON.stringify(registeredAccounts)); }
-      catch (_) { error.textContent = 'Não foi possível salvar a conta neste navegador.'; return; }
+      registrationRequests.push({id:Date.now(),name:fullName,role,email,proof,password:enteredPassword,status:'Pendente',createdAt:new Date().toISOString()});
+      try { localStorage.setItem('sgve-demo-registration-requests', JSON.stringify(registrationRequests)); }
+      catch (_) { error.textContent = 'Não foi possível enviar a solicitação neste navegador.'; return; }
       registerMode = false;
       registerNameInput.required = true;
+      document.getElementById('register-proof-field').hidden = true;
+      document.getElementById('register-proof').required = false;
+      document.getElementById('register-proof').value = '';
       loginSubmitButton.textContent = 'Entrar no sistema →';
       registerToggle.textContent = 'Criar uma conta';
-      loginDescription.textContent = 'Conta criada! Entre com seu e-mail e senha.';
+      loginDescription.textContent = 'Solicitação enviada para análise da administração.';
       document.getElementById('login-password').autocomplete = 'current-password';
-      error.textContent = 'Cadastro criado com sucesso. Agora clique em Entrar no sistema.';
+      error.textContent = 'Solicitação enviada! Sua conta só poderá entrar depois da aprovação do administrador.';
       return;
     }
     const demoAccount = accounts[role];
@@ -1941,9 +1953,45 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
   });
   renderAttendance();
 
+  function renderRegistrationRequests(){
+    const body=document.getElementById('registration-requests-body');
+    if(!body)return;
+    const pending=registrationRequests.filter(item=>item.status==='Pendente');
+    const count=document.getElementById('registration-pending-count');
+    if(count)count.textContent=pending.length+' pendente(s)';
+    body.innerHTML=registrationRequests.length?registrationRequests.slice().sort((a,b)=>b.id-a.id).map(item=>{
+      const roleNames={professor:'Professor',responsavel:'Responsável',estudante:'Estudante'};
+      const actions=item.status==='Pendente'
+        ? '<button type="button" data-registration-approve="'+item.id+'" style="border:0;border-radius:6px;padding:7px 9px;background:#176541;color:white;font-size:10px;font-weight:700;margin:2px">Aprovar</button><button type="button" data-registration-reject="'+item.id+'" style="border:0;border-radius:6px;padding:7px 9px;background:#713b35;color:white;font-size:10px;font-weight:700;margin:2px">Rejeitar</button>'
+        : '<span class="status '+(item.status==='Aprovada'?'approved':'planned')+'">'+safeText(item.status)+'</span>';
+      return '<tr><td>'+safeText(item.name)+'</td><td>'+safeText(roleNames[item.role]||item.role)+'</td><td>'+safeText(item.email)+'</td><td>'+safeText(item.proof)+'</td><td><span class="status '+(item.status==='Pendente'?'pending':item.status==='Aprovada'?'approved':'planned')+'">'+safeText(item.status)+'</span></td><td>'+actions+'</td></tr>';
+    }).join(''):'<tr><td colspan="6">Nenhuma solicitação recebida.</td></tr>';
+  }
+  const registrationBody=document.getElementById('registration-requests-body');
+  registrationBody.addEventListener('click',function(event){
+    const approve=event.target.closest('[data-registration-approve]');
+    const reject=event.target.closest('[data-registration-reject]');
+    if(!approve&&!reject)return;
+    if(sessionStorage.getItem('sgve-demo-role')!=='administrador')return;
+    const id=(approve||reject).dataset.registrationApprove||(reject&&reject.dataset.registrationReject);
+    const request=registrationRequests.find(item=>String(item.id)===String(id));
+    if(!request||request.status!=='Pendente')return;
+    if(approve){
+      registeredAccounts[request.email]={name:request.name,role:request.role,password:request.password,status:'approved'};
+      try{localStorage.setItem('sgve-demo-accounts',JSON.stringify(registeredAccounts));}
+      catch(_){document.getElementById('registration-feedback').textContent='Não foi possível aprovar. Tente novamente.';return;}
+      request.status='Aprovada';
+    }else request.status='Rejeitada';
+    try{localStorage.setItem('sgve-demo-registration-requests',JSON.stringify(registrationRequests));}
+    catch(_){document.getElementById('registration-feedback').textContent='Não foi possível salvar a decisão.';return;}
+    renderRegistrationRequests();
+    document.getElementById('registration-feedback').textContent=approve?'Cadastro aprovado. A pessoa já pode entrar com o e-mail e a senha cadastrados.':'Solicitação rejeitada.';
+  });
+  renderRegistrationRequests();
+
   document.getElementById('reset-demo-data').addEventListener('click', function () {
     if (!window.confirm('Restaurar os dados fictícios? Os registros criados neste navegador serão apagados.')) return;
-    ['sgve-demo-trips','sgve-demo-students','sgve-demo-authorizations','sgve-demo-vehicles','sgve-demo-teachers','sgve-demo-attendance','sgve-demo-alarms'].forEach(key => localStorage.removeItem(key));
+    ['sgve-demo-trips','sgve-demo-students','sgve-demo-authorizations','sgve-demo-vehicles','sgve-demo-teachers','sgve-demo-attendance','sgve-demo-alarms','sgve-demo-accounts','sgve-demo-registration-requests'].forEach(key => localStorage.removeItem(key));
     document.getElementById('users-feedback').textContent = 'Dados locais apagados. Atualize a página para carregar os exemplos iniciais.';
   });
   const savedRole = sessionStorage.getItem('sgve-demo-role');
