@@ -393,6 +393,103 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
 }
 @media(max-width:380px){.login-intro{max-width:68%}.login-intro h1{font-size:24px}.login-mascot{width:37%}.nav-item{font-size:9px;padding:0 8px}}
 
+/* Ajuste fiel ao painel de referência CEPK */
+.topbar{height:72px;padding:0 32px;background:#fff;border-bottom:1px solid #dfe9e1}
+.topbar-actions{display:flex;align-items:center;gap:18px}
+.notification-button{position:relative;border:0;background:transparent;color:#17432b;font-size:22px}
+.notification-button i{position:absolute;right:-6px;top:-5px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:#e43a35;color:#fff;font-size:10px;font-style:normal}
+.dashboard-hero{position:relative;display:flex;align-items:center;justify-content:space-between;min-height:153px;margin:-1px -42px 19px;padding:20px 42px;background:linear-gradient(90deg,rgba(255,255,255,.95) 0%,rgba(255,255,255,.84) 43%,rgba(6,52,31,.12) 100%),url("https://cdn.dpontanews.com.br/midia/2024/04/30/1759285550532_3260331679437041498504538645176702949629573n_otimized.webp") center/cover no-repeat;overflow:hidden}
+.dashboard-hero:after{content:"";position:absolute;right:-68px;top:-80px;width:360px;height:290px;border-left:18px solid #07843c;border-right:18px solid #062f20;transform:skewX(-32deg);opacity:.93}
+.hero-copy{position:relative;z-index:1;border-left:5px solid #0b6d36;padding-left:17px}
+.hero-kicker{margin:0 0 8px;color:#0c5630;font-size:9px;font-weight:900;letter-spacing:.13em}
+.hero-welcome{margin:0;color:#183c27;font-size:15px}
+.hero-copy h1{margin:0;font-family:'Space Grotesk',sans-serif;font-size:29px;line-height:1.12;color:#081c11}
+.hero-subtitle{margin:7px 0 0;color:#395443;font-size:11px}
+.hero-seal{position:relative;z-index:1;width:116px;height:116px;object-fit:contain;margin-right:14px;filter:drop-shadow(0 5px 12px #001d0e40)}
+.dashboard-stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:18px}
+.dashboard-stats .stat-card{min-height:112px;padding:16px 18px;gap:13px;border-color:#e3e8e4;border-radius:12px;box-shadow:0 3px 9px #0a24140c}
+.dashboard-stats .stat-icon{width:40px;height:40px;flex-basis:40px;border-radius:11px;font-size:24px}
+.dashboard-stats .stat-card span:not(.stat-icon){font-size:11px;color:#28362e;line-height:1.25;max-width:118px}
+.dashboard-stats .stat-card strong{font-size:27px;line-height:1.05;margin-top:5px;color:#0b1c12}
+.dashboard-columns{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(270px,.95fr);gap:13px}
+.dashboard-bottom{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.95fr);gap:13px;margin-top:13px}
+.dashboard-trips,.dashboard-notices,.dashboard-calendar{padding:17px 18px;border-radius:12px;border-color:#e1e8e2;box-shadow:0 3px 10px #0a24140a}
+.dashboard-trips .panel-heading,.dashboard-notices .panel-heading,.dashboard-calendar .panel-heading{margin-bottom:10px}
+.dashboard-trips .panel-heading h2,.dashboard-notices .panel-heading h2,.dashboard-calendar .panel-heading h2{display:flex;align-items:center;gap:8px;font-size:15px}
+.heading-icon{color:#08743a;font-size:20px}
+.trip-preview{display:flex;align-items:center;gap:13px;padding:12px 0;border-top:1px solid #e8eee9}
+.trip-photo{width:132px;height:88px;flex:0 0 132px;object-fit:cover;border-radius:9px}
+.trip-info{display:grid;gap:5px;min-width:0}
+.trip-info strong{font-size:12px;line-height:1.25;color:#101b14}
+.trip-info span,.trip-info small{font-size:10px;color:#536257}
+.trip-info .status{justify-self:start;margin-top:2px;padding:5px 9px;font-size:9px;font-style:normal}
+.notice-item{display:flex;align-items:flex-start;gap:11px;padding:16px 0;border-top:1px solid #e8eee9}
+.notice-item p{flex:1;margin:0;font-size:12px;line-height:1.45;color:#25342a}
+.notice-item time{white-space:nowrap;color:#77857b;font-size:10px}
+.notice-dot{width:11px;height:11px;flex:0 0 11px;margin-top:3px;border-radius:50%}
+.green-dot{background:#14893e}.blue-dot{background:#2779ce}.gold-dot{background:#e2ac0b}
+.calendar-month{display:flex;align-items:center;justify-content:space-between;padding:9px 4px;border-top:1px solid #e8eee9;border-bottom:1px solid #e8eee9}
+.calendar-month strong{font-size:14px}.calendar-month span{font-size:24px;color:#314a3a}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:10px 0 6px;text-align:center}
+.calendar-grid span{font-size:10px;color:#58665d;padding:4px 0}
+.calendar-grid b{display:grid;place-items:center;min-height:30px;font-size:13px;font-weight:500;color:#25342a;border-radius:50%}
+.calendar-grid .calendar-active{background:#11863c;color:#fff;font-weight:800;box-shadow:0 3px 7px #11863c33}
+.calendar-dots{display:flex;justify-content:space-around;padding:0 10%;height:8px}
+.calendar-dots i{width:6px;height:6px;border-radius:50%;background:#8bbd98}
+.mascot-promo{position:relative;display:flex;align-items:center;justify-content:space-between;min-height:190px;overflow:hidden;padding:12px 14px;border-radius:12px;background:radial-gradient(circle at 15% 50%,#23a449,#064126 72%);color:#fff}
+.mascot-promo:after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 45%,#021e12aa);pointer-events:none}
+.mascot-promo img{position:relative;z-index:1;width:48%;height:180px;object-fit:contain;object-position:bottom}
+.mascot-promo div{position:relative;z-index:1;display:grid;gap:3px;max-width:52%;text-align:right}
+.mascot-promo strong{font-size:20px;letter-spacing:.1em}
+.mascot-promo b{font-size:25px;color:#9ee334;font-style:italic}
+.mascot-promo span{font-family:Georgia,serif;font-size:14px;font-style:italic;line-height:1.25}
+.prototype-note{margin-top:13px}
+@media(max-width:1050px){.page-content{padding-left:25px;padding-right:25px}.dashboard-hero{margin-left:-25px;margin-right:-25px;padding-left:25px;padding-right:25px}.dashboard-columns{grid-template-columns:1.15fr .85fr}.trip-photo{width:108px;flex-basis:108px}}
+@media(max-width:760px){
+ .sidebar{position:fixed;inset:auto 0 0;width:100%;height:68px;padding:7px 5px calc(7px + env(safe-area-inset-bottom));border-radius:14px 14px 0 0;box-shadow:0 -8px 24px #061d1240;z-index:30}
+ .sidebar .brand,.school-tag,.menu-title,.sidebar-bottom,.theme-toggle{display:none!important}
+ .side-nav{display:flex;flex-direction:row;align-items:center;justify-content:space-around;gap:1px;width:100%;height:100%;margin:0;overflow-x:auto;scrollbar-width:none}
+ .side-nav::-webkit-scrollbar{display:none}
+ .nav-item{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;flex:0 0 62px;min-width:62px;min-height:51px;padding:4px;border-radius:9px;font-size:9px;white-space:nowrap}
+ .nav-item span{width:auto;font-size:18px;line-height:1.05}
+ .nav-item.active{background:#ffffff1e;box-shadow:inset 0 2px #9bdd52}
+ .main-area{margin:0;min-height:100svh;padding-bottom:82px}
+ .topbar{height:58px;padding:0 14px}
+ .mobile-brand{display:flex;align-items:center;gap:7px;color:#0d5d34;font-size:13px}
+ .mobile-brand .mobile-seal{display:block;width:30px;height:30px;object-fit:contain}
+ .breadcrumb{display:none}
+ .profile>span:nth-child(2),.profile button{display:none}
+ .topbar-actions{gap:10px}.notification-button{font-size:19px}
+ .page-content{padding:0 13px 16px}
+ .dashboard-hero{min-height:133px;margin:0 -13px 13px;padding:16px 15px;background-position:center}
+ .hero-copy{padding-left:11px}
+ .hero-kicker{font-size:7px}
+ .hero-welcome{font-size:12px}
+ .hero-copy h1{font-size:23px}
+ .hero-subtitle{font-size:8px}
+ .hero-seal{width:77px;height:77px;margin-right:4px}
+ .dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
+ .dashboard-stats .stat-card{min-height:85px;padding:10px;gap:8px}
+ .dashboard-stats .stat-icon{width:33px;height:33px;flex-basis:33px;font-size:19px}
+ .dashboard-stats .stat-card span:not(.stat-icon){font-size:9px;max-width:none}
+ .dashboard-stats .stat-card strong{font-size:22px}
+ .dashboard-columns,.dashboard-bottom{grid-template-columns:1fr;gap:9px}
+ .dashboard-trips,.dashboard-notices,.dashboard-calendar{padding:13px}
+ .dashboard-trips .panel-heading h2,.dashboard-notices .panel-heading h2,.dashboard-calendar .panel-heading h2{font-size:13px}
+ .trip-preview{gap:9px;padding:9px 0}
+ .trip-photo{width:105px;height:76px;flex-basis:105px}
+ .trip-info strong{font-size:10px}
+ .trip-info span,.trip-info small{font-size:9px}
+ .notice-item{padding:12px 0;gap:8px}
+ .notice-item p{font-size:10px}
+ .notice-item time{font-size:8px}
+ .mascot-promo{min-height:160px}
+ .mascot-promo img{height:150px}
+ .mascot-promo span{font-size:12px}
+ .page-footer{padding-bottom:5px}
+}
+@media(max-width:390px){.nav-item{flex-basis:54px;min-width:54px}.hero-copy h1{font-size:20px}.hero-seal{width:68px;height:68px}.trip-photo{width:94px;height:70px;flex-basis:94px}}
+
 </style>
 
 </head>
@@ -438,31 +535,41 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
     <div class="sidebar-bottom"><img class="school-seal-img" src="./cepk-62.svg" alt=""><div><strong>Colégio Estadual</strong><small>Presidente Kennedy · Ponta Grossa/PR</small></div></div>
   </aside>
   <main class="main-area">
-    <header class="topbar"><div class="mobile-brand"><img class="mobile-seal" src="./cepk-62.svg" alt=""><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="profile"><span class="avatar">A</span><span><strong>Administrador</strong><small>Protótipo</small></span><button id="profile-menu" aria-label="Opções do perfil">⌄</button></div></header>
+    <header class="topbar"><div class="mobile-brand"><img class="mobile-seal" src="./cepk-62.svg" alt=""><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="topbar-actions"><button class="notification-button" type="button" aria-label="Notificações">♧<i>2</i></button><div class="profile"><span class="avatar">A</span><span><strong>Administrador</strong><small>Protótipo</small></span><button id="profile-menu" aria-label="Opções do perfil">⌄</button></div></div></header>
     <section class="page-content">
       <section class="page-view active" id="page-inicio">
-        <div class="page-heading"><div><p class="eyebrow">PAINEL ADMINISTRATIVO</p><h1>Visão geral</h1><p class="subheading">Resumo demonstrativo do sistema.</p></div><span class="date-chip" id="today-label">ANO LETIVO 2026</span></div>
-        <div class="stats-grid">
-          <article class="stat-card"><span class="stat-icon green-icon">↗</span><div><span>Viagens cadastradas</span><strong>3</strong><small>no sistema</small></div></article>
-          <article class="stat-card"><span class="stat-icon blue-icon">♧</span><div><span>Alunos de exemplo</span><strong>4</strong><small>cadastros fictícios</small></div></article>
-          <article class="stat-card"><span class="stat-icon gold-icon">✓</span><div><span>Viagens aprovadas</span><strong>1</strong><small>aguardando execução</small></div></article>
-          <article class="stat-card"><span class="stat-icon orange-icon">◷</span><div><span>Pendentes</span><strong>1</strong><small>aguardando análise</small></div></article>
+        <div class="dashboard-hero">
+          <div class="hero-copy"><p class="hero-kicker">COLÉGIO ESTADUAL PRESIDENTE KENNEDY</p><p class="hero-welcome">Bem-vindo(a),</p><h1>Adryan Matheus!</h1><p class="hero-subtitle">Colégio Estadual Presidente Kennedy – CEPK</p></div>
+          <img class="hero-seal" src="./cepk-62.svg" alt="CEPK 62 anos">
         </div>
-        <div class="content-grid">
-          <section class="panel trips-panel"><div class="panel-heading"><div><p class="eyebrow">ACOMPANHAMENTO</p><h2>Próximas viagens</h2></div><button class="text-button" data-go="viagens">Ver todas as viagens <span>→</span></button></div>
+        <div class="stats-grid dashboard-stats">
+          <article class="stat-card"><span class="stat-icon green-icon">▣</span><div><span>Viagens Cadastradas</span><strong>12</strong></div></article>
+          <article class="stat-card"><span class="stat-icon blue-icon">♟</span><div><span>Estudantes Cadastrados</span><strong>842</strong></div></article>
+          <article class="stat-card"><span class="stat-icon gold-icon">✓</span><div><span>Viagens Aprovadas</span><strong>8</strong></div></article>
+          <article class="stat-card"><span class="stat-icon orange-icon">▦</span><div><span>Próximas Viagens</span><strong>4</strong></div></article>
+        </div>
+        <div class="dashboard-columns">
+          <section class="panel dashboard-trips"><div class="panel-heading"><h2><span class="heading-icon">▣</span> Próximas Viagens</h2><button class="text-button" data-go="viagens">Ver todas <span>→</span></button></div>
             <div class="trip-list">
-              <article class="trip-item"><div class="trip-date"><strong>12</strong><span>NOV</span></div><div class="trip-info"><strong>Visita ao Museu</strong><span>⌖ Museu Histórico</span><small>35 alunos</small></div><span class="status planned">Planejada</span></article>
-              <article class="trip-item"><div class="trip-date"><strong>18</strong><span>NOV</span></div><div class="trip-info"><strong>Passeio Educativo</strong><span>⌖ Parque Estadual</span><small>42 alunos</small></div><span class="status approved">Aprovada</span></article>
-              <article class="trip-item"><div class="trip-date"><strong>25</strong><span>NOV</span></div><div class="trip-info"><strong>Feira de Ciências</strong><span>⌖ Centro de Eventos</span><small>28 alunos</small></div><span class="status pending">Pendente</span></article>
+              <article class="trip-preview"><img class="trip-photo" src="https://cdn-clubecandeias.s3.sa-east-1.amazonaws.com/uploads/2017/08/museu-oscar-niemeyer-um-icone-de-curitiba.jpg" alt="Museu Oscar Niemeyer"><div class="trip-info"><strong>Museu Oscar Niemeyer</strong><span>▦ 25/11/2026</span><small>♟ 48 participantes</small><em class="status pending">Aguardando aprovação</em></div></article>
+              <article class="trip-preview"><img class="trip-photo" src="https://i0.wp.com/trilhaselugares.com/wp-content/uploads/2018/08/Cachoeira-Rio-Sao-Jorge-Ponta-Grossa-12.jpg?fit=1024%2C768&amp;ssl=1" alt="Cachoeira do Salto São Jorge"><div class="trip-info"><strong>Cachoeira do Salto São Jorge</strong><span>▦ 12/12/2026</span><small>♟ 45 participantes</small><em class="status approved">Planejada</em></div></article>
             </div>
           </section>
-          <section class="panel quick-panel"><div class="panel-heading"><div><p class="eyebrow">ACESSO RÁPIDO</p><h2>Atalhos</h2></div></div>
-            <button class="quick-link" data-go="viagens"><span class="quick-icon">＋</span><span><strong>Consultar viagens</strong><small>Visualizar o planejamento</small></span><b>→</b></button>
-            <button class="quick-link" data-go="alunos"><span class="quick-icon">♧</span><span><strong>Consultar alunos</strong><small>Ver estudantes de exemplo</small></span><b>→</b></button>
-            <button class="quick-link" data-go="autorizacoes"><span class="quick-icon">▤</span><span><strong>Autorizações</strong><small>Acompanhar situação</small></span><b>→</b></button>
+          <section class="panel dashboard-notices"><div class="panel-heading"><h2><span class="heading-icon">◀</span> Avisos do CEPK</h2><button class="text-button" data-go="usuarios">Ver todos <span>→</span></button></div>
+            <div class="notice-item"><i class="notice-dot green-dot"></i><p>Inscrições para as próximas viagens abertas!</p><time>06/11/2026</time></div>
+            <div class="notice-item"><i class="notice-dot blue-dot"></i><p>Lembrete: entregar autorizações até dia 20/11.</p><time>05/11/2026</time></div>
+            <div class="notice-item"><i class="notice-dot gold-dot"></i><p>Manutenção no sistema (Sábado às 14h).</p><time>03/11/2026</time></div>
           </section>
         </div>
-        <div class="prototype-note"><span>i</span><p><strong>Ambiente demonstrativo</strong> Esta é uma interface de protótipo. Os dados exibidos são fictícios e não são persistidos em um banco de dados nesta versão.</p></div>
+        <div class="dashboard-bottom">
+          <section class="panel dashboard-calendar"><div class="panel-heading"><h2><span class="heading-icon">▦</span> Calendário de Viagens</h2><button class="text-button" data-go="viagens">Ver calendário <span>→</span></button></div>
+            <div class="calendar-month"><span>‹</span><strong>Novembro 2026</strong><span>›</span></div>
+            <div class="calendar-grid"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><b>22</b><b>23</b><b>24</b><b class="calendar-active">25</b><b>26</b><b>27</b><b>28</b></div>
+            <div class="calendar-dots"><i></i><i></i><i></i><i></i><i></i></div>
+          </section>
+          <section class="mascot-promo"><img src="./mascote.svg" alt="Mascote do CEPK"><div><strong>CEPK</strong><b>62 anos</b><span>Orgulho de fazer parte dessa história!</span></div></section>
+        </div>
+        <div class="prototype-note"><span>i</span><p><strong>Ambiente demonstrativo</strong> Os registros são fictícios e ficam apenas neste navegador. Não utilize dados reais de estudantes nesta versão de testes.</p></div>
       </section>
       <section class="page-view" id="page-viagens">
 <div class="page-heading"><div><p class="eyebrow">PLANEJAMENTO ESCOLAR</p><h1>Viagens</h1><p class="subheading">Cadastre e acompanhe viagens demonstrativas.</p></div></div>
