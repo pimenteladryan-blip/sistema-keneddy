@@ -1238,6 +1238,52 @@ body.dark-mode #app-shell textarea:focus{
   box-shadow:0 0 0 3px #54b77b25!important;
 }
 
+
+/* Correção definitiva dos campos em todas as telas e tamanhos */
+#app-shell .page-view input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]),
+#app-shell .page-view select,
+#app-shell .page-view textarea,
+#app-shell .page-view input[type="file"]{
+  background:#edf5ef!important;
+  color:#20372a!important;
+  border:1px solid #c8d9cc!important;
+  border-radius:12px!important;
+  box-shadow:inset 0 1px 2px #173c2510!important;
+  accent-color:#16804a;
+}
+#app-shell .page-view input::placeholder,
+#app-shell .page-view textarea::placeholder{color:#7d9183!important;opacity:1!important}
+#app-shell .page-view input:focus,
+#app-shell .page-view select:focus,
+#app-shell .page-view textarea:focus{
+  background:#f8fcf9!important;border-color:#278451!important;
+  box-shadow:0 0 0 3px #27845120!important;outline:none!important;
+}
+#app-shell .page-view input[type="file"]{padding:9px!important;border-style:dashed!important}
+#app-shell .page-view input[type="file"]::file-selector-button{
+  border:0;border-radius:8px;background:#176b45;color:#fff;
+  padding:9px 12px;margin-right:10px;font:700 12px 'DM Sans',sans-serif;
+}
+body.dark-mode #app-shell .page-view input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]),
+body.dark-mode #app-shell .page-view select,
+body.dark-mode #app-shell .page-view textarea,
+body.dark-mode #app-shell .page-view input[type="file"]{
+  background:#14251b!important;color:#edf5ef!important;
+  border:1px solid #355442!important;
+  box-shadow:inset 0 1px 2px #0003!important;
+}
+body.dark-mode #app-shell .page-view input::placeholder,
+body.dark-mode #app-shell .page-view textarea::placeholder{color:#9aafa0!important}
+body.dark-mode #app-shell .page-view input:focus,
+body.dark-mode #app-shell .page-view select:focus,
+body.dark-mode #app-shell .page-view textarea:focus{
+  background:#192f22!important;border-color:#56ad78!important;
+  box-shadow:0 0 0 3px #56ad7828!important;
+}
+body.dark-mode #app-shell .page-view input[type="file"]::file-selector-button{
+  background:#24784c;color:#fff;
+}
+
 </style>
 </head>
 <body>
@@ -1315,7 +1361,7 @@ body.dark-mode #app-shell textarea:focus{
           <section class="panel dashboard-trips"><div class="panel-heading"><h2><span class="heading-icon">▣</span> Próximas Viagens</h2><button class="text-button" data-go="viagens">Ver todas <span>→</span></button></div>
             <div class="trip-list">
               <article class="trip-preview"><img class="trip-photo" src="https://cdn-clubecandeias.s3.sa-east-1.amazonaws.com/uploads/2017/08/museu-oscar-niemeyer-um-icone-de-curitiba.jpg" alt="Museu Oscar Niemeyer"><div class="trip-info"><strong>Museu Oscar Niemeyer</strong><span>▦ 25/11/2026</span><small>♟ 48 participantes</small><em class="status pending">Aguardando aprovação</em></div></article>
-              <article class="trip-preview"><img class="trip-photo" src="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2b/2b/32/6d/caption.jpg?h=1100&s=1&w=1100" alt="Cachoeira do Rio São Jorge, em Ponta Grossa"><div class="trip-info"><strong>Cachoeira do Salto São Jorge</strong><span>▦ 12/12/2026</span><small>♟ 45 participantes</small><em class="status approved">Planejada</em></div></article>
+              <article class="trip-preview"><img class="trip-photo" src="https://www.viajeparana.com/sites/viaje-parana/arquivos_restritos/files/imagem/2019-02/cachoeirapref.jpg" alt="Cachoeira do Rio São Jorge, em Ponta Grossa"><div class="trip-info"><strong>Cachoeira do Salto São Jorge</strong><span>▦ 12/12/2026</span><small>♟ 45 participantes</small><em class="status approved">Planejada</em></div></article>
             </div>
           </section>
           <section class="panel dashboard-notices"><div class="panel-heading"><h2><span class="heading-icon">◀</span> Avisos do CEPK</h2><button class="text-button" data-go="usuarios">Ver todos <span>→</span></button></div>
