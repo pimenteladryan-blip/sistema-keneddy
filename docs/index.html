@@ -1433,6 +1433,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
   });
   const accountOverlay = document.getElementById('account-overlay');
   function openAccountPanel(){
+    editedProfilePhoto='';
     const role = sessionStorage.getItem('sgve-demo-role') || 'administrador';
     const active = accounts[role] || accounts.administrador;
     const profile = profileData[active.email] || {};
