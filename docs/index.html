@@ -873,6 +873,36 @@ body.dark-mode .account-close{color:#d9e8de}
 .account-logout{width:100%;height:45px;margin-top:20px;border:0;border-radius:9px;background:#a83232;color:#fff;font-weight:800}
 @media(max-width:520px){.account-dialog{padding:24px 18px;border-radius:15px}.account-dialog h2{font-size:23px}}
 
+
+/* Mobile: controle de tema flutuante acima da navegação inferior */
+@media(max-width:760px){
+  .sidebar .theme-toggle{
+    display:inline-flex!important;
+    position:fixed!important;
+    top:auto!important;
+    right:12px!important;
+    bottom:calc(78px + env(safe-area-inset-bottom))!important;
+    z-index:100!important;
+    width:auto!important;
+    min-height:42px!important;
+    margin:0!important;
+    padding:0 13px!important;
+    border:1px solid #52715f!important;
+    border-radius:999px!important;
+    background:#10291d!important;
+    color:#f0f7f2!important;
+    box-shadow:0 5px 18px #0005!important;
+    align-items:center!important;
+    gap:8px!important;
+    font-size:11px!important;
+  }
+  body.light-mode .sidebar .theme-toggle{
+    background:#fff!important;color:#17452d!important;
+    border-color:#cbdccc!important;box-shadow:0 5px 18px #173c2825!important;
+  }
+  .sidebar .theme-toggle .theme-label{display:inline!important}
+}
+
 </style>
 
 </head>
