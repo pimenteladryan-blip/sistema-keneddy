@@ -1,0 +1,25 @@
+{
+  "id": "./",
+  "name": "SGVE | Colégio Estadual Presidente Kennedy",
+  "short_name": "SGVE CEPK",
+  "description": "Sistema de Gerenciamento de Viagens Escolares do CEPK",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f2f6f2",
+  "theme_color": "#07502d",
+  "categories": [
+    "education",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
