@@ -1512,8 +1512,7 @@ body.dark-mode .account-close{color:#d9e8de}
   let saved = 'dark';
   try {
     const previous = localStorage.getItem('sgve-theme-mode');
-    saved = previous === 'light' ? 'dark' : (previous || 'dark');
-    if (previous === 'light') localStorage.setItem('sgve-theme-mode', 'dark');
+    saved = previous || 'dark';
   } catch (_) {}
   applyTheme(saved);
   button.addEventListener('click', function(){
