@@ -1184,6 +1184,88 @@ body.dark-mode .login-field select{background:#17271e!important;color:#edf5ef!im
 body.dark-mode .login-disclaimer{background:#1b2a20!important;color:#c4d3c8!important;border-color:#3b5542!important}
 body.dark-mode .register-toggle{background:#192a20!important;color:#cce5d3!important;border-color:#385443!important}
 
+
+/* Correção final: modo escuro integral na entrada e no sistema */
+body.dark-mode,
+body.dark-mode html{background:#0b120e!important;color:#e8f1eb!important}
+body.dark-mode .login-screen,
+body.dark-mode #login-screen{background:#0b120e!important}
+body.dark-mode .login-form-side{background:#101a14!important}
+body.dark-mode .login-form-side:before{border-color:#315b40!important;box-shadow:0 0 0 35px #315b4018,0 0 0 70px #315b4010!important}
+body.dark-mode .login-card{
+  background:#142019!important;border:1px solid #304638!important;
+  border-top:1px solid #4ebc83!important;color:#e8f1eb!important;
+  box-shadow:0 20px 60px #0008!important
+}
+body.dark-mode .login-card h2,
+body.dark-mode .login-card .login-field label{color:#e8f1eb!important}
+body.dark-mode .login-card .eyebrow{background:#203d2c!important;color:#79d6a2!important}
+body.dark-mode .login-description{color:#aebfb3!important}
+body.dark-mode .login-field input,
+body.dark-mode .login-field select,
+body.dark-mode #login-form input,
+body.dark-mode #login-form select{
+  background:#0d1711!important;color:#edf5ef!important;
+  border:1px solid #3a5143!important
+}
+body.dark-mode .login-field input::placeholder{color:#8da194!important}
+body.dark-mode .login-disclaimer{background:#1b2a20!important;border-color:#344b3a!important;color:#bdcbbb!important}
+body.dark-mode .login-disclaimer strong{color:#e0ebd8!important}
+body.dark-mode .login-submit{background:#176b45!important;color:#fff!important}
+body.dark-mode #app-shell,
+body.dark-mode .app-shell,
+body.dark-mode .main-area,
+body.dark-mode .page-content,
+body.dark-mode .page-view,
+body.dark-mode .placeholder-view,
+body.dark-mode .panel,
+body.dark-mode .stat-card,
+body.dark-mode .date-chip,
+body.dark-mode .login-card,
+body.dark-mode .account-panel,
+body.dark-mode .modal,
+body.dark-mode .dialog,
+body.dark-mode .profile-modal,
+body.dark-mode .profile-dialog{
+  background-color:#111b15!important;color:#e8f1eb!important;border-color:#2d4435!important
+}
+body.dark-mode .topbar{background:#111b15!important;border-color:#2d4435!important}
+body.dark-mode .quick-link,
+body.dark-mode .trip-date,
+body.dark-mode .prototype-note,
+body.dark-mode .form-section,
+body.dark-mode .settings-card{
+  background:#17251c!important;color:#e8f1eb!important;border-color:#304638!important
+}
+body.dark-mode .quick-link strong,
+body.dark-mode .panel-heading h2,
+body.dark-mode .page-heading h1,
+body.dark-mode .placeholder-view h1,
+body.dark-mode .stat-card strong,
+body.dark-mode .trip-info strong,
+body.dark-mode td,
+body.dark-mode label{color:#e8f1eb!important}
+body.dark-mode input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+body.dark-mode select,
+body.dark-mode textarea{
+  background:#0d1711!important;color:#edf5ef!important;border-color:#3a5143!important
+}
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder{color:#8da194!important}
+body.dark-mode table th{background:#17251c!important;color:#aebfb3!important}
+body.dark-mode table td{background:#111b15!important;color:#e8f1eb!important;border-color:#2d4435!important}
+body.dark-mode .theme-toggle{background:#17251c!important;color:#e8f1eb!important;border-color:#456052!important}
+@media(max-width:760px){
+  body.dark-mode .login-screen,
+  body.dark-mode .login-form-side{background:#0b120e!important}
+  body.dark-mode .login-card{background:#142019!important}
+  body.dark-mode .main-area,
+  body.dark-mode .page-content,
+  body.dark-mode .topbar{background:#0b120e!important}
+  body.dark-mode .panel,
+  body.dark-mode .stat-card,
+  body.dark-mode .placeholder-view{background:#142019!important}
+}
 </style>
 
 <style>
@@ -2283,7 +2365,7 @@ body.dark-mode #app-shell .page-view input[type="file"]::file-selector-button{
     });
   }
   let saved='dark';
-  try{saved=localStorage.getItem('sgve-theme-mode')||'dark';}catch(_){}
+  try{localStorage.setItem('sgve-theme-mode','dark');}catch(_){}
   applyTheme(saved);
   buttons.forEach(button=>button.addEventListener('click',()=>{
     const next=document.body.classList.contains('light-mode')?'dark':'light';
