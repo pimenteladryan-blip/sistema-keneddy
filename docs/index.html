@@ -1184,6 +1184,60 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
   .page-view form[id$="-form"]{grid-template-columns:1fr!important;gap:14px!important}
   .page-view .panel:has(form[id]){padding:17px!important}
 }
+
+/* SGVE • campos de formulário unificados em todas as telas */
+/* Superfícies suaves para campos: viagens, pagamentos, usuários e demais cadastros */
+#app-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]),
+#app-shell select,
+#app-shell textarea{
+  box-sizing:border-box!important;
+  max-width:100%;
+  border:1px solid #cbdccf!important;
+  border-radius:12px!important;
+  background:#f1f7f2!important;
+  color:#20372a!important;
+  font-family:'DM Sans',sans-serif!important;
+  font-size:13px!important;
+  box-shadow:inset 0 1px 2px #183d2510!important;
+  transition:background .18s,border-color .18s,box-shadow .18s!important;
+}
+#app-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):focus,
+#app-shell select:focus,
+#app-shell textarea:focus{
+  outline:none!important;
+  border-color:#278451!important;
+  background:#fff!important;
+  box-shadow:0 0 0 3px #27845120!important;
+}
+#app-shell input::placeholder,
+#app-shell textarea::placeholder{color:#87998c!important;opacity:1!important}
+#app-shell input[type="file"]{
+  min-height:44px;
+  padding:8px!important;
+  background:#f1f7f2!important;
+  border-style:dashed!important;
+}
+#app-shell input[type="checkbox"],
+#app-shell input[type="radio"]{accent-color:#16804a}
+body.dark-mode #app-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]),
+body.dark-mode #app-shell select,
+body.dark-mode #app-shell textarea,
+body.dark-mode #app-shell input[type="file"]{
+  border-color:#385443!important;
+  background:#17271e!important;
+  color:#edf5ef!important;
+  box-shadow:inset 0 1px 2px #0002!important;
+}
+body.dark-mode #app-shell input::placeholder,
+body.dark-mode #app-shell textarea::placeholder{color:#9aafa0!important}
+body.dark-mode #app-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="submit"]):not([type="button"]):focus,
+body.dark-mode #app-shell select:focus,
+body.dark-mode #app-shell textarea:focus{
+  border-color:#54b77b!important;
+  background:#1b3325!important;
+  box-shadow:0 0 0 3px #54b77b25!important;
+}
+
 </style>
 </head>
 <body>
