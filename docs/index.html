@@ -1038,6 +1038,31 @@ body.dark-mode #app-shell .prototype-note strong{color:#fff!important}
  body.dark-mode #app-shell .dashboard-notices .notice-item time{font-size:10px!important}
 }
 
+/* Pagamentos, central de notificações e alarme — desktop e mobile */
+.trip-payment-methods{display:flex;flex-wrap:wrap;gap:9px 14px;align-items:center;min-width:0;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:11px}
+.trip-payment-methods legend{font-size:11px;font-weight:700;padding:0 4px}
+.trip-payment-methods label{display:inline-flex;align-items:center;gap:5px;font-weight:500;white-space:nowrap}
+.trip-payment-methods input,.alarm-optin input{accent-color:#08783f}
+.trip-pay-summary{font-size:10px;line-height:1.5;color:var(--muted);min-width:125px}
+.alarm-explainer,.alarm-note{font-size:11px;line-height:1.6;color:var(--muted)}
+.alarm-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;align-items:end}
+.alarm-controls>label{display:grid;gap:6px;font-size:11px;font-weight:700}
+.alarm-controls input[type=time],.alarm-controls select{height:40px;padding:8px;border:1px solid var(--line);border-radius:7px;background:var(--panel,#fff);color:var(--ink)}
+.alarm-controls .alarm-optin{display:flex;align-items:center;gap:8px;min-height:40px}
+.inline-feedback{font-size:11px;color:var(--green);min-height:1em}
+.notifications-overlay{position:fixed;inset:0;z-index:1000;background:#061b12a8;display:grid;place-items:center;padding:18px}
+.notifications-overlay[hidden]{display:none}
+.notifications-dialog{width:min(520px,100%);max-height:min(80vh,720px);overflow:auto;padding:22px;background:var(--panel,#fff);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 20px 70px #0005}
+.notifications-close{border:0;background:transparent;color:inherit;font-size:28px;cursor:pointer}
+.notification-example{display:flex;gap:12px;padding:14px 2px;border-bottom:1px solid var(--line)}
+.notification-example>span{flex:0 0 10px;width:10px;height:10px;margin-top:6px;border-radius:50%}
+.notification-example strong{font-size:13px}
+.notification-example p{margin:4px 0;font-size:12px;line-height:1.5}
+.notification-example time{font-size:10px;color:var(--muted)}
+body.dark-mode .notifications-dialog{background:#101914;color:#f0f4f0;border-color:#2c3d32}
+body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=time],body.dark-mode .alarm-controls select{background:#111b15;color:#f0f4f0;border-color:#34473a}
+@media(max-width:760px){.trip-payment-methods{grid-column:1/-1}.alarm-controls{grid-template-columns:1fr 1fr}.alarm-controls .alarm-optin{grid-column:1/-1}.notifications-dialog{padding:17px}.trip-pay-summary{min-width:110px}}
+@media(max-width:420px){.alarm-controls{grid-template-columns:1fr}.alarm-controls .alarm-optin{grid-column:auto}}
 </style>
 
 </head>
@@ -1076,6 +1101,7 @@ body.dark-mode #app-shell .prototype-note strong{color:#fff!important}
     <button type="button" class="account-logout" id="account-logout">Sair da conta</button>
   </section>
 </div>
+<div class="notifications-overlay" id="notifications-overlay" hidden><section class="notifications-dialog" role="dialog" aria-modal="true" aria-labelledby="notifications-title"><div class="panel-heading"><div><p class="eyebrow">CENTRAL DE AVISOS</p><h2 id="notifications-title">Notificações</h2></div><button type="button" id="close-notifications" class="notifications-close" aria-label="Fechar notificações">×</button></div><div class="notification-example"><span class="notice-dot green-dot"></span><div><strong>Viagem aprovada</strong><p>Sua viagem foi aprovada pela direção.</p><time>Hoje · 09:15</time></div></div><div class="notification-example"><span class="notice-dot blue-dot"></span><div><strong>Prazo de autorização</strong><p>Não se esqueça de entregar a autorização até a data informada pela escola.</p><time>Hoje · 08:00</time></div></div><div class="notification-example"><span class="notice-dot gold-dot"></span><div><strong>Lembrete de pagamento</strong><p>Confira o valor, as parcelas e as formas de pagamento da viagem.</p><time>Ontem · 17:30</time></div></div><div class="notification-example"><span class="notice-dot green-dot"></span><div><strong>Horário de saída</strong><p>Consulte os detalhes da viagem e programe seu alarme para acordar.</p><time>Exemplo de aviso</time></div></div><p class="alarm-note">Estes são exemplos demonstrativos. Nenhum aviso representa uma mensagem oficial da escola.</p></section></div>
 <div class="app-shell" id="app-shell">
   <aside class="sidebar">
     <a class="brand" href="#inicio"><img class="sidebar-seal" src="./cepk-62.svg" alt=""><span><strong>CEPK</strong><small>Colégio Estadual Presidente Kennedy</small></span></a>
@@ -1096,7 +1122,7 @@ body.dark-mode #app-shell .prototype-note strong{color:#fff!important}
   </aside>
   
   <main class="main-area">
-    <header class="topbar"><div class="mobile-brand"><img class="mobile-seal" src="./cepk-62.svg" alt=""><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="topbar-actions"><button class="notification-button" type="button" aria-label="Notificações" title="Notificações"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i>2</i></button><div class="topbar-theme-slot">    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button></div><div class="profile"><span class="avatar">A</span><span><strong>Administrador</strong><small>Protótipo</small></span><button id="profile-menu" aria-label="Opções do perfil">⌄</button></div></div></header>
+    <header class="topbar"><div class="mobile-brand"><img class="mobile-seal" src="./cepk-62.svg" alt=""><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="topbar-actions"><button class="notification-button" id="open-notifications" type="button" aria-label="Notificações" title="Notificações"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i id="notification-count">3</i></button><div class="topbar-theme-slot">    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button></div><div class="profile"><span class="avatar">A</span><span><strong>Administrador</strong><small>Protótipo</small></span><button id="profile-menu" aria-label="Opções do perfil">⌄</button></div></div></header>
     <section class="page-content">
       <section class="page-view active" id="page-inicio">
         <div class="dashboard-hero">
@@ -1141,10 +1167,17 @@ body.dark-mode #app-shell .prototype-note strong{color:#fff!important}
 <label style="display:grid;gap:6px;font-size:11px;font-weight:700">Data<input id="trip-date" type="date" required style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
 <label style="display:grid;gap:6px;font-size:11px;font-weight:700">Quantidade de alunos<input id="trip-students" type="number" min="1" max="500" required value="30" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
 <label style="display:grid;gap:6px;font-size:11px;font-weight:700">Situação<select id="trip-status" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"><option>Planejada</option><option>Pendente</option><option>Aprovada</option></select></label>
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Valor por pessoa (R$)<input id="trip-price" type="number" min="0" step="0.01" value="0" placeholder="Ex.: 150,00" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Máximo de parcelas<input id="trip-installments" type="number" min="1" max="24" value="1" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
+<fieldset class="trip-payment-methods"><legend>Formas de pagamento aceitas</legend><label><input type="checkbox" name="trip-payment-method" value="Pix" checked> Pix</label><label><input type="checkbox" name="trip-payment-method" value="Dinheiro" checked> Dinheiro</label><label><input type="checkbox" name="trip-payment-method" value="Cartão"> Cartão</label><label><input type="checkbox" name="trip-payment-method" value="Boleto"> Boleto</label></fieldset>
 <button class="login-submit" type="submit" style="height:40px;margin:0">Adicionar viagem</button>
 </form><p id="trip-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div>
 <div class="panel"><div class="panel-heading"><div><p class="eyebrow">REGISTROS</p><h2>Viagens cadastradas</h2></div><span class="status planned" id="trip-count">3 viagens</span></div>
-<div class="table-wrap"><table><thead><tr><th>Viagem</th><th>Destino</th><th>Data</th><th>Alunos</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="trip-table-body"></tbody></table></div></div><div class="panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">CONTROLE DE PRESENÇA</p><h2>Lista de saída e retorno</h2></div></div>
+<div class="table-wrap"><table><thead><tr><th>Viagem</th><th>Destino</th><th>Data</th><th>Alunos</th><th>Valor</th><th>Pagamento</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="trip-table-body"></tbody></table></div></div><div class="panel" id="trip-alarm-panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">LEMBRETE PESSOAL</p><h2>Alarme para acordar</h2></div></div>
+<p class="alarm-explainer">Escolha uma viagem, ative o aviso e defina a hora em que deseja ser lembrado(a) de acordar.</p>
+<div class="alarm-controls"><label>Viagem<select id="alarm-trip"></select></label><label>Horário para acordar<input id="alarm-time" type="time" value="06:00"></label><label class="alarm-optin"><input id="alarm-enabled" type="checkbox"> Quero receber o alarme nesta viagem</label><button type="button" class="login-submit" id="save-alarm" style="width:auto;margin:0;padding:0 18px">Salvar meu alarme</button></div>
+<p id="alarm-feedback" class="inline-feedback" role="status"></p><p class="alarm-note">O aviso e o som funcionam enquanto o SGVE estiver aberto ou ativo. Permita notificações no navegador para receber o aviso visual.</p></div>
+<div class="panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">CONTROLE DE PRESENÇA</p><h2>Lista de saída e retorno</h2></div></div>
 <label style="display:grid;gap:6px;max-width:300px;font-size:11px;font-weight:700">Viagem<select id="attendance-trip" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></select></label>
 <div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Estudante</th><th>Turma</th><th>Presença</th></tr></thead><tbody id="attendance-table-body"></tbody></table></div>
 <p id="attendance-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div></section>
@@ -1391,9 +1424,9 @@ body.dark-mode #app-shell .prototype-note strong{color:#fff!important}
   });
 
   const defaultTrips = [
-    {id:1,name:'Visita ao Museu',destination:'Museu Histórico',date:'2026-11-12',students:35,status:'Planejada'},
-    {id:2,name:'Passeio Educativo',destination:'Parque Estadual',date:'2026-11-18',students:42,status:'Aprovada'},
-    {id:3,name:'Feira de Ciências',destination:'Centro de Eventos',date:'2026-11-25',students:28,status:'Pendente'}
+    {id:1,name:'Visita ao Museu',destination:'Museu Histórico',date:'2026-11-12',students:35,status:'Planejada',price:150,installments:3,paymentMethods:['Pix','Dinheiro','Cartão'],wakeTime:'06:00'},
+    {id:2,name:'Passeio Educativo',destination:'Parque Estadual',date:'2026-11-18',students:42,status:'Aprovada',price:80,installments:2,paymentMethods:['Pix','Dinheiro'],wakeTime:'05:30'},
+    {id:3,name:'Feira de Ciências',destination:'Centro de Eventos',date:'2026-11-25',students:28,status:'Pendente',price:0,installments:1,paymentMethods:['Pix'],wakeTime:'07:00'}
   ];
   let trips = defaultTrips;
   try { trips = JSON.parse(localStorage.getItem('sgve-demo-trips') || 'null') || defaultTrips; } catch (_) {}
@@ -1414,7 +1447,10 @@ body.dark-mode #app-shell .prototype-note strong{color:#fff!important}
       const statusCell = canApprove
         ? '<select data-trip-status="' + t.id + '" style="height:30px;padding:4px;border:1px solid #dfe8e1;border-radius:6px;font-size:10px"><option ' + (t.status==='Planejada'?'selected':'') + '>Planejada</option><option ' + (t.status==='Pendente'?'selected':'') + '>Pendente</option><option ' + (t.status==='Aprovada'?'selected':'') + '>Aprovada</option></select>'
         : '<span class="status ' + cls + '">' + safeText(t.status) + '</span>';
-      return '<tr><td>' + safeText(t.name) + '</td><td>' + safeText(t.destination) + '</td><td>' + date + '</td><td>' + Number(t.students) + '</td><td>' + statusCell + '</td><td>' + action + '</td></tr>';
+      const priceText = Number(t.price)>0 ? Number(t.price).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'A definir';
+      const methods = Array.isArray(t.paymentMethods) && t.paymentMethods.length ? t.paymentMethods.map(safeText).join(', ') : 'A combinar';
+      const paySummary = priceText + '<br>' + Number(t.installments||1) + 'x máx. · ' + methods;
+      return '<tr><td>' + safeText(t.name) + '</td><td>' + safeText(t.destination) + '</td><td>' + date + '</td><td>' + Number(t.students) + '</td><td class="trip-pay-summary">' + paySummary + '</td><td class="trip-pay-summary">' + methods + '</td><td>' + statusCell + '</td><td>' + action + '</td></tr>';
     }).join('');
     document.getElementById('trip-count').textContent = trips.length + (trips.length === 1 ? ' viagem' : ' viagens');
   }
@@ -1426,7 +1462,11 @@ body.dark-mode #app-shell .prototype-note strong{color:#fff!important}
       destination: document.getElementById('trip-destination').value.trim(),
       date: document.getElementById('trip-date').value,
       students: Number(document.getElementById('trip-students').value),
-      status: document.getElementById('trip-status').value
+      status: document.getElementById('trip-status').value,
+      price: Math.max(0,Number(document.getElementById('trip-price').value)||0),
+      installments: Math.min(24,Math.max(1,Number(document.getElementById('trip-installments').value)||1)),
+      paymentMethods: Array.from(document.querySelectorAll('input[name="trip-payment-method"]:checked')).map(input=>input.value),
+      wakeTime: '06:00'
     };
     if (!trip.name || !trip.destination || !trip.date || !Number.isInteger(trip.students) || trip.students < 1) return;
     trips.push(trip);
@@ -1459,6 +1499,76 @@ body.dark-mode #app-shell .prototype-note strong{color:#fff!important}
     document.getElementById('trip-feedback').textContent = 'Registro removido deste navegador.';
   });
   renderTrips();
+
+  // Preferências pessoais de alarme, armazenadas apenas neste navegador/dispositivo.
+  let personalAlarms={};
+  try{personalAlarms=JSON.parse(localStorage.getItem('sgve-demo-alarms')||'{}')||{};}catch(_){}
+  const alarmTrip=document.getElementById('alarm-trip');
+  const alarmTime=document.getElementById('alarm-time');
+  const alarmEnabled=document.getElementById('alarm-enabled');
+  function savePersonalAlarms(){try{localStorage.setItem('sgve-demo-alarms',JSON.stringify(personalAlarms));}catch(_){}}
+  function refreshAlarmTrips(){
+    const selected=alarmTrip.value;
+    alarmTrip.innerHTML=trips.map(t=>'<option value="'+t.id+'">'+safeText(t.name)+'</option>').join('');
+    if(trips.some(t=>String(t.id)===selected))alarmTrip.value=selected;
+    loadAlarmPreference();
+  }
+  function loadAlarmPreference(){
+    const key=alarmTrip.value;
+    const pref=personalAlarms[key]||{};
+    alarmTime.value=pref.time||'06:00';
+    alarmEnabled.checked=!!pref.enabled;
+  }
+  alarmTrip.addEventListener('change',loadAlarmPreference);
+  document.getElementById('save-alarm').addEventListener('click',async()=>{
+    const id=alarmTrip.value;
+    if(!id){document.getElementById('alarm-feedback').textContent='Cadastre ou selecione uma viagem primeiro.';return;}
+    if(alarmEnabled.checked && 'Notification' in window && Notification.permission==='default'){
+      try{await Notification.requestPermission();}catch(_){}
+    }
+    personalAlarms[id]={enabled:alarmEnabled.checked,time:alarmTime.value||'06:00',firedDate:''};
+    savePersonalAlarms();
+    document.getElementById('alarm-feedback').textContent=alarmEnabled.checked?'Alarme ativado neste dispositivo. Deixe o SGVE aberto ou ativo no horário.':'Alarme desativado para esta viagem.';
+  });
+  refreshAlarmTrips();
+  let alarmAudioContext=null;
+  function playWakeAlarm(){
+    try{
+      const AudioCtx=window.AudioContext||window.webkitAudioContext;
+      if(!AudioCtx)return;
+      alarmAudioContext=alarmAudioContext||new AudioCtx();
+      if(alarmAudioContext.state==='suspended')alarmAudioContext.resume();
+      [0,0.35,0.7].forEach(delay=>{
+        const oscillator=alarmAudioContext.createOscillator(),gain=alarmAudioContext.createGain();
+        oscillator.type='sine';oscillator.frequency.value=880;
+        gain.gain.setValueAtTime(0.0001,alarmAudioContext.currentTime+delay);
+        gain.gain.exponentialRampToValueAtTime(0.18,alarmAudioContext.currentTime+delay+0.03);
+        gain.gain.exponentialRampToValueAtTime(0.0001,alarmAudioContext.currentTime+delay+0.24);
+        oscillator.connect(gain);gain.connect(alarmAudioContext.destination);
+        oscillator.start(alarmAudioContext.currentTime+delay);oscillator.stop(alarmAudioContext.currentTime+delay+0.26);
+      });
+    }catch(_){}
+  }
+  function checkWakeAlarms(){
+    const now=new Date(),today=now.toISOString().slice(0,10),clock=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    Object.keys(personalAlarms).forEach(id=>{
+      const pref=personalAlarms[id],trip=trips.find(t=>String(t.id)===String(id));
+      if(!pref||!pref.enabled||!trip||trip.date!==today||pref.time!==clock||pref.firedDate===today)return;
+      pref.firedDate=today;savePersonalAlarms();
+      playWakeAlarm();
+      if('Notification' in window && Notification.permission==='granted'){
+        if(navigator.serviceWorker&&navigator.serviceWorker.ready){
+          navigator.serviceWorker.ready.then(reg=>reg.showNotification('Hora de acordar para a viagem!',{body:'Hoje é dia de '+trip.name+'. Confira os detalhes no SGVE.',icon:'./icon.svg',tag:'sgve-alarm-'+id})).catch(()=>new Notification('Hora de acordar para a viagem!',{body:'Hoje é dia de '+trip.name+'.'}));
+        }else new Notification('Hora de acordar para a viagem!',{body:'Hoje é dia de '+trip.name+'.'});
+      }
+      document.getElementById('alarm-feedback').textContent='Alarme disparado para '+trip.name+'.';
+    });
+  }
+  setInterval(checkWakeAlarms,15000);
+  document.getElementById('open-notifications').addEventListener('click',()=>{document.getElementById('notifications-overlay').hidden=false;});
+  document.getElementById('close-notifications').addEventListener('click',()=>{document.getElementById('notifications-overlay').hidden=true;});
+  document.getElementById('notifications-overlay').addEventListener('click',event=>{if(event.target.id==='notifications-overlay')event.currentTarget.hidden=true;});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')document.getElementById('notifications-overlay').hidden=true;});
 
   const defaultStudents = [
     {id:1,name:'Aluno Exemplo 01',className:'1ª série A',callNumber:1},
@@ -1675,7 +1785,7 @@ body.dark-mode #app-shell .prototype-note strong{color:#fff!important}
 
   document.getElementById('reset-demo-data').addEventListener('click', function () {
     if (!window.confirm('Restaurar os dados fictícios? Os registros criados neste navegador serão apagados.')) return;
-    ['sgve-demo-trips','sgve-demo-students','sgve-demo-authorizations','sgve-demo-vehicles','sgve-demo-teachers','sgve-demo-attendance'].forEach(key => localStorage.removeItem(key));
+    ['sgve-demo-trips','sgve-demo-students','sgve-demo-authorizations','sgve-demo-vehicles','sgve-demo-teachers','sgve-demo-attendance','sgve-demo-alarms'].forEach(key => localStorage.removeItem(key));
     document.getElementById('users-feedback').textContent = 'Dados locais apagados. Atualize a página para carregar os exemplos iniciais.';
   });
   const savedRole = sessionStorage.getItem('sgve-demo-role');
