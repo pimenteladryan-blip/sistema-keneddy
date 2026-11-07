@@ -1587,7 +1587,9 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
       const paySummary = priceText + '<br>' + Number(t.installments||1) + 'x no máximo';
       const requestKey = currentAccount + ':' + t.id;
       const requested = !!tripRequests[requestKey];
-      const requestCell = canRequest ? (requested ? '<span class="status pending">Solicitação enviada</span>' : '<button type="button" data-trip-request="' + t.id + '" class="trip-request-button">Solicitar vaga</button>') : '—';
+      const requestCount = Object.values(tripRequests).filter(req => String(req.tripId) === String(t.id)).length;
+      const managerCanSeeRequests = ['administrador','direcao','secretaria'].includes(roleNow);
+      const requestCell = canRequest ? (requested ? '<span class="status pending">Solicitação enviada</span>' : '<button type="button" data-trip-request="' + t.id + '" class="trip-request-button">Solicitar vaga</button>') : (managerCanSeeRequests ? requestCount + (requestCount===1?' solicitação':' solicitações') : '—');
       return '<tr><td>' + photoCell + '</td><td>' + safeText(t.name) + '</td><td>' + safeText(t.destination) + '</td><td>' + date + '</td><td>' + Number(t.students) + '</td><td class="trip-pay-summary">' + paySummary + '</td><td class="trip-pay-summary">' + methods + '</td><td>' + statusCell + '</td><td>' + requestCell + '</td><td>' + action + '</td></tr>';
     }).join('');
     document.getElementById('trip-count').textContent = trips.length + (trips.length === 1 ? ' viagem' : ' viagens');
