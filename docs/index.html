@@ -1107,6 +1107,83 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
 #app-shell #profile-menu #topbar-avatar.has-photo img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
 
 .trip-request-button{border:0;border-radius:7px;padding:8px 10px;background:#176b45;color:#fff;font-size:10px;font-weight:700;white-space:nowrap}
+
+/* DARK MODE GLOBAL: remove superfícies claras que sobraram em qualquer tela */
+body.dark-mode{
+  --ink:#e6eee8!important;--muted:#a5b7aa!important;--line:#304638!important;
+  --bg:#0b120e!important;color:#e6eee8!important;background:#0b120e!important;
+}
+body.dark-mode #app-shell,
+body.dark-mode #app-shell .main-area,
+body.dark-mode #app-shell .page-content,
+body.dark-mode #app-shell .page-view,
+body.dark-mode #app-shell .table-wrap{
+  background:#0b120e!important;color:#e6eee8!important;
+}
+body.dark-mode #app-shell .topbar,
+body.dark-mode #app-shell .panel,
+body.dark-mode #app-shell .stat-card,
+body.dark-mode #app-shell .placeholder-view,
+body.dark-mode #app-shell .account-dialog,
+body.dark-mode #app-shell .profile-edit-section,
+body.dark-mode #app-shell .trip-card,
+body.dark-mode #app-shell .modal-content,
+body.dark-mode #app-shell .dialog-content,
+body.dark-mode #app-shell .form-card,
+body.dark-mode #app-shell .content-card{
+  background:#142019!important;color:#e6eee8!important;border-color:#304638!important;
+}
+body.dark-mode #app-shell .quick-link,
+body.dark-mode #app-shell .trip-date,
+body.dark-mode #app-shell .account-row,
+body.dark-mode #app-shell .account-current,
+body.dark-mode #app-shell .profile-edit-section input,
+body.dark-mode #app-shell .student-class-heading td{
+  background:#192a20!important;color:#e6eee8!important;border-color:#354b3c!important;
+}
+body.dark-mode #app-shell .topbar{border-bottom-color:#304638!important}
+body.dark-mode #app-shell table,
+body.dark-mode #app-shell thead,
+body.dark-mode #app-shell tbody,
+body.dark-mode #app-shell tr,
+body.dark-mode #app-shell th,
+body.dark-mode #app-shell td{
+  background-color:transparent!important;color:#dce8df!important;border-color:#304638!important;
+}
+body.dark-mode #app-shell th{color:#a8b9ad!important}
+body.dark-mode #app-shell input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=submit]):not([type=button]),
+body.dark-mode #app-shell select,
+body.dark-mode #app-shell textarea{
+  background:#17271e!important;color:#edf5ef!important;border-color:#385443!important;
+}
+body.dark-mode #app-shell input::placeholder,
+body.dark-mode #app-shell textarea::placeholder{color:#9aafa0!important}
+body.dark-mode #app-shell label,
+body.dark-mode #app-shell .panel-heading h2,
+body.dark-mode #app-shell .page-heading h1,
+body.dark-mode #app-shell .placeholder-view h1,
+body.dark-mode #app-shell .trip-info strong,
+body.dark-mode #app-shell .account-dialog h2,
+body.dark-mode #app-shell .account-dialog h3{color:#e6eee8!important}
+body.dark-mode #app-shell .subheading,
+body.dark-mode #app-shell .trip-info span,
+body.dark-mode #app-shell .trip-info small,
+body.dark-mode #app-shell .page-footer,
+body.dark-mode #app-shell .account-dialog small{color:#a5b7aa!important}
+body.dark-mode #app-shell .prototype-note{background:#1b2a20!important;border-color:#3b5542!important}
+body.dark-mode #app-shell .prototype-note p{color:#c4d3c8!important}
+body.dark-mode #app-shell .prototype-note strong{color:#e6eee8!important}
+body.dark-mode .login-screen,
+body.dark-mode .login-form-side{background:#0b120e!important}
+body.dark-mode .login-card{background:#142019!important;color:#e6eee8!important;border-color:#304638!important}
+body.dark-mode .login-card h2,
+body.dark-mode .login-field label{color:#e6eee8!important}
+body.dark-mode .login-description{color:#a5b7aa!important}
+body.dark-mode .login-field input,
+body.dark-mode .login-field select{background:#17271e!important;color:#edf5ef!important;border-color:#385443!important}
+body.dark-mode .login-disclaimer{background:#1b2a20!important;color:#c4d3c8!important;border-color:#3b5542!important}
+body.dark-mode .register-toggle{background:#192a20!important;color:#cce5d3!important;border-color:#385443!important}
+
 </style>
 
 <style>
