@@ -1314,6 +1314,19 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
   try { registeredAccounts = JSON.parse(localStorage.getItem('sgve-demo-accounts') || '{}') || {}; } catch (_) {}
   let registrationRequests = [];
   try { registrationRequests = JSON.parse(localStorage.getItem('sgve-demo-registration-requests') || '[]') || []; } catch (_) {}
+  let migratedLegacyAccounts = false;
+  Object.entries(registeredAccounts).forEach(([email,account],index)=>{
+    if(account && account.status!=='approved'){
+      if(!registrationRequests.some(item=>item.email===email)){
+        registrationRequests.push({id:Date.now()+index,name:account.name||'Usuário de cadastro anterior',role:account.role,email,proof:'Cadastro anterior à validação. Conferir vínculo manualmente.',password:account.password||'',status:'Pendente',createdAt:new Date().toISOString()});
+      }
+      delete registeredAccounts[email];
+      migratedLegacyAccounts = true;
+    }
+  });
+  if(migratedLegacyAccounts){
+    try{localStorage.setItem('sgve-demo-accounts',JSON.stringify(registeredAccounts));localStorage.setItem('sgve-demo-registration-requests',JSON.stringify(registrationRequests));}catch(_){}
+  }
   let profileData = {};
   try { profileData = JSON.parse(localStorage.getItem('sgve-demo-profiles') || '{}') || {}; } catch (_) {}
   function setAvatar(element,name,photo){
@@ -1470,7 +1483,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
     const demoAccount = accounts[role];
     const customAccount = registeredAccounts[email];
     const validDemo = demoAccount && email === demoAccount.email && enteredPassword === password;
-    const validCustom = customAccount && customAccount.role === role && customAccount.password === enteredPassword;
+    const validCustom = customAccount && customAccount.status === 'approved' && customAccount.role === role && customAccount.password === enteredPassword;
     if (!validDemo && !validCustom) {
       error.textContent = 'Dados incorretos. Confira o perfil, o e-mail e a senha.';
       return;
