@@ -945,11 +945,35 @@ body.light-mode .topbar-theme-slot .theme-toggle{background:#fff;color:#214b35;b
 }
 @media(max-width:360px){.topbar-actions{gap:4px!important}.topbar-theme-slot .theme-toggle{width:30px!important;height:30px!important}.notification-button{width:28px;height:30px}}
 
+
+/* Alternância de tema disponível também antes de entrar */
+.login-theme-toggle{position:absolute!important;top:20px!important;right:22px!important;z-index:30!important}
+@media(max-width:760px){
+ .login-theme-toggle{top:12px!important;right:12px!important;min-height:36px!important;padding:0 11px!important}
+ .login-theme-toggle .theme-label{display:inline!important}
+}
+body.dark-mode .dashboard-notices{background:#0b120d!important;border:1px solid #26352b!important;color:#f5f7f5!important}
+body.dark-mode .dashboard-notices .panel-heading{border-bottom:1px solid #29382e!important;padding-bottom:12px!important}
+body.dark-mode .dashboard-notices .panel-heading h2,
+body.dark-mode .dashboard-notices .panel-heading h2 .heading-icon,
+body.dark-mode .dashboard-notices .notice-item p{color:#f5f7f5!important;opacity:1!important;text-shadow:none!important}
+body.dark-mode .dashboard-notices .notice-item{border-top-color:#29382e!important;background:transparent!important}
+body.dark-mode .dashboard-notices .notice-item time{color:#b8c4bc!important;opacity:1!important}
+body.dark-mode .dashboard-notices .text-button{color:#9fe0b8!important}
+body.dark-mode .dashboard-notices .notice-dot.green-dot{background:#36c477!important;box-shadow:0 0 0 3px #36c47720}
+body.dark-mode .dashboard-notices .notice-dot.blue-dot{background:#59a9ff!important;box-shadow:0 0 0 3px #59a9ff20}
+body.dark-mode .dashboard-notices .notice-dot.gold-dot{background:#f0c34e!important;box-shadow:0 0 0 3px #f0c34e20}
+body.dark-mode .dashboard-notices .panel-heading h2,
+body.dark-mode .dashboard-notices .notice-item p,
+body.dark-mode .dashboard-notices .notice-item time{filter:none!important}
+body.dark-mode .dashboard-notices .notice-item p{font-weight:550!important;line-height:1.55!important}
+
 </style>
 
 </head>
 <body>
 <section class="login-screen" id="login-screen">
+  <button class="theme-toggle login-theme-toggle" id="theme-toggle-login" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button>
   <div class="login-brand-panel">
     <div class="login-brand"><img class="cepk-seal" src="./cepk-62.svg" alt="CEPK 62 anos"><span><strong>CEPK</strong><small>Colégio Estadual Presidente Kennedy</small></span></div><img class="login-mascot" src="./mascote.svg" alt="Mascote do CEPK">
     <div class="login-intro"><div class="login-kicker">COLÉGIO ESTADUAL PRESIDENTE KENNEDY</div><h1>Organização e cuidado em cada viagem.</h1><p>Uma plataforma para acompanhar o planejamento das viagens escolares, com informações organizadas em um só lugar.</p></div>
@@ -1590,42 +1614,29 @@ body.light-mode .topbar-theme-slot .theme-toggle{background:#fff;color:#214b35;b
 </script>
 <script>
 (function(){
-  const button = document.getElementById('theme-toggle');
-  if (!button) return;
-  const icon = button.querySelector('.theme-icon');
-  const label = button.querySelector('.theme-label');
+  const buttons = [document.getElementById('theme-toggle'),document.getElementById('theme-toggle-login')].filter(Boolean);
+  if (!buttons.length) return;
   function applyTheme(mode){
     const light = mode === 'light';
     document.body.classList.toggle('light-mode', light);
     document.body.classList.toggle('dark-mode', !light);
-    icon.textContent = light ? '☀' : '☾';
-    label.textContent = light ? 'Tema claro' : 'Tema escuro';
-    button.setAttribute('aria-label', light ? 'Mudar para tema escuro' : 'Mudar para tema claro');
-    button.setAttribute('aria-pressed', String(light));
+    buttons.forEach(button=>{
+      const icon=button.querySelector('.theme-icon');
+      const label=button.querySelector('.theme-label');
+      if(icon) icon.textContent=light?'☀':'☾';
+      if(label) label.textContent=light?'Tema claro':'Tema escuro';
+      button.setAttribute('aria-label',light?'Mudar para tema escuro':'Mudar para tema claro');
+      button.setAttribute('aria-pressed',String(light));
+    });
   }
-  let saved = 'dark';
-  try {
-    const previous = localStorage.getItem('sgve-theme-mode');
-    saved = previous || 'dark';
-  } catch (_) {}
+  let saved='dark';
+  try{saved=localStorage.getItem('sgve-theme-mode')||'dark';}catch(_){}
   applyTheme(saved);
-  const mobileButton = document.getElementById('mobile-theme-control');
-  function syncMobileTheme(){
-    if(!mobileButton) return;
-    const lightNow = document.body.classList.contains('light-mode');
-    mobileButton.querySelector('.mobile-theme-icon').textContent = lightNow ? '☀' : '☾';
-    mobileButton.querySelector('.mobile-theme-label').textContent = lightNow ? 'Tema claro' : 'Tema escuro';
-    mobileButton.setAttribute('aria-label', lightNow ? 'Mudar para tema escuro' : 'Mudar para tema claro');
-  }
-  const originalApplyTheme = applyTheme;
-  applyTheme = function(mode){ originalApplyTheme(mode); syncMobileTheme(); };
-  syncMobileTheme();
-  if(mobileButton) mobileButton.addEventListener('click',()=>button.click());
-  button.addEventListener('click', function(){
-    const next = document.body.classList.contains('light-mode') ? 'dark' : 'light';
+  buttons.forEach(button=>button.addEventListener('click',()=>{
+    const next=document.body.classList.contains('light-mode')?'dark':'light';
     applyTheme(next);
-    try { localStorage.setItem('sgve-theme-mode', next); } catch (_) {}
-  });
+    try{localStorage.setItem('sgve-theme-mode',next);}catch(_){}
+  }));
 })();
 </script>
 <script>
