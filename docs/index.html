@@ -1063,6 +1063,14 @@ body.dark-mode .notifications-dialog{background:#101914;color:#f0f4f0;border-col
 body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=time],body.dark-mode .alarm-controls select{background:#111b15;color:#f0f4f0;border-color:#34473a}
 @media(max-width:760px){.trip-payment-methods{grid-column:1/-1}.alarm-controls{grid-template-columns:1fr 1fr}.alarm-controls .alarm-optin{grid-column:1/-1}.notifications-dialog{padding:17px}.trip-pay-summary{min-width:110px}}
 @media(max-width:420px){.alarm-controls{grid-template-columns:1fr}.alarm-controls .alarm-optin{grid-column:auto}}
+/* Perfil personalizado: nome e foto escolhidos na tela de acesso */
+#register-name-field[hidden]{display:none!important}
+.profile-photo-field small{color:#78877d;font-size:10px;line-height:1.5}
+.profile-photo-field input{height:auto!important;padding:10px!important}
+.login-photo-preview{width:58px;height:58px;border-radius:50%;overflow:hidden;border:2px solid #25834f}
+.login-photo-preview img,.avatar.has-photo img,.account-avatar.has-photo img{width:100%;height:100%;display:block;object-fit:cover;border-radius:50%}
+.avatar.has-photo,.account-avatar.has-photo{overflow:hidden;padding:0}
+body.dark-mode .profile-photo-field small{color:#c0cec4}
 </style>
 
 </head>
@@ -1079,7 +1087,8 @@ body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=t
       <img class="login-card-seal" src="./cepk-62.svg" alt="CEPK 62 anos"><p class="eyebrow">SISTEMA DE GESTÃO DE VIAGENS ESCOLARES</p>
       <h2>Bem-vindo ao SGVE</h2>
       <p class="login-description" id="login-description">Entre com sua conta ou crie um cadastro para acessar a demonstração.</p>
-      <div class="login-field" id="register-name-field" hidden><label for="register-name">Nome completo</label><input id="register-name" type="text" placeholder="Seu nome completo" autocomplete="name"></div>
+      <div class="login-field" id="register-name-field"><label for="register-name">Seu nome</label><input id="register-name" type="text" placeholder="Como quer ser chamado?" autocomplete="name" maxlength="70" required></div>
+      <div class="login-field profile-photo-field"><label for="login-photo">Foto de perfil (opcional)</label><input id="login-photo" type="file" accept="image/*"><small>Escolha uma foto do seu dispositivo. Ela ficará salva somente neste navegador.</small><div id="login-photo-preview" class="login-photo-preview" hidden></div></div>
       <div class="login-field"><label for="login-role">Tipo de acesso</label><select id="login-role" name="role" required style="width:100%;height:47px;padding:0 13px;border:1px solid #dfe8e1;border-radius:8px;background:#fff;color:#25382c;font:inherit;font-size:12px"><option value="administrador">Administrador</option><option value="direcao">Direção</option><option value="secretaria">Secretaria</option><option value="professor">Professor</option><option value="responsavel">Responsável</option><option value="estudante">Estudante</option></select></div>
       <div class="login-field"><label for="login-email">E-mail</label><input id="login-email" name="email" type="email" placeholder="seu@email.com" autocomplete="username" required></div>
       <div class="login-field"><label for="login-password">Senha</label><input id="login-password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required></div>
@@ -1122,11 +1131,11 @@ body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=t
   </aside>
   
   <main class="main-area">
-    <header class="topbar"><div class="mobile-brand"><img class="mobile-seal" src="./cepk-62.svg" alt=""><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="topbar-actions"><button class="notification-button" id="open-notifications" type="button" aria-label="Notificações" title="Notificações"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i id="notification-count">3</i></button><div class="topbar-theme-slot">    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button></div><div class="profile"><span class="avatar">A</span><span><strong>Administrador</strong><small>Protótipo</small></span><button id="profile-menu" aria-label="Opções do perfil">⌄</button></div></div></header>
+    <header class="topbar"><div class="mobile-brand"><img class="mobile-seal" src="./cepk-62.svg" alt=""><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="topbar-actions"><button class="notification-button" id="open-notifications" type="button" aria-label="Notificações" title="Notificações"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i id="notification-count">3</i></button><div class="topbar-theme-slot">    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button></div><div class="profile"><span class="avatar" id="topbar-avatar">A</span><span><strong>Administrador</strong><small>Protótipo</small></span><button id="profile-menu" aria-label="Opções do perfil">⌄</button></div></div></header>
     <section class="page-content">
       <section class="page-view active" id="page-inicio">
         <div class="dashboard-hero">
-          <div class="hero-copy"><p class="hero-kicker">COLÉGIO ESTADUAL PRESIDENTE KENNEDY</p><p class="hero-welcome">Bem-vindo(a),</p><h1>Adryan Matheus!</h1><p class="hero-subtitle">Colégio Estadual Presidente Kennedy – CEPK</p></div>
+          <div class="hero-copy"><p class="hero-kicker">COLÉGIO ESTADUAL PRESIDENTE KENNEDY</p><p class="hero-welcome">Bem-vindo(a),</p><h1 id="welcome-name">Visitante!</h1><p class="hero-subtitle">Colégio Estadual Presidente Kennedy – CEPK</p></div>
           <img class="hero-seal" src="./cepk-62.svg" alt="CEPK 62 anos">
         </div>
         <div class="stats-grid dashboard-stats">
@@ -1264,6 +1273,24 @@ body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=t
   const password = 'Kennedy2026';
   let registeredAccounts = {};
   try { registeredAccounts = JSON.parse(localStorage.getItem('sgve-demo-accounts') || '{}') || {}; } catch (_) {}
+  let profileData = {};
+  try { profileData = JSON.parse(localStorage.getItem('sgve-demo-profiles') || '{}') || {}; } catch (_) {}
+  let selectedPhoto = '';
+  const photoInput = document.getElementById('login-photo');
+  const photoPreview = document.getElementById('login-photo-preview');
+  photoInput.addEventListener('change', function(){
+    const file=this.files&&this.files[0]; selectedPhoto='';
+    if(!file){photoPreview.hidden=true;photoPreview.textContent='';return;}
+    if(!file.type.startsWith('image/')){this.value='';error.textContent='Escolha um arquivo de imagem.';return;}
+    if(file.size>1024*1024){this.value='';error.textContent='A foto deve ter no máximo 1 MB.';return;}
+    const reader=new FileReader();reader.onload=()=>{selectedPhoto=String(reader.result||'');photoPreview.innerHTML='';const img=document.createElement('img');img.src=selectedPhoto;img.alt='Prévia da foto de perfil';photoPreview.appendChild(img);photoPreview.hidden=false;error.textContent='';};reader.readAsDataURL(file);
+  });
+  function setAvatar(element,name,photo){
+    if(!element)return;
+    element.textContent='';
+    if(photo){const img=document.createElement('img');img.src=photo;img.alt='Foto de perfil';element.appendChild(img);element.classList.add('has-photo');}
+    else{element.classList.remove('has-photo');element.textContent=(name||'U').trim().charAt(0).toUpperCase();}
+  }
   const login = document.getElementById('demo-login-form');
   let registerMode = false;
   const registerNameField = document.getElementById('register-name-field');
@@ -1296,9 +1323,12 @@ body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=t
   }
   function enterApp(role) {
     const account = accounts[role];
-    document.querySelector('.profile strong').textContent = account.role;
-    document.querySelector('.profile small').textContent = 'Acesso demonstrativo';
-    document.querySelector('.avatar').textContent = account.role.charAt(0);
+    const profile = profileData[account.email] || {};
+    const displayName = (profile.name || account.role || 'Usuário').trim();
+    document.querySelector('.profile strong').textContent = displayName;
+    document.querySelector('.profile small').textContent = account.role;
+    setAvatar(document.getElementById('topbar-avatar'),displayName,profile.photo||'');
+    document.getElementById('welcome-name').textContent = displayName + '!';
     document.querySelectorAll('.nav-item').forEach(b => {
       b.hidden = !account.pages.includes(b.dataset.page);
     });
@@ -1334,8 +1364,8 @@ body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=t
   }
   registerToggle.addEventListener('click', function () {
     registerMode = !registerMode;
-    registerNameField.hidden = !registerMode;
-    registerNameInput.required = registerMode;
+    registerNameField.hidden = false;
+    registerNameInput.required = true;
     loginSubmitButton.textContent = registerMode ? 'Criar minha conta' : 'Entrar no sistema →';
     registerToggle.textContent = registerMode ? 'Já tenho uma conta' : 'Criar uma conta';
     loginDescription.textContent = registerMode ? 'Preencha seus dados para criar uma conta neste navegador.' : 'Entre com sua conta ou crie um cadastro para acessar a demonstração.';
@@ -1347,8 +1377,10 @@ body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=t
     const role = roleSelect.value;
     const email = emailInput.value.trim().toLowerCase();
     const enteredPassword = document.getElementById('login-password').value;
+    const displayNameInput = registerNameInput.value.trim();
+    if (!displayNameInput) { error.textContent = 'Digite seu nome para continuar.'; registerNameInput.focus(); return; }
     if (registerMode) {
-      const fullName = registerNameInput.value.trim();
+      const fullName = displayNameInput;
       if (!['professor','responsavel','estudante'].includes(role)) {
         error.textContent = 'Por segurança, o cadastro público está disponível apenas para Professor, Responsável ou Estudante.';
         return;
@@ -1365,8 +1397,7 @@ body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=t
       try { localStorage.setItem('sgve-demo-accounts', JSON.stringify(registeredAccounts)); }
       catch (_) { error.textContent = 'Não foi possível salvar a conta neste navegador.'; return; }
       registerMode = false;
-      registerNameField.hidden = true;
-      registerNameInput.required = false;
+      registerNameInput.required = true;
       loginSubmitButton.textContent = 'Entrar no sistema →';
       registerToggle.textContent = 'Criar uma conta';
       loginDescription.textContent = 'Conta criada! Entre com seu e-mail e senha.';
@@ -1382,9 +1413,11 @@ body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=t
       error.textContent = 'Dados incorretos. Confira o perfil, o e-mail e a senha.';
       return;
     }
-    if (validCustom) {
-      accounts[role] = {...accounts[role], role:customAccount.name};
-    }
+    const activeAccount = validCustom ? {...accounts[role], role:customAccount.name} : demoAccount;
+    const chosenName = displayNameInput || (validCustom ? customAccount.name : activeAccount.role);
+    profileData[email] = {name:chosenName,photo:selectedPhoto || (profileData[email]&&profileData[email].photo) || ''};
+    try { localStorage.setItem('sgve-demo-profiles',JSON.stringify(profileData)); } catch (_) { error.textContent='Não foi possível salvar seu perfil neste navegador.'; return; }
+    if (validCustom) accounts[role] = activeAccount;
     error.textContent = '';
     sessionStorage.setItem('sgve-demo-session', 'authenticated');
     sessionStorage.setItem('sgve-demo-role', role);
@@ -1394,9 +1427,10 @@ body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=t
   function openAccountPanel(){
     const role = sessionStorage.getItem('sgve-demo-role') || 'administrador';
     const active = accounts[role] || accounts.administrador;
-    document.getElementById('account-name').textContent = active.role;
+    const profile = profileData[active.email] || {};
+    document.getElementById('account-name').textContent = profile.name || active.role;
     document.getElementById('account-email').textContent = active.email;
-    document.getElementById('account-avatar').textContent = active.role.charAt(0);
+    setAvatar(document.getElementById('account-avatar'),profile.name||active.role,profile.photo||'');
     const list = document.getElementById('account-list');
     const rows = Object.entries(accounts).map(([key, item]) => ({name:item.role,email:item.email,active:key===role}));
     Object.values(registeredAccounts).forEach(item => {
