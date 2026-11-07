@@ -5,6 +5,7 @@ services:
     plan: starter
     buildCommand: npm install
     startCommand: npm start
+    autoDeployTrigger: off
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
