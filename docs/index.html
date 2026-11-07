@@ -1342,7 +1342,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
   function openPage(name) {
     const role = sessionStorage.getItem('sgve-demo-role') || 'administrador';
     const allowed = accounts[role].pages;
-    if (!allowed.includes(name)) return;
+    if (!allowed.includes(name) || (name === 'usuarios' && role !== 'administrador')) return;
     document.querySelectorAll('.page-view').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
     document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page === name));
     const nav = document.querySelector('.nav-item[data-page="' + name + '"]');
@@ -1357,10 +1357,14 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
     setAvatar(document.getElementById('topbar-avatar'),displayName,profile.photo||'');
     document.getElementById('welcome-name').textContent = displayName + '!';
     document.querySelectorAll('.nav-item').forEach(b => {
-      b.hidden = !account.pages.includes(b.dataset.page);
+      const permitted = account.pages.includes(b.dataset.page) && (b.dataset.page !== 'usuarios' || role === 'administrador');
+      b.hidden = !permitted;
+      b.style.display = permitted ? '' : 'none';
     });
     document.querySelectorAll('[data-go]').forEach(b => {
-      b.hidden = !account.pages.includes(b.dataset.go);
+      const permitted = account.pages.includes(b.dataset.go) && (b.dataset.go !== 'usuarios' || role === 'administrador');
+      b.hidden = !permitted;
+      b.style.display = permitted ? '' : 'none';
     });
     loginScreen.classList.add('is-hidden');
     loginScreen.setAttribute('aria-hidden', 'true');
@@ -1370,6 +1374,10 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
       const form = document.getElementById(id);
       if (form) form.style.display = manager ? 'grid' : 'none';
     });
+    const tripCreatePanel = document.getElementById('trip-form')?.closest('.panel');
+    if (tripCreatePanel) tripCreatePanel.style.display = manager ? '' : 'none';
+    const usersNav = document.querySelector('.nav-item[data-page="usuarios"]');
+    if (usersNav) { const adminOnly = role === 'administrador'; usersNav.hidden = !adminOnly; usersNav.style.display = adminOnly ? '' : 'none'; }
     const approvalOption = document.querySelector('#trip-status option:last-child');
     if (approvalOption) approvalOption.disabled = !['administrador','direcao'].includes(role);
     renderTrips();
@@ -1885,6 +1893,9 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
   document.getElementById('attendance-table-body').addEventListener('change', function (event) {
     const checkbox = event.target.closest('[data-attendance-student]');
     if (!checkbox) return;
+    const currentRole = sessionStorage.getItem('sgve-demo-role');
+    const canMarkPresence = ['administrador','direcao','secretaria','professor'].includes(currentRole);
+    if (!canMarkPresence) { checkbox.checked = !!(attendance[attendanceTrip.value] && attendance[attendanceTrip.value][checkbox.dataset.attendanceStudent] === true); return; }
     const tripId = attendanceTrip.value;
     if (!attendance[tripId]) attendance[tripId] = {};
     attendance[tripId][checkbox.dataset.attendanceStudent] = checkbox.checked;
