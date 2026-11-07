@@ -1443,6 +1443,82 @@ body.dark-mode #app-shell .page-view input[type="file"]::file-selector-button{
   background:#24784c;color:#fff;
 }
 
+
+
+/* MOBILE DARK MODE FIX v2: maior especificidade para regras responsivas antigas */
+html body.dark-mode,
+html body.dark-mode #login-screen,
+html body.dark-mode .login-screen,
+html body.dark-mode .login-form-side,
+html body.dark-mode #app-shell,
+html body.dark-mode #app-shell .main-area,
+html body.dark-mode #app-shell .page-content,
+html body.dark-mode #app-shell .page-view,
+html body.dark-mode #app-shell .topbar,
+html body.dark-mode #app-shell .sidebar,
+html body.dark-mode #app-shell .mobile-nav,
+html body.dark-mode #app-shell .content-area{
+  background-color:#0b120e!important;
+  color:#e8f1eb!important;
+}
+html body.dark-mode .login-card,
+html body.dark-mode #login-screen .login-card,
+html body.dark-mode #app-shell .panel,
+html body.dark-mode #app-shell .stat-card,
+html body.dark-mode #app-shell .quick-link,
+html body.dark-mode #app-shell .modal-content,
+html body.dark-mode #app-shell .dialog-content{
+  background-color:#142019!important;
+  color:#e8f1eb!important;
+  border-color:#304638!important;
+}
+html body.dark-mode #login-screen input,
+html body.dark-mode .login-screen input,
+html body.dark-mode #login-form input,
+html body.dark-mode #login-form select,
+html body.dark-mode #app-shell input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=submit]):not([type=button]),
+html body.dark-mode #app-shell select,
+html body.dark-mode #app-shell textarea{
+  background-color:#17271e!important;
+  color:#edf5ef!important;
+  border-color:#385443!important;
+}
+html body.dark-mode #login-screen label,
+html body.dark-mode .login-screen label,
+html body.dark-mode #login-screen h1,
+html body.dark-mode #login-screen h2,
+html body.dark-mode #login-screen p{
+  color:#e8f1eb!important;
+}
+@media(max-width:760px){
+  html body.dark-mode,
+  html body.dark-mode #login-screen,
+  html body.dark-mode .login-screen,
+  html body.dark-mode .login-form-side,
+  html body.dark-mode #app-shell,
+  html body.dark-mode #app-shell .main-area,
+  html body.dark-mode #app-shell .page-content,
+  html body.dark-mode #app-shell .page-view,
+  html body.dark-mode #app-shell .topbar,
+  html body.dark-mode #app-shell .mobile-header,
+  html body.dark-mode #app-shell .mobile-nav,
+  html body.dark-mode #app-shell .sidebar,
+  html body.dark-mode #app-shell .content-area{
+    background:#0b120e!important;
+    background-color:#0b120e!important;
+    color:#e8f1eb!important;
+  }
+  html body.dark-mode #login-screen .login-card,
+  html body.dark-mode .login-screen .login-card,
+  html body.dark-mode #app-shell .panel,
+  html body.dark-mode #app-shell .stat-card,
+  html body.dark-mode #app-shell .placeholder-view,
+  html body.dark-mode #app-shell .quick-link{
+    background:#142019!important;
+    background-color:#142019!important;
+    color:#e8f1eb!important;
+  }
+}
 </style>
 </head>
 <body>
