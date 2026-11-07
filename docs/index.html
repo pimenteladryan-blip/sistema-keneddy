@@ -1449,7 +1449,7 @@ body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=t
         : '<span class="status ' + cls + '">' + safeText(t.status) + '</span>';
       const priceText = Number(t.price)>0 ? Number(t.price).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'A definir';
       const methods = Array.isArray(t.paymentMethods) && t.paymentMethods.length ? t.paymentMethods.map(safeText).join(', ') : 'A combinar';
-      const paySummary = priceText + '<br>' + Number(t.installments||1) + 'x máx. · ' + methods;
+      const paySummary = priceText + '<br>' + Number(t.installments||1) + 'x no máximo';
       return '<tr><td>' + safeText(t.name) + '</td><td>' + safeText(t.destination) + '</td><td>' + date + '</td><td>' + Number(t.students) + '</td><td class="trip-pay-summary">' + paySummary + '</td><td class="trip-pay-summary">' + methods + '</td><td>' + statusCell + '</td><td>' + action + '</td></tr>';
     }).join('');
     document.getElementById('trip-count').textContent = trips.length + (trips.length === 1 ? ' viagem' : ' viagens');
@@ -1550,7 +1550,7 @@ body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=t
     }catch(_){}
   }
   function checkWakeAlarms(){
-    const now=new Date(),today=now.toISOString().slice(0,10),clock=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    const now=new Date(),today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0'),clock=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
     Object.keys(personalAlarms).forEach(id=>{
       const pref=personalAlarms[id],trip=trips.find(t=>String(t.id)===String(id));
       if(!pref||!pref.enabled||!trip||trip.date!==today||pref.time!==clock||pref.firedDate===today)return;
