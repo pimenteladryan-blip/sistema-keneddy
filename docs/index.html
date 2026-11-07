@@ -1063,7 +1063,7 @@ body.dark-mode .notifications-dialog{background:#101914;color:#f0f4f0;border-col
 body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=time],body.dark-mode .alarm-controls select{background:#111b15;color:#f0f4f0;border-color:#34473a}
 @media(max-width:760px){.trip-payment-methods{grid-column:1/-1}.alarm-controls{grid-template-columns:1fr 1fr}.alarm-controls .alarm-optin{grid-column:1/-1}.notifications-dialog{padding:17px}.trip-pay-summary{min-width:110px}}
 @media(max-width:420px){.alarm-controls{grid-template-columns:1fr}.alarm-controls .alarm-optin{grid-column:auto}}
-/* Perfil personalizado: nome e foto escolhidos na tela de acesso */
+/* Perfil personalizado: nome informado no acesso e foto editada após entrar */
 #register-name-field[hidden]{display:none!important}
 .profile-photo-field small{color:#78877d;font-size:10px;line-height:1.5}
 .profile-photo-field input{height:auto!important;padding:10px!important}
@@ -1071,6 +1071,24 @@ body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=t
 .login-photo-preview img,.avatar.has-photo img,.account-avatar.has-photo img{width:100%;height:100%;display:block;object-fit:cover;border-radius:50%}
 .avatar.has-photo,.account-avatar.has-photo{overflow:hidden;padding:0}
 body.dark-mode .profile-photo-field small{color:#c0cec4}
+/* Edição do perfil dentro da área logada */
+.profile-edit-section{margin:20px 0;padding:17px;border:1px solid #dce9df;border-radius:12px;background:#f8fbf8;display:grid;gap:9px}
+.profile-edit-section h3{margin:0 0 4px;font-size:15px}
+.profile-edit-section label{font-size:11px;font-weight:750;color:#345542}
+.profile-edit-section input[type="text"]{width:100%;height:42px;padding:0 11px;border:1px solid #d6e2d9;border-radius:8px;background:#fff;color:#20372a;font:inherit;font-size:13px}
+.profile-edit-section input[type="file"]{width:100%;font-size:11px}
+.profile-edit-section small{font-size:10px;color:#718477}
+.edit-profile-preview{width:68px;height:68px;border-radius:50%;overflow:hidden;border:2px solid #25834f}
+.edit-profile-preview img{width:100%;height:100%;object-fit:cover}
+.profile-edit-actions{display:flex;gap:8px;flex-wrap:wrap}
+.profile-edit-actions button{min-height:38px;padding:0 12px;border:0;border-radius:8px;font-size:11px;font-weight:750;cursor:pointer}
+#remove-profile-photo{background:#e9efea;color:#355444}
+#save-profile{background:#247b49;color:white}
+#profile-edit-message{margin:0;font-size:11px;color:#267346;min-height:14px}
+body.dark-mode .profile-edit-section{background:#102219;border-color:#31533d}
+body.dark-mode .profile-edit-section label{color:#d4e7d9}
+body.dark-mode .profile-edit-section input[type="text"]{background:#172d21;border-color:#3b5a47;color:#edf5ef}
+body.dark-mode .profile-edit-section small{color:#b3c5b8}
 </style>
 
 </head>
@@ -1088,7 +1106,6 @@ body.dark-mode .profile-photo-field small{color:#c0cec4}
       <h2>Bem-vindo ao SGVE</h2>
       <p class="login-description" id="login-description">Entre com sua conta ou crie um cadastro para acessar a demonstração.</p>
       <div class="login-field" id="register-name-field"><label for="register-name">Seu nome</label><input id="register-name" type="text" placeholder="Como quer ser chamado?" autocomplete="name" maxlength="70" required></div>
-      <div class="login-field profile-photo-field"><label for="login-photo">Foto de perfil (opcional)</label><input id="login-photo" type="file" accept="image/*"><small>Escolha uma foto do seu dispositivo. Ela ficará salva somente neste navegador.</small><div id="login-photo-preview" class="login-photo-preview" hidden></div></div>
       <div class="login-field"><label for="login-role">Tipo de acesso</label><select id="login-role" name="role" required style="width:100%;height:47px;padding:0 13px;border:1px solid #dfe8e1;border-radius:8px;background:#fff;color:#25382c;font:inherit;font-size:12px"><option value="administrador">Administrador</option><option value="direcao">Direção</option><option value="secretaria">Secretaria</option><option value="professor">Professor</option><option value="responsavel">Responsável</option><option value="estudante">Estudante</option></select></div>
       <div class="login-field"><label for="login-email">E-mail</label><input id="login-email" name="email" type="email" placeholder="seu@email.com" autocomplete="username" required></div>
       <div class="login-field"><label for="login-password">Senha</label><input id="login-password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required></div>
@@ -1105,6 +1122,7 @@ body.dark-mode .profile-photo-field small{color:#c0cec4}
     <button type="button" class="account-close" id="account-close" aria-label="Fechar">×</button>
     <p class="account-eyebrow">SGVE · PERFIL</p><h2 id="account-dialog-title">Sua conta</h2>
     <div class="account-current"><span class="account-avatar" id="account-avatar">A</span><div><strong id="account-name">Administrador</strong><small id="account-email">admin@sgve.demo</small><span class="account-state">● Sessão ativa neste dispositivo</span></div></div>
+    <section class="profile-edit-section"><h3>Editar perfil</h3><label for="edit-profile-name">Nome exibido</label><input id="edit-profile-name" type="text" maxlength="70" placeholder="Seu nome"><label for="edit-profile-photo">Foto de perfil</label><input id="edit-profile-photo" type="file" accept="image/*"><small>Escolha uma imagem de até 1 MB. A foto fica salva neste navegador.</small><div id="edit-profile-preview" class="edit-profile-preview" hidden></div><div class="profile-edit-actions"><button type="button" id="remove-profile-photo">Remover foto</button><button type="button" id="save-profile">Salvar alterações</button></div><p id="profile-edit-message" role="status"></p></section>
     <h3>Contas disponíveis neste dispositivo</h3><p class="account-help">Perfis demonstrativos e contas criadas neste navegador.</p>
     <div class="account-list" id="account-list"></div>
     <button type="button" class="account-logout" id="account-logout">Sair da conta</button>
@@ -1275,16 +1293,6 @@ body.dark-mode .profile-photo-field small{color:#c0cec4}
   try { registeredAccounts = JSON.parse(localStorage.getItem('sgve-demo-accounts') || '{}') || {}; } catch (_) {}
   let profileData = {};
   try { profileData = JSON.parse(localStorage.getItem('sgve-demo-profiles') || '{}') || {}; } catch (_) {}
-  let selectedPhoto = '';
-  const photoInput = document.getElementById('login-photo');
-  const photoPreview = document.getElementById('login-photo-preview');
-  photoInput.addEventListener('change', function(){
-    const file=this.files&&this.files[0]; selectedPhoto='';
-    if(!file){photoPreview.hidden=true;photoPreview.textContent='';return;}
-    if(!file.type.startsWith('image/')){this.value='';error.textContent='Escolha um arquivo de imagem.';return;}
-    if(file.size>1024*1024){this.value='';error.textContent='A foto deve ter no máximo 1 MB.';return;}
-    const reader=new FileReader();reader.onload=()=>{selectedPhoto=String(reader.result||'');photoPreview.innerHTML='';const img=document.createElement('img');img.src=selectedPhoto;img.alt='Prévia da foto de perfil';photoPreview.appendChild(img);photoPreview.hidden=false;error.textContent='';};reader.readAsDataURL(file);
-  });
   function setAvatar(element,name,photo){
     if(!element)return;
     element.textContent='';
@@ -1415,7 +1423,7 @@ body.dark-mode .profile-photo-field small{color:#c0cec4}
     }
     const activeAccount = validCustom ? {...accounts[role], role:customAccount.name} : demoAccount;
     const chosenName = displayNameInput || (validCustom ? customAccount.name : activeAccount.role);
-    profileData[email] = {name:chosenName,photo:selectedPhoto || (profileData[email]&&profileData[email].photo) || ''};
+    profileData[email] = {name:chosenName,photo:(profileData[email]&&profileData[email].photo) || ''};
     try { localStorage.setItem('sgve-demo-profiles',JSON.stringify(profileData)); } catch (_) { error.textContent='Não foi possível salvar seu perfil neste navegador.'; return; }
     if (validCustom) accounts[role] = activeAccount;
     error.textContent = '';
@@ -1431,6 +1439,10 @@ body.dark-mode .profile-photo-field small{color:#c0cec4}
     document.getElementById('account-name').textContent = profile.name || active.role;
     document.getElementById('account-email').textContent = active.email;
     setAvatar(document.getElementById('account-avatar'),profile.name||active.role,profile.photo||'');
+    document.getElementById('edit-profile-name').value=profile.name||active.role;
+    const editPreview=document.getElementById('edit-profile-preview');editPreview.innerHTML='';
+    if(profile.photo){const previewImg=document.createElement('img');previewImg.src=profile.photo;previewImg.alt='Foto atual do perfil';editPreview.appendChild(previewImg);editPreview.hidden=false;}else{editPreview.hidden=true;}
+    document.getElementById('edit-profile-photo').value='';document.getElementById('profile-edit-message').textContent='';
     const list = document.getElementById('account-list');
     const rows = Object.entries(accounts).map(([key, item]) => ({name:item.role,email:item.email,active:key===role}));
     Object.values(registeredAccounts).forEach(item => {
@@ -1439,6 +1451,38 @@ body.dark-mode .profile-photo-field small{color:#c0cec4}
     list.innerHTML = rows.map(item => '<div class="account-row"><div><strong>'+String(item.name).replace(/[&<>"]/g,'')+'</strong><small>'+String(item.email).replace(/[&<>"]/g,'')+'</small></div><em>'+(item.active?'ATIVA':'DISPONÍVEL')+'</em></div>').join('');
     accountOverlay.hidden = false;
   }
+  let editedProfilePhoto = '';
+  document.getElementById('edit-profile-photo').addEventListener('change',function(){
+    const file=this.files&&this.files[0];editedProfilePhoto='';
+    const msg=document.getElementById('profile-edit-message');
+    if(!file)return;
+    if(!file.type.startsWith('image/')){this.value='';msg.textContent='Escolha um arquivo de imagem.';return;}
+    if(file.size>1024*1024){this.value='';msg.textContent='A foto deve ter no máximo 1 MB.';return;}
+    const reader=new FileReader();reader.onload=()=>{editedProfilePhoto=String(reader.result||'');const box=document.getElementById('edit-profile-preview');box.innerHTML='';const img=document.createElement('img');img.src=editedProfilePhoto;img.alt='Prévia da nova foto';box.appendChild(img);box.hidden=false;msg.textContent='Prévia atualizada. Clique em Salvar alterações.';};reader.readAsDataURL(file);
+  });
+  document.getElementById('remove-profile-photo').addEventListener('click',()=>{
+    const role=sessionStorage.getItem('sgve-demo-role')||'administrador';const active=accounts[role]||accounts.administrador;
+    profileData[active.email]={...(profileData[active.email]||{}),photo:''};
+    try{localStorage.setItem('sgve-demo-profiles',JSON.stringify(profileData));}catch(_){}
+    editedProfilePhoto='';document.getElementById('edit-profile-photo').value='';document.getElementById('edit-profile-preview').hidden=true;
+    setAvatar(document.getElementById('account-avatar'),profileData[active.email].name||active.role,'');
+    setAvatar(document.getElementById('topbar-avatar'),profileData[active.email].name||active.role,'');
+    document.getElementById('profile-edit-message').textContent='Foto removida.';
+  });
+  document.getElementById('save-profile').addEventListener('click',()=>{
+    const role=sessionStorage.getItem('sgve-demo-role')||'administrador';const active=accounts[role]||accounts.administrador;
+    const name=document.getElementById('edit-profile-name').value.trim();const msg=document.getElementById('profile-edit-message');
+    if(!name){msg.textContent='Digite um nome para o perfil.';return;}
+    profileData[active.email]={...(profileData[active.email]||{}),name,photo:editedProfilePhoto||((profileData[active.email]||{}).photo)||''};
+    try{localStorage.setItem('sgve-demo-profiles',JSON.stringify(profileData));}
+    catch(_){msg.textContent='Não foi possível salvar neste navegador.';return;}
+    document.getElementById('account-name').textContent=name;document.querySelector('.profile strong').textContent=name;
+    document.getElementById('welcome-name').textContent=name+'!';
+    setAvatar(document.getElementById('account-avatar'),name,profileData[active.email].photo);
+    setAvatar(document.getElementById('topbar-avatar'),name,profileData[active.email].photo);
+    editedProfilePhoto='';document.getElementById('edit-profile-photo').value='';
+    msg.textContent='Perfil atualizado com sucesso!';
+  });
   document.getElementById('profile-menu').addEventListener('click', openAccountPanel);
   document.getElementById('account-close').addEventListener('click',()=>{accountOverlay.hidden=true;});
   accountOverlay.addEventListener('click',event=>{if(event.target===accountOverlay)accountOverlay.hidden=true;});
