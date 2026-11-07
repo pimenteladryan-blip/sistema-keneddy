@@ -1105,6 +1105,8 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
 
 #app-shell #profile-menu #topbar-avatar.has-photo{overflow:hidden;padding:0}
 #app-shell #profile-menu #topbar-avatar.has-photo img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+
+.trip-request-button{border:0;border-radius:7px;padding:8px 10px;background:#176b45;color:#fff;font-size:10px;font-weight:700;white-space:nowrap}
 </style>
 
 </head>
@@ -1217,7 +1219,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
 <button class="login-submit" type="submit" style="height:40px;margin:0">Adicionar viagem</button>
 </form><p id="trip-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div>
 <div class="panel"><div class="panel-heading"><div><p class="eyebrow">REGISTROS</p><h2>Viagens cadastradas</h2></div><span class="status planned" id="trip-count">3 viagens</span></div>
-<div class="table-wrap"><table><thead><tr><th>Foto</th><th>Viagem</th><th>Destino</th><th>Data</th><th>Alunos</th><th>Valor</th><th>Pagamento</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="trip-table-body"></tbody></table></div></div><div class="panel" id="trip-alarm-panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">LEMBRETE PESSOAL</p><h2>Alarme para acordar</h2></div></div>
+<div class="table-wrap"><table><thead><tr><th>Foto</th><th>Viagem</th><th>Destino</th><th>Data</th><th>Alunos</th><th>Valor</th><th>Pagamento</th><th>Situação</th><th>Participação</th><th>Ações</th></tr></thead><tbody id="trip-table-body"></tbody></table></div></div><div class="panel" id="trip-alarm-panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">LEMBRETE PESSOAL</p><h2>Alarme para acordar</h2></div></div>
 <p class="alarm-explainer">Escolha uma viagem, ative o aviso e defina a hora em que deseja ser lembrado(a) de acordar.</p>
 <div class="alarm-controls"><label>Viagem<select id="alarm-trip"></select></label><label>Horário para acordar<input id="alarm-time" type="time" value="06:00"></label><label class="alarm-optin"><input id="alarm-enabled" type="checkbox"> Quero receber o alarme nesta viagem</label><button type="button" class="login-submit" id="save-alarm" style="width:auto;margin:0;padding:0 18px">Salvar meu alarme</button></div>
 <p id="alarm-feedback" class="inline-feedback" role="status"></p><p class="alarm-note">O aviso e o som funcionam enquanto o SGVE estiver aberto ou ativo. Permita notificações no navegador para receber o aviso visual.</p></div>
@@ -1302,7 +1304,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
     direcao: {email:'direcao@sgve.demo', role:'Direção', pages:['inicio','viagens','alunos','autorizacoes','transportes','professores','relatorios']},
     secretaria: {email:'secretaria@sgve.demo', role:'Secretaria', pages:['inicio','viagens','alunos','autorizacoes','transportes','professores','relatorios']},
     professor: {email:'professor@sgve.demo', role:'Professor', pages:['inicio','viagens']},
-    responsavel: {email:'responsavel@sgve.demo', role:'Responsável', pages:['inicio','viagens','autorizacoes']},
+    responsavel: {email:'responsavel@sgve.demo', role:'Responsável', pages:['inicio','viagens','alunos','autorizacoes','transportes','professores','relatorios']},
     estudante: {email:'estudante@sgve.demo', role:'Estudante', pages:['inicio','viagens','alunos','autorizacoes','transportes','professores','relatorios']}
   };
   const password = 'Kennedy2026';
@@ -1359,12 +1361,14 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
     document.querySelectorAll('.nav-item').forEach(b => {
       const permitted = account.pages.includes(b.dataset.page) && (b.dataset.page !== 'usuarios' || role === 'administrador');
       b.hidden = !permitted;
-      b.style.display = permitted ? '' : 'none';
+      if (permitted) b.style.removeProperty('display');
+      else b.style.setProperty('display','none','important');
     });
     document.querySelectorAll('[data-go]').forEach(b => {
       const permitted = account.pages.includes(b.dataset.go) && (b.dataset.go !== 'usuarios' || role === 'administrador');
       b.hidden = !permitted;
-      b.style.display = permitted ? '' : 'none';
+      if (permitted) b.style.removeProperty('display');
+      else b.style.setProperty('display','none','important');
     });
     loginScreen.classList.add('is-hidden');
     loginScreen.setAttribute('aria-hidden', 'true');
@@ -1374,10 +1378,20 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
       const form = document.getElementById(id);
       if (form) form.style.display = manager ? 'grid' : 'none';
     });
-    const tripCreatePanel = document.getElementById('trip-form')?.closest('.panel');
-    if (tripCreatePanel) tripCreatePanel.style.display = manager ? '' : 'none';
+    ['trip-form','student-form','vehicle-form','teacher-form'].forEach(id => {
+      const panel = document.getElementById(id)?.closest('.panel');
+      if (panel) {
+        if (manager) panel.style.removeProperty('display');
+        else panel.style.setProperty('display','none','important');
+      }
+    });
     const usersNav = document.querySelector('.nav-item[data-page="usuarios"]');
-    if (usersNav) { const adminOnly = role === 'administrador'; usersNav.hidden = !adminOnly; usersNav.style.display = adminOnly ? '' : 'none'; }
+    if (usersNav) {
+      const adminOnly = role === 'administrador';
+      usersNav.hidden = !adminOnly;
+      if (adminOnly) usersNav.style.removeProperty('display');
+      else usersNav.style.setProperty('display','none','important');
+    }
     const approvalOption = document.querySelector('#trip-status option:last-child');
     if (approvalOption) approvalOption.disabled = !['administrador','direcao'].includes(role);
     renderTrips();
@@ -1552,7 +1566,12 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
   function saveTrips() {
     try { localStorage.setItem('sgve-demo-trips', JSON.stringify(trips)); } catch (_) {}
   }
+  let tripRequests = {};
+  try { tripRequests = JSON.parse(localStorage.getItem('sgve-demo-trip-requests') || '{}') || {}; } catch (_) {}
   function renderTrips() {
+    const roleNow = sessionStorage.getItem('sgve-demo-role');
+    const canRequest = ['estudante','responsavel'].includes(roleNow);
+    const currentAccount = accounts[roleNow]?.email || roleNow || 'visitante';
     tripBody.innerHTML = trips.map(t => {
       const photoCell = t.photo ? '<img class="trip-table-photo" src="' + safeText(t.photo) + '" alt="Foto de ' + safeText(t.name) + '">' : '<span class="trip-table-photo-empty">▣</span>';
       const cls = t.status === 'Aprovada' ? 'approved' : t.status === 'Pendente' ? 'pending' : 'planned';
@@ -1566,10 +1585,25 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
       const priceText = Number(t.price)>0 ? Number(t.price).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'A definir';
       const methods = Array.isArray(t.paymentMethods) && t.paymentMethods.length ? t.paymentMethods.map(safeText).join(', ') : 'A combinar';
       const paySummary = priceText + '<br>' + Number(t.installments||1) + 'x no máximo';
-      return '<tr><td>' + photoCell + '</td><td>' + safeText(t.name) + '</td><td>' + safeText(t.destination) + '</td><td>' + date + '</td><td>' + Number(t.students) + '</td><td class="trip-pay-summary">' + paySummary + '</td><td class="trip-pay-summary">' + methods + '</td><td>' + statusCell + '</td><td>' + action + '</td></tr>';
+      const requestKey = currentAccount + ':' + t.id;
+      const requested = !!tripRequests[requestKey];
+      const requestCell = canRequest ? (requested ? '<span class="status pending">Solicitação enviada</span>' : '<button type="button" data-trip-request="' + t.id + '" class="trip-request-button">Solicitar vaga</button>') : '—';
+      return '<tr><td>' + photoCell + '</td><td>' + safeText(t.name) + '</td><td>' + safeText(t.destination) + '</td><td>' + date + '</td><td>' + Number(t.students) + '</td><td class="trip-pay-summary">' + paySummary + '</td><td class="trip-pay-summary">' + methods + '</td><td>' + statusCell + '</td><td>' + requestCell + '</td><td>' + action + '</td></tr>';
     }).join('');
     document.getElementById('trip-count').textContent = trips.length + (trips.length === 1 ? ' viagem' : ' viagens');
   }
+  tripBody.addEventListener('click', function(event) {
+    const button = event.target.closest('[data-trip-request]');
+    if (!button) return;
+    const role = sessionStorage.getItem('sgve-demo-role');
+    if (!['estudante','responsavel'].includes(role)) return;
+    const account = accounts[role];
+    const key = account.email + ':' + button.dataset.tripRequest;
+    if (tripRequests[key]) return;
+    tripRequests[key] = {tripId:button.dataset.tripRequest, requestedAt:new Date().toISOString(), status:'Solicitada'};
+    try { localStorage.setItem('sgve-demo-trip-requests', JSON.stringify(tripRequests)); } catch (_) {}
+    renderTrips();
+  });
   document.getElementById('trip-form').addEventListener('submit', function (event) {
     event.preventDefault();
     const trip = {
@@ -1764,7 +1798,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
     const visible = role === 'responsavel' ? authorizations.filter(a => a.student === 'Aluno Exemplo 01') : authorizations;
     document.getElementById('authorization-table-body').innerHTML = visible.map(a => {
       const cls = a.status === 'Autorizada' ? 'approved' : a.status === 'Pendente' ? 'pending' : 'planned';
-      const canUpdate = ['responsavel','administrador','direcao','secretaria'].includes(role);
+      const canUpdate = ['administrador','direcao','secretaria'].includes(role);
       const control = canUpdate
         ? '<select data-auth-status="' + a.id + '" aria-label="Situação da autorização" style="height:34px;padding:5px;border:1px solid #dfe8e1;border-radius:6px"><option ' + (a.status==='Pendente'?'selected':'') + '>Pendente</option><option ' + (a.status==='Autorizada'?'selected':'') + '>Autorizada</option><option ' + (a.status==='Não autorizada'?'selected':'') + '>Não autorizada</option></select>'
         : '<span class="status ' + cls + '">' + safeText(a.status) + '</span>';
