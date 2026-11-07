@@ -1,1 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 520"><defs><linearGradient id="fur" x2="0" y2="1"><stop stop-color="#f3f0e8"/><stop offset="1" stop-color="#aaa99c"/></linearGradient><linearGradient id="j" x2="0" y2="1"><stop stop-color="#15984b"/><stop offset="1" stop-color="#064526"/></linearGradient></defs><path d="M75 167 L54 33 Q51 12 72 27 L160 99 M345 167 L366 33 Q369 12 348 27 L260 99" fill="#b5b4a9" stroke="#17251c" stroke-width="12" stroke-linejoin="round"/><path d="M78 118 L72 57 L126 108 M342 118 L348 57 L294 108" fill="#e99b9b"/><path d="M91 131 Q210 52 329 131 L351 256 Q343 356 210 370 Q77 356 69 256Z" fill="url(#fur)" stroke="#17251c" stroke-width="13"/><path d="M105 199 Q128 150 166 177 Q184 204 159 235 Q121 252 105 199 M315 199 Q292 150 254 177 Q236 204 261 235 Q299 252 315 199" fill="#fff" stroke="#17251c" stroke-width="10"/><ellipse cx="146" cy="205" rx="12" ry="20" fill="#101c16"/><ellipse cx="274" cy="205" rx="12" ry="20" fill="#101c16"/><ellipse cx="210" cy="270" rx="68" ry="49" fill="#fff"/><path d="M187 250 Q210 226 233 250 Q232 274 210 277 Q188 274 187 250" fill="#17251c"/><path d="M210 278 Q207 305 180 302 M210 278 Q213 305 240 302" fill="none" stroke="#17251c" stroke-width="8" stroke-linecap="round"/><path d="M97 117 Q210 56 323 117 L310 154 Q210 117 110 154Z" fill="#0b6b35" stroke="#17251c" stroke-width="11"/><path d="M110 122 Q210 71 310 122" fill="none" stroke="#9bdc54" stroke-width="9"/><text x="210" y="132" text-anchor="middle" font-family="Arial,sans-serif" font-size="35" font-weight="900" fill="#fff">CEPK</text><path d="M87 367 Q210 329 333 367 L381 500 L39 500Z" fill="url(#j)" stroke="#17251c" stroke-width="13"/><path d="M146 378 L210 418 L274 378 L291 500 L129 500Z" fill="#0b2819" stroke="#17251c" stroke-width="8"/><path d="M111 403 L52 442 Q30 459 50 478 Q70 493 91 471 L151 436 M309 403 L368 442 Q390 459 370 478 Q350 493 329 471 L269 436" fill="none" stroke="#b7b5a9" stroke-width="28" stroke-linecap="round"/><path d="M172 420 L210 444 L248 420" fill="none" stroke="#8fd64c" stroke-width="8"/><text x="210" y="481" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" font-weight="900" fill="#b9e56d">CEPK</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 650">
+<defs><linearGradient id="fur" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#f3f0e8"/><stop offset=".55" stop-color="#b9b6a9"/><stop offset="1" stop-color="#77786f"/></linearGradient><linearGradient id="jacket" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#64705b"/><stop offset=".5" stop-color="#252f26"/><stop offset="1" stop-color="#101b15"/></linearGradient><linearGradient id="cap" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9fe332"/><stop offset=".45" stop-color="#17893c"/><stop offset="1" stop-color="#064b29"/></linearGradient></defs>
+<!-- ears -->
+<path d="M102 190 Q54 76 79 23 Q91 2 113 31 L190 130 M358 190 Q406 76 381 23 Q369 2 347 31 L270 130" fill="#aaa99f" stroke="#172019" stroke-width="13" stroke-linejoin="round"/>
+<path d="M100 132 L91 51 Q114 70 153 143 M360 132 L369 51 Q346 70 307 143" fill="#d6a9a0" stroke="#5e5f57" stroke-width="7"/>
+<!-- head fur outline -->
+<path d="M87 150 Q151 91 230 97 Q309 91 373 150 Q397 202 382 268 Q371 344 303 376 Q230 417 157 376 Q89 344 78 268 Q63 202 87 150Z" fill="url(#fur)" stroke="#172019" stroke-width="13"/>
+<path d="M90 189 Q66 232 91 259 L111 244 M370 189 Q394 232 369 259 L349 244" fill="none" stroke="#85877d" stroke-width="14"/>
+<!-- cap brim and crown -->
+<path d="M99 151 Q118 62 230 55 Q342 62 361 151 Q231 122 99 151Z" fill="url(#cap)" stroke="#172019" stroke-width="12"/>
+<path d="M94 146 Q226 115 369 148 Q355 175 230 176 Q112 174 94 146Z" fill="#0d542e" stroke="#172019" stroke-width="9"/>
+<path d="M126 113 Q230 65 334 113" fill="none" stroke="#b5e94c" stroke-width="8"/>
+<text x="230" y="130" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="37" font-weight="900" fill="#fff">CEPK</text>
+<!-- brow / eyes -->
+<path d="M115 211 Q158 168 194 207 M266 207 Q302 168 345 211" fill="none" stroke="#55594f" stroke-width="14" stroke-linecap="round"/>
+<ellipse cx="160" cy="235" rx="38" ry="48" fill="#fff" stroke="#313a31" stroke-width="7"/><ellipse cx="300" cy="235" rx="38" ry="48" fill="#fff" stroke="#313a31" stroke-width="7"/>
+<ellipse cx="170" cy="239" rx="16" ry="25" fill="#131b15"/><ellipse cx="290" cy="239" rx="16" ry="25" fill="#131b15"/><circle cx="176" cy="228" r="7" fill="#fff"/><circle cx="296" cy="228" r="7" fill="#fff"/>
+<!-- muzzle -->
+<path d="M143 296 Q230 257 317 296 Q329 350 230 367 Q131 350 143 296Z" fill="#f1eee5" stroke="#77796f" stroke-width="6"/>
+<ellipse cx="230" cy="292" rx="39" ry="28" fill="#20251f" stroke="#111812" stroke-width="6"/><path d="M230 316 Q222 341 194 338 M230 316 Q238 341 266 338" fill="none" stroke="#343a31" stroke-width="7" stroke-linecap="round"/>
+<path d="M212 340 Q230 351 250 338 Q249 370 230 372 Q211 369 212 340Z" fill="#d85b58" stroke="#702d2a" stroke-width="4"/>
+<!-- jacket body -->
+<path d="M119 390 Q160 365 202 378 L230 408 L258 378 Q302 365 341 390 L390 500 L352 535 L108 535 L70 500Z" fill="url(#jacket)" stroke="#172019" stroke-width="13"/>
+<path d="M119 391 L78 462 Q56 504 101 520 L149 458 M341 391 L382 462 Q404 504 359 520 L311 458" fill="#a8a89a" stroke="#172019" stroke-width="12"/>
+<path d="M112 405 L84 475 Q76 501 105 508 L140 452 M348 405 L376 475 Q384 501 355 508 L320 452" fill="none" stroke="#a8db43" stroke-width="13"/>
+<path d="M213 405 L230 430 L247 405 L265 529 L195 529Z" fill="#151f18" stroke="#090f0b" stroke-width="6"/>
+<path d="M230 430 L230 529" stroke="#b6d94a" stroke-width="5"/>
+<path d="M138 430 L183 440 M322 430 L277 440" stroke="#d2d2c2" stroke-width="7" stroke-linecap="round"/>
+<rect x="273" y="435" width="58" height="34" rx="4" fill="#203729" stroke="#a8d843" stroke-width="3"/><text x="302" y="458" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="900" fill="#d3ee7a">CEPK</text>
+<!-- left arm and thumbs up -->
+<path d="M101 444 Q73 445 61 411 Q44 386 65 369 Q84 356 102 381 L127 418" fill="#bcb9ac" stroke="#172019" stroke-width="12" stroke-linecap="round"/>
+<path d="M74 395 Q51 372 65 354 Q79 340 94 356 L107 374 Q119 365 135 376 Q151 391 135 416 L114 439 Q90 436 74 416Z" fill="#d6d1c3" stroke="#172019" stroke-width="9"/>
+<!-- right hand peace-ish -->
+<path d="M357 420 Q389 393 391 360 L403 321 Q413 299 429 311 Q440 323 429 348 L416 381 Q443 358 448 377 Q453 391 437 407 L402 451 Q380 466 357 447Z" fill="#d2cec0" stroke="#172019" stroke-width="10"/>
+<!-- lower torso and shorts -->
+<path d="M111 526 L349 526 L332 612 Q230 638 128 612Z" fill="#33362f" stroke="#151d17" stroke-width="12"/>
+<path d="M230 530 L230 615 M130 602 Q230 580 330 602" stroke="#101711" stroke-width="8"/>
+<path d="M130 616 Q117 648 146 650 L190 650 L210 612 M330 616 Q343 648 314 650 L270 650 L250 612" fill="#d3d0c3" stroke="#172019" stroke-width="10"/>
+<path d="M84 511 Q39 550 29 590 Q54 607 81 582 L125 544" fill="none" stroke="#aca99d" stroke-width="22" stroke-linecap="round"/>
+</svg>
