@@ -57,3 +57,13 @@ Este projeto ainda é um protótipo em desenvolvimento e **não está aprovado p
 
 **Use somente dados fictícios durante os testes.** Não cadastre estudantes reais, informações de responsáveis ou dados da escola sem autorização formal e revisão de segurança/privacidade. Não publique credenciais no GitHub.
 
+
+
+## Demonstração no navegador (sem servidor)
+
+O protótipo estático em `docs/` usa `localStorage` do navegador para guardar os registros de demonstração. Não usa banco de dados nem envia esses registros para um servidor. Os dados ficam apenas no navegador/dispositivo em que foram cadastrados.
+
+Quando o GitHub Pages estiver habilitado e o workflow terminar, acesse:
+https://pimenteladryan-blip.github.io/sistema-keneddy/
+
+Esta é uma demonstração com dados fictícios e autenticação simulada. Não use dados pessoais reais nem senhas reais. Limpar os dados do navegador pode apagar os registros da demonstração.
