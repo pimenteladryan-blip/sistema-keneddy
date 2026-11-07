@@ -803,6 +803,18 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
   #app-shell .dashboard-bottom{grid-template-columns:1fr 1fr!important}
 }
 
+
+/* Correção definitiva: o estado autenticado esconde o login em qualquer tela */
+#login-screen.is-hidden,
+.login-screen.is-hidden,
+#login-screen[aria-hidden="true"]{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+#app-shell:not(.logged-in){display:none!important}
+#app-shell.logged-in{display:block!important}
+
 </style>
 
 </head>
@@ -1023,7 +1035,8 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
     document.querySelectorAll('[data-go]').forEach(b => {
       b.hidden = !account.pages.includes(b.dataset.go);
     });
-    loginScreen.style.display = 'none';
+    loginScreen.classList.add('is-hidden');
+    loginScreen.setAttribute('aria-hidden', 'true');
     app.classList.add('logged-in');
     const manager = ['administrador','direcao','secretaria'].includes(role);
     ['trip-form','student-form','vehicle-form','teacher-form'].forEach(id => {
@@ -1043,7 +1056,8 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
   }
   function leaveApp() {
     app.classList.remove('logged-in');
-    loginScreen.style.display = 'grid';
+    loginScreen.classList.remove('is-hidden');
+    loginScreen.removeAttribute('aria-hidden');
     sessionStorage.removeItem('sgve-demo-session');
     sessionStorage.removeItem('sgve-demo-role');
     fillDemoEmail();
