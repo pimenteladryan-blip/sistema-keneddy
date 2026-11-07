@@ -1089,6 +1089,19 @@ body.dark-mode .profile-edit-section{background:#102219;border-color:#31533d}
 body.dark-mode .profile-edit-section label{color:#d4e7d9}
 body.dark-mode .profile-edit-section input[type="text"]{background:#172d21;border-color:#3b5a47;color:#edf5ef}
 body.dark-mode .profile-edit-section small{color:#b3c5b8}
+
+/* Ajustes de fotos e menu de conta */
+#app-shell #profile-menu{display:grid!important;place-items:center!important;flex:0 0 36px;width:36px;height:36px;margin:0 0 0 10px;padding:0;border:1px solid #385342;border-radius:50%;background:#1c4432;color:#70d5a1;cursor:pointer;overflow:hidden}
+#app-shell #profile-menu #topbar-avatar{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;font-size:12px;font-weight:800}
+#app-shell #profile-menu #topbar-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+#app-shell .profile>span:nth-child(2){display:none!important}
+.trip-photo-placeholder{display:grid;place-items:center;background:#1b3b2a;color:#78c99a;font-size:27px}
+.trip-table-photo{display:block;width:58px;height:44px;object-fit:cover;border-radius:7px}
+.trip-table-photo-empty{display:grid;place-items:center;width:58px;height:44px;border-radius:7px;background:#1b3b2a;color:#78c99a}
+.trip-photo-preview{grid-column:1/-1;width:90px;height:68px;overflow:hidden;border-radius:8px;border:1px solid #42614d}
+.trip-photo-preview img{width:100%;height:100%;object-fit:cover}
+#trip-form input[type=file]{max-width:100%;font-size:10px}
+@media(max-width:760px){#app-shell #profile-menu{width:35px;height:35px;margin-left:8px}.trip-table-photo,.trip-table-photo-empty{width:46px;height:38px}}
 </style>
 
 </head>
@@ -1149,7 +1162,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
   </aside>
   
   <main class="main-area">
-    <header class="topbar"><div class="mobile-brand"><img class="mobile-seal" src="./cepk-62.svg" alt=""><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="topbar-actions"><button class="notification-button" id="open-notifications" type="button" aria-label="Notificações" title="Notificações"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i id="notification-count">3</i></button><div class="topbar-theme-slot">    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button></div><div class="profile"><span class="avatar" id="topbar-avatar">A</span><span><strong>Administrador</strong><small>Protótipo</small></span><button id="profile-menu" aria-label="Opções do perfil">⌄</button></div></div></header>
+    <header class="topbar"><div class="mobile-brand"><img class="mobile-seal" src="./cepk-62.svg" alt=""><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="topbar-actions"><button class="notification-button" id="open-notifications" type="button" aria-label="Notificações" title="Notificações"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i id="notification-count">3</i></button><div class="topbar-theme-slot">    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button></div><div class="profile"><button class="avatar" id="profile-menu" type="button" aria-label="Abrir contas e opções do perfil"><span id="topbar-avatar">A</span></button><span><strong>Administrador</strong><small>Protótipo</small></span></div></div></header>
     <section class="page-content">
       <section class="page-view active" id="page-inicio">
         <div class="dashboard-hero">
@@ -1166,7 +1179,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
           <section class="panel dashboard-trips"><div class="panel-heading"><h2><span class="heading-icon">▣</span> Próximas Viagens</h2><button class="text-button" data-go="viagens">Ver todas <span>→</span></button></div>
             <div class="trip-list">
               <article class="trip-preview"><img class="trip-photo" src="https://cdn-clubecandeias.s3.sa-east-1.amazonaws.com/uploads/2017/08/museu-oscar-niemeyer-um-icone-de-curitiba.jpg" alt="Museu Oscar Niemeyer"><div class="trip-info"><strong>Museu Oscar Niemeyer</strong><span>▦ 25/11/2026</span><small>♟ 48 participantes</small><em class="status pending">Aguardando aprovação</em></div></article>
-              <article class="trip-preview"><img class="trip-photo" src="https://www.pg.pr.gov.br/files/_fotos/sao_jorge2.jpg" alt="Cachoeira do Salto São Jorge"><div class="trip-info"><strong>Cachoeira do Salto São Jorge</strong><span>▦ 12/12/2026</span><small>♟ 45 participantes</small><em class="status approved">Planejada</em></div></article>
+              <article class="trip-preview"><div class="trip-photo trip-photo-placeholder" role="img" aria-label="Foto não cadastrada">▣</div><div class="trip-info"><strong>Cachoeira do Salto São Jorge</strong><span>▦ 12/12/2026</span><small>♟ 45 participantes</small><em class="status approved">Planejada</em></div></article>
             </div>
           </section>
           <section class="panel dashboard-notices"><div class="panel-heading"><h2><span class="heading-icon">◀</span> Avisos do CEPK</h2><button class="text-button" data-go="usuarios">Ver todos <span>→</span></button></div>
@@ -1193,6 +1206,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
 <label style="display:grid;gap:6px;font-size:11px;font-weight:700">Destino<input id="trip-destination" required maxlength="80" placeholder="Destino" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
 <label style="display:grid;gap:6px;font-size:11px;font-weight:700">Data<input id="trip-date" type="date" required style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
 <label style="display:grid;gap:6px;font-size:11px;font-weight:700">Quantidade de alunos<input id="trip-students" type="number" min="1" max="500" required value="30" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Foto da viagem<input id="trip-photo" type="file" accept="image/*" style="height:40px;padding:7px;border:1px solid #dfe8e1;border-radius:7px"></label><div id="trip-photo-preview" class="trip-photo-preview" hidden></div>
 <label style="display:grid;gap:6px;font-size:11px;font-weight:700">Situação<select id="trip-status" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"><option>Planejada</option><option>Pendente</option><option>Aprovada</option></select></label>
 <label style="display:grid;gap:6px;font-size:11px;font-weight:700">Valor por pessoa (R$)<input id="trip-price" type="number" min="0" step="0.01" value="0" placeholder="Ex.: 150,00" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
 <label style="display:grid;gap:6px;font-size:11px;font-weight:700">Máximo de parcelas<input id="trip-installments" type="number" min="1" max="24" value="1" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
@@ -1200,7 +1214,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
 <button class="login-submit" type="submit" style="height:40px;margin:0">Adicionar viagem</button>
 </form><p id="trip-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div>
 <div class="panel"><div class="panel-heading"><div><p class="eyebrow">REGISTROS</p><h2>Viagens cadastradas</h2></div><span class="status planned" id="trip-count">3 viagens</span></div>
-<div class="table-wrap"><table><thead><tr><th>Viagem</th><th>Destino</th><th>Data</th><th>Alunos</th><th>Valor</th><th>Pagamento</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="trip-table-body"></tbody></table></div></div><div class="panel" id="trip-alarm-panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">LEMBRETE PESSOAL</p><h2>Alarme para acordar</h2></div></div>
+<div class="table-wrap"><table><thead><tr><th>Foto</th><th>Viagem</th><th>Destino</th><th>Data</th><th>Alunos</th><th>Valor</th><th>Pagamento</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="trip-table-body"></tbody></table></div></div><div class="panel" id="trip-alarm-panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">LEMBRETE PESSOAL</p><h2>Alarme para acordar</h2></div></div>
 <p class="alarm-explainer">Escolha uma viagem, ative o aviso e defina a hora em que deseja ser lembrado(a) de acordar.</p>
 <div class="alarm-controls"><label>Viagem<select id="alarm-trip"></select></label><label>Horário para acordar<input id="alarm-time" type="time" value="06:00"></label><label class="alarm-optin"><input id="alarm-enabled" type="checkbox"> Quero receber o alarme nesta viagem</label><button type="button" class="login-submit" id="save-alarm" style="width:auto;margin:0;padding:0 18px">Salvar meu alarme</button></div>
 <p id="alarm-feedback" class="inline-feedback" role="status"></p><p class="alarm-note">O aviso e o som funcionam enquanto o SGVE estiver aberto ou ativo. Permita notificações no navegador para receber o aviso visual.</p></div>
@@ -1295,9 +1309,11 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
   try { profileData = JSON.parse(localStorage.getItem('sgve-demo-profiles') || '{}') || {}; } catch (_) {}
   function setAvatar(element,name,photo){
     if(!element)return;
-    element.textContent='';
-    if(photo){const img=document.createElement('img');img.src=photo;img.alt='Foto de perfil';element.appendChild(img);element.classList.add('has-photo');}
-    else{element.classList.remove('has-photo');element.textContent=(name||'U').trim().charAt(0).toUpperCase();}
+    const target=element.id==='profile-menu'?document.getElementById('topbar-avatar'):element;
+    if(!target)return;
+    target.textContent='';
+    if(photo){const img=document.createElement('img');img.src=photo;img.alt='Foto de perfil';target.appendChild(img);target.classList.add('has-photo');}
+    else{target.classList.remove('has-photo');target.textContent=(name||'U').trim().charAt(0).toUpperCase();}
   }
   const login = document.getElementById('demo-login-form');
   let registerMode = false;
@@ -1510,6 +1526,15 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
   let trips = defaultTrips;
   try { trips = JSON.parse(localStorage.getItem('sgve-demo-trips') || 'null') || defaultTrips; } catch (_) {}
   const tripBody = document.getElementById('trip-table-body');
+  let pendingTripPhoto = '';
+  document.getElementById('trip-photo').addEventListener('change',function(){
+    const file=this.files&&this.files[0],msg=document.getElementById('trip-feedback'),preview=document.getElementById('trip-photo-preview');
+    pendingTripPhoto='';preview.innerHTML='';preview.hidden=true;
+    if(!file)return;
+    if(!file.type.startsWith('image/')){this.value='';msg.textContent='Escolha um arquivo de imagem.';return;}
+    if(file.size>1024*1024){this.value='';msg.textContent='A foto deve ter no máximo 1 MB.';return;}
+    const reader=new FileReader();reader.onload=()=>{pendingTripPhoto=String(reader.result||'');const img=document.createElement('img');img.src=pendingTripPhoto;img.alt='Prévia da foto da viagem';preview.appendChild(img);preview.hidden=false;msg.textContent='Foto selecionada. Ela será salva junto com a viagem.';};reader.readAsDataURL(file);
+  });
   function safeText(value) {
     return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   }
@@ -1518,6 +1543,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
   }
   function renderTrips() {
     tripBody.innerHTML = trips.map(t => {
+      const photoCell = t.photo ? '<img class="trip-table-photo" src="' + safeText(t.photo) + '" alt="Foto de ' + safeText(t.name) + '">' : '<span class="trip-table-photo-empty">▣</span>';
       const cls = t.status === 'Aprovada' ? 'approved' : t.status === 'Pendente' ? 'pending' : 'planned';
       const date = t.date ? t.date.split('-').reverse().join('/') : '—';
       const manager = ['administrador','direcao','secretaria'].includes(sessionStorage.getItem('sgve-demo-role'));
@@ -1529,7 +1555,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
       const priceText = Number(t.price)>0 ? Number(t.price).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'A definir';
       const methods = Array.isArray(t.paymentMethods) && t.paymentMethods.length ? t.paymentMethods.map(safeText).join(', ') : 'A combinar';
       const paySummary = priceText + '<br>' + Number(t.installments||1) + 'x no máximo';
-      return '<tr><td>' + safeText(t.name) + '</td><td>' + safeText(t.destination) + '</td><td>' + date + '</td><td>' + Number(t.students) + '</td><td class="trip-pay-summary">' + paySummary + '</td><td class="trip-pay-summary">' + methods + '</td><td>' + statusCell + '</td><td>' + action + '</td></tr>';
+      return '<tr><td>' + photoCell + '</td><td>' + safeText(t.name) + '</td><td>' + safeText(t.destination) + '</td><td>' + date + '</td><td>' + Number(t.students) + '</td><td class="trip-pay-summary">' + paySummary + '</td><td class="trip-pay-summary">' + methods + '</td><td>' + statusCell + '</td><td>' + action + '</td></tr>';
     }).join('');
     document.getElementById('trip-count').textContent = trips.length + (trips.length === 1 ? ' viagem' : ' viagens');
   }
@@ -1537,6 +1563,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
     event.preventDefault();
     const trip = {
       id: Date.now(),
+      photo: pendingTripPhoto,
       name: document.getElementById('trip-name').value.trim(),
       destination: document.getElementById('trip-destination').value.trim(),
       date: document.getElementById('trip-date').value,
@@ -1554,6 +1581,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
     renderAttendance();
     renderReports();
     this.reset();
+    pendingTripPhoto='';document.getElementById('trip-photo-preview').innerHTML='';document.getElementById('trip-photo-preview').hidden=true;
     document.getElementById('trip-feedback').textContent = 'Viagem adicionada ao protótipo deste navegador.';
   });
   tripBody.addEventListener('change', function (event) {
