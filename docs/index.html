@@ -1109,6 +1109,82 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
 .trip-request-button{border:0;border-radius:7px;padding:8px 10px;background:#176b45;color:#fff;font-size:10px;font-weight:700;white-space:nowrap}
 </style>
 
+<style>
+/* Formulários de cadastro: visual limpo, compacto e consistente */
+.page-view .panel:has(> form),
+.page-view .panel:has(form[id]){
+  border:1px solid var(--line)!important;
+  border-radius:16px!important;
+  padding:clamp(17px,2.5vw,26px)!important;
+  box-shadow:0 8px 26px #0000000a!important;
+}
+.page-view .panel:has(form[id]) .panel-heading{margin-bottom:22px!important}
+.page-view .panel:has(form[id]) .panel-heading h2{
+  font-family:'Space Grotesk','DM Sans',sans-serif;
+  font-size:19px;letter-spacing:-.035em;
+}
+.page-view form[id$="-form"]{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr))!important;
+  gap:17px!important;
+  align-items:end!important;
+}
+.page-view form[id$="-form"]>label{
+  display:grid!important;gap:8px!important;min-width:0;
+  color:var(--ink)!important;font-size:11px!important;font-weight:700!important;
+  letter-spacing:.005em;
+}
+.page-view form[id$="-form"] input:not([type="checkbox"]):not([type="radio"]),
+.page-view form[id$="-form"] select{
+  width:100%!important;min-width:0!important;height:46px!important;
+  padding:0 13px!important;border:1px solid var(--line)!important;
+  border-radius:10px!important;background:var(--bg)!important;
+  color:var(--ink)!important;font:500 12px 'DM Sans',sans-serif!important;
+  outline:none!important;box-shadow:none!important;
+  transition:border-color .18s,box-shadow .18s,background .18s!important;
+}
+.page-view form[id$="-form"] input::placeholder{color:var(--muted)!important;opacity:.8}
+.page-view form[id$="-form"] input:focus,
+.page-view form[id$="-form"] select:focus{
+  border-color:var(--green)!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 16%,transparent)!important;
+  background:var(--mint)!important;
+}
+.page-view form[id$="-form"] input[type="date"]{color-scheme:inherit}
+.page-view form[id$="-form"] input[type="file"]{
+  height:auto!important;min-height:46px!important;padding:8px!important;
+  font-size:11px!important;
+}
+.page-view form[id$="-form"] .login-submit{
+  width:100%;height:46px!important;margin:0!important;
+  border:0;border-radius:10px!important;
+  background:var(--green)!important;color:white!important;
+  box-shadow:0 5px 13px #145c3b20;
+  font-size:11px!important;font-weight:800!important;
+}
+.page-view form[id$="-form"] .login-submit:hover{filter:brightness(1.08)}
+.page-view form[id$="-form"] fieldset{
+  min-width:0;margin:0;padding:13px 14px 14px;
+  border:1px solid var(--line);border-radius:11px;
+}
+.page-view form[id$="-form"] fieldset legend{
+  padding:0 6px;color:var(--ink);font-size:10px;font-weight:800;
+}
+.page-view form[id$="-form"] fieldset label{
+  display:inline-flex;align-items:center;gap:7px;margin:5px 12px 3px 0;
+  color:var(--muted);font-size:11px;font-weight:600;
+}
+.page-view form[id$="-form"] input[type="checkbox"],
+.page-view form[id$="-form"] input[type="radio"]{accent-color:var(--green)}
+.page-view [id$="-feedback"]{
+  margin-top:15px!important;padding:0 2px;color:var(--green)!important;
+  font-size:11px!important;font-weight:650;line-height:1.5;
+}
+@media(max-width:600px){
+  .page-view form[id$="-form"]{grid-template-columns:1fr!important;gap:14px!important}
+  .page-view .panel:has(form[id]){padding:17px!important}
+}
+</style>
 </head>
 <body>
 <section class="login-screen" id="login-screen">
