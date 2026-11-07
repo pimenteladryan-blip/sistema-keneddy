@@ -490,6 +490,48 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
 }
 @media(max-width:390px){.nav-item{flex-basis:54px;min-width:54px}.hero-copy h1{font-size:20px}.hero-seal{width:68px;height:68px}.trip-photo{width:94px;height:70px;flex-basis:94px}}
 
+
+/* Ajuste de fidelidade à referência enviada: painel claro e proporções do mockup. */
+:root{color-scheme:light;--green:#08743a;--deep:#062f20;--mint:#eaf4ed;--ink:#14231a;--muted:#718078;--line:#dfe8e1;--bg:#f1f6f2}
+body{background:#f1f6f2;color:#14231a}
+.sidebar{width:210px;padding:25px 13px 18px;background:linear-gradient(180deg,#062f20 0%,#041f17 100%)}
+.main-area{margin-left:210px}
+.sidebar .brand{gap:9px;padding:0 5px}
+.sidebar .brand strong{font-size:17px}
+.sidebar .brand small{font-size:9px;line-height:1.35}
+.sidebar-seal,.school-seal-img{width:43px;height:43px;object-fit:contain;border-radius:50%;background:#fff}
+.sidebar-bottom .school-seal-img{width:34px;height:34px}
+.school-tag{margin:28px 7px 23px}
+.nav-item{min-height:42px;font-size:12px}
+.nav-item.active{background:linear-gradient(90deg,#0b8a3e,#08743a);box-shadow:none}
+.topbar{height:72px;padding:0 30px;background:#fff;border-color:#e1e9e2}
+.page-content{max-width:1440px;padding:0 30px 20px}
+.dashboard-hero{min-height:156px;margin:0 -30px 18px;padding:20px 30px;background-image:linear-gradient(90deg,rgba(255,255,255,.94),rgba(255,255,255,.76) 52%,rgba(255,255,255,.08)),url("https://cdn.dpontanews.com.br/midia/2024/04/30/1759285550532_3260331679437041498504538645176702949629573n_otimized.webp");background-position:center 45%;background-size:cover}
+.dashboard-hero:after{right:-65px;top:-90px;width:360px;height:300px;border-left:18px solid #07843c;border-right:18px solid #062f20}
+.hero-copy{border-left-color:#08743a}
+.hero-kicker{color:#075a30}
+.hero-copy h1{font-size:30px;color:#091b11}
+.hero-seal{width:112px;height:112px}
+.dashboard-stats .stat-card,.dashboard-trips,.dashboard-notices,.dashboard-calendar{background:#fff!important;border-color:#e1e8e2!important;color:#14231a!important;box-shadow:0 3px 12px #173c280a!important}
+.dashboard-stats .stat-card strong,.dashboard-trips .trip-info strong,.dashboard-notices .notice-item p,.dashboard-calendar .calendar-grid b{color:#101b14!important}
+.dashboard-stats .stat-card span:not(.stat-icon),.dashboard-trips .trip-info span,.dashboard-trips .trip-info small,.dashboard-notices .notice-item time{color:#536257!important}
+.trip-preview,.notice-item,.calendar-month{border-color:#e8eee9}
+.dashboard-columns{grid-template-columns:minmax(0,1.35fr) minmax(280px,.95fr);gap:13px}
+.dashboard-bottom{grid-template-columns:minmax(0,1fr) minmax(280px,.95fr);gap:13px}
+.mascot-promo{background:radial-gradient(circle at 15% 50%,#23a449,#064126 72%)}
+.prototype-note{background:#f0f7f1;border-color:#dcebe0}
+.prototype-note p{color:#718078}.prototype-note strong{color:#355a43}
+.page-footer{color:#87938a}
+@media(max-width:1050px){.sidebar{width:210px}.main-area{margin-left:210px}.page-content{padding-left:22px;padding-right:22px}.dashboard-hero{margin-left:-22px;margin-right:-22px;padding-left:22px;padding-right:22px}}
+@media(max-width:760px){
+ .sidebar{width:100%;height:70px}
+ .main-area{margin:0}
+ .page-content{padding:0 13px 16px}
+ .dashboard-hero{margin:0 -13px 13px;min-height:135px;padding:15px}
+ .dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .dashboard-columns,.dashboard-bottom{grid-template-columns:1fr}
+}
+
 </style>
 
 </head>
@@ -1093,8 +1135,13 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
     button.setAttribute('aria-label', light ? 'Mudar para tema escuro' : 'Mudar para tema claro');
     button.setAttribute('aria-pressed', String(light));
   }
-  let saved = 'dark';
-  try { saved = localStorage.getItem('sgve-theme-mode') || 'dark'; } catch (_) {}
+  // Migra a preferência escura antiga para o visual claro da referência CEPK.
+  let saved = 'light';
+  try {
+    const previous = localStorage.getItem('sgve-theme-mode');
+    saved = previous === 'dark' ? 'light' : (previous || 'light');
+    if (previous === 'dark' || !previous) localStorage.setItem('sgve-theme-mode', 'light');
+  } catch (_) {}
   applyTheme(saved);
   button.addEventListener('click', function(){
     const next = document.body.classList.contains('light-mode') ? 'dark' : 'light';
