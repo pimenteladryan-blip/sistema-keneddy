@@ -918,6 +918,33 @@ body.dark-mode .student-class-heading td{background:#142219!important;color:#f1f
 .mobile-theme-control{display:none;position:fixed;right:12px;bottom:calc(82px + env(safe-area-inset-bottom));z-index:1200;min-height:42px;padding:0 13px;align-items:center;gap:8px;border:1px solid #52715f;border-radius:999px;background:#10291d;color:#f0f7f2;box-shadow:0 5px 18px #0006;font:700 11px 'DM Sans',sans-serif}
 .student-class-heading td{padding:11px 12px!important;background:#eaf2ec;color:#17472f;font-weight:850}.student-class-heading span{float:right;font-size:10px;font-weight:600;opacity:.8}.student-call-number{font-variant-numeric:tabular-nums;font-weight:800}
 @media(max-width:760px){.mobile-theme-control{display:inline-flex!important}.sidebar .theme-toggle{display:none!important}}
+
+/* Controles do cabeçalho: notificações, tema e perfil */
+.topbar-actions{display:flex;align-items:center;gap:14px}
+.topbar-theme-slot{display:flex;align-items:center}
+.topbar-theme-slot .theme-toggle{
+ position:static!important;top:auto!important;right:auto!important;z-index:2!important;
+ display:inline-flex!important;align-items:center;gap:7px;min-height:36px;padding:0 10px;
+ border:1px solid var(--line);border-radius:999px;background:var(--mint);color:var(--ink);
+ box-shadow:none;font:700 10px 'DM Sans',sans-serif;cursor:pointer
+}
+.topbar-theme-slot .theme-toggle:hover{transform:translateY(-1px)}
+.notification-button{display:grid;place-items:center;width:36px;height:36px;padding:5px;cursor:pointer}
+.notification-button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+body.dark-mode .topbar-theme-slot .theme-toggle{background:#101a13;color:#f1f4f2;border-color:#34453a}
+body.light-mode .topbar-theme-slot .theme-toggle{background:#fff;color:#214b35;border-color:#d6e2d8}
+.mobile-theme-control{display:none!important}
+@media(max-width:760px){
+ .topbar-actions{gap:7px!important}
+ .topbar-theme-slot .theme-toggle{min-height:33px!important;width:34px!important;height:34px!important;padding:0!important;justify-content:center!important;gap:0!important}
+ .topbar-theme-slot .theme-label,.topbar-theme-slot .theme-switch-track{display:none!important}
+ .topbar-theme-slot .theme-icon{font-size:18px!important}
+ .notification-button{width:32px;height:32px;padding:4px}
+ .notification-button svg{width:20px;height:20px}
+ .notification-button i{width:16px;height:16px;font-size:9px}
+}
+@media(max-width:360px){.topbar-actions{gap:4px!important}.topbar-theme-slot .theme-toggle{width:30px!important;height:30px!important}.notification-button{width:28px;height:30px}}
+
 </style>
 
 </head>
@@ -970,12 +997,12 @@ body.dark-mode .student-class-heading td{background:#142219!important;color:#f1f
       <button class="nav-item" data-page="relatorios"><span>▥</span>Relatórios</button>
       <button class="nav-item" data-page="usuarios"><span>⚙</span>Usuários</button>
     </nav>
-    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button>
+
     <div class="sidebar-bottom"><img class="school-seal-img" src="./cepk-62.svg" alt=""><div><strong>Colégio Estadual</strong><small>Presidente Kennedy · Ponta Grossa/PR</small></div></div>
   </aside>
-  <button type="button" class="mobile-theme-control" id="mobile-theme-control" aria-label="Alternar tema"><span class="mobile-theme-icon">☾</span><span class="mobile-theme-label">Tema escuro</span></button>
+  
   <main class="main-area">
-    <header class="topbar"><div class="mobile-brand"><img class="mobile-seal" src="./cepk-62.svg" alt=""><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="topbar-actions"><button class="notification-button" type="button" aria-label="Notificações">♧<i>2</i></button><div class="profile"><span class="avatar">A</span><span><strong>Administrador</strong><small>Protótipo</small></span><button id="profile-menu" aria-label="Opções do perfil">⌄</button></div></div></header>
+    <header class="topbar"><div class="mobile-brand"><img class="mobile-seal" src="./cepk-62.svg" alt=""><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="topbar-actions"><button class="notification-button" type="button" aria-label="Notificações" title="Notificações"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i>2</i></button><div class="topbar-theme-slot">    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button></div><div class="profile"><span class="avatar">A</span><span><strong>Administrador</strong><small>Protótipo</small></span><button id="profile-menu" aria-label="Opções do perfil">⌄</button></div></div></header>
     <section class="page-content">
       <section class="page-view active" id="page-inicio">
         <div class="dashboard-hero">
