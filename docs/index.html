@@ -1031,6 +1031,7 @@ body.dark-mode .student-class-heading td{background:#142219!important;color:#f1f
 <div class="panel" style="margin-bottom:16px"><div class="panel-heading"><div><p class="eyebrow">NOVO CADASTRO</p><h2>Adicionar estudante de exemplo</h2></div></div>
 <form id="student-form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;align-items:end">
 <label style="display:grid;gap:6px;font-size:11px;font-weight:700">Nome fictício<input id="student-name" required maxlength="70" placeholder="Ex.: Estudante Demonstração" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
+<label style="display:grid;gap:6px;font-size:11px;font-weight:700">Nº da chamada<input id="student-roll" type="number" min="1" max="99" step="1" required value="1" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
 <label style="display:grid;gap:6px;font-size:11px;font-weight:700">Turma<select id="student-class" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"><option>6º ano A</option><option>7º ano A</option><option>8º ano A</option><option>9º ano A</option><option>1ª série A</option><option>2ª série B</option><option>3ª série A</option></select></label>
 <button class="login-submit" type="submit" style="height:40px;margin:0">Adicionar estudante</button>
 </form><p id="student-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div>
@@ -1339,10 +1340,10 @@ body.dark-mode .student-class-heading td{background:#142219!important;color:#f1f
   renderTrips();
 
   const defaultStudents = [
-    {id:1,name:'Aluno Exemplo 01',className:'1ª série A'},
-    {id:2,name:'Aluno Exemplo 02',className:'1ª série A'},
-    {id:3,name:'Aluno Exemplo 03',className:'2ª série B'},
-    {id:4,name:'Aluno Exemplo 04',className:'3ª série A'}
+    {id:1,name:'Aluno Exemplo 01',className:'1ª série A',callNumber:1},
+    {id:2,name:'Aluno Exemplo 02',className:'1ª série A',callNumber:2},
+    {id:3,name:'Aluno Exemplo 03',className:'2ª série B',callNumber:1},
+    {id:4,name:'Aluno Exemplo 04',className:'3ª série A',callNumber:1}
   ];
   let students = defaultStudents;
   try { students = JSON.parse(localStorage.getItem('sgve-demo-students') || 'null') || defaultStudents; } catch (_) {}
@@ -1354,7 +1355,7 @@ body.dark-mode .student-class-heading td{background:#142219!important;color:#f1f
     const manager = ['administrador','secretaria'].includes(sessionStorage.getItem('sgve-demo-role'));
     const collator = new Intl.Collator('pt-BR', {numeric:true,sensitivity:'base'});
     const grouped = new Map();
-    [...students].sort((a,b)=>collator.compare(a.className||'Sem turma',b.className||'Sem turma') || collator.compare(a.name,b.name)).forEach(student=>{
+    [...students].sort((a,b)=>collator.compare(a.className||'Sem turma',b.className||'Sem turma') || ((Number(a.callNumber)||999)-(Number(b.callNumber)||999)) || collator.compare(a.name,b.name)).forEach(student=>{
       const turma = student.className || 'Sem turma';
       if(!grouped.has(turma)) grouped.set(turma,[]);
       grouped.get(turma).push(student);
@@ -1363,7 +1364,8 @@ body.dark-mode .student-class-heading td{background:#142219!important;color:#f1f
     grouped.forEach((members,turma)=>{
       rows += '<tr class="student-class-heading"><td colspan="5">'+safeText(turma)+' <span>'+members.length+' aluno(s)</span></td></tr>';
       members.forEach((student,index)=>{
-        rows += '<tr><td class="student-call-number">'+String(index+1).padStart(2,'0')+'</td><td>'+safeText(student.name)+'</td><td>'+safeText(turma)+'</td><td><span class="status approved">Ativo</span></td><td>'+(manager?'<button type="button" data-student-delete="'+student.id+'" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button>':'—')+'</td></tr>';
+        const callNumber = Number(student.callNumber) || index+1;
+        rows += '<tr><td class="student-call-number">'+String(callNumber).padStart(2,'0')+'</td><td>'+safeText(student.name)+'</td><td>'+safeText(turma)+'</td><td><span class="status approved">Ativo</span></td><td>'+(manager?'<button type="button" data-student-delete="'+student.id+'" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button>':'—')+'</td></tr>';
       });
     });
     studentBody.innerHTML = rows || '<tr><td colspan="5">Nenhum estudante cadastrado.</td></tr>';
@@ -1373,8 +1375,13 @@ body.dark-mode .student-class-heading td{background:#142219!important;color:#f1f
     event.preventDefault();
     const name = document.getElementById('student-name').value.trim();
     const className = document.getElementById('student-class').value;
-    if (!name) return;
-    students.push({id:Date.now(),name,className});
+    const callNumber = Number(document.getElementById('student-roll').value);
+    if (!name || !Number.isInteger(callNumber) || callNumber < 1 || callNumber > 99) return;
+    if (students.some(s=>s.className===className && Number(s.callNumber)===callNumber)) {
+      document.getElementById('student-feedback').textContent = 'Esse número de chamada já está ocupado nesta turma.';
+      return;
+    }
+    students.push({id:Date.now(),name,className,callNumber});
     saveStudents();
     renderStudents();
     renderAttendance();
@@ -1511,7 +1518,7 @@ body.dark-mode .student-class-heading td{background:#142219!important;color:#f1f
     document.getElementById('report-vehicle-count').textContent = vehicles.length;
   }
   document.getElementById('export-trips').addEventListener('click', () => downloadCsv('sgve-viagens-demo.csv',['Viagem','Destino','Data','Alunos','Situação'],trips.map(t=>[t.name,t.destination,t.date,t.students,t.status])));
-  document.getElementById('export-students').addEventListener('click', () => downloadCsv('sgve-estudantes-demo.csv',['Estudante','Turma'],students.map(s=>[s.name,s.className])));
+  document.getElementById('export-students').addEventListener('click', () => downloadCsv('sgve-estudantes-demo.csv',['Nº da chamada','Estudante','Turma'],students.map(s=>[s.callNumber||'',s.name,s.className])));
   document.getElementById('export-auth').addEventListener('click', () => downloadCsv('sgve-autorizacoes-demo.csv',['Estudante','Viagem','Data','Situação'],authorizations.map(a=>[a.student,a.trip,a.date,a.status])));
   renderReports();
 
