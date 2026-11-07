@@ -491,45 +491,81 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
 @media(max-width:390px){.nav-item{flex-basis:54px;min-width:54px}.hero-copy h1{font-size:20px}.hero-seal{width:68px;height:68px}.trip-photo{width:94px;height:70px;flex-basis:94px}}
 
 
-/* Ajuste de fidelidade à referência enviada: painel claro e proporções do mockup. */
-:root{color-scheme:light;--green:#08743a;--deep:#062f20;--mint:#eaf4ed;--ink:#14231a;--muted:#718078;--line:#dfe8e1;--bg:#f1f6f2}
-body{background:#f1f6f2;color:#14231a}
-.sidebar{width:210px;padding:25px 13px 18px;background:linear-gradient(180deg,#062f20 0%,#041f17 100%)}
-.main-area{margin-left:210px}
-.sidebar .brand{gap:9px;padding:0 5px}
-.sidebar .brand strong{font-size:17px}
-.sidebar .brand small{font-size:9px;line-height:1.35}
-.sidebar-seal,.school-seal-img{width:43px;height:43px;object-fit:contain;border-radius:50%;background:#fff}
-.sidebar-bottom .school-seal-img{width:34px;height:34px}
-.school-tag{margin:28px 7px 23px}
-.nav-item{min-height:42px;font-size:12px}
-.nav-item.active{background:linear-gradient(90deg,#0b8a3e,#08743a);box-shadow:none}
-.topbar{height:72px;padding:0 30px;background:#fff;border-color:#e1e9e2}
-.page-content{max-width:1440px;padding:0 30px 20px}
-.dashboard-hero{min-height:156px;margin:0 -30px 18px;padding:20px 30px;background-image:linear-gradient(90deg,rgba(255,255,255,.94),rgba(255,255,255,.76) 52%,rgba(255,255,255,.08)),url("https://cdn.dpontanews.com.br/midia/2024/04/30/1759285550532_3260331679437041498504538645176702949629573n_otimized.webp");background-position:center 45%;background-size:cover}
-.dashboard-hero:after{right:-65px;top:-90px;width:360px;height:300px;border-left:18px solid #07843c;border-right:18px solid #062f20}
-.hero-copy{border-left-color:#08743a}
-.hero-kicker{color:#075a30}
-.hero-copy h1{font-size:30px;color:#091b11}
-.hero-seal{width:112px;height:112px}
-.dashboard-stats .stat-card,.dashboard-trips,.dashboard-notices,.dashboard-calendar{background:#fff!important;border-color:#e1e8e2!important;color:#14231a!important;box-shadow:0 3px 12px #173c280a!important}
-.dashboard-stats .stat-card strong,.dashboard-trips .trip-info strong,.dashboard-notices .notice-item p,.dashboard-calendar .calendar-grid b{color:#101b14!important}
-.dashboard-stats .stat-card span:not(.stat-icon),.dashboard-trips .trip-info span,.dashboard-trips .trip-info small,.dashboard-notices .notice-item time{color:#536257!important}
-.trip-preview,.notice-item,.calendar-month{border-color:#e8eee9}
-.dashboard-columns{grid-template-columns:minmax(0,1.35fr) minmax(280px,.95fr);gap:13px}
-.dashboard-bottom{grid-template-columns:minmax(0,1fr) minmax(280px,.95fr);gap:13px}
-.mascot-promo{background:radial-gradient(circle at 15% 50%,#23a449,#064126 72%)}
-.prototype-note{background:#f0f7f1;border-color:#dcebe0}
-.prototype-note p{color:#718078}.prototype-note strong{color:#355a43}
-.page-footer{color:#87938a}
-@media(max-width:1050px){.sidebar{width:210px}.main-area{margin-left:210px}.page-content{padding-left:22px;padding-right:22px}.dashboard-hero{margin-left:-22px;margin-right:-22px;padding-left:22px;padding-right:22px}}
-@media(max-width:760px){
- .sidebar{width:100%;height:70px}
- .main-area{margin:0}
- .page-content{padding:0 13px 16px}
- .dashboard-hero{margin:0 -13px 13px;min-height:135px;padding:15px}
- .dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
- .dashboard-columns,.dashboard-bottom{grid-template-columns:1fr}
+/* Versão mobile de verdade: navegação e distribuição próprias para celular.
+   Não altera o layout nem os estilos da tela de login. */
+@media (max-width: 900px), (pointer: coarse) and (hover: none) {
+  .app-shell .sidebar{
+    position:fixed!important;inset:auto 0 0 0!important;
+    width:100%!important;height:auto!important;min-height:66px!important;
+    padding:7px 5px calc(7px + env(safe-area-inset-bottom))!important;
+    display:block!important;border-radius:15px 15px 0 0;
+    background:linear-gradient(180deg,#0a482e,#062b1d)!important;
+    box-shadow:0 -7px 24px #00190d35;z-index:100!important;
+  }
+  .app-shell .sidebar .brand,.app-shell .sidebar .school-tag,
+  .app-shell .sidebar .menu-title,.app-shell .sidebar .sidebar-bottom,
+  .app-shell .sidebar .theme-toggle{display:none!important}
+  .app-shell .side-nav{
+    display:flex!important;flex-direction:row!important;align-items:center;
+    justify-content:flex-start!important;gap:3px!important;width:100%;height:54px;
+    margin:0!important;padding:0 2px 2px;overflow-x:auto;overflow-y:hidden;
+    scrollbar-width:none;overscroll-behavior-x:contain;
+  }
+  .app-shell .side-nav::-webkit-scrollbar{display:none}
+  .app-shell .nav-item{
+    display:flex!important;flex:1 0 66px!important;flex-direction:column!important;
+    justify-content:center;align-items:center;gap:3px!important;
+    min-width:60px!important;min-height:49px!important;width:auto!important;
+    padding:4px 3px!important;border-radius:9px!important;
+    color:#dcece2!important;font-size:9px!important;white-space:nowrap;
+    text-align:center;
+  }
+  .app-shell .nav-item span{width:auto!important;font-size:18px!important;line-height:1}
+  .app-shell .nav-item.active{background:#ffffff1c!important;box-shadow:inset 0 2px #a4e65d!important;color:#fff!important}
+  .app-shell .main-area{margin:0!important;min-height:100svh;padding:0 0 calc(88px + env(safe-area-inset-bottom))!important}
+  .app-shell .topbar{position:sticky;top:0;z-index:20;height:58px!important;
+    display:flex;gap:8px;padding:0 13px!important;background:#fff!important;
+    box-shadow:0 2px 8px #183c260a}
+  .app-shell .mobile-brand{display:flex!important;align-items:center;gap:7px;color:#0b6036;font-size:14px}
+  .app-shell .mobile-seal{display:block;width:31px;height:31px;object-fit:contain}
+  .app-shell .breadcrumb{display:none!important}
+  .app-shell .profile{margin-left:auto;gap:6px}
+  .app-shell .profile>span:nth-child(2),.app-shell .profile button{display:none!important}
+  .app-shell .topbar-actions{gap:10px}
+  .app-shell .page-content{width:100%;max-width:none;margin:0;padding:0 12px 15px!important}
+  .app-shell .dashboard-hero{min-height:142px;margin:0 -12px 12px!important;padding:15px 13px!important;background-position:center!important}
+  .app-shell .hero-copy{max-width:72%;padding-left:10px}
+  .app-shell .hero-kicker{font-size:7px;letter-spacing:.1em}
+  .app-shell .hero-welcome{font-size:11px}
+  .app-shell .hero-copy h1{font-size:clamp(20px,6vw,26px)}
+  .app-shell .hero-subtitle{font-size:8px}
+  .app-shell .hero-seal{width:72px;height:72px;margin:0 1px 0 5px}
+  .app-shell .dashboard-stats{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin-bottom:10px}
+  .app-shell .dashboard-stats .stat-card{min-width:0;min-height:88px;padding:10px!important;gap:8px!important}
+  .app-shell .dashboard-stats .stat-icon{width:33px;height:33px;flex-basis:33px;font-size:18px}
+  .app-shell .dashboard-stats .stat-card span:not(.stat-icon){font-size:9px;line-height:1.25}
+  .app-shell .dashboard-stats .stat-card strong{font-size:22px}
+  .app-shell .dashboard-columns,.app-shell .dashboard-bottom{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important;margin-top:10px}
+  .app-shell .dashboard-trips,.app-shell .dashboard-notices,.app-shell .dashboard-calendar{min-width:0;padding:13px!important}
+  .app-shell .trip-preview{gap:9px;padding:10px 0}
+  .app-shell .trip-photo{width:104px;height:76px;flex:0 0 104px}
+  .app-shell .trip-info{min-width:0}
+  .app-shell .trip-info strong{font-size:10px}
+  .app-shell .trip-info span,.app-shell .trip-info small{font-size:9px}
+  .app-shell .notice-item{gap:8px;padding:12px 0}
+  .app-shell .notice-item p{font-size:10px}
+  .app-shell .notice-item time{font-size:8px}
+  .app-shell .mascot-promo{min-height:155px}
+  .app-shell .mascot-promo img{height:145px}
+  .app-shell .prototype-note{align-items:flex-start;padding:11px}
+  .app-shell .page-footer{flex-direction:column;gap:5px;padding-bottom:8px}
+  .app-shell .table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .app-shell .placeholder-view{min-height:250px;padding:24px}
+}
+/* Em celular em modo paisagem, preservar leitura e não esmagar os cartões. */
+@media (max-width: 900px) and (orientation: landscape) {
+  .app-shell .dashboard-columns,.app-shell .dashboard-bottom{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .app-shell .dashboard-hero{min-height:120px}
 }
 
 </style>
@@ -1135,13 +1171,8 @@ body{background:#f1f6f2;color:#14231a}
     button.setAttribute('aria-label', light ? 'Mudar para tema escuro' : 'Mudar para tema claro');
     button.setAttribute('aria-pressed', String(light));
   }
-  // Migra a preferência escura antiga para o visual claro da referência CEPK.
-  let saved = 'light';
-  try {
-    const previous = localStorage.getItem('sgve-theme-mode');
-    saved = previous === 'dark' ? 'light' : (previous || 'light');
-    if (previous === 'dark' || !previous) localStorage.setItem('sgve-theme-mode', 'light');
-  } catch (_) {}
+  let saved = 'dark';
+  try { saved = localStorage.getItem('sgve-theme-mode') || 'dark'; } catch (_) {}
   applyTheme(saved);
   button.addEventListener('click', function(){
     const next = document.body.classList.contains('light-mode') ? 'dark' : 'light';
