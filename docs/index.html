@@ -1339,8 +1339,8 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
 
   function fillDemoEmail() {
     const account = accounts[roleSelect.value];
-    emailInput.value = account.email;
-    document.getElementById('demo-account-email').textContent = account.email;
+    emailInput.value = registerMode ? '' : account.email;
+    document.getElementById('demo-account-email').textContent = registerMode ? 'Informe seu e-mail pessoal ou institucional' : account.email;
   }
   roleSelect.addEventListener('change', fillDemoEmail);
   fillDemoEmail();
@@ -1417,6 +1417,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
   }
   registerToggle.addEventListener('click', function () {
     registerMode = !registerMode;
+    fillDemoEmail();
     registerNameField.hidden = false;
     registerNameInput.required = true;
     const proofField = document.getElementById('register-proof-field');
@@ -1474,7 +1475,7 @@ body.dark-mode .profile-edit-section small{color:#b3c5b8}
       error.textContent = 'Dados incorretos. Confira o perfil, o e-mail e a senha.';
       return;
     }
-    const activeAccount = validCustom ? {...accounts[role], role:customAccount.name} : demoAccount;
+    const activeAccount = validCustom ? {...accounts[role], email, role:customAccount.name} : demoAccount;
     const chosenName = displayNameInput || (validCustom ? customAccount.name : activeAccount.role);
     profileData[email] = {name:chosenName,photo:(profileData[email]&&profileData[email].photo) || ''};
     try { localStorage.setItem('sgve-demo-profiles',JSON.stringify(profileData)); } catch (_) { error.textContent='Não foi possível salvar seu perfil neste navegador.'; return; }
