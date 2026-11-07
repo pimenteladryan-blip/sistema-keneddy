@@ -1521,6 +1521,7 @@ body.dark-mode .trip-payment-methods,body.dark-mode .alarm-controls input[type=t
   }
   alarmTrip.addEventListener('change',loadAlarmPreference);
   document.getElementById('save-alarm').addEventListener('click',async()=>{
+    try{const AudioCtx=window.AudioContext||window.webkitAudioContext;if(AudioCtx){alarmAudioContext=alarmAudioContext||new AudioCtx();if(alarmAudioContext.state==='suspended')await alarmAudioContext.resume();}}catch(_){}
     const id=alarmTrip.value;
     if(!id){document.getElementById('alarm-feedback').textContent='Cadastre ou selecione uma viagem primeiro.';return;}
     if(alarmEnabled.checked && 'Notification' in window && Notification.permission==='default'){
