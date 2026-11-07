@@ -903,6 +903,21 @@ body.dark-mode .account-close{color:#d9e8de}
   .sidebar .theme-toggle .theme-label{display:inline!important}
 }
 
+body.dark-mode{color-scheme:dark!important;--green:#168354;--deep:#030805;--mint:#0b120d;--ink:#f1f4f2;--muted:#b4beb8;--line:#202d24;--bg:#050806;color:#f1f4f2!important;background:#050806!important}
+body.dark-mode .main-area,body.dark-mode .page-content,body.dark-mode .page-view{background:#050806!important;color:#f1f4f2!important}
+body.dark-mode .sidebar{background:#020e08!important;border-color:#18261d!important}
+body.dark-mode .topbar,body.dark-mode .panel,body.dark-mode .stat-card,body.dark-mode .placeholder-view,body.dark-mode .account-dialog,body.dark-mode .account-current,body.dark-mode .account-row,body.dark-mode .trip-date,body.dark-mode .quick-link,body.dark-mode .dashboard-hero{background:#0b120d!important;border-color:#202d24!important;color:#f1f4f2!important}
+body.dark-mode h1,body.dark-mode h2,body.dark-mode h3,body.dark-mode h4,body.dark-mode p,body.dark-mode label,body.dark-mode th,body.dark-mode td,body.dark-mode .panel-heading h2,body.dark-mode .trip-info strong,body.dark-mode .stat-card strong,body.dark-mode .quick-link strong,body.dark-mode .profile strong,body.dark-mode .breadcrumb strong,body.dark-mode .placeholder-view h1{color:#f1f4f2!important}
+body.dark-mode .subheading,body.dark-mode .eyebrow,body.dark-mode .breadcrumb,body.dark-mode .profile small,body.dark-mode .trip-info span,body.dark-mode .trip-info small,body.dark-mode .stat-card small,body.dark-mode .stat-card span:not(.stat-icon),body.dark-mode .page-footer,body.dark-mode .account-help,body.dark-mode .account-current small,body.dark-mode .account-row small{color:#b4beb8!important}
+body.dark-mode .hero-kicker,body.dark-mode .hero-subtitle,body.dark-mode .hero-welcome,body.dark-mode .login-kicker,body.dark-mode .login-brand small{color:#e1e7e3!important}
+body.dark-mode .status.approved{background:#183326!important;color:#d5e6db!important}body.dark-mode .status.pending{background:#3a301b!important;color:#f0dfb4!important}body.dark-mode .status.planned{background:#252e28!important;color:#d7dfd9!important}
+body.dark-mode .prototype-note{background:#0d1711!important;border-color:#26372d!important}body.dark-mode .prototype-note p,body.dark-mode .prototype-note strong{color:#d8e0da!important}
+body.dark-mode input,body.dark-mode select,body.dark-mode textarea{background:#070c08!important;color:#f1f4f2!important;border-color:#34453a!important}body.dark-mode input::placeholder,body.dark-mode textarea::placeholder{color:#aab5ad!important}
+body.dark-mode .theme-toggle,body.dark-mode .mobile-theme-control{background:#0b140e!important;color:#f1f4f2!important;border-color:#34453a!important}
+body.dark-mode .student-class-heading td{background:#142219!important;color:#f1f4f2!important}body.dark-mode .student-call-number{color:#e4ebe6!important}
+.mobile-theme-control{display:none;position:fixed;right:12px;bottom:calc(82px + env(safe-area-inset-bottom));z-index:1200;min-height:42px;padding:0 13px;align-items:center;gap:8px;border:1px solid #52715f;border-radius:999px;background:#10291d;color:#f0f7f2;box-shadow:0 5px 18px #0006;font:700 11px 'DM Sans',sans-serif}
+.student-class-heading td{padding:11px 12px!important;background:#eaf2ec;color:#17472f;font-weight:850}.student-class-heading span{float:right;font-size:10px;font-weight:600;opacity:.8}.student-call-number{font-variant-numeric:tabular-nums;font-weight:800}
+@media(max-width:760px){.mobile-theme-control{display:inline-flex!important}.sidebar .theme-toggle{display:none!important}}
 </style>
 
 </head>
@@ -958,6 +973,7 @@ body.dark-mode .account-close{color:#d9e8de}
     <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button>
     <div class="sidebar-bottom"><img class="school-seal-img" src="./cepk-62.svg" alt=""><div><strong>Colégio Estadual</strong><small>Presidente Kennedy · Ponta Grossa/PR</small></div></div>
   </aside>
+  <button type="button" class="mobile-theme-control" id="mobile-theme-control" aria-label="Alternar tema"><span class="mobile-theme-icon">☾</span><span class="mobile-theme-label">Tema escuro</span></button>
   <main class="main-area">
     <header class="topbar"><div class="mobile-brand"><img class="mobile-seal" src="./cepk-62.svg" alt=""><strong>SGVE</strong></div><div class="breadcrumb">Gestão escolar <span>/</span> <strong id="breadcrumb-page">Início</strong></div><div class="topbar-actions"><button class="notification-button" type="button" aria-label="Notificações">♧<i>2</i></button><div class="profile"><span class="avatar">A</span><span><strong>Administrador</strong><small>Protótipo</small></span><button id="profile-menu" aria-label="Opções do perfil">⌄</button></div></div></header>
     <section class="page-content">
@@ -976,7 +992,7 @@ body.dark-mode .account-close{color:#d9e8de}
           <section class="panel dashboard-trips"><div class="panel-heading"><h2><span class="heading-icon">▣</span> Próximas Viagens</h2><button class="text-button" data-go="viagens">Ver todas <span>→</span></button></div>
             <div class="trip-list">
               <article class="trip-preview"><img class="trip-photo" src="https://cdn-clubecandeias.s3.sa-east-1.amazonaws.com/uploads/2017/08/museu-oscar-niemeyer-um-icone-de-curitiba.jpg" alt="Museu Oscar Niemeyer"><div class="trip-info"><strong>Museu Oscar Niemeyer</strong><span>▦ 25/11/2026</span><small>♟ 48 participantes</small><em class="status pending">Aguardando aprovação</em></div></article>
-              <article class="trip-preview"><img class="trip-photo" src="https://i0.wp.com/trilhaselugares.com/wp-content/uploads/2018/08/Cachoeira-Rio-Sao-Jorge-Ponta-Grossa-12.jpg?fit=1024%2C768&amp;ssl=1" alt="Cachoeira do Salto São Jorge"><div class="trip-info"><strong>Cachoeira do Salto São Jorge</strong><span>▦ 12/12/2026</span><small>♟ 45 participantes</small><em class="status approved">Planejada</em></div></article>
+              <article class="trip-preview"><img class="trip-photo" src="https://www.pg.pr.gov.br/files/_fotos/sao_jorge2.jpg" alt="Cachoeira do Salto São Jorge"><div class="trip-info"><strong>Cachoeira do Salto São Jorge</strong><span>▦ 12/12/2026</span><small>♟ 45 participantes</small><em class="status approved">Planejada</em></div></article>
             </div>
           </section>
           <section class="panel dashboard-notices"><div class="panel-heading"><h2><span class="heading-icon">◀</span> Avisos do CEPK</h2><button class="text-button" data-go="usuarios">Ver todos <span>→</span></button></div>
@@ -1019,7 +1035,7 @@ body.dark-mode .account-close{color:#d9e8de}
 <button class="login-submit" type="submit" style="height:40px;margin:0">Adicionar estudante</button>
 </form><p id="student-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div>
 <div class="panel"><div class="panel-heading"><div><p class="eyebrow">REGISTROS FICTÍCIOS</p><h2>Estudantes</h2></div><span class="status planned" id="student-count">4 estudantes</span></div>
-<div class="table-wrap"><table><thead><tr><th>Estudante</th><th>Turma</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="student-table-body"></tbody></table></div></div></section>
+<div class="table-wrap"><table><thead><tr><th>Nº</th><th>Estudante</th><th>Turma</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="student-table-body"></tbody></table></div></div></section>
       <section class="page-view" id="page-autorizacoes"><div class="page-heading"><div><p class="eyebrow">DOCUMENTAÇÃO ESCOLAR</p><h1>Autorizações</h1><p class="subheading">Acompanhe o status das autorizações fictícias.</p></div></div>
 <div class="panel"><div class="panel-heading"><div><p class="eyebrow">CONTROLE DE AUTORIZAÇÕES</p><h2>Autorizações de exemplo</h2></div><span class="status planned">Dados fictícios</span></div>
 <div class="table-wrap"><table><thead><tr><th>Estudante</th><th>Viagem</th><th>Data</th><th>Situação</th><th>Atualizar</th></tr></thead><tbody id="authorization-table-body"></tbody></table></div>
@@ -1336,7 +1352,21 @@ body.dark-mode .account-close{color:#d9e8de}
   }
   function renderStudents() {
     const manager = ['administrador','secretaria'].includes(sessionStorage.getItem('sgve-demo-role'));
-    studentBody.innerHTML = students.map(s => '<tr><td>' + safeText(s.name) + '</td><td>' + safeText(s.className) + '</td><td><span class="status approved">Ativo</span></td><td>' + (manager ? '<button type="button" data-student-delete="' + s.id + '" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button>' : '—') + '</td></tr>').join('');
+    const collator = new Intl.Collator('pt-BR', {numeric:true,sensitivity:'base'});
+    const grouped = new Map();
+    [...students].sort((a,b)=>collator.compare(a.className||'Sem turma',b.className||'Sem turma') || collator.compare(a.name,b.name)).forEach(student=>{
+      const turma = student.className || 'Sem turma';
+      if(!grouped.has(turma)) grouped.set(turma,[]);
+      grouped.get(turma).push(student);
+    });
+    let rows = '';
+    grouped.forEach((members,turma)=>{
+      rows += '<tr class="student-class-heading"><td colspan="5">'+safeText(turma)+' <span>'+members.length+' aluno(s)</span></td></tr>';
+      members.forEach((student,index)=>{
+        rows += '<tr><td class="student-call-number">'+String(index+1).padStart(2,'0')+'</td><td>'+safeText(student.name)+'</td><td>'+safeText(turma)+'</td><td><span class="status approved">Ativo</span></td><td>'+(manager?'<button type="button" data-student-delete="'+student.id+'" style="border:0;background:none;color:#a33;font-size:10px;font-weight:700">Excluir</button>':'—')+'</td></tr>';
+      });
+    });
+    studentBody.innerHTML = rows || '<tr><td colspan="5">Nenhum estudante cadastrado.</td></tr>';
     document.getElementById('student-count').textContent = students.length + (students.length === 1 ? ' estudante' : ' estudantes');
   }
   document.getElementById('student-form').addEventListener('submit', function (event) {
@@ -1545,6 +1575,18 @@ body.dark-mode .account-close{color:#d9e8de}
     saved = previous || 'dark';
   } catch (_) {}
   applyTheme(saved);
+  const mobileButton = document.getElementById('mobile-theme-control');
+  function syncMobileTheme(){
+    if(!mobileButton) return;
+    const lightNow = document.body.classList.contains('light-mode');
+    mobileButton.querySelector('.mobile-theme-icon').textContent = lightNow ? '☀' : '☾';
+    mobileButton.querySelector('.mobile-theme-label').textContent = lightNow ? 'Tema claro' : 'Tema escuro';
+    mobileButton.setAttribute('aria-label', lightNow ? 'Mudar para tema escuro' : 'Mudar para tema claro');
+  }
+  const originalApplyTheme = applyTheme;
+  applyTheme = function(mode){ originalApplyTheme(mode); syncMobileTheme(); };
+  syncMobileTheme();
+  if(mobileButton) mobileButton.addEventListener('click',()=>button.click());
   button.addEventListener('click', function(){
     const next = document.body.classList.contains('light-mode') ? 'dark' : 'light';
     applyTheme(next);
