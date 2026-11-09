@@ -837,6 +837,12 @@ body.dark-mode input,body.dark-mode select,body.dark-mode textarea{background:#1
 body.dark-mode input::placeholder,body.dark-mode textarea::placeholder{color:#8fa598}
 body.dark-mode .theme-toggle{background:#183a2b;color:#eaf4ed;border-color:#42644f}
 body.dark-mode .login-screen{background:#0b1711}
+body.dark-mode .login-brand-panel{
+  background-image:
+    linear-gradient(90deg,rgba(3,18,10,.94) 0%,rgba(3,18,10,.82) 58%,rgba(3,18,10,.58) 100%),
+    url("https://cdn.dpontanews.com.br/midia/2024/04/30/1759285550532_3260331679437041498504538645176702949629573n_otimized.webp")!important;
+  background-position:center!important;background-size:cover!important;background-repeat:no-repeat!important;
+}
 body.dark-mode .login-form-side{background:linear-gradient(145deg,#102219,#0b1711)}
 body.dark-mode .login-card{background:#14271d;border-color:#294638;color:#edf5ef}
 body.dark-mode .login-card h2{color:#f0f7f2}
@@ -1701,7 +1707,7 @@ body.dark-mode .demo-verification-code{border-color:#42694e;background:#1b3826;c
       <h2>Bem-vindo ao SGVE</h2>
       <p class="login-description" id="login-description">Entre com sua conta ou crie um cadastro para acessar a demonstração.</p>
       <div class="login-field" id="register-name-field"><label for="register-name">Seu nome completo</label><input id="register-name" type="text" placeholder="Nome completo" autocomplete="name" maxlength="70" required></div>
-      <div class="login-field access-type-field"><label for="login-role">Tipo de acesso</label><div class="access-select-wrap"><span class="access-select-icon" aria-hidden="true">▦</span><select id="login-role" name="role" class="access-select" required><option value="administrador">Administrador</option><option value="direcao">Direção</option><option value="secretaria">Secretaria</option><option value="professor">Professor</option><option value="responsavel">Responsável</option><option value="estudante">Estudante</option></select><span class="access-select-arrow" aria-hidden="true">⌄</span></div><small class="access-type-hint">Escolha o perfil correspondente à sua função na escola.</small></div>
+      <div class="login-field access-type-field"><label for="login-role">Tipo de acesso</label><div class="access-select-wrap"><span class="access-select-icon" aria-hidden="true">▦</span><select id="login-role" name="role" class="access-select" required><option value="" disabled>Selecione seu perfil para continuar</option><option value="administrador">Administrador</option><option value="direcao">Direção</option><option value="secretaria">Secretaria</option><option value="professor">Professor</option><option value="responsavel">Responsável</option><option value="estudante">Estudante</option></select><span class="access-select-arrow" aria-hidden="true">⌄</span></div><small class="access-type-hint">Escolha o perfil correspondente à sua função na escola.</small></div>
       <div class="login-field"><label for="login-email">E-mail</label><input id="login-email" name="email" type="email" placeholder="seu@email.com" autocomplete="username" required></div>
       <div class="login-field"><label for="login-password">Senha</label><input id="login-password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required></div>
       <p id="login-error" class="login-error" role="alert" aria-live="polite"></p>
@@ -1890,6 +1896,23 @@ body.dark-mode .demo-verification-code{border-color:#42694e;background:#1b3826;c
   try { registeredAccounts = JSON.parse(localStorage.getItem('sgve-demo-accounts') || '{}') || {}; } catch (_) {}
   let registrationRequests = [];
   try { registrationRequests = JSON.parse(localStorage.getItem('sgve-demo-registration-requests') || '[]') || []; } catch (_) {}
+  const demoCodeAlphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  function createDemoVerificationCode() {
+    const bytes = new Uint8Array(6);
+    if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(bytes);
+    else for (let index = 0; index < bytes.length; index++) bytes[index] = Math.floor(Math.random() * 256);
+    return Array.from(bytes, value => demoCodeAlphabet[value % demoCodeAlphabet.length]).join('');
+  }
+  let normalizedRegistrationCodes = false;
+  registrationRequests.forEach(item => {
+    if (item && item.status === 'Pendente' && !item.verificationCode) {
+      item.verificationCode = createDemoVerificationCode();
+      normalizedRegistrationCodes = true;
+    }
+  });
+  if (normalizedRegistrationCodes) {
+    try { localStorage.setItem('sgve-demo-registration-requests', JSON.stringify(registrationRequests)); } catch (_) {}
+  }
   let migratedLegacyAccounts = false;
   Object.entries(registeredAccounts).forEach(([email,account],index)=>{
     if(account && account.status!=='approved'){
@@ -2008,6 +2031,8 @@ body.dark-mode .demo-verification-code{border-color:#42694e;background:#1b3826;c
   }
   registerToggle.addEventListener('click', function () {
     registerMode = !registerMode;
+    if (registerMode) roleSelect.value = '';
+    else if (!roleSelect.value) roleSelect.value = 'administrador';
     fillDemoEmail();
     registerNameField.hidden = !registerMode;
     registerNameInput.required = registerMode;
@@ -2029,7 +2054,8 @@ body.dark-mode .demo-verification-code{border-color:#42694e;background:#1b3826;c
       if (!displayNameInput) { error.textContent = 'Digite seu nome completo para continuar.'; registerNameInput.focus(); return; }
       const fullName = displayNameInput;
       if (!['professor','responsavel','estudante'].includes(role)) {
-        error.textContent = 'Por segurança, o cadastro público está disponível apenas para Professor, Responsável ou Estudante.';
+        error.textContent = 'Selecione Professor, Responsável ou Estudante para criar uma conta.';
+        roleSelect.focus();
         return;
       }
       if (!fullName || enteredPassword.length < 6) {
@@ -2047,16 +2073,13 @@ body.dark-mode .demo-verification-code{border-color:#42694e;background:#1b3826;c
         emailInput.focus();
         return;
       }
-      const codeAlphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      const randomBytes = new Uint8Array(6);
-      if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(randomBytes);
-      else for (let index=0; index<6; index++) randomBytes[index]=Math.floor(Math.random()*256);
-      const verificationCode = Array.from(randomBytes, value => codeAlphabet[value % codeAlphabet.length]).join('');
+      const verificationCode = createDemoVerificationCode();
       const newRequest = {id:Date.now(),name:fullName,role,email,verificationCode,password:enteredPassword,status:'Pendente',createdAt:new Date().toISOString()};
       const nextRequests = [...registrationRequests,newRequest];
       try {
         localStorage.setItem('sgve-demo-registration-requests', JSON.stringify(nextRequests));
         registrationRequests = nextRequests;
+        renderRegistrationRequests();
       } catch (_) {
         error.textContent = 'Não foi possível salvar a solicitação neste navegador. Verifique o espaço disponível e tente novamente.';
         return;
@@ -2595,6 +2618,13 @@ body.dark-mode .demo-verification-code{border-color:#42694e;background:#1b3826;c
     document.getElementById('registration-feedback').textContent=approve?'Cadastro aprovado. A pessoa já pode entrar com o e-mail e a senha cadastrados.':'Solicitação rejeitada.';
   });
   renderRegistrationRequests();
+  window.addEventListener('storage', event => {
+    if (event.key !== 'sgve-demo-registration-requests') return;
+    try {
+      registrationRequests = JSON.parse(event.newValue || '[]') || [];
+      renderRegistrationRequests();
+    } catch (_) {}
+  });
 
   document.getElementById('reset-demo-data').addEventListener('click', function () {
     if (!window.confirm('Restaurar os dados fictícios? Os registros criados neste navegador serão apagados.')) return;
