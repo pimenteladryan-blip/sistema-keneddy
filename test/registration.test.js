@@ -140,6 +140,9 @@ test('solicitação rejeitada não cria uma conta', async () => {
   });
   assert.equal(rejection.status, 200);
 
+  const resubmitted = await submitRequest(rejectedEmail);
+  assert.equal(resubmitted.status, 201);
+
   const login = await fetch(baseUrl + '/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: baseUrl },
