@@ -5,6 +5,7 @@ const express = require('express');
 const helmet = require('helmet');
 const { db, audit } = require('./db');
 const { hashPassword, verifyPassword, randomToken, sha256 } = require('./security');
+const { randomInt } = require('node:crypto');
 const { ROLE_LABELS, RECORD_MANAGERS, USER_MANAGERS, hasRole } = require('./access');
 
 const app = express();
@@ -29,6 +30,10 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const registrationAttempts = new Map();
 const REGISTRATION_WINDOW_MS = 60 * 60 * 1000;
 const MAX_REGISTRATION_ATTEMPTS = 5;
+const VERIFICATION_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function createVerificationCode() {
+  return Array.from({ length: 6 }, () => VERIFICATION_CODE_ALPHABET[randomInt(VERIFICATION_CODE_ALPHABET.length)]).join('');
+}
 function parseCookies(header = '') {
   return Object.fromEntries(header.split(';').map(part => {
     const index = part.indexOf('=');
@@ -139,13 +144,14 @@ app.post('/api/registration-requests', async (req, res, next) => {
       return res.status(409).json({ error: 'Já existe uma solicitação pendente para este e-mail.' });
     }
     const passwordHash = await hashPassword(password);
+    const verificationCode = createVerificationCode();
     if (previousRequest?.status === 'rejected') {
-      db.prepare("UPDATE registration_requests SET display_name = ?, password_hash = ?, role = ?, status = 'pending', reviewed_by = NULL, reviewed_at = NULL, created_at = CURRENT_TIMESTAMP WHERE id = ?")
-        .run(name, passwordHash, role, previousRequest.id);
+      db.prepare("UPDATE registration_requests SET display_name = ?, password_hash = ?, role = ?, verification_code = ?, status = 'pending', reviewed_by = NULL, reviewed_at = NULL, created_at = CURRENT_TIMESTAMP WHERE id = ?")
+        .run(name, passwordHash, role, verificationCode, previousRequest.id);
     } else {
-      db.prepare('INSERT INTO registration_requests (display_name, email, password_hash, role) VALUES (?, ?, ?, ?)').run(name, email, passwordHash, role);
+      db.prepare('INSERT INTO registration_requests (display_name, email, password_hash, role, verification_code) VALUES (?, ?, ?, ?, ?)').run(name, email, passwordHash, role, verificationCode);
     }
-    res.status(201).json({ message: 'Solicitação enviada. A conta ficará disponível depois da aprovação da administração.' });
+    res.status(201).json({ message: 'Solicitação enviada. Informe o código ao administrador para conferir seu cadastro. A conta só será liberada após a aprovação.', verificationCode });
   } catch (error) {
     if (String(error.message).includes('UNIQUE')) return res.status(409).json({ error: 'Já existe uma solicitação para este e-mail.' });
     next(error);
@@ -256,7 +262,7 @@ app.post('/api/users', requireAuth, requireCsrf, requireRoles(...USER_MANAGERS),
   }
 });
 app.get('/api/registration-requests', requireAuth, requireRoles('admin'), (_req, res) => {
-  const requests = db.prepare("SELECT id, display_name AS name, email, role, status, created_at FROM registration_requests WHERE status = 'pending' ORDER BY created_at ASC LIMIT 200").all();
+  const requests = db.prepare("SELECT id, display_name AS name, email, role, verification_code, status, created_at FROM registration_requests WHERE status = 'pending' ORDER BY created_at ASC LIMIT 200").all();
   res.json({ requests: requests.map(item => ({ ...item, roleLabel: ROLE_LABELS[item.role] })) });
 });
 app.post('/api/registration-requests/:id/approve', requireAuth, requireCsrf, requireRoles('admin'), (req, res) => {
