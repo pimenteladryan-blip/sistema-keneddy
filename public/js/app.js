@@ -130,7 +130,7 @@ async function loadRegistrationRequests() {
     count.textContent = String(data.requests.length);
     list.innerHTML = data.requests.length ? data.requests.map(item =>
       '<article class="data-row registration-request-row"><div class="registration-request-details"><strong>' + escapeHtml(item.name) + '</strong><span>' +
-      escapeHtml(item.email) + ' · ' + escapeHtml(item.roleLabel) + '</span><small>Recebida em ' + escapeHtml(dateLabel(item.created_at)) + '</small></div>' +
+      escapeHtml(item.email) + ' · ' + escapeHtml(item.roleLabel) + '</span><small>Código de conferência: <strong class="verification-code-badge">' + escapeHtml(item.verification_code) + '</strong></small><small>Recebida em ' + escapeHtml(dateLabel(item.created_at)) + '</small></div>' +
       '<div class="registration-actions"><button type="button" class="small-action" data-registration-action="approve" data-registration-id="' + item.id + '">Aprovar</button>' +
       '<button type="button" class="small-action reject-action" data-registration-action="reject" data-registration-id="' + item.id + '">Rejeitar</button></div></article>'
     ).join('') : '<p class="muted">Não há solicitações aguardando aprovação.</p>';
@@ -263,7 +263,7 @@ registrationForm.addEventListener('submit', async event => {
       body: JSON.stringify({ name: values.name, email: values.email, role: values.role, password: values.password })
     });
     registrationForm.reset();
-    showMessage('#registration-message', result.message);
+    showMessage('#registration-message', result.message + ' Código: ' + result.verificationCode);
   } catch (error) {
     showMessage('#registration-message', error.message, true);
   } finally {
