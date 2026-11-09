@@ -208,3 +208,88 @@ button:hover{background:var(--green-dark);box-shadow:0 5px 14px #06452f20;transf
  .dashboard-welcome-banner{min-height:76px}
  .dashboard-welcome-banner div span{font-size:9px}
 }
+
+
+/* Cadastro aprovado pelo servidor e controles de tema */
+.topline{flex-wrap:wrap;align-items:center}
+.theme-toggle{display:inline-flex;align-items:center;gap:7px;min-height:34px;margin:0 0 0 auto;padding:0 11px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-size:10px}
+.theme-toggle:hover{background:var(--green-soft);color:var(--green-dark);box-shadow:none;transform:none}
+.link-button{justify-self:center;min-height:36px;margin:7px auto 0;padding:0 8px;background:transparent;color:var(--green);font-size:12px}
+.link-button:hover{background:var(--green-soft);color:var(--green-dark);box-shadow:none;transform:none}
+.secondary-link{margin-top:0}
+.registration-form{margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}
+.registration-intro,.field-hint{margin:0;color:var(--muted);font-size:11px;line-height:1.6}
+.field-hint{margin-top:-3px}
+.registration-requests-section{margin-top:28px;padding-top:22px;border-top:1px solid var(--line)}
+.registration-request-row{align-items:center}
+.registration-request-details{display:grid;gap:5px;min-width:0}
+.registration-request-details strong{color:var(--ink)}
+.registration-request-details small{color:var(--muted);font-size:10px}
+.registration-actions{display:flex;flex-wrap:wrap;gap:7px}
+.small-action{min-height:34px;margin:0;padding:0 11px;font-size:10px}
+.reject-action{background:#8c3d3d}
+.reject-action:hover{background:#702d2d}
+body.dark-mode{
+  color-scheme:dark;
+  --ink:#e7eee9;--muted:#a5b3a9;--line:#304238;--green-soft:#1d3829;
+  background:#0c1711;color:var(--ink)
+}
+body.dark-mode .content-panel{background:#0c1711}
+body.dark-mode .topline{color:#a5b3a9}
+body.dark-mode .theme-toggle{border-color:#3b5143;background:#17251c;color:#e7eee9}
+body.dark-mode .theme-toggle:hover{background:#20382a;color:#d5f0dd}
+body.dark-mode .auth-card,
+body.dark-mode .module-panel,
+body.dark-mode .tabs,
+body.dark-mode .overview-card,
+body.dark-mode .data-row,
+body.dark-mode .trip-card{border-color:#304238;background:#15231a;color:#e7eee9}
+body.dark-mode .auth-card{box-shadow:0 18px 55px #00000035}
+body.dark-mode .login-school-mark strong{color:#a8d8b7}
+body.dark-mode .login-school-mark small,
+body.dark-mode .section-subtitle,
+body.dark-mode .overview-card small,
+body.dark-mode .data-row span,
+body.dark-mode .registration-request-details small{color:#a5b3a9}
+body.dark-mode label,
+body.dark-mode .choice-field legend{color:#d5e1d8}
+body.dark-mode input,
+body.dark-mode select{border-color:#3b5143;background:#101c15;color:#edf5ef}
+body.dark-mode input::placeholder{color:#829287}
+body.dark-mode input:focus,
+body.dark-mode select:focus{border-color:#72b889;box-shadow:0 0 0 3px #72b88925}
+body.dark-mode .button-secondary{border-color:#3b5143;background:#17251c;color:#e7eee9}
+body.dark-mode .button-secondary:hover{background:#20382a;color:#d5f0dd}
+body.dark-mode .tab{color:#a5b3a9}
+body.dark-mode .tab:hover,
+body.dark-mode .tab.active{background:#1d3829;color:#bde6c8}
+body.dark-mode .inline-form,
+body.dark-mode .privacy-note{border-color:#304238;background:#111e16}
+body.dark-mode .choice span{border-color:#3b5143;background:#17251c;color:#c2d0c6}
+body.dark-mode .choice input:checked+span{border-color:#72b889;background:#1d3829;color:#c9efd3}
+body.dark-mode .dashboard-welcome-banner{border-color:#31513c;background:linear-gradient(100deg,#183323,#14231a 68%,#1b3425)}
+body.dark-mode .dashboard-welcome-banner strong{color:#d7ebdc}
+body.dark-mode .dashboard-welcome-banner div span{color:#a5b3a9}
+body.dark-mode .banner-years{color:#a8d8b7}
+body.dark-mode .content-footer{border-color:#304238;color:#94a59a}
+body.dark-mode .login-mark,
+body.dark-mode .dashboard-mark{border-color:#8bd34e;background:#eaf4ed;color:#06452f}
+body.dark-mode .link-button{color:#a8d8b7}
+body.dark-mode .link-button:hover{background:#1d3829;color:#d5f0dd}
+body.dark-mode .registration-intro,
+body.dark-mode .field-hint{color:#a5b3a9}
+body.dark-mode .registration-requests-section{border-color:#304238}
+body.dark-mode .reject-action{background:#8c3d3d;color:#fff}
+@media(max-width:760px){
+  .topline{gap:8px;margin-bottom:25px}
+  .theme-toggle{min-height:33px;padding:0 9px}
+  .registration-request-row{align-items:stretch}
+  .registration-actions{width:100%}
+  .registration-actions button{flex:1}
+}
+@media(max-width:520px){
+  .topline{font-size:9px}
+  .theme-toggle{font-size:9px}
+  .registration-form{gap:7px}
+  .registration-actions{gap:6px}
+}
