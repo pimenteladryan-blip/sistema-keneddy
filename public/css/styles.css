@@ -293,3 +293,29 @@ body.dark-mode .reject-action{background:#8c3d3d;color:#fff}
   .registration-form{gap:7px}
   .registration-actions{gap:6px}
 }
+
+
+/* Código de conferência e seletores refinados */
+.verification-code-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  margin-left:5px;padding:5px 9px;border:1px solid #b9d8c2;
+  border-radius:7px;background:#edf7ef;color:#145c3b;
+  font:800 12px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;
+  letter-spacing:.16em;
+}
+select{
+  min-height:46px;padding:0 40px 0 13px;border:1px solid #cbd9ce;
+  border-radius:11px;background-color:#fbfdfb;color:var(--ink);
+  font-size:13px;font-weight:650;cursor:pointer;
+  box-shadow:0 2px 5px #173c2808;
+  transition:border-color .18s,box-shadow .18s,background .18s;
+}
+select:hover{border-color:#78a98a;background-color:#f5faf6}
+select:focus-visible{outline:3px solid #2b8a5630;outline-offset:2px;border-color:#23734a}
+body.dark-mode select{border-color:#405b49;background-color:#14231a;color:#e7eee9}
+body.dark-mode select:hover{border-color:#72b889;background-color:#1a3022}
+body.dark-mode .verification-code-badge{border-color:#42694e;background:#1b3826;color:#c9efd3}
+@media(max-width:520px){
+  .verification-code-badge{font-size:11px;letter-spacing:.13em}
+  select{min-height:48px;font-size:14px}
+}
