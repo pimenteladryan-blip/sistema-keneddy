@@ -2002,7 +2002,9 @@ body.dark-mode .login-error.success{color:#8bd5a2!important}
         error.textContent = 'Este e-mail já possui cadastro ou solicitação. Confira seus dados ou fale com a escola.';
         return;
       }
-      if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+      const atPosition = email.indexOf('@');
+      const lastDot = email.lastIndexOf('.');
+      if (atPosition < 1 || lastDot <= atPosition + 1 || lastDot === email.length - 1 || email.includes(' ')) {
         error.textContent = 'Informe um e-mail válido para continuar.';
         emailInput.focus();
         return;
