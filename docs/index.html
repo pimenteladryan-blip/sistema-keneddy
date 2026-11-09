@@ -1542,14 +1542,106 @@ body.dark-mode .access-select-arrow{color:#a9d7b5}
 body.dark-mode .access-type-hint{color:#a7b8ab}
 @media(max-width:760px){.access-select-wrap{min-height:54px}.access-select{height:52px}}
 
-/* Mascote do CEPK sempre visível nos dois temas */
-.login-brand-panel > .login-mascot,
-body.dark-mode .login-brand-panel > .login-mascot,
-body.light-mode .login-brand-panel > .login-mascot{
+/* Ajustes finais da entrada: mascote em primeiro plano e seletor limpo */
+.login-brand-panel{
+  position:relative!important;
+  isolation:isolate!important;
+  overflow:hidden!important;
+}
+.login-brand-panel:after{
+  z-index:0!important;
+  pointer-events:none!important;
+}
+.login-brand-panel>.login-brand,
+.login-brand-panel>.login-intro,
+.login-brand-panel>.login-brand-footer{
+  position:relative!important;
+  z-index:3!important;
+}
+.login-brand-panel>.login-mascot,
+body.dark-mode .login-brand-panel>.login-mascot,
+body.light-mode .login-brand-panel>.login-mascot{
   display:block!important;
+  position:absolute!important;
+  z-index:2!important;
+  right:clamp(16px,4%,48px)!important;
+  bottom:clamp(14px,5%,48px)!important;
+  width:min(32%,330px)!important;
+  max-width:330px!important;
+  height:auto!important;
+  max-height:52%!important;
+  object-fit:contain!important;
+  object-position:center bottom!important;
   visibility:visible!important;
   opacity:1!important;
   filter:drop-shadow(0 14px 20px #001a0c70)!important;
+}
+.access-type-field{gap:8px!important}
+.access-type-field>label{
+  color:#30483a!important;
+  font-size:11px!important;
+  font-weight:750!important;
+  letter-spacing:.02em!important;
+}
+.access-select-wrap{
+  display:block!important;
+  min-height:54px!important;
+  border:1px solid #d9e5dc!important;
+  border-radius:11px!important;
+  background:#fff!important;
+  box-shadow:0 2px 7px #173c2808!important;
+  transition:border-color .18s,box-shadow .18s!important;
+}
+.access-select-wrap:hover{border-color:#a9c9b2!important;background:#fff!important}
+.access-select-wrap:focus-within{
+  border-color:#328253!important;
+  box-shadow:0 0 0 3px #32825318!important;
+}
+.access-select-icon{display:none!important}
+.access-select{
+  display:block!important;
+  width:100%!important;
+  height:53px!important;
+  padding:0 46px 0 15px!important;
+  border:0!important;
+  border-radius:11px!important;
+  outline:0!important;
+  background:transparent!important;
+  color:#263d2e!important;
+  font:600 13px 'DM Sans','Segoe UI',Arial,sans-serif!important;
+  appearance:none!important;
+  -webkit-appearance:none!important;
+}
+.access-select option{background:#fff!important;color:#263d2e!important}
+.access-select-arrow{
+  right:16px!important;
+  color:#52745d!important;
+  font-size:18px!important;
+}
+.access-type-hint{margin-top:2px!important;color:#7d8c81!important;font-size:10px!important}
+body.dark-mode .access-type-field>label{color:#dce9df!important}
+body.dark-mode .access-select-wrap{
+  border-color:#344b3b!important;
+  background:#17251d!important;
+  box-shadow:none!important;
+}
+body.dark-mode .access-select-wrap:hover{border-color:#527d5e!important;background:#192a20!important}
+body.dark-mode .access-select{color:#edf5ef!important}
+body.dark-mode .access-select option{background:#17251d!important;color:#edf5ef!important}
+body.dark-mode .access-select-arrow{color:#a9cbb1!important}
+body.dark-mode .access-type-hint{color:#a7b8ab!important}
+body.dark-mode .login-error.success{color:#8bd5a2!important}
+.login-error.success{color:#26734a!important}
+@media(max-width:760px){
+  .login-brand-panel>.login-mascot,
+  body.dark-mode .login-brand-panel>.login-mascot,
+  body.light-mode .login-brand-panel>.login-mascot{
+    right:12px!important;
+    bottom:10px!important;
+    width:min(29%,120px)!important;
+    max-height:48%!important;
+  }
+  .login-brand-panel>.login-intro{max-width:66%!important}
 }
 </style>
 </head>
@@ -1884,10 +1976,12 @@ body.light-mode .login-brand-panel > .login-mascot{
     registerToggle.textContent = registerMode ? 'Já tenho uma conta' : 'Criar uma conta';
     loginDescription.textContent = registerMode ? 'Preencha seus dados para criar uma conta neste navegador.' : 'Entre com sua conta ou crie um cadastro para acessar a demonstração.';
     document.getElementById('login-password').autocomplete = registerMode ? 'new-password' : 'current-password';
+    error.classList.remove('success');
     error.textContent = '';
   });
   login.addEventListener('submit', function (event) {
     event.preventDefault();
+    error.classList.remove('success');
     const role = roleSelect.value;
     const email = emailInput.value.trim().toLowerCase();
     const enteredPassword = document.getElementById('login-password').value;
@@ -1908,9 +2002,20 @@ body.light-mode .login-brand-panel > .login-mascot{
         error.textContent = 'Este e-mail já possui cadastro ou solicitação. Confira seus dados ou fale com a escola.';
         return;
       }
-      registrationRequests.push({id:Date.now(),name:fullName,role,email,proof,password:enteredPassword,status:'Pendente',createdAt:new Date().toISOString()});
-      try { localStorage.setItem('sgve-demo-registration-requests', JSON.stringify(registrationRequests)); }
-      catch (_) { error.textContent = 'Não foi possível enviar a solicitação neste navegador.'; return; }
+      if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+        error.textContent = 'Informe um e-mail válido para continuar.';
+        emailInput.focus();
+        return;
+      }
+      const newRequest = {id:Date.now(),name:fullName,role,email,proof,password:enteredPassword,status:'Pendente',createdAt:new Date().toISOString()};
+      const nextRequests = [...registrationRequests,newRequest];
+      try {
+        localStorage.setItem('sgve-demo-registration-requests', JSON.stringify(nextRequests));
+        registrationRequests = nextRequests;
+      } catch (_) {
+        error.textContent = 'Não foi possível salvar a solicitação neste navegador. Verifique o espaço disponível e tente novamente.';
+        return;
+      }
       registerMode = false;
       registerNameInput.required = true;
       document.getElementById('register-proof-field').hidden = true;
@@ -1920,7 +2025,8 @@ body.light-mode .login-brand-panel > .login-mascot{
       registerToggle.textContent = 'Criar uma conta';
       loginDescription.textContent = 'Solicitação enviada para análise da administração.';
       document.getElementById('login-password').autocomplete = 'current-password';
-      error.textContent = 'Solicitação enviada! Sua conta só poderá entrar depois da aprovação do administrador.';
+      error.classList.add('success');
+      error.textContent = 'Solicitação enviada com sucesso! Aguarde a aprovação do administrador para entrar.';
       return;
     }
     const demoAccount = accounts[role];
@@ -2473,7 +2579,10 @@ body.light-mode .login-brand-panel > .login-mascot{
     });
   }
   let saved='dark';
-  try{localStorage.setItem('sgve-theme-mode','dark');}catch(_){}
+  try{
+    const stored=localStorage.getItem('sgve-theme-mode');
+    if(stored==='light'||stored==='dark') saved=stored;
+  }catch(_){}
   applyTheme(saved);
   buttons.forEach(button=>button.addEventListener('click',()=>{
     const next=document.body.classList.contains('light-mode')?'dark':'light';
