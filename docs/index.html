@@ -1665,6 +1665,27 @@ body.dark-mode .login-error.success{color:#8bd5a2!important}
   .login-brand-panel>.login-intro{max-width:66%!important}
 }
 </style>
+<style>
+/* Seletores com aparência de controle moderno, acessíveis nos dois temas */
+.access-select-wrap{position:relative;isolation:isolate}
+.access-select{
+  width:100%;min-height:51px;padding:0 43px 0 45px!important;
+  appearance:none;-webkit-appearance:none;border:1px solid #cbdccf!important;
+  border-radius:12px!important;background:linear-gradient(180deg,#fff,#f5faf6)!important;
+  color:#214b32!important;font-size:13px!important;font-weight:750!important;
+  letter-spacing:.01em;box-shadow:0 4px 12px #173c280d;
+  cursor:pointer;transition:border-color .18s,box-shadow .18s,transform .18s;
+}
+.access-select:hover{border-color:#75a987!important;box-shadow:0 6px 16px #173c2814}
+.access-select:focus-visible{outline:3px solid #2c8c5730!important;outline-offset:2px}
+.access-select-icon{position:absolute;left:15px;top:50%;z-index:2;transform:translateY(-50%);color:#28744a;font-size:17px;pointer-events:none}
+.access-select-arrow{position:absolute;right:15px;top:50%;z-index:2;color:#28744a;font-size:18px;pointer-events:none}
+.demo-verification-code{display:inline-flex;padding:5px 9px;border:1px solid #b9d8c2;border-radius:7px;background:#edf7ef;color:#145c3b;font:800 12px ui-monospace,Consolas,monospace;letter-spacing:.15em}
+body.dark-mode .access-select{border-color:#456653!important;background:linear-gradient(180deg,#1a2c21,#142219)!important;color:#e1f1e5!important;box-shadow:0 4px 14px #0003}
+body.dark-mode .access-select-icon,body.dark-mode .access-select-arrow{color:#9cdbad}
+body.dark-mode .demo-verification-code{border-color:#42694e;background:#1b3826;color:#c9efd3}
+@media(max-width:760px){.access-select{min-height:49px;font-size:14px!important}.access-select-wrap{width:100%}}
+</style>
 </head>
 <body>
 <section class="login-screen" id="login-screen">
@@ -1680,7 +1701,6 @@ body.dark-mode .login-error.success{color:#8bd5a2!important}
       <h2>Bem-vindo ao SGVE</h2>
       <p class="login-description" id="login-description">Entre com sua conta ou crie um cadastro para acessar a demonstração.</p>
       <div class="login-field" id="register-name-field"><label for="register-name">Seu nome completo</label><input id="register-name" type="text" placeholder="Nome completo" autocomplete="name" maxlength="70" required></div>
-      <div class="login-field" id="register-proof-field" hidden><label for="register-proof">Identificação para conferência</label><input id="register-proof" type="text" placeholder="Matrícula, código de vínculo ou identificação institucional" maxlength="100"><small style="color:#829087;font-size:10px;line-height:1.5">A escola usará essa informação para conferir seu vínculo antes de liberar a conta.</small></div>
       <div class="login-field access-type-field"><label for="login-role">Tipo de acesso</label><div class="access-select-wrap"><span class="access-select-icon" aria-hidden="true">▦</span><select id="login-role" name="role" class="access-select" required><option value="administrador">Administrador</option><option value="direcao">Direção</option><option value="secretaria">Secretaria</option><option value="professor">Professor</option><option value="responsavel">Responsável</option><option value="estudante">Estudante</option></select><span class="access-select-arrow" aria-hidden="true">⌄</span></div><small class="access-type-hint">Escolha o perfil correspondente à sua função na escola.</small></div>
       <div class="login-field"><label for="login-email">E-mail</label><input id="login-email" name="email" type="email" placeholder="seu@email.com" autocomplete="username" required></div>
       <div class="login-field"><label for="login-password">Senha</label><input id="login-password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required></div>
@@ -1843,7 +1863,7 @@ body.dark-mode .login-error.success{color:#8bd5a2!important}
 </tbody></table></div>
 <p style="margin:14px 0 0;color:#7a887f;font-size:10px;line-height:1.7">Senha demonstrativa comum: <strong>Kennedy2026</strong>. Não são contas reais e não devem ser usadas para proteger dados.</p>
 </div>
-<div class="panel" id="registration-requests-panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">CONTROLE DE ACESSO</p><h2>Solicitações de cadastro</h2><p class="subheading">Confira os dados informados e aprove somente quem tiver vínculo confirmado com a escola.</p></div><span class="status pending" id="registration-pending-count">0 pendentes</span></div><div class="table-wrap"><table><thead><tr><th>Nome</th><th>Perfil solicitado</th><th>E-mail</th><th>Identificação informada</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="registration-requests-body"><tr><td colspan="6">Nenhuma solicitação recebida.</td></tr></tbody></table></div><p id="registration-feedback" role="status" style="font-size:10px;color:#70d5a1;margin:12px 0 0"></p><p style="font-size:10px;color:#9aaba1;line-height:1.6;margin:10px 0 0">Protótipo: os pedidos ficam salvos somente neste navegador. A aprovação não confirma identidade de verdade nem substitui a validação oficial da escola.</p></div>
+<div class="panel" id="registration-requests-panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">CONTROLE DE ACESSO</p><h2>Solicitações de cadastro</h2><p class="subheading">Confira os dados informados e aprove somente quem tiver vínculo confirmado com a escola.</p></div><span class="status pending" id="registration-pending-count">0 pendentes</span></div><div class="table-wrap"><table><thead><tr><th>Nome</th><th>Perfil solicitado</th><th>E-mail</th><th>Código de conferência</th><th>Situação</th><th>Ações</th></tr></thead><tbody id="registration-requests-body"><tr><td colspan="6">Nenhuma solicitação recebida.</td></tr></tbody></table></div><p id="registration-feedback" role="status" style="font-size:10px;color:#70d5a1;margin:12px 0 0"></p><p style="font-size:10px;color:#9aaba1;line-height:1.6;margin:10px 0 0">Protótipo: os pedidos ficam salvos somente neste navegador. A aprovação não confirma identidade de verdade nem substitui a validação oficial da escola.</p></div>
 <div class="panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">MANUTENÇÃO DO PROTÓTIPO</p><h2>Reiniciar dados locais</h2></div></div>
 <p style="color:#7a887f;font-size:11px;line-height:1.7">Apaga viagens, estudantes, autorizações, veículos, professores e frequências criados neste navegador e restaura os exemplos iniciais.</p>
 <button class="login-submit" id="reset-demo-data" style="width:auto;padding:0 18px;margin:0;background:#8b3b32">Restaurar dados de exemplo</button>
@@ -1991,10 +2011,6 @@ body.dark-mode .login-error.success{color:#8bd5a2!important}
     fillDemoEmail();
     registerNameField.hidden = !registerMode;
     registerNameInput.required = registerMode;
-    const proofField = document.getElementById('register-proof-field');
-    const proofInput = document.getElementById('register-proof');
-    if (proofField) proofField.hidden = !registerMode;
-    if (proofInput) proofInput.required = registerMode;
     loginSubmitButton.textContent = registerMode ? 'Criar minha conta' : 'Entrar no sistema →';
     registerToggle.textContent = registerMode ? 'Já tenho uma conta' : 'Criar uma conta';
     loginDescription.textContent = registerMode ? 'Preencha seus dados para criar uma conta neste navegador.' : 'Entre com sua conta ou crie um cadastro para acessar a demonstração.';
@@ -2016,9 +2032,8 @@ body.dark-mode .login-error.success{color:#8bd5a2!important}
         error.textContent = 'Por segurança, o cadastro público está disponível apenas para Professor, Responsável ou Estudante.';
         return;
       }
-      const proof = document.getElementById('register-proof').value.trim();
-      if (!fullName || enteredPassword.length < 6 || !proof) {
-        error.textContent = 'Informe seu nome completo, a identificação solicitada e uma senha com pelo menos 6 caracteres.';
+      if (!fullName || enteredPassword.length < 6) {
+        error.textContent = 'Informe seu nome completo e uma senha com pelo menos 6 caracteres.';
         return;
       }
       if (registeredAccounts[email] || registrationRequests.some(item => item.email === email && item.status !== 'rejected') || Object.values(accounts).some(item => item.email === email)) {
@@ -2032,7 +2047,12 @@ body.dark-mode .login-error.success{color:#8bd5a2!important}
         emailInput.focus();
         return;
       }
-      const newRequest = {id:Date.now(),name:fullName,role,email,proof,password:enteredPassword,status:'Pendente',createdAt:new Date().toISOString()};
+      const codeAlphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      const randomBytes = new Uint8Array(6);
+      if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(randomBytes);
+      else for (let index=0; index<6; index++) randomBytes[index]=Math.floor(Math.random()*256);
+      const verificationCode = Array.from(randomBytes, value => codeAlphabet[value % codeAlphabet.length]).join('');
+      const newRequest = {id:Date.now(),name:fullName,role,email,verificationCode,password:enteredPassword,status:'Pendente',createdAt:new Date().toISOString()};
       const nextRequests = [...registrationRequests,newRequest];
       try {
         localStorage.setItem('sgve-demo-registration-requests', JSON.stringify(nextRequests));
@@ -2045,15 +2065,12 @@ body.dark-mode .login-error.success{color:#8bd5a2!important}
       registerNameField.hidden = true;
       registerNameInput.required = false;
       registerNameInput.value = '';
-      document.getElementById('register-proof-field').hidden = true;
-      document.getElementById('register-proof').required = false;
-      document.getElementById('register-proof').value = '';
       loginSubmitButton.textContent = 'Entrar no sistema →';
       registerToggle.textContent = 'Criar uma conta';
       loginDescription.textContent = 'Solicitação enviada para análise da administração.';
       document.getElementById('login-password').autocomplete = 'current-password';
       error.classList.add('success');
-      error.textContent = 'Solicitação enviada com sucesso! Aguarde a aprovação do administrador para entrar.';
+      error.textContent = 'Solicitação enviada! Seu código de conferência é ' + verificationCode + '. Informe-o ao administrador e aguarde a aprovação para entrar.';
       return;
     }
     const demoAccount = accounts[role];
@@ -2554,7 +2571,7 @@ body.dark-mode .login-error.success{color:#8bd5a2!important}
       const actions=item.status==='Pendente'
         ? '<button type="button" data-registration-approve="'+item.id+'" style="border:0;border-radius:6px;padding:7px 9px;background:#176541;color:white;font-size:10px;font-weight:700;margin:2px">Aprovar</button><button type="button" data-registration-reject="'+item.id+'" style="border:0;border-radius:6px;padding:7px 9px;background:#713b35;color:white;font-size:10px;font-weight:700;margin:2px">Rejeitar</button>'
         : '<span class="status '+(item.status==='Aprovada'?'approved':'planned')+'">'+safeText(item.status)+'</span>';
-      return '<tr><td>'+safeText(item.name)+'</td><td>'+safeText(roleNames[item.role]||item.role)+'</td><td>'+safeText(item.email)+'</td><td>'+safeText(item.proof)+'</td><td><span class="status '+(item.status==='Pendente'?'pending':item.status==='Aprovada'?'approved':'planned')+'">'+safeText(item.status)+'</span></td><td>'+actions+'</td></tr>';
+      return '<tr><td>'+safeText(item.name)+'</td><td>'+safeText(roleNames[item.role]||item.role)+'</td><td>'+safeText(item.email)+'</td><td><strong class="demo-verification-code">'+safeText(item.verificationCode||'—')+'</strong></td><td><span class="status '+(item.status==='Pendente'?'pending':item.status==='Aprovada'?'approved':'planned')+'">'+safeText(item.status)+'</span></td><td>'+actions+'</td></tr>';
     }).join(''):'<tr><td colspan="6">Nenhuma solicitação recebida.</td></tr>';
   }
   const registrationBody=document.getElementById('registration-requests-body');
