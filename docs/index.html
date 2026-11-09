@@ -1266,6 +1266,27 @@ body.dark-mode .theme-toggle{background:#17251c!important;color:#e8f1eb!importan
   body.dark-mode .stat-card,
   body.dark-mode .placeholder-view{background:#142019!important}
 }
+
+
+/* Correção de cadastro/login e responsividade da tela publicada */
+#register-name-field[hidden],#register-proof-field[hidden]{display:none!important}
+.login-card .register-toggle{min-height:44px;transition:background .18s,border-color .18s,transform .18s}
+.login-card .register-toggle:focus-visible{outline:3px solid #78bd8d;outline-offset:3px}
+body.light-mode .login-card .register-toggle{background:#f0f4e9;border-color:#cbd5b7;color:#52672f}
+body.light-mode .login-card .register-toggle:hover{background:#e2e9d2;border-color:#a8ba88}
+body.dark-mode .login-card .register-toggle{background:#183a2b;border-color:#42644f;color:#d9f0df}
+body.dark-mode .login-card .register-toggle:hover{background:#234a35;border-color:#6aa17a}
+@media(max-width:760px){
+  .login-screen{width:100%;min-height:100svh}
+  .login-form-side{width:100%;min-width:0;padding:22px 15px 32px}
+  .login-card{width:min(100%,460px);padding:25px 19px}
+  .login-brand-panel>.login-mascot,body.dark-mode .login-brand-panel>.login-mascot,body.light-mode .login-brand-panel>.login-mascot{width:min(28vw,112px)!important;right:10px!important;bottom:8px!important}
+  .login-brand-panel>.login-intro{max-width:calc(100% - 92px)!important}
+  .table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #registration-requests-panel table{min-width:680px}
+}
+@media(max-width:380px){.login-card{padding:22px 15px}.login-intro h1{font-size:29px}}
+
 </style>
 
 <style>
@@ -1876,6 +1897,8 @@ body.dark-mode .login-error.success{color:#8bd5a2!important}
   let registerMode = false;
   const registerNameField = document.getElementById('register-name-field');
   const registerNameInput = document.getElementById('register-name');
+  registerNameField.hidden = true;
+  registerNameInput.required = false;
   const registerToggle = document.getElementById('register-toggle');
   const loginSubmitButton = document.getElementById('login-submit-button');
   const loginDescription = document.getElementById('login-description');
@@ -1966,8 +1989,8 @@ body.dark-mode .login-error.success{color:#8bd5a2!important}
   registerToggle.addEventListener('click', function () {
     registerMode = !registerMode;
     fillDemoEmail();
-    registerNameField.hidden = false;
-    registerNameInput.required = true;
+    registerNameField.hidden = !registerMode;
+    registerNameInput.required = registerMode;
     const proofField = document.getElementById('register-proof-field');
     const proofInput = document.getElementById('register-proof');
     if (proofField) proofField.hidden = !registerMode;
@@ -1986,8 +2009,8 @@ body.dark-mode .login-error.success{color:#8bd5a2!important}
     const email = emailInput.value.trim().toLowerCase();
     const enteredPassword = document.getElementById('login-password').value;
     const displayNameInput = registerNameInput.value.trim();
-    if (!displayNameInput) { error.textContent = 'Digite seu nome para continuar.'; registerNameInput.focus(); return; }
     if (registerMode) {
+      if (!displayNameInput) { error.textContent = 'Digite seu nome completo para continuar.'; registerNameInput.focus(); return; }
       const fullName = displayNameInput;
       if (!['professor','responsavel','estudante'].includes(role)) {
         error.textContent = 'Por segurança, o cadastro público está disponível apenas para Professor, Responsável ou Estudante.';
@@ -2019,7 +2042,9 @@ body.dark-mode .login-error.success{color:#8bd5a2!important}
         return;
       }
       registerMode = false;
-      registerNameInput.required = true;
+      registerNameField.hidden = true;
+      registerNameInput.required = false;
+      registerNameInput.value = '';
       document.getElementById('register-proof-field').hidden = true;
       document.getElementById('register-proof').required = false;
       document.getElementById('register-proof').value = '';
