@@ -20,10 +20,12 @@ function showDashboard(user) {
   document.querySelector('#trip-form').classList.toggle('hidden', !canManage);
   document.querySelector('#trip-assignment').classList.toggle('hidden', !canManage);
   document.querySelector('#users-tab').classList.toggle('hidden', !canManage);
+  document.querySelector('#registration-requests-section').classList.toggle('hidden', user.role !== 'admin');
   document.querySelectorAll('[data-admin-only]').forEach(option => { option.hidden = user.role !== 'admin'; });
   loadClasses();
   loadStudents();
   loadTrips();
+  if (user.role === 'admin') loadRegistrationRequests();
 }
 function showLogin() {
   currentUser = null;
@@ -119,6 +121,38 @@ async function loadTrips() {
     document.querySelector('#trip-student-trip').innerHTML = options;
   } catch (error) { list.textContent = error.message; }
 }
+async function loadRegistrationRequests() {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  const list = document.querySelector('#registration-requests-list');
+  const count = document.querySelector('#registration-requests-count');
+  try {
+    const data = await api('/api/registration-requests');
+    count.textContent = String(data.requests.length);
+    list.innerHTML = data.requests.length ? data.requests.map(item =>
+      '<article class="data-row registration-request-row"><div class="registration-request-details"><strong>' + escapeHtml(item.name) + '</strong><span>' +
+      escapeHtml(item.email) + ' · ' + escapeHtml(item.roleLabel) + '</span><small>Recebida em ' + escapeHtml(dateLabel(item.created_at)) + '</small></div>' +
+      '<div class="registration-actions"><button type="button" class="small-action" data-registration-action="approve" data-registration-id="' + item.id + '">Aprovar</button>' +
+      '<button type="button" class="small-action reject-action" data-registration-action="reject" data-registration-id="' + item.id + '">Rejeitar</button></div></article>'
+    ).join('') : '<p class="muted">Não há solicitações aguardando aprovação.</p>';
+  } catch (error) {
+    list.textContent = error.message;
+  }
+}
+document.querySelector('#registration-requests-list').addEventListener('click', async event => {
+  const button = event.target.closest('[data-registration-action]');
+  if (!button || !currentUser || currentUser.role !== 'admin') return;
+  button.disabled = true;
+  try {
+    const result = await api('/api/registration-requests/' + Number(button.dataset.registrationId) + '/' + button.dataset.registrationAction, {
+      method: 'POST', body: '{}'
+    });
+    showMessage('#registration-requests-message', result.message);
+    await loadRegistrationRequests();
+  } catch (error) {
+    showMessage('#registration-requests-message', error.message, true);
+    button.disabled = false;
+  }
+});
 document.querySelector('#trip-form').addEventListener('submit', async event => {
   event.preventDefault();
   const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
@@ -194,6 +228,49 @@ document.querySelector('#student-form').addEventListener('submit', async event =
     await loadStudents();
   } catch (error) { showMessage('#student-message', error.message, true); }
 });
+const registrationForm = document.querySelector('#registration-form');
+const registrationMessage = document.querySelector('#registration-message');
+const loginHelper = document.querySelector('#login-view .helper');
+document.querySelector('#show-registration').addEventListener('click', () => {
+  loginForm.classList.add('hidden');
+  registrationForm.classList.remove('hidden');
+  document.querySelector('#show-registration').classList.add('hidden');
+  loginHelper.classList.add('hidden');
+  registrationMessage.textContent = '';
+});
+document.querySelector('#hide-registration').addEventListener('click', () => {
+  registrationForm.classList.add('hidden');
+  loginForm.classList.remove('hidden');
+  document.querySelector('#show-registration').classList.remove('hidden');
+  loginHelper.classList.remove('hidden');
+  registrationMessage.textContent = '';
+});
+registrationForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  registrationMessage.textContent = '';
+  registrationMessage.classList.remove('error-text');
+  const values = Object.fromEntries(new FormData(registrationForm).entries());
+  if (values.password !== values.password_confirm) {
+    showMessage('#registration-message', 'As senhas não coincidem.', true);
+    return;
+  }
+  const button = document.querySelector('#registration-submit');
+  button.disabled = true;
+  button.textContent = 'Enviando...';
+  try {
+    const result = await api('/api/registration-requests', {
+      method: 'POST',
+      body: JSON.stringify({ name: values.name, email: values.email, role: values.role, password: values.password })
+    });
+    registrationForm.reset();
+    showMessage('#registration-message', result.message);
+  } catch (error) {
+    showMessage('#registration-message', error.message, true);
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Enviar solicitação';
+  }
+});
 document.querySelector('#user-form').addEventListener('submit', async event => {
   event.preventDefault();
   const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
@@ -202,6 +279,25 @@ document.querySelector('#user-form').addEventListener('submit', async event => {
     event.currentTarget.reset();
     showMessage('#user-message', result.message + ' Perfil: ' + result.user.roleLabel);
   } catch (error) { showMessage('#user-message', error.message, true); }
+});
+function applyTheme(mode) {
+  const dark = mode === 'dark';
+  document.body.classList.toggle('dark-mode', dark);
+  const button = document.querySelector('#theme-toggle');
+  button.innerHTML = (dark ? '☀ <span>Tema claro</span>' : '☾ <span>Tema escuro</span>');
+  button.setAttribute('aria-label', dark ? 'Mudar para tema claro' : 'Mudar para tema escuro');
+  button.setAttribute('aria-pressed', String(dark));
+}
+let savedTheme = 'light';
+try {
+  const storedTheme = localStorage.getItem('sgve-theme-mode');
+  if (storedTheme === 'light' || storedTheme === 'dark') savedTheme = storedTheme;
+} catch (_) {}
+applyTheme(savedTheme);
+document.querySelector('#theme-toggle').addEventListener('click', () => {
+  const next = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+  applyTheme(next);
+  try { localStorage.setItem('sgve-theme-mode', next); } catch (_) {}
 });
 async function restoreSession() {
   try {
