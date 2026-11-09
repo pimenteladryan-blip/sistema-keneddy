@@ -1519,6 +1519,28 @@ html body.dark-mode #login-screen p{
     color:#e8f1eb!important;
   }
 }
+
+/* Seletor de tipo de acesso — visual refinado */
+.access-type-field{gap:9px}
+.access-type-field>label{display:flex;align-items:center;gap:8px;color:#30483a;font-size:11px;font-weight:800;letter-spacing:.01em}
+.access-select-wrap{position:relative;display:flex;align-items:center;min-height:56px;border:1px solid #d8e6dc;border-radius:12px;background:linear-gradient(135deg,#fbfdfb,#f1f7f2);box-shadow:0 3px 10px #173c2808;transition:border-color .2s,box-shadow .2s,background .2s}
+.access-select-wrap:hover{border-color:#9fc5aa;background:#f7fbf7}
+.access-select-wrap:focus-within{border-color:#27804d;box-shadow:0 0 0 4px #27804d19,0 5px 16px #173c2810}
+.access-select-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;margin-left:9px;border-radius:9px;background:#e4f1e7;color:#17623c;font-size:17px}
+.access-select{position:relative;z-index:1;flex:1;width:100%;height:54px;min-width:0;padding:0 42px 0 11px;border:0!important;border-radius:12px!important;outline:none!important;background:transparent!important;color:#263d2e!important;font:700 12px 'DM Sans','Segoe UI',Arial,sans-serif!important;appearance:none;-webkit-appearance:none;cursor:pointer}
+.access-select option{background:#fff;color:#263d2e;font-weight:600}
+.access-select-arrow{position:absolute;right:16px;top:50%;transform:translateY(-58%);color:#39734e;font-size:21px;pointer-events:none}
+.access-type-hint{margin-top:0;color:#819087;font-size:10px;line-height:1.5}
+body.dark-mode .access-type-field>label{color:#dce9df}
+body.dark-mode .access-select-wrap{border-color:#344b3b;background:linear-gradient(135deg,#17251b,#111b15);box-shadow:0 3px 12px #0002}
+body.dark-mode .access-select-wrap:hover{border-color:#527d5e;background:#1a2a20}
+body.dark-mode .access-select-wrap:focus-within{border-color:#70b184;box-shadow:0 0 0 4px #70b18420}
+body.dark-mode .access-select-icon{background:#263f2e;color:#a9d7b5}
+body.dark-mode .access-select{color:#edf5ef!important}
+body.dark-mode .access-select option{background:#17251b;color:#edf5ef}
+body.dark-mode .access-select-arrow{color:#a9d7b5}
+body.dark-mode .access-type-hint{color:#a7b8ab}
+@media(max-width:760px){.access-select-wrap{min-height:54px}.access-select{height:52px}}
 </style>
 </head>
 <body>
@@ -1536,7 +1558,7 @@ html body.dark-mode #login-screen p{
       <p class="login-description" id="login-description">Entre com sua conta ou crie um cadastro para acessar a demonstração.</p>
       <div class="login-field" id="register-name-field"><label for="register-name">Seu nome completo</label><input id="register-name" type="text" placeholder="Nome completo" autocomplete="name" maxlength="70" required></div>
       <div class="login-field" id="register-proof-field" hidden><label for="register-proof">Identificação para conferência</label><input id="register-proof" type="text" placeholder="Matrícula, código de vínculo ou identificação institucional" maxlength="100"><small style="color:#829087;font-size:10px;line-height:1.5">A escola usará essa informação para conferir seu vínculo antes de liberar a conta.</small></div>
-      <div class="login-field"><label for="login-role">Tipo de acesso</label><select id="login-role" name="role" required style="width:100%;height:47px;padding:0 13px;border:1px solid #dfe8e1;border-radius:8px;background:#fff;color:#25382c;font:inherit;font-size:12px"><option value="administrador">Administrador</option><option value="direcao">Direção</option><option value="secretaria">Secretaria</option><option value="professor">Professor</option><option value="responsavel">Responsável</option><option value="estudante">Estudante</option></select></div>
+      <div class="login-field access-type-field"><label for="login-role">Tipo de acesso</label><div class="access-select-wrap"><span class="access-select-icon" aria-hidden="true">▦</span><select id="login-role" name="role" class="access-select" required><option value="administrador">Administrador</option><option value="direcao">Direção</option><option value="secretaria">Secretaria</option><option value="professor">Professor</option><option value="responsavel">Responsável</option><option value="estudante">Estudante</option></select><span class="access-select-arrow" aria-hidden="true">⌄</span></div><small class="access-type-hint">Escolha o perfil correspondente à sua função na escola.</small></div>
       <div class="login-field"><label for="login-email">E-mail</label><input id="login-email" name="email" type="email" placeholder="seu@email.com" autocomplete="username" required></div>
       <div class="login-field"><label for="login-password">Senha</label><input id="login-password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required></div>
       <p id="login-error" class="login-error" role="alert" aria-live="polite"></p>
