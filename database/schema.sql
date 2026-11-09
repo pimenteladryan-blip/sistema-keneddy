@@ -114,6 +114,7 @@ CREATE TABLE IF NOT EXISTS registration_requests (
   email TEXT NOT NULL COLLATE NOCASE UNIQUE,
   password_hash TEXT,
   role TEXT NOT NULL CHECK (role IN ('teacher','guardian','student')),
+  verification_code TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
   reviewed_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
   reviewed_at TEXT,
