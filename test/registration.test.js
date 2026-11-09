@@ -91,6 +91,8 @@ test('cadastro público só libera acesso após aprovação do administrador', a
   const pendingEmail = 'professor-pendente@sgve.local';
   const submitted = await submitRequest(pendingEmail);
   assert.equal(submitted.status, 201);
+  const submittedData = await submitted.json();
+  assert.match(submittedData.verificationCode, /^[A-HJ-NP-Z2-9]{6}$/);
 
   const duplicate = await submitRequest(pendingEmail);
   assert.equal(duplicate.status, 409);
@@ -109,6 +111,7 @@ test('cadastro público só libera acesso após aprovação do administrador', a
   const queue = await queueResponse.json();
   const request = queue.requests.find(item => item.email === pendingEmail);
   assert.ok(request);
+  assert.equal(request.verification_code, submittedData.verificationCode);
   assert.equal(Object.hasOwn(request, 'password_hash'), false);
 
   const approval = await fetch(baseUrl + '/api/registration-requests/' + request.id + '/approve', {
