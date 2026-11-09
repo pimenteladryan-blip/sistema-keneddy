@@ -134,11 +134,17 @@ app.post('/api/registration-requests', async (req, res, next) => {
     if (db.prepare('SELECT id FROM users WHERE email = ?').get(email)) {
       return res.status(409).json({ error: 'Este e-mail já possui uma conta. Tente entrar ou fale com a secretaria.' });
     }
-    if (db.prepare("SELECT id FROM registration_requests WHERE email = ? AND status = 'pending'").get(email)) {
+    const previousRequest = db.prepare('SELECT id, status FROM registration_requests WHERE email = ?').get(email);
+    if (previousRequest?.status === 'pending') {
       return res.status(409).json({ error: 'Já existe uma solicitação pendente para este e-mail.' });
     }
     const passwordHash = await hashPassword(password);
-    db.prepare('INSERT INTO registration_requests (display_name, email, password_hash, role) VALUES (?, ?, ?, ?)').run(name, email, passwordHash, role);
+    if (previousRequest?.status === 'rejected') {
+      db.prepare("UPDATE registration_requests SET display_name = ?, password_hash = ?, role = ?, status = 'pending', reviewed_by = NULL, reviewed_at = NULL, created_at = CURRENT_TIMESTAMP WHERE id = ?")
+        .run(name, passwordHash, role, previousRequest.id);
+    } else {
+      db.prepare('INSERT INTO registration_requests (display_name, email, password_hash, role) VALUES (?, ?, ?, ?)').run(name, email, passwordHash, role);
+    }
     res.status(201).json({ message: 'Solicitação enviada. A conta ficará disponível depois da aprovação da administração.' });
   } catch (error) {
     if (String(error.message).includes('UNIQUE')) return res.status(409).json({ error: 'Já existe uma solicitação para este e-mail.' });
