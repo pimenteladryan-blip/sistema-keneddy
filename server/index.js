@@ -26,6 +26,9 @@ app.use(express.urlencoded({ extended: false, limit: '20kb' }));
 const loginAttempts = new Map();
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const MAX_LOGIN_ATTEMPTS = 5;
+const registrationAttempts = new Map();
+const REGISTRATION_WINDOW_MS = 60 * 60 * 1000;
+const MAX_REGISTRATION_ATTEMPTS = 5;
 function parseCookies(header = '') {
   return Object.fromEntries(header.split(';').map(part => {
     const index = part.indexOf('=');
@@ -108,6 +111,40 @@ async function bootstrapAdmin() {
 }
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', service: 'SGVE', environment: isProduction ? 'production' : 'development' }));
+
+app.post('/api/registration-requests', async (req, res, next) => {
+  try {
+    if (!sameOrigin(req)) return res.status(403).json({ error: 'Origem não permitida.' });
+    const name = cleanText(req.body.name, 100);
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const role = String(req.body.role || '');
+    const password = String(req.body.password || '');
+    if (name.length < 3 || !validEmail(email) || !['teacher', 'guardian', 'student'].includes(role) ||
+        password.length < 14 || password.length > 200) {
+      return res.status(400).json({ error: 'Informe nome, e-mail, perfil e senha com pelo menos 14 caracteres.' });
+    }
+    const now = Date.now();
+    const key = String(req.ip || 'unknown') + ':' + email;
+    const attempt = registrationAttempts.get(key);
+    if (attempt && now - attempt.startedAt < REGISTRATION_WINDOW_MS && attempt.count >= MAX_REGISTRATION_ATTEMPTS) {
+      return res.status(429).json({ error: 'Muitas solicitações para este e-mail. Aguarde uma hora e tente novamente.' });
+    }
+    if (!attempt || now - attempt.startedAt >= REGISTRATION_WINDOW_MS) registrationAttempts.set(key, { startedAt: now, count: 1 });
+    else attempt.count += 1;
+    if (db.prepare('SELECT id FROM users WHERE email = ?').get(email)) {
+      return res.status(409).json({ error: 'Este e-mail já possui uma conta. Tente entrar ou fale com a secretaria.' });
+    }
+    if (db.prepare("SELECT id FROM registration_requests WHERE email = ? AND status = 'pending'").get(email)) {
+      return res.status(409).json({ error: 'Já existe uma solicitação pendente para este e-mail.' });
+    }
+    const passwordHash = await hashPassword(password);
+    db.prepare('INSERT INTO registration_requests (display_name, email, password_hash, role) VALUES (?, ?, ?, ?)').run(name, email, passwordHash, role);
+    res.status(201).json({ message: 'Solicitação enviada. A conta ficará disponível depois da aprovação da administração.' });
+  } catch (error) {
+    if (String(error.message).includes('UNIQUE')) return res.status(409).json({ error: 'Já existe uma solicitação para este e-mail.' });
+    next(error);
+  }
+});
 app.post('/api/auth/login', async (req, res, next) => {
   try {
     if (!sameOrigin(req)) return res.status(403).json({ error: 'Origem não permitida.' });
@@ -211,6 +248,37 @@ app.post('/api/users', requireAuth, requireCsrf, requireRoles(...USER_MANAGERS),
     if (String(error.message).includes('UNIQUE')) return res.status(409).json({ error: 'Já existe uma conta com esse e-mail.' });
     next(error);
   }
+});
+app.get('/api/registration-requests', requireAuth, requireRoles('admin'), (_req, res) => {
+  const requests = db.prepare("SELECT id, display_name AS name, email, role, status, created_at FROM registration_requests WHERE status = 'pending' ORDER BY created_at ASC LIMIT 200").all();
+  res.json({ requests: requests.map(item => ({ ...item, roleLabel: ROLE_LABELS[item.role] })) });
+});
+app.post('/api/registration-requests/:id/approve', requireAuth, requireCsrf, requireRoles('admin'), (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: 'Solicitação inválida.' });
+  const request = db.prepare("SELECT id, display_name, email, password_hash, role FROM registration_requests WHERE id = ? AND status = 'pending'").get(id);
+  if (!request || !request.password_hash) return res.status(404).json({ error: 'Solicitação não encontrada ou já analisada.' });
+  if (db.prepare('SELECT id FROM users WHERE email = ?').get(request.email)) return res.status(409).json({ error: 'Já existe uma conta com este e-mail.' });
+  db.exec('BEGIN IMMEDIATE');
+  try {
+    const created = db.prepare('INSERT INTO users (display_name, email, password_hash, role) VALUES (?, ?, ?, ?)').run(request.display_name, request.email, request.password_hash, request.role);
+    db.prepare("UPDATE registration_requests SET status = 'approved', password_hash = NULL, reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'pending'").run(req.auth.user.id, id);
+    audit(req.auth.user.id, 'approve_registration', 'registration_request', id);
+    db.exec('COMMIT');
+    res.json({ message: 'Cadastro aprovado. A pessoa já pode entrar com o e-mail e a senha cadastrados.', userId: Number(created.lastInsertRowid) });
+  } catch (error) {
+    db.exec('ROLLBACK');
+    if (String(error.message).includes('UNIQUE')) return res.status(409).json({ error: 'Já existe uma conta com este e-mail.' });
+    throw error;
+  }
+});
+app.post('/api/registration-requests/:id/reject', requireAuth, requireCsrf, requireRoles('admin'), (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: 'Solicitação inválida.' });
+  const result = db.prepare("UPDATE registration_requests SET status = 'rejected', password_hash = NULL, reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'pending'").run(req.auth.user.id, id);
+  if (!result.changes) return res.status(404).json({ error: 'Solicitação não encontrada ou já analisada.' });
+  audit(req.auth.user.id, 'reject_registration', 'registration_request', id);
+  res.json({ message: 'Solicitação rejeitada.' });
 });
 app.get('/api/users', requireAuth, requireRoles('admin', 'direction'), (_req, res) => {
   const rows = db.prepare('SELECT id, display_name, email, role, active FROM users ORDER BY display_name LIMIT 300').all();
