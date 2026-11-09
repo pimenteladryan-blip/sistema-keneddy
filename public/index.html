@@ -42,7 +42,7 @@
       <div class="brand-footer">SGVE · Sistema de Gerenciamento de Viagens Escolares</div>
     </section>
     <section class="content-panel">
-      <div class="topline"><span class="status-dot"></span> PORTAL INSTITUCIONAL · CEPK</div>
+      <div class="topline"><span class="status-dot"></span><span>PORTAL INSTITUCIONAL · CEPK</span><button type="button" class="theme-toggle" id="theme-toggle" aria-label="Mudar para tema escuro" aria-pressed="false">☾ <span>Tema escuro</span></button></div>
       <section id="login-view" class="auth-card">
         <div class="login-school-mark"><span class="login-mark">CEPK</span><span><strong>CEPK · 62 ANOS</strong><small>Colégio Estadual Presidente Kennedy</small></span></div>
         <p class="eyebrow green">SISTEMA DE VIAGENS ESCOLARES</p><h2>Acesse sua conta</h2>
@@ -52,7 +52,23 @@
           <label for="password">Senha</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" required>
           <button type="submit" id="login-button">Entrar no sistema</button><p id="login-message" class="message" role="alert" aria-live="polite"></p>
         </form>
-        <p class="helper">Não possui acesso? Procure a secretaria ou a direção.</p>
+        <button type="button" class="link-button" id="show-registration">Solicitar acesso</button>
+        <form id="registration-form" class="registration-form hidden">
+          <p class="registration-intro">Preencha seus dados. A conta só será liberada depois da conferência e aprovação do administrador.</p>
+          <label for="registration-name">Nome completo</label><input id="registration-name" name="name" type="text" autocomplete="name" maxlength="100" required>
+          <label for="registration-email">E-mail</label><input id="registration-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+          <label for="registration-role">Tipo de acesso</label>
+          <select id="registration-role" name="role" required>
+            <option value="teacher">Professor</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
+          </select>
+          <label for="registration-password">Criar senha</label><input id="registration-password" name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required>
+          <small class="field-hint">Use pelo menos 14 caracteres. Sua senha será armazenada protegida e não ficará visível para o administrador.</small>
+          <label for="registration-password-confirm">Confirmar senha</label><input id="registration-password-confirm" name="password_confirm" type="password" minlength="14" maxlength="200" autocomplete="new-password" required>
+          <button type="submit" id="registration-submit">Enviar solicitação</button>
+          <p id="registration-message" class="message" role="status" aria-live="polite"></p>
+          <button type="button" class="link-button secondary-link" id="hide-registration">Voltar para entrar</button>
+        </form>
+        <p class="helper">O acesso é liberado pela administração do Colégio Estadual Presidente Kennedy.</p>
       </section>
       <section id="dashboard-view" class="dashboard hidden">
         <header class="welcome-row">
@@ -133,6 +149,11 @@
           </form>
           <p id="user-message" class="message" role="status"></p>
           <p class="privacy-note">A senha deve ter pelo menos 14 caracteres. Entregue as credenciais de forma privada e nunca as envie pelo repositório.</p>
+          <section id="registration-requests-section" class="registration-requests-section hidden">
+            <div class="section-heading"><div><p class="eyebrow green">ANÁLISE DE ACESSO</p><h3>Solicitações pendentes</h3><p class="section-subtitle">Somente o administrador pode aprovar ou rejeitar cadastros.</p></div><span id="registration-requests-count" class="count-pill">0</span></div>
+            <p id="registration-requests-message" class="message" role="status"></p>
+            <div id="registration-requests-list" class="data-list"><p class="muted">Carregando solicitações...</p></div>
+          </section>
         </section>
       </section>
       <footer class="content-footer">Acesso restrito a usuários autorizados.</footer>
