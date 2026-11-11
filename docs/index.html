@@ -1692,6 +1692,18 @@ body.dark-mode .access-select-icon,body.dark-mode .access-select-arrow{color:#9c
 body.dark-mode .demo-verification-code{border-color:#42694e;background:#1b3826;color:#c9efd3}
 @media(max-width:760px){.access-select{min-height:49px;font-size:14px!important}.access-select-wrap{width:100%}}
 </style>
+<style>
+/* Kennedyto: reforço de contraste exclusivo para o tema escuro da tela de login */
+body.dark-mode #login-screen .login-brand-panel > .login-mascot{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  mix-blend-mode:normal!important;
+  background:radial-gradient(ellipse at 50% 62%,rgba(123,205,148,.30) 0%,rgba(48,112,72,.16) 43%,transparent 73%)!important;
+  border-radius:48% 48% 42% 42%!important;
+  filter:brightness(1.28) contrast(1.08) saturate(1.16) drop-shadow(0 14px 22px rgba(0,0,0,.62))!important;
+}
+</style>
 </head>
 <body>
 <section class="login-screen" id="login-screen">
