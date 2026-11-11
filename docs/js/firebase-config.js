@@ -1,16 +1,15 @@
-// Configuração pública do aplicativo Web Firebase.
-// Preencha com os dados exibidos em Configurações do projeto > Seus apps > SDK setup.
-// Estes valores identificam o projeto, mas NÃO substituem as regras de segurança.
+// Configuração do aplicativo Web do Firebase (SGVE).
+// Estes valores identificam o projeto; não inclua credenciais privadas neste arquivo.
 export const firebaseConfig = {
-  apiKey: "COLE_A_API_KEY_DO_FIREBASE",
-  authDomain: "SEU_PROJETO.firebaseapp.com",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_PROJETO.firebasestorage.app",
-  messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-  appId: "SEU_APP_ID"
+  apiKey: "AIzaSyAjCY6nydEIs_v9vv8mDczk6ODRilPPy7c",
+  authDomain: "svge-14ec7.firebaseapp.com",
+  projectId: "svge-14ec7",
+  storageBucket: "svge-14ec7.firebasestorage.app",
+  messagingSenderId: "427867210389",
+  appId: "1:427867210389:web:be34bea9e71787f571519c",
+  measurementId: "G-8YG8N5TKFK"
 };
 
-export const firebaseConfigured =
-  firebaseConfig.apiKey !== "COLE_A_API_KEY_DO_FIREBASE" &&
-  firebaseConfig.projectId !== "SEU_PROJECT_ID" &&
-  firebaseConfig.appId !== "SEU_APP_ID";
+export const firebaseConfigured = Object.values(firebaseConfig).every(
+  (value) => typeof value === "string" && value.length > 0
+);
