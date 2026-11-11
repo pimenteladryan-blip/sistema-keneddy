@@ -1975,78 +1975,30 @@ body.dark-mode #login-screen .register-toggle{
 </style>
 
 
-<style>
-/* SGVE: seletor de perfil nativo para corrigir abertura e seleção em celulares */
-#login-screen .access-select-wrap{
-  position:relative!important;display:block!important;width:100%!important;
-  min-height:56px!important;overflow:visible!important;
-}
-#login-screen select#login-role.access-select{
-  display:block!important;position:relative!important;z-index:4!important;
-  width:100%!important;height:56px!important;min-height:56px!important;
-  margin:0!important;padding:0 42px 0 15px!important;
-  appearance:auto!important;-webkit-appearance:menulist!important;
-  border:1px solid #cbdccf!important;border-radius:11px!important;
-  background:#fff!important;color:#214b32!important;
-  font:700 14px 'DM Sans','Segoe UI',Arial,sans-serif!important;
-  line-height:normal!important;cursor:pointer!important;
-  touch-action:manipulation!important;pointer-events:auto!important;
-}
-#login-screen .access-select-icon,
-#login-screen .access-select-arrow{display:none!important}
-#login-screen select#login-role option{background:#fff!important;color:#20372a!important}
-body.dark-mode #login-screen select#login-role.access-select{
-  border-color:#456653!important;background:#17251d!important;color:#edf5ef!important;
-}
-body.dark-mode #login-screen select#login-role option{
-  background:#17251d!important;color:#edf5ef!important;
-}
-/* Transição suave entre login e painel principal */
-#login-screen{
-  opacity:1;transform:translateY(0) scale(1);
-  transition:opacity .55s ease,transform .65s cubic-bezier(.2,.75,.25,1),visibility 0s;
-}
-#login-screen.is-hidden{
-  position:fixed!important;inset:0!important;z-index:-1!important;
-  display:grid!important;opacity:0!important;visibility:hidden!important;
-  pointer-events:none!important;transform:translateY(-14px) scale(.985)!important;
-  transition:opacity .48s ease,transform .58s cubic-bezier(.2,.75,.25,1),visibility 0s .58s!important;
-}
-#app-shell.logged-in{
-  animation:sgveDashboardEnter .72s cubic-bezier(.18,.72,.24,1) both;
-  transform-origin:50% 12%;
-}
-#app-shell.logged-in .topbar{animation:sgveContentEnter .58s .12s both}
-#app-shell.logged-in .page-view.active{animation:sgveContentEnter .68s .18s both}
-#app-shell.logged-in .stat-card,
-#app-shell.logged-in .dashboard-trips,
-#app-shell.logged-in .dashboard-notices,
-#app-shell.logged-in .dashboard-calendar{
-  animation:sgveContentEnter .62s .24s both;
-}
-@keyframes sgveDashboardEnter{
-  from{opacity:0;transform:translateY(22px) scale(.992);filter:blur(3px)}
-  to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
-}
-@keyframes sgveContentEnter{
-  from{opacity:0;transform:translateY(12px)}
-  to{opacity:1;transform:translateY(0)}
-}
-@media(prefers-reduced-motion:reduce){
-  #login-screen,#login-screen.is-hidden,#app-shell.logged-in,
-  #app-shell.logged-in .topbar,#app-shell.logged-in .page-view.active,
-  #app-shell.logged-in .stat-card,#app-shell.logged-in .dashboard-trips,
-  #app-shell.logged-in .dashboard-notices,#app-shell.logged-in .dashboard-calendar{
-    animation:none!important;transition:none!important;filter:none!important;transform:none!important;
-  }
-}
-</style>
+
 
 
 <style>
 /* Visibilidade controlada diretamente pelas funções enterApp e leaveApp. */
 #login-screen.is-hidden{pointer-events:none!important}
 #app-shell.logged-in{display:block}
+</style>
+
+
+<style>
+/* Correção final: o Kennedyto do painel de entrada não pode ficar sobre o sistema após autenticar. */
+#login-screen.is-hidden,
+#login-screen[aria-hidden="true"]{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+#app-shell.logged-in{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
 </style>
 
 </head>
