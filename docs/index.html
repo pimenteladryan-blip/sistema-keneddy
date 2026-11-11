@@ -2769,7 +2769,7 @@ body.dark-mode #login-screen .login-brand-panel > .login-mascot{
 })();
 </script>
 <script>
-if ("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+if ("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
 let deferredInstallPrompt=null;
 window.addEventListener("beforeinstallprompt",event=>{event.preventDefault();deferredInstallPrompt=event;const b=document.getElementById("pwa-install");if(b)b.hidden=false;});
 const installButton=document.getElementById("pwa-install");
