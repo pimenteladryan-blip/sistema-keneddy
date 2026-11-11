@@ -3240,5 +3240,68 @@ html,body{min-height:100%!important;height:auto!important;overflow-x:hidden!impo
 }
 </style>
 
+
+<style id="sgve-desktop-login-visibility-fix">
+/* Correção final: texto institucional e mascote sempre visíveis no login desktop. */
+@media (min-width: 761px) {
+  #login-screen:not([hidden]) > .login-brand-panel {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    isolation: isolate !important;
+  }
+  #login-screen:not([hidden]) > .login-brand-panel > .login-brand,
+  #login-screen:not([hidden]) > .login-brand-panel > .login-intro,
+  #login-screen:not([hidden]) > .login-brand-panel > .login-brand-footer {
+    display: block !important;
+    position: relative !important;
+    z-index: 5 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    clip: auto !important;
+    clip-path: none !important;
+    color: #ffffff !important;
+  }
+  #login-screen:not([hidden]) > .login-brand-panel > .login-brand {
+    display: flex !important;
+    align-items: center !important;
+  }
+  #login-screen:not([hidden]) > .login-brand-panel > .login-intro {
+    width: calc(100% - 245px) !important;
+    max-width: 650px !important;
+    min-width: 0 !important;
+    margin: auto 0 !important;
+    padding: 24px 0 !important;
+  }
+  #login-screen:not([hidden]) > .login-brand-panel > .login-intro .login-kicker,
+  #login-screen:not([hidden]) > .login-brand-panel > .login-intro h1,
+  #login-screen:not([hidden]) > .login-brand-panel > .login-intro p {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,.45) !important;
+  }
+  #login-screen:not([hidden]) > .login-brand-panel > .login-mascot {
+    display: block !important;
+    position: absolute !important;
+    z-index: 4 !important;
+    right: 22px !important;
+    bottom: 22px !important;
+    width: clamp(165px, 20vw, 270px) !important;
+    height: auto !important;
+    max-width: 270px !important;
+    max-height: 46% !important;
+    object-fit: contain !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    clip: auto !important;
+    clip-path: none !important;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,.4)) !important;
+  }
+}
+</style>
 </body>
 </html>
