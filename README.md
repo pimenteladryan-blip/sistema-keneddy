@@ -99,3 +99,7 @@ Não existe senha administrativa padrão. Não envie o arquivo `.env` ao GitHub.
 
 **SGVE | Colégio Estadual Presidente Kennedy**  
 Demonstração: https://pimenteladryan-blip.github.io/sistema-keneddy/
+
+## Planejamento do projeto
+
+O histórico, as decisões, o estado atual e o roteiro de evolução estão documentados em [docs/PLANEJAMENTO.md](docs/PLANEJAMENTO.md).
