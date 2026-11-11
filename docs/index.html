@@ -3228,5 +3228,127 @@ body.dark-mode .mobile-brand strong{color:#e4efe5!important}
   #login-screen .login-field{margin:11px 0!important}
 }
 </style>
+
+<style id="sgve-login-layout-override-v2">
+/* Ajuste final do login: ocupa a tela inteira e elimina a rolagem interna do cartão. */
+html,body{min-height:100%!important;height:auto!important;overflow-x:hidden!important;overflow-y:auto!important}
+#login-screen.login-screen{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.08fr) minmax(440px,.92fr)!important;
+  grid-template-rows:minmax(100svh,auto)!important;
+  align-items:stretch!important;
+  justify-items:stretch!important;
+  width:100%!important;max-width:none!important;
+  min-height:100vh!important;min-height:100svh!important;
+  height:auto!important;margin:0!important;padding:0!important;
+  overflow:visible!important;background:#101713!important;
+}
+#login-screen>.login-brand-panel{
+  display:flex!important;position:relative!important;inset:auto!important;
+  grid-column:1!important;grid-row:1!important;
+  width:100%!important;min-width:0!important;max-width:none!important;
+  min-height:100vh!important;min-height:100svh!important;height:auto!important;
+  margin:0!important;padding:clamp(30px,4vw,64px)!important;
+  overflow:hidden!important;visibility:visible!important;opacity:1!important;
+  background-color:#123c29!important;
+  background-image:linear-gradient(110deg,rgba(0,24,13,.82),rgba(0,32,18,.42)),url("./kennedy-entrada.svg")!important;
+  background-position:center!important;background-size:cover!important;background-repeat:no-repeat!important;
+}
+#login-screen>.login-brand-panel .login-brand,
+#login-screen>.login-brand-panel .login-intro,
+#login-screen>.login-brand-panel .login-brand-footer{
+  display:flex!important;position:relative!important;z-index:4!important;
+  visibility:visible!important;opacity:1!important;color:#fff!important;
+}
+#login-screen>.login-brand-panel .login-intro{
+  display:block!important;width:min(76%,650px)!important;max-width:650px!important;
+  margin:clamp(28px,6vh,68px) 0 20px!important;
+}
+#login-screen .login-intro h1{
+  max-width:600px!important;color:#fff!important;
+  font-size:clamp(38px,4.5vw,64px)!important;line-height:1.06!important;
+}
+#login-screen .login-intro p,#login-screen .login-kicker,
+#login-screen .login-brand small,#login-screen .login-brand-footer{color:#edf6ef!important}
+#login-screen .login-mascot{
+  display:block!important;visibility:visible!important;opacity:1!important;
+  position:absolute!important;z-index:3!important;
+  right:clamp(20px,4vw,54px)!important;bottom:clamp(18px,4vh,40px)!important;
+  width:clamp(150px,19vw,250px)!important;max-width:250px!important;
+  height:auto!important;max-height:44%!important;object-fit:contain!important;
+  pointer-events:none!important;filter:drop-shadow(0 12px 22px #0008)!important;
+}
+#login-screen>.login-form-side{
+  display:flex!important;position:relative!important;inset:auto!important;
+  grid-column:2!important;grid-row:1!important;
+  align-items:center!important;justify-content:center!important;
+  width:100%!important;min-width:0!important;max-width:none!important;
+  min-height:100vh!important;min-height:100svh!important;height:auto!important;
+  margin:0!important;padding:48px clamp(24px,4vw,60px)!important;
+  overflow:visible!important;visibility:visible!important;opacity:1!important;
+  background:radial-gradient(circle at 85% 15%,#1b3929 0,#121d16 46%,#101713 82%)!important;
+}
+#login-screen>.login-form-side:before{display:none!important}
+#login-screen .login-card{
+  display:block!important;position:relative!important;inset:auto!important;z-index:5!important;
+  flex:0 1 540px!important;width:min(100%,540px)!important;
+  min-width:0!important;max-width:540px!important;
+  max-height:none!important;height:auto!important;
+  margin:auto!important;padding:clamp(26px,3vw,42px)!important;
+  overflow:visible!important;visibility:visible!important;opacity:1!important;
+  border:1px solid #344b3b!important;border-radius:20px!important;
+  background:#17231b!important;color:#edf5ef!important;
+  box-shadow:0 22px 60px #0007!important;
+}
+#login-screen .login-card-seal{display:block!important;width:68px!important;height:68px!important;margin:0 auto 12px!important;object-fit:contain!important}
+#login-screen .login-card h2{display:block!important;color:#f0f6f1!important;font-size:clamp(25px,2.2vw,31px)!important;text-align:center!important}
+#login-screen .login-description{display:block!important;color:#c1d0c4!important;text-align:center!important}
+#login-screen .login-field{display:grid!important;visibility:visible!important;opacity:1!important;margin:13px 0!important}
+#login-screen .login-field label{color:#dce9df!important}
+#login-screen .login-field input,#login-screen .login-field select{
+  display:block!important;width:100%!important;min-height:48px!important;
+  background:#0e1a12!important;color:#e8f1e9!important;border:1px solid #3a5743!important;
+}
+#login-screen .login-submit{display:block!important;width:100%!important;min-height:50px!important}
+#login-screen .register-toggle,#login-screen .pwa-install{width:100%!important;min-height:44px!important;margin-top:10px!important}
+#login-screen .login-disclaimer{display:flex!important;visibility:visible!important;opacity:1!important}
+#app-shell .mascot-promo img{display:none!important}
+@media(min-width:761px) and (max-width:1050px){
+  #login-screen.login-screen{grid-template-columns:minmax(0,1fr) minmax(400px,.95fr)!important}
+  #login-screen>.login-brand-panel{padding:28px!important}
+  #login-screen .login-mascot{width:clamp(130px,17vw,190px)!important}
+  #login-screen .login-card{padding:26px!important}
+}
+@media(max-width:760px){
+  #login-screen.login-screen{
+    display:flex!important;flex-direction:column!important;align-items:stretch!important;
+    grid-template-columns:none!important;grid-template-rows:none!important;
+    min-height:100svh!important;height:auto!important;overflow:visible!important;
+  }
+  #login-screen>.login-brand-panel{
+    display:flex!important;position:relative!important;inset:auto!important;
+    width:100%!important;min-width:0!important;min-height:230px!important;
+    height:auto!important;max-height:none!important;padding:20px 20px 24px!important;
+    border:0!important;border-radius:0 0 18px 18px!important;background-position:center!important;
+  }
+  #login-screen>.login-brand-panel .login-intro{width:74%!important;margin:28px 0 6px!important}
+  #login-screen .login-intro h1{font-size:clamp(27px,7vw,36px)!important}
+  #login-screen .login-intro p{font-size:11px!important;line-height:1.55!important}
+  #login-screen .login-mascot{right:10px!important;bottom:10px!important;width:clamp(90px,26vw,122px)!important;max-width:122px!important;max-height:45%!important}
+  #login-screen>.login-form-side{
+    display:flex!important;position:relative!important;inset:auto!important;
+    width:100%!important;min-height:0!important;height:auto!important;
+    padding:22px 14px 32px!important;background:#101713!important;
+  }
+  #login-screen .login-card{
+    flex:0 1 auto!important;width:100%!important;max-width:480px!important;
+    max-height:none!important;height:auto!important;margin:0 auto!important;
+    padding:24px 20px!important;border-radius:16px!important;
+  }
+  #login-screen .login-card-seal{width:56px!important;height:56px!important}
+  #login-screen .login-card h2{font-size:24px!important}
+}
+</style>
+
 </body>
 </html>
