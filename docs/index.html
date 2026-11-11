@@ -2920,5 +2920,57 @@ body.dark-mode .mobile-brand strong{color:#e4efe5!important}
 }
 </style>
 
+
+<style id="login-desktop-mobile-layout">
+/* No computador, a tela de acesso usa a composição compacta do mobile,
+   com largura confortável e rolagem na página — nunca dentro do formulário. */
+@media (min-width:761px){
+  #login-screen.login-screen{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-height:100vh!important;
+    min-height:100svh!important;
+    padding:38px 24px 48px!important;
+    background:#0d1911!important;
+  }
+  #login-screen .login-brand-panel{display:none!important}
+  #login-screen .login-form-side{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:100%!important;
+    min-height:0!important;
+    padding:0!important;
+    overflow:visible!important;
+    background:transparent!important;
+  }
+  #login-screen .login-card{
+    display:block!important;
+    flex:0 1 560px!important;
+    width:min(100%,560px)!important;
+    max-width:560px!important;
+    max-height:none!important;
+    height:auto!important;
+    margin:0!important;
+    padding:36px 40px!important;
+    overflow:visible!important;
+    border-radius:18px!important;
+  }
+  #login-screen .login-card-seal{width:76px!important;height:76px!important}
+  #login-screen .login-card h2{font-size:30px!important}
+  #login-screen .login-description{font-size:13px!important;line-height:1.65!important}
+  #login-screen .login-field{margin:16px 0!important}
+  #login-screen .login-field input,
+  #login-screen .login-field select{min-height:50px!important}
+  #login-screen .login-submit{min-height:50px!important}
+  #login-screen .login-theme-toggle{top:18px!important;right:18px!important}
+}
+@media (min-width:761px) and (max-height:760px){
+  #login-screen.login-screen{justify-content:flex-start!important;padding-top:76px!important}
+  #login-screen .login-card{padding-top:26px!important;padding-bottom:26px!important}
+}
+</style>
 </body>
 </html>
