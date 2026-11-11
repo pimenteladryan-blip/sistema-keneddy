@@ -4,11 +4,11 @@ O **SGVE** é um sistema demonstrativo desenvolvido para apoiar a organização 
 
 A proposta é reunir, em um só lugar, informações sobre viagens, estudantes, autorizações, transporte, professores, presença e relatórios, com acesso organizado conforme o perfil de cada usuário.
 
-## Acesse a demonstração
+## Acesse o sistema
 
-**[Abrir o SGVE](https://pimenteladryan-blip.github.io/sistema-keneddy/)**
+**[ABRIR SGVE | Sistema de Gerenciamento de Viagens Escolares](https://pimenteladryan-blip.github.io/sistema-keneddy/)**
 
-A demonstração funciona pelo navegador e também pode ser instalada como PWA em dispositivos compatíveis.
+Hospedagem: **GitHub Pages**. O projeto não depende do Render. A versão publicada é uma demonstração estática e pode ser instalada como PWA em dispositivos compatíveis.
 
 ## Funcionalidades
 
@@ -53,7 +53,7 @@ O módulo **Usuários** é exclusivo do administrador. Os formulários de cadast
 - **GitHub Pages e GitHub Actions:** publicação automática da demonstração estática.
 
 ### Estrutura de servidor do projeto
-O repositório também contém uma estrutura de aplicação com **Node.js**, **Express** e **SQLite**, além de configurações para implantação. Essa versão de servidor é separada da demonstração estática publicada no GitHub Pages.
+O repositório também contém uma estrutura de servidor local com **Node.js**, **Express** e **SQLite**, separada da demonstração estática publicada no GitHub Pages. Ela não está conectada ao site público.
 
 ## Como testar
 
