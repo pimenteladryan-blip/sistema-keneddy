@@ -1795,6 +1795,185 @@ body.dark-mode #login-screen .login-brand-panel > .login-mascot{
 }
 </style>
 
+
+<style>
+/* SGVE: mesma composição nos dois temas; somente a paleta muda */
+@media screen and (min-width:761px){
+  #login-screen.login-screen{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+    align-items:stretch!important;
+    min-height:100svh!important;
+    height:auto!important;
+    overflow:hidden!important;
+  }
+  #login-screen .login-brand-panel{
+    position:relative!important;
+    width:100%!important;
+    min-height:100svh!important;
+    height:auto!important;
+    justify-content:space-between!important;
+    padding:clamp(28px,4vw,64px)!important;
+  }
+  #login-screen .login-form-side{
+    position:relative!important;
+    inset:auto!important;
+    display:grid!important;
+    place-items:center!important;
+    width:100%!important;
+    min-height:100svh!important;
+    height:auto!important;
+    padding:clamp(24px,4vw,58px)!important;
+    pointer-events:auto!important;
+  }
+  #login-screen .login-card{
+    width:min(100%,480px)!important;
+    max-height:calc(100svh - 48px)!important;
+    overflow:auto!important;
+    margin:auto!important;
+  }
+}
+@media screen and (max-width:760px){
+  #login-screen.login-screen{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    min-height:100svh!important;
+    height:auto!important;
+    overflow:visible!important;
+  }
+  #login-screen .login-brand-panel{
+    flex:0 0 auto!important;
+    width:100%!important;
+    min-height:clamp(250px,36svh,340px)!important;
+    height:auto!important;
+    padding:22px 20px 24px!important;
+    justify-content:flex-start!important;
+  }
+  #login-screen .login-intro{
+    margin:clamp(24px,5vh,48px) 0 0!important;
+    max-width:70%!important;
+  }
+  #login-screen .login-form-side{
+    position:relative!important;
+    inset:auto!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:100%!important;
+    min-height:0!important;
+    padding:22px 15px 32px!important;
+    pointer-events:auto!important;
+  }
+  #login-screen .login-card{
+    width:min(100%,480px)!important;
+    max-height:none!important;
+    overflow:visible!important;
+    margin:0 auto!important;
+    padding:24px 20px!important;
+  }
+}
+/* Tema claro */
+body.light-mode #login-screen,
+body.light-mode #login-screen .login-form-side{
+  background:#edf5ee!important;
+}
+body.light-mode #login-screen .login-brand-panel{
+  background-image:linear-gradient(110deg,rgba(235,247,237,.93),rgba(221,240,225,.80)),url("https://cdn.dpontanews.com.br/midia/2024/04/30/1759285550532_3260331679437041498504538645176702949629573n_otimized.webp")!important;
+  background-size:cover!important;
+  background-position:center!important;
+  color:#173d2a!important;
+}
+body.light-mode #login-screen .login-brand-panel .login-brand,
+body.light-mode #login-screen .login-brand-panel .login-intro,
+body.light-mode #login-screen .login-brand-panel .login-brand-footer,
+body.light-mode #login-screen .login-brand-panel .login-intro h1,
+body.light-mode #login-screen .login-brand-panel .login-intro p,
+body.light-mode #login-screen .login-brand-panel .login-kicker{
+  color:#173d2a!important;
+  text-shadow:none!important;
+}
+body.light-mode #login-screen .login-brand-panel .login-brand small,
+body.light-mode #login-screen .login-brand-panel .login-brand-footer{color:#42654d!important}
+body.light-mode #login-screen .login-form-side{
+  background:radial-gradient(circle at 85% 15%,#f8fcf8 0,#edf5ee 48%,#e4efe6 100%)!important;
+}
+body.light-mode #login-screen .login-card{
+  background:#fff!important;
+  color:#203b2a!important;
+  border:1px solid #d8e7da!important;
+  box-shadow:0 24px 65px rgba(24,69,39,.12)!important;
+}
+body.light-mode #login-screen .login-card h2{color:#173d2a!important}
+body.light-mode #login-screen .login-description{color:#718078!important}
+body.light-mode #login-screen .login-field label,
+body.light-mode #login-screen .access-type-field>label{color:#345640!important}
+body.light-mode #login-screen .login-field input,
+body.light-mode #login-screen .login-field select,
+body.light-mode #login-screen .access-select-wrap{
+  background:#fff!important;
+  color:#25382c!important;
+  border-color:#d5e3d8!important;
+}
+body.light-mode #login-screen .login-card .eyebrow{
+  background:#e8f3e9!important;color:#24613b!important;
+}
+body.light-mode #login-screen .login-disclaimer{
+  background:#f2f8f2!important;color:#607365!important;border-color:#dceade!important;
+}
+body.light-mode #login-screen .login-disclaimer strong{color:#28583a!important}
+body.light-mode #login-screen .register-toggle{
+  background:#f1f7f2!important;color:#245b38!important;border-color:#d5e5d8!important;
+}
+/* Tema escuro */
+body.dark-mode #login-screen,
+body.dark-mode #login-screen .login-form-side{
+  background:#0b120e!important;
+}
+body.dark-mode #login-screen .login-brand-panel{
+  background-image:linear-gradient(110deg,rgba(3,19,12,.94),rgba(4,25,16,.78)),url("https://cdn.dpontanews.com.br/midia/2024/04/30/1759285550532_3260331679437041498504538645176702949629573n_otimized.webp")!important;
+  background-size:cover!important;
+  background-position:center!important;
+  color:#edf6ef!important;
+}
+body.dark-mode #login-screen .login-brand-panel .login-brand,
+body.dark-mode #login-screen .login-brand-panel .login-intro,
+body.dark-mode #login-screen .login-brand-panel .login-brand-footer,
+body.dark-mode #login-screen .login-brand-panel .login-intro h1,
+body.dark-mode #login-screen .login-brand-panel .login-intro p,
+body.dark-mode #login-screen .login-brand-panel .login-kicker{color:#edf6ef!important}
+body.dark-mode #login-screen .login-form-side{
+  background:radial-gradient(circle at 85% 15%,#1b3929 0,#121d16 48%,#0b120e 100%)!important;
+}
+body.dark-mode #login-screen .login-card{
+  background:#142019!important;
+  color:#e8f1eb!important;
+  border:1px solid #304638!important;
+  box-shadow:0 24px 70px #0008!important;
+}
+body.dark-mode #login-screen .login-card h2{color:#f0f7f2!important}
+body.dark-mode #login-screen .login-description{color:#b7c8bd!important}
+body.dark-mode #login-screen .login-field label,
+body.dark-mode #login-screen .access-type-field>label{color:#dce9df!important}
+body.dark-mode #login-screen .login-field input,
+body.dark-mode #login-screen .login-field select,
+body.dark-mode #login-screen .access-select-wrap{
+  background:#0d1711!important;
+  color:#edf5ef!important;
+  border-color:#3a5143!important;
+}
+body.dark-mode #login-screen .login-card .eyebrow{
+  background:#203d2c!important;color:#a8e0b8!important;
+}
+body.dark-mode #login-screen .login-disclaimer{
+  background:#192a20!important;color:#b7c8bd!important;border-color:#304638!important;
+}
+body.dark-mode #login-screen .login-disclaimer strong{color:#a8dfb7!important}
+body.dark-mode #login-screen .register-toggle{
+  background:#192a20!important;color:#d8eee0!important;border-color:#304638!important;
+}
+</style>
+
 </head>
 <body>
 <section class="login-screen" id="login-screen">
