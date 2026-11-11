@@ -3051,6 +3051,88 @@ body.dark-mode .mobile-brand strong{color:#e4efe5!important}
     width: 100% !important;
   }
 }
+
+/* Reconstrução exclusiva do layout desktop. O breakpoint mobile permanece intacto. */
+@media (min-width: 761px) {
+  #login-screen:not([hidden]) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.15fr) minmax(420px, .85fr) !important;
+    grid-template-rows: minmax(100vh, auto) !important;
+    align-items: stretch !important;
+    gap: 0 !important;
+    min-height: 100vh !important;
+    background: #f4f7f4 !important;
+  }
+  #login-screen:not([hidden]) > .login-brand-panel {
+    display: flex !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 100vh !important;
+    padding: clamp(38px, 5vw, 76px) !important;
+    justify-content: space-between !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-right: 6px solid #168b48 !important;
+    border-radius: 0 !important;
+  }
+  #login-screen:not([hidden]) .login-brand-panel > .login-brand {
+    position: relative !important;
+    z-index: 3 !important;
+    align-self: flex-start !important;
+  }
+  #login-screen:not([hidden]) .login-brand-panel > .login-intro {
+    position: relative !important;
+    z-index: 3 !important;
+    width: min(68%, 650px) !important;
+    max-width: 650px !important;
+    margin: auto 0 !important;
+    padding-bottom: 30px !important;
+  }
+  #login-screen:not([hidden]) .login-brand-panel > .login-intro h1 {
+    max-width: 590px !important;
+    font-size: clamp(38px, 4.2vw, 64px) !important;
+    line-height: 1.06 !important;
+  }
+  #login-screen:not([hidden]) .login-brand-panel > .login-intro p {
+    max-width: 460px !important;
+    font-size: 15px !important;
+    line-height: 1.75 !important;
+  }
+  #login-screen:not([hidden]) .login-brand-panel > .login-mascot {
+    display: block !important;
+    position: absolute !important;
+    z-index: 2 !important;
+    right: clamp(24px, 4vw, 66px) !important;
+    bottom: clamp(36px, 7vh, 76px) !important;
+    width: min(31%, 340px) !important;
+    max-width: 340px !important;
+    max-height: 48% !important;
+    height: auto !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #login-screen:not([hidden]) > .login-form-side {
+    display: flex !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 100vh !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: clamp(32px, 4vw, 68px) !important;
+  }
+  #login-screen:not([hidden]) .login-card {
+    width: min(100%, 460px) !important;
+    margin: auto !important;
+    padding: clamp(30px, 3vw, 46px) !important;
+    border-radius: 22px !important;
+  }
+}
+
 </style>
 
 </body>
