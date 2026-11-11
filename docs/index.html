@@ -2023,6 +2023,80 @@ body.sgve-authenticated #app-shell {
   opacity:1!important;
 }
 </style>
+<style>
+/* Login para PC: a composição mobile foi ampliada e equilibrada para telas grandes */
+@media screen and (min-width:901px) and (pointer:fine){
+  #login-screen.login-screen{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.12fr) minmax(430px,.88fr)!important;
+    min-height:100vh!important;
+    min-height:100svh!important;
+    height:100svh!important;
+    overflow:hidden!important;
+    background:#0b120e!important;
+  }
+  #login-screen .login-brand-panel{
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:space-between!important;
+    min-width:0!important;
+    min-height:100svh!important;
+    padding:clamp(34px,5vw,76px)!important;
+    border:0!important;
+    border-right:1px solid #ffffff18!important;
+    background-position:center!important;
+  }
+  #login-screen .login-brand{
+    gap:16px!important;
+  }
+  #login-screen .cepk-seal{width:clamp(62px,6vw,86px)!important;height:auto!important}
+  #login-screen .login-intro{
+    width:min(100%,650px)!important;
+    max-width:650px!important;
+    margin:clamp(38px,8vh,100px) 0!important;
+  }
+  #login-screen .login-intro h1{
+    max-width:620px!important;
+    font-size:clamp(42px,4.4vw,66px)!important;
+    line-height:1.06!important;
+  }
+  #login-screen .login-intro p{
+    max-width:490px!important;
+    font-size:clamp(14px,1.15vw,17px)!important;
+    line-height:1.8!important;
+  }
+  #login-screen .login-mascot{
+    right:clamp(20px,4vw,58px)!important;
+    bottom:clamp(18px,4vh,48px)!important;
+    width:min(27%,300px)!important;
+    max-height:42%!important;
+  }
+  #login-screen .login-form-side{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-width:0!important;
+    min-height:100svh!important;
+    padding:clamp(28px,4vw,64px)!important;
+    background:radial-gradient(ellipse at 50% 35%,#1b3929 0,#121d16 52%,#0b120e 100%)!important;
+  }
+  #login-screen .login-card{
+    width:min(100%,480px)!important;
+    max-height:calc(100svh - 56px)!important;
+    overflow:auto!important;
+    margin:0!important;
+    padding:clamp(30px,3vw,46px)!important;
+    border-radius:22px!important;
+  }
+}
+@media screen and (min-width:761px) and (max-width:1100px) and (pointer:fine){
+  #login-screen.login-screen{grid-template-columns:minmax(0,1fr) minmax(390px,.95fr)!important}
+  #login-screen .login-brand-panel{padding:30px!important}
+  #login-screen .login-intro h1{font-size:clamp(36px,4vw,48px)!important}
+  #login-screen .login-mascot{width:min(25%,210px)!important}
+  #login-screen .login-card{padding:27px!important}
+}
+</style>
 </head>
 <body>
 <section class="login-screen" id="login-screen">
