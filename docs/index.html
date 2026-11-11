@@ -3242,15 +3242,29 @@ html,body{min-height:100%!important;height:auto!important;overflow-x:hidden!impo
 
 
 <style id="sgve-desktop-login-visibility-fix">
-/* Correção final: texto institucional e mascote sempre visíveis no login desktop. */
+/* Desktop: correção de contraste e camadas. Regras mobile preservadas. */
 @media (min-width: 761px) {
   #login-screen:not([hidden]) > .login-brand-panel {
     display: flex !important;
+    position: relative !important;
     flex-direction: column !important;
     justify-content: space-between !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    min-width: 0 !important;
+    min-height: 100vh !important;
+    overflow: hidden !important;
     isolation: isolate !important;
+  }
+  body.light-mode #login-screen:not([hidden]) > .login-brand-panel {
+    --login-title-color: #173f29;
+    --login-copy-color: #405f49;
+    --login-kicker-color: #ffffff;
+    --login-kicker-bg: rgba(13, 72, 42, .88);
+  }
+  body.dark-mode #login-screen:not([hidden]) > .login-brand-panel {
+    --login-title-color: #f2f8f3;
+    --login-copy-color: #d3e4d7;
+    --login-kicker-color: #eaf6ed;
+    --login-kicker-bg: rgba(0, 20, 11, .48);
   }
   #login-screen:not([hidden]) > .login-brand-panel > .login-brand,
   #login-screen:not([hidden]) > .login-brand-panel > .login-intro,
@@ -3262,27 +3276,39 @@ html,body{min-height:100%!important;height:auto!important;overflow-x:hidden!impo
     opacity: 1 !important;
     clip: auto !important;
     clip-path: none !important;
-    color: #ffffff !important;
   }
   #login-screen:not([hidden]) > .login-brand-panel > .login-brand {
     display: flex !important;
     align-items: center !important;
   }
+  #login-screen:not([hidden]) > .login-brand-panel > .login-brand strong,
+  #login-screen:not([hidden]) > .login-brand-panel > .login-intro h1 {
+    color: var(--login-title-color, #ffffff) !important;
+    -webkit-text-fill-color: currentColor !important;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, .16) !important;
+  }
+  #login-screen:not([hidden]) > .login-brand-panel > .login-brand small,
+  #login-screen:not([hidden]) > .login-brand-panel > .login-intro p,
+  #login-screen:not([hidden]) > .login-brand-panel > .login-brand-footer {
+    color: var(--login-copy-color, #edf6ef) !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
   #login-screen:not([hidden]) > .login-brand-panel > .login-intro {
+    display: block !important;
     width: calc(100% - 245px) !important;
     max-width: 650px !important;
     min-width: 0 !important;
     margin: auto 0 !important;
     padding: 24px 0 !important;
   }
-  #login-screen:not([hidden]) > .login-brand-panel > .login-intro .login-kicker,
-  #login-screen:not([hidden]) > .login-brand-panel > .login-intro h1,
-  #login-screen:not([hidden]) > .login-brand-panel > .login-intro p {
-    display: block !important;
+  #login-screen:not([hidden]) > .login-brand-panel > .login-intro .login-kicker {
+    display: inline-flex !important;
     visibility: visible !important;
     opacity: 1 !important;
-    color: #ffffff !important;
-    text-shadow: 0 2px 8px rgba(0,0,0,.45) !important;
+    color: var(--login-kicker-color, #ffffff) !important;
+    background: var(--login-kicker-bg, rgba(0, 20, 11, .48)) !important;
+    -webkit-text-fill-color: currentColor !important;
+    text-shadow: none !important;
   }
   #login-screen:not([hidden]) > .login-brand-panel > .login-mascot {
     display: block !important;
@@ -3295,11 +3321,12 @@ html,body{min-height:100%!important;height:auto!important;overflow-x:hidden!impo
     max-width: 270px !important;
     max-height: 46% !important;
     object-fit: contain !important;
+    object-position: center bottom !important;
     visibility: visible !important;
     opacity: 1 !important;
     clip: auto !important;
     clip-path: none !important;
-    filter: drop-shadow(0 10px 20px rgba(0,0,0,.4)) !important;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, .48)) !important;
   }
 }
 </style>
