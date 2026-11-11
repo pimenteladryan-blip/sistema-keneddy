@@ -2997,67 +2997,88 @@ body.dark-mode .mobile-brand strong{color:#e4efe5!important}
 
 
 <style id="login-desktop-mobile-layout">
-/* Desktop: identidade visual completa do Kennedy, com mascote e foto da escola. */
+/* PC: mantém a mesma composição empilhada do mobile, ampliada para telas grandes. */
 @media (min-width:761px){
   #login-screen.login-screen{
     display:grid!important;
-    grid-template-columns:minmax(0,1.12fr) minmax(430px,.88fr)!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:minmax(290px,38svh) minmax(430px,1fr)!important;
     align-items:stretch!important;
     min-height:100vh!important;
     min-height:100svh!important;
     padding:0!important;
     gap:0!important;
-    background:#0d1911!important;
+    overflow-y:auto!important;
+    background:#101713!important;
   }
   #login-screen .login-brand-panel{
     display:flex!important;
     flex-direction:column!important;
     justify-content:space-between!important;
     position:relative!important;
-    width:auto!important;
-    min-height:100vh!important;
-    min-height:100svh!important;
-    padding:clamp(28px,4vw,64px)!important;
+    width:100%!important;
+    min-height:290px!important;
+    height:100%!important;
+    padding:clamp(28px,3.5vh,48px) clamp(32px,7vw,112px)!important;
     overflow:hidden!important;
-    background-image:linear-gradient(110deg,rgba(0,25,14,.86),rgba(0,35,19,.54)),url("https://cdn.dpontanews.com.br/midia/2024/04/30/1759285550532_3260331679437041498504538645176702949629573n_otimized.webp")!important;
+    border:0!important;
+    background-image:
+      linear-gradient(90deg,rgba(3,19,12,.88) 0%,rgba(4,25,16,.72) 58%,rgba(4,25,16,.48) 100%),
+      url("https://cdn.dpontanews.com.br/midia/2024/04/30/1759285550532_3260331679437041498504538645176702949629573n_otimized.webp")!important;
     background-size:cover!important;
-    background-position:center!important;
+    background-position:center 43%!important;
     color:#fff!important;
   }
   #login-screen .login-brand,
   #login-screen .login-intro,
-  #login-screen .login-brand-footer{position:relative!important;z-index:3!important}
-  #login-screen .login-mascot{
-    display:block!important;
-    position:absolute!important;
-    z-index:2!important;
-    right:clamp(12px,3vw,48px)!important;
-    bottom:6%!important;
-    width:min(38%,360px)!important;
-    max-height:48%!important;
-    object-fit:contain!important;
-    object-position:bottom right!important;
+  #login-screen .login-brand-footer{
+    position:relative!important;
+    z-index:3!important;
   }
+  #login-screen .login-brand .brand-symbol{
+    width:48px!important;height:48px!important;font-size:27px!important;
+  }
+  #login-screen .login-intro{
+    max-width:760px!important;
+    margin:clamp(24px,3vh,38px) 0 10px!important;
+  }
+  #login-screen .login-intro h1{
+    max-width:760px!important;
+    margin:14px 0!important;
+    font-size:clamp(36px,4.2vw,54px)!important;
+    line-height:1.08!important;
+  }
+  #login-screen .login-intro p{
+    max-width:650px!important;
+    font-size:14px!important;
+    line-height:1.7!important;
+  }
+  #login-screen .login-brand-footer{
+    display:flex!important;
+    align-items:center!important;
+    gap:10px!important;
+    font-size:11px!important;
+  }
+  #login-screen .login-mascot{display:none!important}
   #login-screen .login-form-side{
     display:flex!important;
     align-items:center!important;
     justify-content:center!important;
-    width:auto!important;
-    min-height:100vh!important;
-    min-height:100svh!important;
-    padding:56px clamp(24px,4vw,64px)!important;
+    width:100%!important;
+    min-height:430px!important;
+    padding:38px 24px 52px!important;
     overflow:visible!important;
-    background:radial-gradient(circle at 85% 15%,#1b3929 0,#121d16 42%,#101713 78%)!important;
+    background:radial-gradient(circle at 50% 0%,#1b3929 0,#121d16 48%,#101713 82%)!important;
   }
   #login-screen .login-card{
     display:block!important;
-    flex:0 1 500px!important;
-    width:min(100%,500px)!important;
-    max-width:500px!important;
+    flex:0 1 480px!important;
+    width:min(100%,480px)!important;
+    max-width:480px!important;
     max-height:none!important;
     height:auto!important;
     margin:0!important;
-    padding:34px 38px!important;
+    padding:clamp(30px,3vw,42px)!important;
     overflow:visible!important;
     border-radius:18px!important;
   }
@@ -3071,8 +3092,13 @@ body.dark-mode .mobile-brand strong{color:#e4efe5!important}
   #login-screen .login-theme-toggle{top:18px!important;right:18px!important}
 }
 @media (min-width:761px) and (max-height:760px){
-  #login-screen .login-form-side{padding-top:76px!important;padding-bottom:28px!important}
-  #login-screen .login-card{padding-top:26px!important;padding-bottom:26px!important}
+  #login-screen.login-screen{
+    grid-template-rows:minmax(270px,36svh) minmax(420px,1fr)!important;
+  }
+  #login-screen .login-brand-panel{padding-top:24px!important;padding-bottom:24px!important}
+  #login-screen .login-intro{margin:18px 0 6px!important}
+  #login-screen .login-intro h1{font-size:clamp(32px,3.7vw,44px)!important}
+  #login-screen .login-form-side{padding-top:28px!important;padding-bottom:34px!important}
 }
 </style>
 </body>
