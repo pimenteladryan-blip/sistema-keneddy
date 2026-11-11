@@ -1,4 +1,4 @@
-const CACHE_NAME = "sgve-cepk-v35";;;;;
+const CACHE_NAME = "sgve-cepk-v36";;;;;
 const APP_SHELL = ["./", "./index.html", "./styles.css", "./demo.js", "./manifest.webmanifest", "./icon.svg", "./cepk-62.svg", "./mascote.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
@@ -9,14 +9,20 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
-  event.respondWith(caches.match(request).then(cached => {
-    if (cached) return cached;
-    return fetch(request).then(response => {
-      if (response && response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-      }
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    try {
+      // Network-first: no computador e no celular, buscar a versão mais recente.
+      const response = await fetch(request, { cache: "no-store" });
+      if (response && response.ok) await cache.put(request, response.clone());
       return response;
-    }).catch(() => request.mode === "navigate" ? caches.match("./index.html") : Response.error());
-  }));
+    } catch (error) {
+      const cached = await cache.match(request);
+      if (cached) return cached;
+      if (request.mode === "navigate") {
+        return (await cache.match("./index.html")) || Response.error();
+      }
+      return Response.error();
+    }
+  })());
 });
