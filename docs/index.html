@@ -1704,6 +1704,97 @@ body.dark-mode #login-screen .login-brand-panel > .login-mascot{
   filter:brightness(1.28) contrast(1.08) saturate(1.16) drop-shadow(0 14px 22px rgba(0,0,0,.62))!important;
 }
 </style>
+
+<style>
+/* SGVE: login responsivo revisado na versão de teste */
+@media screen and (min-width:901px) and (pointer:fine){
+  #login-screen.login-screen{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.08fr) minmax(420px,.92fr)!important;
+    align-items:stretch!important;
+    min-height:100svh!important;
+    height:auto!important;
+    overflow:hidden!important;
+  }
+  #login-screen .login-brand-panel{
+    width:100%!important;
+    min-height:100svh!important;
+    height:auto!important;
+    padding:clamp(32px,5vw,72px)!important;
+  }
+  #login-screen .login-form-side{
+    position:relative!important;
+    inset:auto!important;
+    width:100%!important;
+    min-height:100svh!important;
+    height:auto!important;
+    display:grid!important;
+    place-items:center!important;
+    padding:40px clamp(24px,4vw,64px)!important;
+    background:radial-gradient(circle at 80% 15%,#1b3929 0,#121d16 42%,#101713 78%)!important;
+    pointer-events:auto!important;
+  }
+  #login-screen .login-card{
+    width:min(100%,470px)!important;
+    max-height:none!important;
+    overflow:visible!important;
+    margin:auto!important;
+    padding:clamp(28px,3vw,40px)!important;
+  }
+}
+@media screen and (max-width:900px),(pointer:coarse) and (hover:none){
+  #login-screen.login-screen{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:flex-start!important;
+    min-height:100svh!important;
+    height:auto!important;
+    overflow:visible!important;
+  }
+  #login-screen .login-brand-panel{
+    flex:0 0 auto!important;
+    width:100%!important;
+    min-height:clamp(270px,39svh,390px)!important;
+    height:auto!important;
+    padding:22px 22px 24px!important;
+    justify-content:flex-start!important;
+    background-position:center 43%!important;
+  }
+  #login-screen .login-intro{
+    margin:clamp(30px,7vh,66px) 0 0!important;
+    max-width:68%!important;
+  }
+  #login-screen .login-mascot{
+    right:12px!important;
+    bottom:12px!important;
+    width:min(29%,140px)!important;
+    max-height:48%!important;
+  }
+  #login-screen .login-form-side{
+    position:relative!important;
+    inset:auto!important;
+    z-index:5!important;
+    display:flex!important;
+    flex:1 0 auto!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:100%!important;
+    min-height:0!important;
+    padding:24px 16px 36px!important;
+    background:#0b120e!important;
+    pointer-events:auto!important;
+  }
+  #login-screen .login-card{
+    width:min(100%,460px)!important;
+    max-height:none!important;
+    overflow:visible!important;
+    margin:0 auto!important;
+    padding:25px 22px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <section class="login-screen" id="login-screen">
