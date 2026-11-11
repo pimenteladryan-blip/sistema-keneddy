@@ -1692,7 +1692,70 @@ body.dark-mode .access-select-icon,body.dark-mode .access-select-arrow{color:#9c
 body.dark-mode .demo-verification-code{border-color:#42694e;background:#1b3826;color:#c9efd3}
 @media(max-width:760px){.access-select{min-height:49px;font-size:14px!important}.access-select-wrap{width:100%}}
 </style>
-</head>
+<style>\n
+/* Ajuste final da identidade visual no desktop e isolamento do login após autenticar */
+@media (min-width: 761px) {
+  #login-screen:not(.is-hidden) {
+    display:grid!important;
+    grid-template-columns:minmax(0,1.12fr) minmax(390px,.88fr)!important;
+    min-height:100vh!important;
+    width:100%!important;
+    align-items:stretch!important;
+    background:#f5f7f5!important;
+  }
+  #login-screen:not(.is-hidden) > .login-brand-panel {
+    display:flex!important;
+    position:relative!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:100vh!important;
+    height:auto!important;
+    max-height:none!important;
+    flex-direction:column!important;
+    justify-content:space-between!important;
+    padding:clamp(36px,5vw,72px)!important;
+    overflow:hidden!important;
+    border-radius:0!important;
+  }
+  #login-screen:not(.is-hidden) > .login-form-side {
+    display:grid!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:100vh!important;
+    height:auto!important;
+    padding:36px clamp(24px,4vw,64px)!important;
+    place-items:center!important;
+  }
+  #login-screen:not(.is-hidden) .login-brand-panel > .login-mascot {
+    display:block!important;
+    position:absolute!important;
+    z-index:2!important;
+    right:clamp(24px,5vw,72px)!important;
+    bottom:clamp(24px,5vh,56px)!important;
+    width:min(34%,360px)!important;
+    max-width:360px!important;
+    max-height:56%!important;
+    height:auto!important;
+    object-fit:contain!important;
+    object-position:center bottom!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+  #login-screen:not(.is-hidden) .login-brand-panel > .login-intro {
+    max-width:min(70%,620px)!important;
+    margin:40px 0!important;
+  }
+}
+body.sgve-authenticated #login-screen,
+body.sgve-authenticated .login-screen {
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+body.sgve-authenticated #app-shell {
+  display:block!important;
+}
+\n</style>\n</head>
 <body>
 <section class="login-screen" id="login-screen">
   <button class="theme-toggle login-theme-toggle" id="theme-toggle-login" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button>
@@ -1988,6 +2051,7 @@ body.dark-mode .demo-verification-code{border-color:#42694e;background:#1b3826;c
       if (permitted) b.style.removeProperty('display');
       else b.style.setProperty('display','none','important');
     });
+    document.body.classList.add('sgve-authenticated');
     loginScreen.classList.add('is-hidden');
     loginScreen.setAttribute('aria-hidden', 'true');
     app.classList.add('logged-in');
@@ -2022,6 +2086,7 @@ body.dark-mode .demo-verification-code{border-color:#42694e;background:#1b3826;c
     openPage('inicio');
   }
   function leaveApp() {
+    document.body.classList.remove('sgve-authenticated');
     app.classList.remove('logged-in');
     loginScreen.classList.remove('is-hidden');
     loginScreen.removeAttribute('aria-hidden');
