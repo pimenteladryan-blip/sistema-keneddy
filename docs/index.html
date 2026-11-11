@@ -2673,5 +2673,110 @@ const installButton=document.getElementById("pwa-install");
 if(installButton)installButton.addEventListener("click",async()=>{if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;installButton.hidden=true;});
 window.addEventListener("appinstalled",()=>{if(installButton)installButton.hidden=true;});
 </script>
+
+<style id="login-theme-unified">
+/* A tela de login mantém a mesma composição nos dois temas; apenas a paleta muda. */
+#login-screen.login-screen{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.1fr) minmax(360px,.9fr)!important;
+  min-height:100vh!important;
+  background:var(--bg)!important;
+}
+#login-screen .login-brand-panel{
+  position:relative!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+  min-width:0!important;
+  min-height:100vh!important;
+  padding:56px clamp(28px,7vw,100px)!important;
+  border:0!important;
+  overflow:hidden!important;
+  transition:background .2s,color .2s!important;
+}
+#login-screen .login-form-side{
+  display:grid!important;
+  place-items:center!important;
+  min-width:0!important;
+  min-height:100vh!important;
+  padding:36px 25px!important;
+  transition:background .2s!important;
+}
+#login-screen .login-card{
+  width:min(100%,460px)!important;
+  margin:0!important;
+  transition:background .2s,color .2s,border-color .2s!important;
+}
+body.light-mode #login-screen .login-brand-panel{
+  background-image:linear-gradient(110deg,rgba(238,247,235,.94),rgba(220,237,216,.86)),url("https://cdn.dpontanews.com.br/midia/2024/04/30/1759285550532_3260331679437041498504538645176702949629573n_otimized.webp")!important;
+  background-position:center!important;background-size:cover!important;
+  color:#23442d!important;border-right:1px solid #cbdcc7!important;
+}
+body.light-mode #login-screen .login-brand strong,
+body.light-mode #login-screen .login-intro h1{color:#23442d!important}
+body.light-mode #login-screen .login-brand small,
+body.light-mode #login-screen .login-kicker,
+body.light-mode #login-screen .login-intro p,
+body.light-mode #login-screen .login-brand-footer{color:#526d55!important}
+body.light-mode #login-screen .login-form-side{background:linear-gradient(145deg,#f5f9f2,#e7f0e3)!important}
+body.light-mode #login-screen .login-card{
+  background:#fff!important;color:#263b2c!important;
+  border:1px solid #d4e3d1!important;
+  box-shadow:0 22px 65px rgba(37,75,43,.12)!important;
+}
+body.light-mode #login-screen .login-card h2{color:#23442d!important}
+body.light-mode #login-screen .login-description,
+body.light-mode #login-screen .login-field label{color:#536657!important}
+body.light-mode #login-screen .login-field input,
+body.light-mode #login-screen .login-field select{
+  background:#fbfdfb!important;color:#263b2c!important;border-color:#d4e1d3!important;
+}
+body.dark-mode #login-screen .login-brand-panel{
+  background-image:linear-gradient(110deg,rgba(5,24,15,.96),rgba(9, forty, 24,.88)),url("https://cdn.dpontanews.com.br/midia/2024/04/30/1759285550532_3260331679437041498504538645176702949629573n_otimized.webp")!important;
+  background-position:center!important;background-size:cover!important;
+  color:#edf6ef!important;border-right:1px solid #263b2d!important;
+}
+body.dark-mode #login-screen .login-brand strong,
+body.dark-mode #login-screen .login-intro h1{color:#edf6ef!important}
+body.dark-mode #login-screen .login-brand small,
+body.dark-mode #login-screen .login-kicker,
+body.dark-mode #login-screen .login-intro p,
+body.dark-mode #login-screen .login-brand-footer{color:#b8cdbd!important}
+body.dark-mode #login-screen .login-form-side{background:linear-gradient(145deg,#0c1710,#101f15)!important}
+body.dark-mode #login-screen .login-card{
+  background:#17251b!important;color:#e8f1e9!important;
+  border:1px solid #304638!important;
+  box-shadow:0 22px 65px rgba(0,0,0,.34)!important;
+}
+body.dark-mode #login-screen .login-card h2{color:#f0f6f1!important}
+body.dark-mode #login-screen .login-description,
+body.dark-mode #login-screen .login-field label{color:#c1d0c4!important}
+body.dark-mode #login-screen .login-card .eyebrow{background:#203b29!important;color:#a9d5b4!important}
+body.dark-mode #login-screen .login-field input,
+body.dark-mode #login-screen .login-field select,
+body.dark-mode #login-screen .access-select{
+  background:#0e1a12!important;color:#e8f1e9!important;border-color:#3a5743!important;
+}
+body.dark-mode #login-screen .login-field input::placeholder{color:#8fa294!important}
+body.dark-mode #login-screen .login-disclaimer{background:#203629!important;border-color:#365541!important;color:#bdcfc1!important}
+body.dark-mode #login-screen .login-disclaimer strong{color:#a9dfb7!important}
+body.dark-mode #login-screen .login-submit{background:linear-gradient(110deg,#267447,#175b35)!important;color:#fff!important}
+body.dark-mode #login-screen .login-card .register-toggle{background:#203b29!important;border-color:#42644c!important;color:#d9f0df!important}
+body.light-mode #login-screen .login-theme-toggle{
+  background:#f7fbf5!important;color:#31583a!important;border-color:#bfd4bd!important;
+  box-shadow:0 5px 18px rgba(40,75,44,.13)!important;
+}
+body.dark-mode #login-screen .login-theme-toggle{
+  background:#14251a!important;color:#eaf4ed!important;border-color:#45634e!important;
+  box-shadow:0 5px 18px rgba(0,0,0,.4)!important;
+}
+@media(max-width:760px){
+  #login-screen.login-screen{display:flex!important;flex-direction:column!important}
+  #login-screen .login-brand-panel{min-height:245px!important;padding:22px 22px 18px!important}
+  #login-screen .login-form-side{min-height:auto!important;padding:23px 15px 30px!important}
+  #login-screen .login-card{width:min(100%,460px)!important}
+}
+</style>
+
 </body>
 </html>
