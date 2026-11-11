@@ -1757,7 +1757,7 @@ body.sgve-authenticated #app-shell {
 }
 \n</style>\n</head>
 <body>
-<section class="login-screen" id="login-screen">
+<section class="login-screen" id="login-screen" aria-hidden="false">
   <button class="theme-toggle login-theme-toggle" id="theme-toggle-login" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button>
   <div class="login-brand-panel">
     <div class="login-brand"><img class="cepk-seal" src="./cepk-62.svg" alt="CEPK 62 anos"><span><strong>CEPK</strong><small>Colégio Estadual Presidente Kennedy</small></span></div><img class="login-mascot" src="./mascote.svg" alt="Mascote do CEPK">
@@ -1793,7 +1793,7 @@ body.sgve-authenticated #app-shell {
   </section>
 </div>
 <div class="notifications-overlay" id="notifications-overlay" hidden><section class="notifications-dialog" role="dialog" aria-modal="true" aria-labelledby="notifications-title"><div class="panel-heading"><div><p class="eyebrow">CENTRAL DE AVISOS</p><h2 id="notifications-title">Notificações</h2></div><button type="button" id="close-notifications" class="notifications-close" aria-label="Fechar notificações">×</button></div><div class="notification-example"><span class="notice-dot green-dot"></span><div><strong>Viagem aprovada</strong><p>Sua viagem foi aprovada pela direção.</p><time>Hoje · 09:15</time></div></div><div class="notification-example"><span class="notice-dot blue-dot"></span><div><strong>Prazo de autorização</strong><p>Não se esqueça de entregar a autorização até a data informada pela escola.</p><time>Hoje · 08:00</time></div></div><div class="notification-example"><span class="notice-dot gold-dot"></span><div><strong>Lembrete de pagamento</strong><p>Confira o valor, as parcelas e as formas de pagamento da viagem.</p><time>Ontem · 17:30</time></div></div><div class="notification-example"><span class="notice-dot green-dot"></span><div><strong>Horário de saída</strong><p>Consulte os detalhes da viagem e programe seu alarme para acordar.</p><time>Exemplo de aviso</time></div></div><p class="alarm-note">Estes são exemplos demonstrativos. Nenhum aviso representa uma mensagem oficial da escola.</p></section></div>
-<div class="app-shell" id="app-shell">
+<div class="app-shell" id="app-shell" hidden>
   <aside class="sidebar">
     <a class="brand" href="#inicio"><img class="sidebar-seal" src="./cepk-62.svg" alt=""><span><strong>CEPK</strong><small>Colégio Estadual Presidente Kennedy</small></span></a>
     <div class="school-tag">ESCOLA ESTADUAL</div>
@@ -2053,7 +2053,9 @@ body.sgve-authenticated #app-shell {
     });
     document.body.classList.add('sgve-authenticated');
     loginScreen.classList.add('is-hidden');
+    loginScreen.hidden = true;
     loginScreen.setAttribute('aria-hidden', 'true');
+    app.hidden = false;
     app.classList.add('logged-in');
     const manager = ['administrador','direcao','secretaria'].includes(role);
     ['trip-form','student-form','vehicle-form','teacher-form'].forEach(id => {
@@ -2088,8 +2090,10 @@ body.sgve-authenticated #app-shell {
   function leaveApp() {
     document.body.classList.remove('sgve-authenticated');
     app.classList.remove('logged-in');
+    app.hidden = true;
     loginScreen.classList.remove('is-hidden');
-    loginScreen.removeAttribute('aria-hidden');
+    loginScreen.hidden = false;
+    loginScreen.setAttribute('aria-hidden', 'false');
     sessionStorage.removeItem('sgve-demo-session');
     sessionStorage.removeItem('sgve-demo-role');
     fillDemoEmail();
@@ -2982,6 +2986,70 @@ body.dark-mode .mobile-brand strong{color:#e4efe5!important}
   .sidebar .nav-item{gap:6px!important;padding:7px 6px!important;font-size:10px!important}
   .sidebar .nav-item span{font-size:18px!important}
   .main-area{padding-bottom:96px!important}
+}
+</style>
+
+
+<style id="sgve-interface-state-fix">
+/* Estado estrutural da aplicação: não depende da ordem das antigas regras CSS. */
+#login-screen[hidden],
+#app-shell[hidden] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+#login-screen:not([hidden]) {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.12fr) minmax(360px, .88fr) !important;
+  min-height: 100vh !important;
+  width: 100% !important;
+  visibility: visible !important;
+}
+#login-screen:not([hidden]) > .login-brand-panel {
+  position: relative !important;
+  min-width: 0 !important;
+  min-height: 100vh !important;
+  overflow: hidden !important;
+}
+#login-screen:not([hidden]) .login-brand-panel > .login-mascot {
+  display: block !important;
+  position: absolute !important;
+  z-index: 2 !important;
+  right: clamp(20px, 4vw, 64px) !important;
+  bottom: 24px !important;
+  width: min(34%, 350px) !important;
+  max-height: 52% !important;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center bottom !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+}
+#app-shell:not([hidden]) {
+  display: block !important;
+  visibility: visible !important;
+}
+@media (max-width: 760px) {
+  #login-screen:not([hidden]) {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100svh !important;
+  }
+  #login-screen:not([hidden]) > .login-brand-panel {
+    min-height: 245px !important;
+    height: auto !important;
+  }
+  #login-screen:not([hidden]) .login-brand-panel > .login-mascot {
+    right: 10px !important;
+    bottom: 12px !important;
+    width: min(32%, 150px) !important;
+    max-height: 66% !important;
+  }
+  #login-screen:not([hidden]) > .login-form-side {
+    min-height: auto !important;
+    width: 100% !important;
+  }
 }
 </style>
 
