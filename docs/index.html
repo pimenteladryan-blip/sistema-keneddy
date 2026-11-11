@@ -2001,6 +2001,23 @@ body.dark-mode #login-screen .register-toggle{
 }
 </style>
 
+
+<style>
+/* Correção mobile/desktop: ao autenticar, o painel com o Kennedyto sai completamente da tela. */
+body.sgve-authenticated #login-screen,
+body.sgve-authenticated .login-screen,
+body.sgve-authenticated #login-screen .login-mascot {
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+body.sgve-authenticated #app-shell {
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+</style>
 </head>
 <body>
 <section class="login-screen" id="login-screen">
@@ -2278,6 +2295,7 @@ body.dark-mode #login-screen .register-toggle{
     document.getElementById('breadcrumb-page').textContent = nav ? nav.textContent.trim() : name;
   }
   function enterApp(role) {
+    document.body.classList.add('sgve-authenticated');
     const account = accounts[role];
     const profile = profileData[account.email] || {};
     const displayName = (profile.name || account.role || 'Usuário').trim();
@@ -2334,6 +2352,7 @@ body.dark-mode #login-screen .register-toggle{
     openPage('inicio');
   }
   function leaveApp() {
+    document.body.classList.remove('sgve-authenticated');
     app.classList.remove('logged-in');
     app.style.setProperty('display', 'none', 'important');
     loginScreen.classList.remove('is-hidden');
