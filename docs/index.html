@@ -1857,7 +1857,7 @@ body.dark-mode .demo-verification-code{border-color:#42694e;background:#1b3826;c
             <div class="calendar-grid"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><b>22</b><b>23</b><b>24</b><b class="calendar-active">25</b><b>26</b><b>27</b><b>28</b></div>
             <div class="calendar-dots"><i></i><i></i><i></i><i></i><i></i></div>
           </section>
-          <section class="mascot-promo"><img src="./mascote.svg" alt="Mascote do CEPK"><div><strong>CEPK</strong><b>62 anos</b><span>Orgulho de fazer parte dessa história!</span></div></section>
+          <section class="mascot-promo app-school-note"><div><strong>CEPK</strong><b>62 anos</b><span>Orgulho de fazer parte dessa história!</span></div></section>
         </div>
         <div class="prototype-note"><span>i</span><p><strong>Ambiente demonstrativo</strong> Os registros são fictícios e ficam apenas neste navegador. Não utilize dados reais de estudantes nesta versão de testes.</p></div>
       </section>
@@ -3096,6 +3096,25 @@ body.dark-mode .mobile-brand strong{color:#e4efe5!important}
     border-radius:18px!important;
   }
   #login-screen .login-card-seal{width:76px!important;height:76px!important}
+
+  /* Kennedyto aparece somente no login; dentro do app fica apenas o aviso institucional. */
+  #app-shell .mascot-promo img{display:none!important}
+  #app-shell .mascot-promo{
+    min-height:86px!important;height:auto!important;padding:16px 20px!important;
+    justify-content:flex-start!important;border-radius:12px!important;
+  }
+  #app-shell .mascot-promo div{
+    display:grid!important;gap:3px!important;max-width:100%!important;
+    width:100%!important;text-align:left!important;
+  }
+  #app-shell .mascot-promo strong{font-size:15px!important}
+  #app-shell .mascot-promo b{font-size:19px!important}
+  #app-shell .mascot-promo span{font-size:11px!important}
+  #login-screen .login-mascot{
+    display:block!important;width:min(28%,250px)!important;max-width:250px!important;
+    max-height:43%!important;object-fit:contain!important;
+  }
+
   #login-screen .login-card h2{font-size:30px!important}
   #login-screen .login-description{font-size:13px!important;line-height:1.65!important}
   #login-screen .login-field{margin:15px 0!important}
