@@ -2042,6 +2042,42 @@ body.dark-mode #login-screen select#login-role option{
 }
 </style>
 
+
+<style>
+/* Correção: depois do login, esconder de fato a tela de entrada.
+   Sem animações de transição. */
+#login-screen.is-hidden,
+.login-screen.is-hidden{
+  display:none!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:none!important;
+  transform:none!important;
+  animation:none!important;
+  transition:none!important;
+}
+#app-shell{display:none}
+#app-shell.logged-in{
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  transform:none!important;
+  filter:none!important;
+  animation:none!important;
+  transition:none!important;
+}
+#app-shell.logged-in *,
+#app-shell.logged-in .topbar,
+#app-shell.logged-in .page-view.active,
+#app-shell.logged-in .stat-card,
+#app-shell.logged-in .dashboard-trips,
+#app-shell.logged-in .dashboard-notices,
+#app-shell.logged-in .dashboard-calendar{
+  animation:none!important;
+  transition:none!important;
+}
+</style>
+
 </head>
 <body>
 <section class="login-screen" id="login-screen">
