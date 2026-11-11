@@ -2869,5 +2869,56 @@ body.dark-mode .mobile-brand strong{color:#e4efe5!important}
 }
 </style>
 
+
+<style id="kennedy-desktop-inspired-by-mobile">
+/* Desktop: linguagem visual do mobile, ampliada para telas grandes */
+@media (min-width:761px){
+  .sidebar{
+    position:fixed!important;inset:auto 0 0 0!important;
+    width:100%!important;height:82px!important;min-height:82px!important;
+    padding:8px 22px calc(8px + env(safe-area-inset-bottom))!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    border-radius:18px 18px 0 0!important;
+    box-shadow:0 -8px 28px rgba(4,35,20,.18)!important;
+    z-index:40!important;
+  }
+  .sidebar .brand,.sidebar .school-tag,.sidebar .menu-title,
+  .sidebar .sidebar-bottom,.sidebar>.theme-toggle{display:none!important}
+  .sidebar .side-nav{
+    display:flex!important;flex-direction:row!important;align-items:center!important;
+    justify-content:center!important;gap:8px!important;width:min(100%,1240px)!important;
+    height:100%!important;margin:0!important;overflow:visible!important;
+  }
+  .sidebar .nav-item{
+    display:flex!important;flex:1 1 0!important;min-width:0!important;max-width:148px!important;
+    min-height:58px!important;align-items:center!important;justify-content:center!important;
+    gap:10px!important;padding:8px 12px!important;border:1px solid transparent!important;
+    border-radius:12px!important;font-size:12px!important;font-weight:750!important;
+    white-space:nowrap!important;transition:background .18s,transform .18s!important;
+  }
+  .sidebar .nav-item span{width:auto!important;font-size:21px!important;line-height:1!important}
+  .sidebar .nav-item.active{background:rgba(255,255,255,.15)!important;box-shadow:inset 0 3px #a8df63!important}
+  .sidebar .nav-item:hover{background:rgba(255,255,255,.10)!important;transform:translateY(-2px)}
+  .main-area{margin:0!important;min-height:100vh!important;padding-bottom:104px!important}
+  .mobile-brand{display:flex!important;align-items:center!important;gap:9px!important;color:#155b34!important;font-size:15px!important}
+  .mobile-brand .mobile-seal{display:block!important;width:36px!important;height:36px!important;object-fit:contain}
+  .topbar{height:76px!important;padding:0 clamp(22px,3vw,48px)!important}
+  .topbar-actions{gap:18px!important}
+  .page-content{max-width:1600px!important;margin:0 auto!important;padding:26px clamp(22px,3vw,48px) 30px!important}
+  .dashboard-hero{margin:0 0 20px!important;padding:24px 30px!important;min-height:170px!important;border-radius:16px!important}
+  .dashboard-stats{gap:15px!important;margin-bottom:20px!important}
+  .dashboard-stats .stat-card{min-height:120px!important;border-radius:15px!important;padding:19px!important}
+  .dashboard-columns,.dashboard-bottom{gap:16px!important}
+  .dashboard-trips,.dashboard-notices,.dashboard-calendar,.panel{border-radius:15px!important}
+}
+@media (min-width:761px) and (max-width:1050px){
+  .sidebar{height:76px!important;min-height:76px!important;padding-left:10px!important;padding-right:10px!important}
+  .sidebar .side-nav{gap:3px!important}
+  .sidebar .nav-item{gap:6px!important;padding:7px 6px!important;font-size:10px!important}
+  .sidebar .nav-item span{font-size:18px!important}
+  .main-area{padding-bottom:96px!important}
+}
+</style>
+
 </body>
 </html>
