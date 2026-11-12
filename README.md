@@ -6,7 +6,7 @@ A proposta é reunir, em um só lugar, informações sobre viagens, estudantes, 
 
 ## Acesse o sistema
 
-**[ABRIR SGVE | Sistema de Gerenciamento de Viagens Escolares](https://pimenteladryan-blip.github.io/sistema-keneddy/)**
+**[ABRIR SGVE | Acessar a versão publicada](https://pimenteladryan-blip.github.io/sistema-keneddy/)**
 
 Hospedagem: **GitHub Pages**. O projeto não depende do Render. A versão publicada é uma demonstração estática e pode ser instalada como PWA em dispositivos compatíveis.
 
@@ -98,4 +98,4 @@ Não existe senha administrativa padrão. Não envie o arquivo `.env` ao GitHub.
 ---
 
 **SGVE | Colégio Estadual Presidente Kennedy**  
-Demonstração: https://pimenteladryan-blip.github.io/sistema-keneddy/
+Versão publicada: https://pimenteladryan-blip.github.io/sistema-keneddy/
