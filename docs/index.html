@@ -1756,6 +1756,32 @@ body.sgve-authenticated #app-shell {
   display:block!important;
 }
 </style>
+
+<style id="sgve-login-final-visual-v45">
+#login-screen .login-brand-panel{position:relative!important;isolation:isolate!important;overflow:hidden!important}
+#login-screen .login-brand-panel>.login-mascot{display:block!important;visibility:visible!important;opacity:1!important;position:absolute!important;z-index:5!important;width:clamp(180px,22vw,310px)!important;max-width:42%!important;height:auto!important;max-height:68%!important;right:clamp(14px,3vw,42px)!important;bottom:clamp(10px,2.5vh,28px)!important;object-fit:contain!important;object-position:center bottom!important;filter:drop-shadow(0 10px 18px #001b0d35)!important;pointer-events:none!important}
+#login-screen #register-name-field[hidden]{display:none!important}
+#login-screen #register-name-field:not([hidden]){display:grid!important}
+@media(max-width:760px){#login-screen .login-brand-panel>.login-mascot{width:clamp(90px,25vw,145px)!important;max-width:30%!important;max-height:55%!important;right:8px!important;bottom:6px!important}}
+body.light-mode #login-screen{background:#eaf3e9!important;color:#173d29!important}
+body.light-mode #login-screen>.login-brand-panel{background:linear-gradient(145deg,#e8f3e7 0%,#d5e9d5 48%,#b9d9c2 100%)!important;border-right:1px solid #c1d9c5!important;color:#173d29!important}
+body.light-mode #login-screen>.login-brand-panel:before{background:radial-gradient(ellipse at 18% 85%,#8fca9b70,transparent 62%)!important}
+body.light-mode #login-screen>.login-brand-panel:after{border-color:#397a4c25!important;box-shadow:0 0 0 48px #ffffff18,0 0 0 96px #ffffff10!important}
+body.light-mode #login-screen .login-brand strong,body.light-mode #login-screen .login-intro h1,body.light-mode #login-screen .login-intro p,body.light-mode #login-screen .login-kicker,body.light-mode #login-screen .login-brand-footer{color:#173f29!important;text-shadow:none!important}
+body.light-mode #login-screen .login-brand small{color:#315f3e!important}
+body.light-mode #login-screen .login-kicker{background:#ffffffa8!important;border-color:#a9c9ad!important}
+body.light-mode #login-screen>.login-form-side{background:linear-gradient(155deg,#edf6eb 0%,#dceedd 58%,#c9e2ce 100%)!important}
+body.light-mode #login-screen .login-card{background:linear-gradient(145deg,#fff 0%,#f8fcf7 58%,#eaf5e9 100%)!important;border:1px solid #c9ddcb!important;color:#1c3e2a!important;box-shadow:0 20px 54px #1a57301c!important}
+body.light-mode #login-screen .login-card h2,body.light-mode #login-screen .login-card label{color:#183e29!important}
+body.light-mode #login-screen .login-card .eyebrow{background:#dceedd!important;color:#185b36!important}
+body.light-mode #login-screen .login-description,body.light-mode #login-screen .access-type-hint{color:#486a50!important}
+body.light-mode #login-screen .login-field input,body.light-mode #login-screen .login-field select,body.light-mode #login-screen .access-select{background:#f5fbf4!important;color:#183e29!important;border-color:#bcd5bf!important}
+body.light-mode #login-screen input::placeholder{color:#718b73!important;opacity:1!important}
+body.light-mode #login-screen .login-disclaimer{background:#e0efdf!important;color:#31563a!important;border-color:#bdd8be!important}
+body.light-mode #login-screen .login-disclaimer strong{color:#174c2e!important}
+body.light-mode #login-screen .login-submit{background:linear-gradient(110deg,#247b49,#145c37)!important;color:#fff!important}
+body.light-mode #login-screen .login-theme-toggle{background:#f7fcf6!important;color:#205b36!important;border-color:#9dbfa2!important}
+</style>
 </head>
 <body>
 <section class="login-screen" id="login-screen" aria-hidden="false">
@@ -1770,7 +1796,7 @@ body.sgve-authenticated #app-shell {
       <img class="login-card-seal" src="./cepk-62.svg" alt="CEPK 62 anos"><p class="eyebrow">SISTEMA DE GESTÃO DE VIAGENS ESCOLARES</p>
       <h2>Bem-vindo ao SGVE</h2>
       <p class="login-description" id="login-description">Entre com sua conta ou crie um cadastro para acessar a demonstração.</p>
-      <div class="login-field" id="register-name-field"><label for="register-name">Seu nome completo</label><input id="register-name" type="text" placeholder="Nome completo" autocomplete="name" maxlength="70" required></div>
+      <div class="login-field" id="register-name-field" hidden><label for="register-name">Seu nome completo</label><input id="register-name" type="text" placeholder="Nome completo" autocomplete="name" maxlength="70" required></div>
       <div class="login-field access-type-field"><label for="login-role">Tipo de acesso</label><div class="access-select-wrap"><span class="access-select-icon" aria-hidden="true">▦</span><select id="login-role" name="role" class="access-select" required><option value="" disabled>Selecione seu perfil para continuar</option><option value="administrador">Administrador</option><option value="direcao">Direção</option><option value="secretaria">Secretaria</option><option value="professor">Professor</option><option value="responsavel">Responsável</option><option value="estudante">Estudante</option></select><span class="access-select-arrow" aria-hidden="true">⌄</span></div><small class="access-type-hint">Escolha o perfil correspondente à sua função na escola.</small></div>
       <div class="login-field"><label for="login-email">E-mail</label><input id="login-email" name="email" type="email" placeholder="seu@email.com" autocomplete="username" required></div>
       <div class="login-field"><label for="login-password">Senha</label><input id="login-password" name="password" type="password" placeholder="Digite sua senha" autocomplete="current-password" required></div>
