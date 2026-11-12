@@ -3443,5 +3443,60 @@ html,body{min-height:100%!important;height:auto!important;overflow-x:hidden!impo
 }
 </style>
 
+
+<style id="sgve-login-theme-contrast">
+/* Login: tema claro realmente claro, tema escuro realmente escuro. */
+body.light-mode #login-screen:not(.is-hidden) {background:#f3f7f2!important;color:#203b2b!important}
+body.light-mode #login-screen:not(.is-hidden)>.login-brand-panel {
+  background:linear-gradient(145deg,#f4f8f1 0%,#e4efe4 54%,#d4e6dc 100%)!important;
+  color:#1e402c!important;border-right:1px solid #cbdccb!important;
+}
+body.light-mode #login-screen:not(.is-hidden)>.login-brand-panel:before {background:radial-gradient(ellipse at 15% 90%,#b7d8c0a0,transparent 60%)!important}
+body.light-mode #login-screen:not(.is-hidden)>.login-brand-panel:after {background:linear-gradient(135deg,#ffffff35,transparent 55%)!important}
+body.light-mode #login-screen:not(.is-hidden) .login-brand strong,
+body.light-mode #login-screen:not(.is-hidden) .login-brand small,
+body.light-mode #login-screen:not(.is-hidden) .login-intro h1,
+body.light-mode #login-screen:not(.is-hidden) .login-intro p,
+body.light-mode #login-screen:not(.is-hidden) .login-brand-footer {color:#214832!important}
+body.light-mode #login-screen:not(.is-hidden) .login-kicker {color:#286542!important;border-color:#9fbea5!important;background:#ffffff80!important}
+body.light-mode #login-screen:not(.is-hidden)>.login-form-side {background:#f3f7f2!important}
+body.light-mode #login-screen:not(.is-hidden) .login-card {background:#fff!important;color:#263b2d!important;border:1px solid #dce8dd!important;box-shadow:0 18px 50px #234a3014!important}
+body.light-mode #login-screen:not(.is-hidden) .login-card h2,
+body.light-mode #login-screen:not(.is-hidden) .login-card label {color:#263d2e!important}
+body.light-mode #login-screen:not(.is-hidden) .login-description,
+body.light-mode #login-screen:not(.is-hidden) .login-card .eyebrow {color:#718276!important}
+body.light-mode #login-screen:not(.is-hidden) .login-theme-toggle {background:#fff!important;color:#28553a!important;border:1px solid #cbdccb!important}
+body.light-mode #login-screen:not(.is-hidden) .login-theme-toggle .theme-switch-track {background:#d8e8d9!important}
+body.dark-mode #login-screen:not(.is-hidden) {background:#091710!important;color:#edf5ef!important}
+body.dark-mode #login-screen:not(.is-hidden)>.login-brand-panel {
+  background:linear-gradient(145deg,#071b13 0%,#0b3021 55%,#10432e 100%)!important;
+  color:#edf5ef!important;border-right:1px solid #244a34!important;
+}
+body.dark-mode #login-screen:not(.is-hidden)>.login-brand-panel:before {background:radial-gradient(ellipse at 15% 90%,#1c795080,transparent 60%)!important}
+body.dark-mode #login-screen:not(.is-hidden)>.login-brand-panel:after {background:linear-gradient(135deg,#ffffff0b,transparent 55%)!important}
+body.dark-mode #login-screen:not(.is-hidden) .login-brand strong,
+body.dark-mode #login-screen:not(.is-hidden) .login-brand small,
+body.dark-mode #login-screen:not(.is-hidden) .login-intro h1,
+body.dark-mode #login-screen:not(.is-hidden) .login-intro p,
+body.dark-mode #login-screen:not(.is-hidden) .login-brand-footer {color:#edf5ef!important}
+body.dark-mode #login-screen:not(.is-hidden) .login-kicker {color:#c6e8cf!important;border-color:#426c50!important;background:#102b1d99!important}
+body.dark-mode #login-screen:not(.is-hidden)>.login-form-side {background:#0b1711!important}
+body.dark-mode #login-screen:not(.is-hidden) .login-card {background:#14271d!important;color:#edf5ef!important;border:1px solid #294638!important;box-shadow:0 18px 50px #0005!important}
+body.dark-mode #login-screen:not(.is-hidden) .login-card h2,
+body.dark-mode #login-screen:not(.is-hidden) .login-card label {color:#edf5ef!important}
+body.dark-mode #login-screen:not(.is-hidden) .login-description,
+body.dark-mode #login-screen:not(.is-hidden) .login-card .eyebrow {color:#a1b5a8!important}
+body.dark-mode #login-screen:not(.is-hidden) .login-theme-toggle {background:#14271d!important;color:#e7f1e9!important;border:1px solid #355642!important}
+body.dark-mode #login-screen:not(.is-hidden) .login-theme-toggle .theme-switch-track {background:#35583d!important}
+@media (max-height:760px) {
+  #login-screen:not(.is-hidden):not([hidden])>.login-brand-panel {padding-top:clamp(10px,2vh,18px)!important;padding-bottom:clamp(10px,2vh,18px)!important}
+  #login-screen:not(.is-hidden):not([hidden]) .login-brand-footer {font-size:10px!important}
+  #login-screen:not(.is-hidden):not([hidden]) .login-intro {margin:8px 0!important}
+  #login-screen:not(.is-hidden):not([hidden]) .login-intro h1 {font-size:clamp(22px,3.5vh,34px)!important;margin:7px 0!important}
+  #login-screen:not(.is-hidden):not([hidden]) .login-intro p {font-size:11px!important;line-height:1.35!important}
+  #login-screen:not(.is-hidden):not([hidden]) .login-mascot {max-height:28%!important;width:min(25%,210px)!important}
+}
+</style>
+
 </body>
 </html>
