@@ -3498,5 +3498,54 @@ body.dark-mode #login-screen:not(.is-hidden) .login-theme-toggle .theme-switch-t
 }
 </style>
 
+
+<style id="sgve-login-readable-colors">
+/* Corrige contraste de todos os textos da entrada nos dois temas. */
+#login-screen .login-brand strong,
+#login-screen .login-intro h1,
+#login-screen .login-card h2 {font-weight:800!important;opacity:1!important}
+body.light-mode #login-screen .login-brand strong,
+body.light-mode #login-screen .login-brand small,
+body.light-mode #login-screen .login-intro h1,
+body.light-mode #login-screen .login-intro p,
+body.light-mode #login-screen .login-brand-footer,
+body.light-mode #login-screen .login-card h2,
+body.light-mode #login-screen .login-card label,
+body.light-mode #login-screen .login-card p,
+body.light-mode #login-screen .login-card .eyebrow,
+body.light-mode #login-screen .login-card .login-description,
+body.light-mode #login-screen .login-card .access-type-hint {color:#244b34!important;text-shadow:none!important}
+body.light-mode #login-screen .login-intro p,
+body.light-mode #login-screen .login-brand small,
+body.light-mode #login-screen .login-brand-footer,
+body.light-mode #login-screen .login-description {color:#426b50!important}
+body.light-mode #login-screen .login-card {background:linear-gradient(145deg,#ffffff 0%,#f7fbf6 58%,#eaf4e9 100%)!important}
+body.light-mode #login-screen .login-field input,
+body.light-mode #login-screen .login-field select,
+body.light-mode #login-screen .access-select {background:#f5faf4!important;color:#244b34!important;border-color:#c9ddca!important}
+body.light-mode #login-screen input::placeholder {color:#718a75!important;opacity:1!important}
+body.light-mode #login-screen .login-disclaimer {background:#e7f2e5!important;color:#365c3e!important;border-color:#c9dfc8!important}
+body.dark-mode #login-screen .login-brand strong,
+body.dark-mode #login-screen .login-brand small,
+body.dark-mode #login-screen .login-intro h1,
+body.dark-mode #login-screen .login-intro p,
+body.dark-mode #login-screen .login-brand-footer,
+body.dark-mode #login-screen .login-card h2,
+body.dark-mode #login-screen .login-card label,
+body.dark-mode #login-screen .login-card p,
+body.dark-mode #login-screen .login-card .eyebrow,
+body.dark-mode #login-screen .login-card .login-description,
+body.dark-mode #login-screen .login-card .access-type-hint {color:#edf6ef!important;text-shadow:none!important}
+body.dark-mode #login-screen .login-intro p,
+body.dark-mode #login-screen .login-brand small,
+body.dark-mode #login-screen .login-brand-footer,
+body.dark-mode #login-screen .login-description {color:#c1d8c6!important}
+body.dark-mode #login-screen .login-field input,
+body.dark-mode #login-screen .login-field select,
+body.dark-mode #login-screen .access-select {background:#1a3023!important;color:#edf6ef!important;border-color:#45634b!important}
+body.dark-mode #login-screen input::placeholder {color:#a9c0ae!important;opacity:1!important}
+body.dark-mode #login-screen .login-disclaimer {background:#1b3826!important;color:#d5ead9!important;border-color:#42694e!important}
+</style>
+
 </body>
 </html>
