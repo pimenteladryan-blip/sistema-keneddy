@@ -3913,6 +3913,18 @@ body.light-mode #login-screen .login-brand .cepk-seal {
     text-shadow:none!important;
   }
 }
+
+/* Sino de notificações sem moldura/quadrado */
+.notification-button,
+body.dark-mode .notification-button,
+body.light-mode .notification-button{
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+  outline:0;
+}
+.notification-button:focus-visible{outline:2px solid currentColor!important;outline-offset:3px;border-radius:4px!important}
 </style>
 
 </body>
