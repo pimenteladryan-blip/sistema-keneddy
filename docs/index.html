@@ -1782,12 +1782,75 @@ body.light-mode #login-screen .login-disclaimer strong{color:#174c2e!important}
 body.light-mode #login-screen .login-submit{background:linear-gradient(110deg,#247b49,#145c37)!important;color:#fff!important}
 body.light-mode #login-screen .login-theme-toggle{background:#f7fcf6!important;color:#205b36!important;border-color:#9dbfa2!important}
 </style>
+
+<style id="sgve-login-reference-design-v50">
+/* Layout visual inspirado na referência: painel verde, tipografia escura e cartão limpo. */
+#login-screen .login-brand-panel{
+ background:radial-gradient(ellipse at 75% 80%,#6de34b 0%,transparent 46%),linear-gradient(125deg,#f5ffe9 0%,#d9f8c8 48%,#8be35a 100%)!important;
+ color:#082b16!important;isolation:isolate!important;
+}
+#login-screen .login-brand-panel:before{
+ background:radial-gradient(ellipse at 82% 70%,#36c83caa,transparent 60%),linear-gradient(135deg,#ffffff66,transparent 55%)!important;
+}
+#login-screen .login-brand-panel:after{
+ background:linear-gradient(130deg,transparent 35%,#64d94355 35%,#64d94355 58%,transparent 58%)!important;
+}
+#login-screen .login-brand-panel .login-brand strong,
+#login-screen .login-brand-panel .login-brand small,
+#login-screen .login-brand-panel .login-intro h1,
+#login-screen .login-brand-panel .login-intro p,
+#login-screen .login-brand-panel .login-brand-footer,
+#login-screen .login-brand-panel .login-kicker{
+ color:#082b16!important;text-shadow:none!important;opacity:1!important;
+}
+#login-screen .login-brand-panel .login-intro h1{font-weight:900!important;letter-spacing:-.035em!important}
+#login-screen .login-brand-panel .login-kicker{background:#07552b!important;color:#fff!important;border:0!important}
+#login-screen .login-brand .cepk-seal{
+ background:transparent!important;border:0!important;outline:0!important;
+ box-shadow:none!important;filter:none!important;border-radius:0!important;
+}
+#login-screen .login-form-side{
+ background:radial-gradient(ellipse at 90% 10%,#e1f8d6 0%,transparent 52%),linear-gradient(145deg,#eaf8e5,#c8edb7)!important;
+}
+#login-screen .login-card{
+ background:rgba(255,255,255,.94)!important;border:1px solid #d5e8d1!important;
+ border-radius:26px!important;box-shadow:0 12px 34px #174c251c!important;
+ color:#10251a!important;
+}
+#login-screen .login-card-seal{display:none!important}
+#login-screen .login-card:before{
+ content:"🔒";display:grid;place-items:center;width:48px;height:48px;margin:0 auto 12px;
+ border:2px solid #176a37;border-radius:50%;font-size:23px;color:#145b31;
+}
+#login-screen .login-card h2{color:#10251a!important}
+#login-screen .login-description{color:#34483a!important}
+#login-screen .login-field label{color:#17271d!important}
+#login-screen .login-field input,
+#login-screen .login-field select,
+#login-screen .access-select{
+ color:#14271b!important;background:#fff!important;border-color:#c4d3c6!important;
+}
+#login-screen input::placeholder{color:#78847b!important;opacity:1!important}
+#login-screen .login-disclaimer{background:#e5f5df!important;color:#23442b!important;border-color:#b9dcae!important}
+#login-screen .login-submit{background:linear-gradient(110deg,#087c2d,#00521f)!important;color:#fff!important}
+#login-screen .login-mascot{
+ display:block!important;visibility:visible!important;opacity:1!important;
+ width:min(34%,300px)!important;max-height:70%!important;height:auto!important;
+ object-fit:contain!important;object-position:center bottom!important;
+ right:2.5%!important;bottom:7%!important;z-index:4!important;filter:none!important;
+}
+@media(max-width:760px){
+ #login-screen .login-brand .cepk-seal{background:transparent!important;box-shadow:none!important}
+ #login-screen .login-mascot{width:min(28%,120px)!important;max-height:35%!important;right:8px!important;bottom:8px!important}
+}
+</style>
+
 </head>
 <body>
 <section class="login-screen" id="login-screen" aria-hidden="false">
   <button class="theme-toggle login-theme-toggle" id="theme-toggle-login" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button>
   <div class="login-brand-panel">
-    <div class="login-brand"><img class="cepk-seal" src="./cepk-62.svg" alt="CEPK 62 anos"><span><strong>CEPK</strong><small>Colégio Estadual Presidente Kennedy</small></span></div><img class="login-mascot" src="./kennedyto-login-v2.webp" alt="Mascote do CEPK" loading="eager" decoding="sync" onerror="this.onerror=null;this.src=\'./mascote.svg\';">
+    <div class="login-brand"><img class="cepk-seal" src="./cepk-62.svg" alt="CEPK 62 anos"><span><strong>CEPK</strong><small>Colégio Estadual Presidente Kennedy</small></span></div><img class="login-mascot" src="./kennedyto-login.webp" alt="Mascote do CEPK" loading="eager" decoding="sync" onerror="this.onerror=null;this.src=\'./mascote.svg\';">
     <div class="login-intro"><div class="login-kicker">COLÉGIO ESTADUAL PRESIDENTE KENNEDY</div><h1>Organização e cuidado em cada viagem.</h1><p>Uma plataforma para acompanhar o planejamento das viagens escolares, com informações organizadas em um só lugar.</p></div>
     <div class="login-brand-footer">Tradição que constrói o futuro! · Ponta Grossa – PR</div>
   </div>
