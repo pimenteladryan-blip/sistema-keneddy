@@ -123,7 +123,9 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
     }
     const request = requestSnapshot.data();
     if (!['teacher', 'guardian', 'student'].includes(request.role) ||
-        typeof request.email !== 'string' || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(request.email)) {
+        typeof request.email !== 'string' || (request.email.length > 254 || !request.email.includes('@') ||
+          request.email.startsWith('@') || request.email.endsWith('@') ||
+          !request.email.slice(request.email.lastIndexOf('@') + 1).includes('.'))) {
       const error = new Error('Os dados da solicitação são inválidos.');
       error.code = 'invalid-request';
       throw error;
