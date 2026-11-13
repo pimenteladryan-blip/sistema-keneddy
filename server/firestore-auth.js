@@ -128,7 +128,7 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
     const request = requestSnapshot.data();
     const requestEmail = typeof request.email === 'string' ? request.email.trim().toLowerCase() : '';
     const validRequestEmail = requestEmail.length <= 254 &&
-      /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(requestEmail);
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(requestEmail);
     const validName = typeof request.display_name === 'string' &&
       request.display_name.trim().length >= 3 && request.display_name.trim().length <= 100;
     const validPasswordHash = typeof request.password_hash === 'string' &&
