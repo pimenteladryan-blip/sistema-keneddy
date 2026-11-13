@@ -225,6 +225,49 @@ async function createUniqueComposite(name, fields, data) {
   });
 }
 
+
+async function createTripRelationIfDraft(name, tripId, relatedId, data) {
+  if (!['tripClasses', 'tripStaff'].includes(name)) {
+    throw new TypeError('Relação de viagem não permitida.');
+  }
+  const tripKey = normalizeId(tripId);
+  const relatedKey = normalizeId(relatedId);
+  const tripRef = collection('trips').doc(tripKey);
+  const relationRef = collection(name).doc(tripKey + '_' + relatedKey);
+  return requireFirestore().runTransaction(async transaction => {
+    const [tripSnapshot, relationSnapshot] = await Promise.all([
+      transaction.get(tripRef), transaction.get(relationRef)
+    ]);
+    if (!tripSnapshot.exists) return { error: 'not-found' };
+    if (tripSnapshot.data().status !== 'draft') return { error: 'not-draft' };
+    if (!relationSnapshot.exists) transaction.create(relationRef, data);
+    return { ok: true };
+  });
+}
+
+async function transitionTripStatus(tripId, expectedStatus, nextStatus, extra = {}, requireLinkedClass = false) {
+  const tripKey = normalizeId(tripId);
+  const db = requireFirestore();
+  const tripRef = collection('trips').doc(tripKey);
+  return db.runTransaction(async transaction => {
+    const tripSnapshot = await transaction.get(tripRef);
+    if (!tripSnapshot.exists) return { error: 'not-found' };
+    if (tripSnapshot.data().status !== expectedStatus) {
+      return { error: expectedStatus === 'draft' ? 'not-draft' : 'not-pending' };
+    }
+    if (requireLinkedClass) {
+      const classesQuery = collection('tripClasses')
+        .where('trip_id', '==', Number(tripKey)).limit(1);
+      const classesSnapshot = await transaction.get(classesQuery);
+      if (classesSnapshot.empty) return { error: 'no-classes' };
+    }
+    transaction.update(tripRef, {
+      status: nextStatus, ...extra, updated_at: new Date().toISOString()
+    });
+    return { ok: true };
+  });
+}
+
 async function createTripStudentWithinCapacity(tripId, studentId) {
   const tripKey = normalizeId(tripId);
   const studentKey = normalizeId(studentId);
@@ -279,5 +322,7 @@ module.exports = {
   createUnique,
   upsertUnique,
   createUniqueComposite,
-  createTripStudentWithinCapacity
+  createTripStudentWithinCapacity,
+  createTripRelationIfDraft,
+  transitionTripStatus
 };
