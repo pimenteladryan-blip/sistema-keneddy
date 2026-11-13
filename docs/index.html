@@ -418,6 +418,8 @@ body.light-mode .status.pending{background:#fff4df;color:#986b1d}
 .dashboard-trips .panel-heading h2,.dashboard-notices .panel-heading h2,.dashboard-calendar .panel-heading h2{display:flex;align-items:center;gap:8px;font-size:15px}
 .heading-icon{color:#08743a;font-size:20px}
 .trip-preview{display:flex;align-items:center;gap:13px;padding:12px 0;border-top:1px solid #e8eee9}
+.dashboard-empty{margin:0;padding:18px 0;color:#829087;font-size:11px}
+.dashboard-trip-placeholder{display:grid;place-items:center;background:#eaf4ed;color:#187146;font-size:30px}
 .trip-photo{width:132px;height:88px;flex:0 0 132px;object-fit:cover;border-radius:9px}
 .trip-info{display:grid;gap:5px;min-width:0}
 .trip-info strong{font-size:12px;line-height:1.25;color:#101b14}
@@ -1969,17 +1971,14 @@ html body.light-mode #login-screen:not(.is-hidden):not([hidden]) .login-brand-pa
           <img class="hero-seal" src="./cepk-62.svg" alt="CEPK 62 anos">
         </div>
         <div class="stats-grid dashboard-stats">
-          <article class="stat-card"><span class="stat-icon green-icon">▣</span><div><span>Viagens Cadastradas</span><strong>12</strong></div></article>
-          <article class="stat-card"><span class="stat-icon blue-icon">♟</span><div><span>Estudantes Cadastrados</span><strong>842</strong></div></article>
-          <article class="stat-card"><span class="stat-icon gold-icon">✓</span><div><span>Viagens Aprovadas</span><strong>8</strong></div></article>
-          <article class="stat-card"><span class="stat-icon orange-icon">▦</span><div><span>Próximas Viagens</span><strong>4</strong></div></article>
+          <article class="stat-card"><span class="stat-icon green-icon">▣</span><div><span>Viagens Cadastradas</span><strong id="dashboard-trip-count">0</strong></div></article>
+          <article class="stat-card"><span class="stat-icon blue-icon">♟</span><div><span>Estudantes Cadastrados</span><strong id="dashboard-student-count">0</strong></div></article>
+          <article class="stat-card"><span class="stat-icon gold-icon">✓</span><div><span>Viagens Aprovadas</span><strong id="dashboard-approved-count">0</strong></div></article>
+          <article class="stat-card"><span class="stat-icon orange-icon">▦</span><div><span>Próximas Viagens</span><strong id="dashboard-upcoming-count">0</strong></div></article>
         </div>
         <div class="dashboard-columns">
           <section class="panel dashboard-trips"><div class="panel-heading"><h2><span class="heading-icon">▣</span> Próximas Viagens</h2><button class="text-button" data-go="viagens">Ver todas <span>→</span></button></div>
-            <div class="trip-list">
-              <article class="trip-preview"><img class="trip-photo" src="https://cdn-clubecandeias.s3.sa-east-1.amazonaws.com/uploads/2017/08/museu-oscar-niemeyer-um-icone-de-curitiba.jpg" alt="Museu Oscar Niemeyer"><div class="trip-info"><strong>Museu Oscar Niemeyer</strong><span>▦ 25/11/2026</span><small>♟ 48 participantes</small><em class="status pending">Aguardando aprovação</em></div></article>
-              <article class="trip-preview"><img class="trip-photo" src="https://www.viajeparana.com/sites/viaje-parana/arquivos_restritos/files/styles/escala_e_corta_226x185_/public/imagem/2019-02/cachoeira_sao_jorge.jpg?itok=RNoIQ8e7" alt="Cachoeira do Rio São Jorge, em Ponta Grossa"><div class="trip-info"><strong>Cachoeira do Salto São Jorge</strong><span>▦ 12/12/2026</span><small>♟ 45 participantes</small><em class="status approved">Planejada</em></div></article>
-            </div>
+            <div class="trip-list" id="dashboard-upcoming-trips"><p class="dashboard-empty">Carregando próximas viagens...</p></div>
           </section>
           <section class="panel dashboard-notices"><div class="panel-heading"><h2><span class="heading-icon">◀</span> Avisos do CEPK</h2><button class="text-button" data-go="usuarios">Ver todos <span>→</span></button></div>
             <div class="notice-item"><i class="notice-dot green-dot"></i><p>Inscrições para as próximas viagens abertas!</p><time>06/11/2026</time></div>
@@ -2228,6 +2227,7 @@ html body.light-mode #login-screen:not(.is-hidden):not([hidden]) .login-brand-pa
     if (approvalOption) approvalOption.disabled = !['administrador','direcao'].includes(role);
     renderTrips();
     renderStudents();
+    updateDashboard();
     renderAuthorizations();
     renderVehicles();
     renderTeachers();
@@ -2424,6 +2424,7 @@ html body.light-mode #login-screen:not(.is-hidden):not([hidden]) .login-brand-pa
   }
   function saveTrips() {
     try { localStorage.setItem('sgve-demo-trips', JSON.stringify(trips)); } catch (_) {}
+    updateDashboard();
   }
   let tripRequests = {};
   try { tripRequests = JSON.parse(localStorage.getItem('sgve-demo-trip-requests') || '{}') || {}; } catch (_) {}
@@ -2595,6 +2596,7 @@ html body.light-mode #login-screen:not(.is-hidden):not([hidden]) .login-brand-pa
   const studentBody = document.getElementById('student-table-body');
   function saveStudents() {
     try { localStorage.setItem('sgve-demo-students', JSON.stringify(students)); } catch (_) {}
+    updateDashboard();
   }
   function renderStudents() {
     const manager = ['administrador','secretaria'].includes(sessionStorage.getItem('sgve-demo-role'));
@@ -2615,6 +2617,32 @@ html body.light-mode #login-screen:not(.is-hidden):not([hidden]) .login-brand-pa
     });
     studentBody.innerHTML = rows || '<tr><td colspan="5">Nenhum estudante cadastrado.</td></tr>';
     document.getElementById('student-count').textContent = students.length + (students.length === 1 ? ' estudante' : ' estudantes');
+    updateDashboard();
+  }
+  function updateDashboard() {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const upcoming = trips
+      .filter(trip => trip.date && new Date(trip.date + 'T00:00:00') >= today)
+      .sort((a,b) => a.date.localeCompare(b.date));
+    const setCount = (id,value) => {
+      const node = document.getElementById(id);
+      if (node) node.textContent = String(value);
+    };
+    setCount('dashboard-trip-count', trips.length);
+    setCount('dashboard-student-count', students.length);
+    setCount('dashboard-approved-count', trips.filter(trip => trip.status === 'Aprovada').length);
+    setCount('dashboard-upcoming-count', upcoming.length);
+    const list = document.getElementById('dashboard-upcoming-trips');
+    if (!list) return;
+    list.innerHTML = upcoming.slice(0,3).map(trip => {
+      const date = trip.date.split('-').reverse().join('/');
+      const statusClass = trip.status === 'Aprovada' ? 'approved' : trip.status === 'Pendente' ? 'pending' : 'planned';
+      const photo = trip.photo
+        ? '<img class="trip-photo" src="' + safeText(trip.photo) + '" alt="Foto de ' + safeText(trip.name) + '">'
+        : '<div class="trip-photo dashboard-trip-placeholder" aria-hidden="true">▣</div>';
+      return '<article class="trip-preview">' + photo + '<div class="trip-info"><strong>' + safeText(trip.name) + '</strong><span>▦ ' + date + (trip.destination ? ' · ' + safeText(trip.destination) : '') + '</span><small>♟ ' + (Number(trip.students)||0) + ' participantes</small><em class="status ' + statusClass + '">' + safeText(trip.status || 'Planejada') + '</em></div></article>';
+    }).join('') || '<p class="dashboard-empty">Nenhuma próxima viagem cadastrada.</p>';
   }
   document.getElementById('student-form').addEventListener('submit', function (event) {
     event.preventDefault();
