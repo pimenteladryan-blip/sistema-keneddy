@@ -1,5 +1,6 @@
 'use strict';
 
+const { createHash } = require('node:crypto');
 const { firestore } = require('./firebase');
 
 const COLLECTIONS = Object.freeze({
@@ -88,6 +89,53 @@ async function remove(name, id) {
   await collection(name).doc(normalizeId(id)).delete();
 }
 
+
+const UNIQUE_FIELDS = Object.freeze({
+  users: ['email'],
+  registrationRequests: ['email']
+});
+
+function uniqueIndexRef(name, field, value) {
+  if (!UNIQUE_FIELDS[name]?.includes(field)) {
+    throw new TypeError('Campo único não permitido para esta coleção.');
+  }
+  const normalized = String(value ?? '').trim().toLowerCase();
+  if (!normalized || normalized.length > 254) throw new TypeError('Valor único inválido.');
+  const key = createHash('sha256').update(normalized).digest('hex');
+  return requireFirestore().collection('_sgve_unique_indexes').doc(name + '_' + field + '_' + key);
+}
+
+async function getByUnique(name, field, value) {
+  const index = await uniqueIndexRef(name, field, value).get();
+  if (!index.exists) return null;
+  return get(name, index.data().documentId);
+}
+
+async function createUnique(name, field, value, data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new TypeError('Os dados do documento devem ser um objeto.');
+  }
+  const db = requireFirestore();
+  const indexRef = uniqueIndexRef(name, field, value);
+  const counterRef = db.collection('_sgve_counters').doc(name);
+  const normalized = String(value).trim().toLowerCase();
+  return db.runTransaction(async transaction => {
+    const indexSnapshot = await transaction.get(indexRef);
+    if (indexSnapshot.exists) {
+      const error = new Error('Registro duplicado: ' + field);
+      error.code = 'already-exists';
+      throw error;
+    }
+    const counterSnapshot = await transaction.get(counterRef);
+    const id = (counterSnapshot.exists ? Number(counterSnapshot.data().value) : 0) + 1;
+    const documentRef = collection(name).doc(String(id));
+    transaction.create(documentRef, { ...data, [field]: normalized });
+    transaction.set(counterRef, { value: id, updated_at: new Date().toISOString() });
+    transaction.create(indexRef, { documentId: String(id), value: normalized });
+    return id;
+  });
+}
+
 async function nextNumericId(name) {
   if (!COLLECTIONS[name]) throw new Error('Coleção SGVE desconhecida: ' + name);
   const db = requireFirestore();
@@ -115,5 +163,7 @@ module.exports = {
   update,
   remove,
   nextNumericId,
-  createWithNumericId
+  createWithNumericId,
+  getByUnique,
+  createUnique
 };
