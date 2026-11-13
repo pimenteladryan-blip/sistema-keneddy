@@ -1,4 +1,4 @@
-const CACHE_NAME = "sgve-cepk-v71";
+const CACHE_NAME = "sgve-cepk-v72";
 const APP_SHELL = ["./", "./index.html", "./styles.css", "./demo.js", "./manifest.webmanifest", "./icon.svg", "./cepk-62.svg", "./mascote.svg", "./Kennedyto-CEPK-fundo-transparente.png", "./kennedyto-login.webp", "./kennedy-entrada.svg"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
