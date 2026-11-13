@@ -1787,7 +1787,7 @@ body.light-mode #login-screen .login-theme-toggle{background:#f7fcf6!important;c
 <section class="login-screen" id="login-screen" aria-hidden="false">
   <button class="theme-toggle login-theme-toggle" id="theme-toggle-login" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button>
   <div class="login-brand-panel">
-    <div class="login-brand"><img class="cepk-seal" src="./cepk-62.svg" alt="CEPK 62 anos"><span><strong>CEPK</strong><small>Colégio Estadual Presidente Kennedy</small></span></div><img class="login-mascot" src="./kennedyto-login.webp" alt="Mascote do CEPK">
+    <div class="login-brand"><img class="cepk-seal" src="./cepk-62.svg" alt="CEPK 62 anos"><span><strong>CEPK</strong><small>Colégio Estadual Presidente Kennedy</small></span></div><img class="login-mascot" src="./mascote.svg" alt="Mascote do CEPK">
     <div class="login-intro"><div class="login-kicker">COLÉGIO ESTADUAL PRESIDENTE KENNEDY</div><h1>Organização e cuidado em cada viagem.</h1><p>Uma plataforma para acompanhar o planejamento das viagens escolares, com informações organizadas em um só lugar.</p></div>
     <div class="login-brand-footer">Tradição que constrói o futuro! · Ponta Grossa – PR</div>
   </div>
@@ -3663,6 +3663,23 @@ body.light-mode #login-screen:not(.is-hidden):not([hidden]) .login-brand .cepk-s
 }
 body.dark-mode #login-screen:not(.is-hidden):not([hidden])>.login-brand-panel {
   background:linear-gradient(145deg,#071b13 0%,#0b3021 55%,#10432e 100%)!important;
+}
+</style>
+\n
+<style id="sgve-mascot-svg-and-seal-clean-v47">
+/* Corrige a imagem do mascote usando o SVG íntegro e remove a sombra do selo no tema claro. */
+#login-screen .login-brand-panel>.login-mascot {
+  display:block!important;
+  width:min(32%,330px)!important;
+  height:auto!important;
+  max-height:48%!important;
+  object-fit:contain!important;
+  object-position:center bottom!important;
+  filter:none!important;
+}
+body.light-mode #login-screen .login-brand .cepk-seal {
+  filter:none!important;
+  box-shadow:none!important;
 }
 </style>
 \n</body>
