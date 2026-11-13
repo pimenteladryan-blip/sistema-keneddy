@@ -56,7 +56,7 @@ async function list(name, options = {}) {
     query = query.orderBy(options.orderBy.field, options.orderBy.direction || 'asc');
   }
   if (Number.isInteger(options.limit) && options.limit > 0) {
-    query = query.limit(Math.min(options.limit, 500));
+    query = query.limit(Math.min(options.limit, 5000));
   }
   const snapshot = await query.get();
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
