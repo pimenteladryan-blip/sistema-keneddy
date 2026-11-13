@@ -191,6 +191,82 @@ async function upsertUnique(name, field, value, createData, updateData, allowedE
   });
 }
 
+
+async function createUniqueComposite(name, fields, data) {
+  if (!['classes'].includes(name) || !Array.isArray(fields) || fields.length !== 5 ||
+      fields.some(field => typeof field !== 'string' || !field)) {
+    throw new TypeError('Chave composta não permitida.');
+  }
+  const normalized = fields.map((field, index) => {
+    const value = data[field];
+    if (value === undefined || value === null || String(value).trim() === '') {
+      throw new TypeError('Campo obrigatório para chave composta: ' + field);
+    }
+    return index === 4 ? String(Number(value)) : String(value).trim().toLowerCase();
+  });
+  const key = createHash('sha256').update(JSON.stringify(normalized)).digest('hex');
+  const db = requireFirestore();
+  const indexRef = db.collection('_sgve_unique_indexes').doc(name + '_composite_' + key);
+  const counterRef = db.collection('_sgve_counters').doc(name);
+  return db.runTransaction(async transaction => {
+    const indexSnapshot = await transaction.get(indexRef);
+    if (indexSnapshot.exists) {
+      const error = new Error('Registro duplicado.');
+      error.code = 'already-exists';
+      throw error;
+    }
+    const counterSnapshot = await transaction.get(counterRef);
+    const id = (counterSnapshot.exists ? Number(counterSnapshot.data().value) : 0) + 1;
+    const documentRef = collection(name).doc(String(id));
+    transaction.create(documentRef, { ...data, id, created_at: data.created_at || new Date().toISOString() });
+    transaction.set(counterRef, { value: id, updated_at: new Date().toISOString() });
+    transaction.create(indexRef, { documentId: String(id), fields: normalized });
+    return id;
+  });
+}
+
+async function createTripStudentWithinCapacity(tripId, studentId, capacity) {
+  const tripKey = normalizeId(tripId);
+  const studentKey = normalizeId(studentId);
+  const db = requireFirestore();
+  const tripRef = collection('trips').doc(tripKey);
+  const studentRef = collection('students').doc(studentKey);
+  const classLinkRef = collection('tripClasses').doc(tripKey + '_' + normalizeId(
+    (await get('students', studentKey))?.class_id
+  ));
+  const participantRef = collection('tripStudents').doc(tripKey + '_' + studentKey);
+  const counterRef = db.collection('_sgve_trip_participant_counts').doc(tripKey);
+  return db.runTransaction(async transaction => {
+    const [tripSnapshot, studentSnapshot, classLinkSnapshot, participantSnapshot, counterSnapshot] =
+      await Promise.all([
+        transaction.get(tripRef), transaction.get(studentRef),
+        transaction.get(classLinkRef), transaction.get(participantRef),
+        transaction.get(counterRef)
+      ]);
+    if (!tripSnapshot.exists || !studentSnapshot.exists || studentSnapshot.data().active === false) {
+      return { error: 'not-found' };
+    }
+    if (tripSnapshot.data().status !== 'draft') return { error: 'not-draft' };
+    if (!classLinkSnapshot.exists) return { error: 'class-not-linked' };
+    if (participantSnapshot.exists) return { ok: true };
+    let count = counterSnapshot.exists ? Number(counterSnapshot.data().value) : null;
+    if (count === null) {
+      const existing = await transaction.get(
+        collection('tripStudents').where('trip_id', '==', Number(tripKey))
+      );
+      count = existing.size;
+    }
+    if (count >= Number(capacity)) return { error: 'capacity' };
+    transaction.create(participantRef, {
+      trip_id: Number(tripKey), student_id: Number(studentKey),
+      authorization_status: 'pending', departure_present: null,
+      return_present: null, created_at: new Date().toISOString()
+    });
+    transaction.set(counterRef, { value: count + 1, updated_at: new Date().toISOString() });
+    return { ok: true };
+  });
+}
+
 module.exports = {
   COLLECTIONS,
   get,
@@ -203,5 +279,7 @@ module.exports = {
   createWithNumericId,
   getByUnique,
   createUnique,
-  upsertUnique
+  upsertUnique,
+  createUniqueComposite,
+  createTripStudentWithinCapacity
 };
