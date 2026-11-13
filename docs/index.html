@@ -1845,12 +1845,52 @@ body.light-mode #login-screen .login-theme-toggle{background:#f7fcf6!important;c
 }
 </style>
 
+
+<style id="sgve-login-contrast-mascot-v51">
+/* Remove o cadeado decorativo inserido no cartão de login. */
+#login-screen .login-card:before{content:none!important;display:none!important}
+/* Marca do colégio sem placa, sombra ou moldura quadrada. */
+#login-screen .login-brand{background:transparent!important;box-shadow:none!important;border:0!important;padding:0!important}
+#login-screen .login-brand .cepk-seal{
+ display:block!important;background:transparent!important;border:0!important;
+ outline:0!important;box-shadow:none!important;filter:none!important;
+ padding:0!important;border-radius:50%!important;mix-blend-mode:multiply;
+}
+/* Contraste: toda a tipografia do painel esquerdo em preto no tema claro. */
+body.light-mode #login-screen .login-brand-panel,
+body.light-mode #login-screen .login-brand-panel .login-brand strong,
+body.light-mode #login-screen .login-brand-panel .login-brand small,
+body.light-mode #login-screen .login-brand-panel .login-intro h1,
+body.light-mode #login-screen .login-brand-panel .login-intro p,
+body.light-mode #login-screen .login-brand-panel .login-brand-footer{
+ color:#080f0a!important;text-shadow:none!important;opacity:1!important;
+}
+body.light-mode #login-screen .login-brand-panel .login-kicker{
+ color:#fff!important;background:#07552b!important;text-shadow:none!important;
+}
+/* Mascote vetorial carregado diretamente de um arquivo existente no Pages. */
+#login-screen .login-brand-panel>.login-mascot{
+ display:block!important;visibility:visible!important;opacity:1!important;
+ position:absolute!important;z-index:5!important;
+ width:clamp(180px,22vw,310px)!important;max-width:42%!important;
+ height:auto!important;max-height:68%!important;object-fit:contain!important;
+ object-position:center bottom!important;right:clamp(14px,3vw,42px)!important;
+ bottom:clamp(10px,2.5vh,28px)!important;filter:none!important;
+}
+@media(max-width:760px){
+ #login-screen .login-brand-panel>.login-mascot{
+  width:clamp(90px,25vw,145px)!important;max-width:30%!important;
+  max-height:55%!important;right:8px!important;bottom:6px!important;
+ }
+}
+</style>
+
 </head>
 <body>
 <section class="login-screen" id="login-screen" aria-hidden="false">
   <button class="theme-toggle login-theme-toggle" id="theme-toggle-login" type="button" aria-label="Alternar tema" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Tema escuro</span><span class="theme-switch-track" aria-hidden="true"><span></span></span></button>
   <div class="login-brand-panel">
-    <div class="login-brand"><img class="cepk-seal" src="./cepk-62.svg" alt="CEPK 62 anos"><span><strong>CEPK</strong><small>Colégio Estadual Presidente Kennedy</small></span></div><img class="login-mascot" src="./kennedyto-login.webp" alt="Mascote do CEPK" loading="eager" decoding="sync" onerror="this.onerror=null;this.src=\'./mascote.svg\';">
+    <div class="login-brand"><img class="cepk-seal" src="./cepk-62.svg" alt="CEPK 62 anos"><span><strong>CEPK</strong><small>Colégio Estadual Presidente Kennedy</small></span></div><img class="login-mascot" src="./mascote.svg" alt="Kennedyto, mascote do CEPK" loading="eager" decoding="sync">
     <div class="login-intro"><div class="login-kicker">COLÉGIO ESTADUAL PRESIDENTE KENNEDY</div><h1>Organização e cuidado em cada viagem.</h1><p>Uma plataforma para acompanhar o planejamento das viagens escolares, com informações organizadas em um só lugar.</p></div>
     <div class="login-brand-footer">Tradição que constrói o futuro! · Ponta Grossa – PR</div>
   </div>
