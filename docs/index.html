@@ -3840,5 +3840,32 @@ body.light-mode #login-screen .login-brand .cepk-seal {
   line-height:1.3!important;
 }
 </style>
+
+<style id="sgve-mobile-login-no-pull-v66">
+/* Mantém a tela de login fixa no celular, sem arrastar a página para baixo. */
+@media (max-width:760px){
+  html:has(#login-screen:not(.is-hidden):not([hidden])),
+  body:has(#login-screen:not(.is-hidden):not([hidden])){
+    width:100%!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+  }
+  body:has(#login-screen:not(.is-hidden):not([hidden])){
+    position:fixed!important;
+    inset:0!important;
+  }
+  #login-screen:not(.is-hidden):not([hidden]){
+    width:100%!important;
+    height:100dvh!important;
+    min-height:0!important;
+    max-height:100dvh!important;
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+  }
+}
+</style>
+
 </body>
 </html>
