@@ -4,6 +4,7 @@ const path = require('node:path');
 const express = require('express');
 const helmet = require('helmet');
 const { db, audit } = require('./db');
+const { firebaseConfigured } = require('./firebase');
 const { hashPassword, verifyPassword, randomToken, sha256 } = require('./security');
 const { randomInt } = require('node:crypto');
 const { ROLE_LABELS, RECORD_MANAGERS, USER_MANAGERS, hasRole } = require('./access');
@@ -115,7 +116,7 @@ async function bootstrapAdmin() {
   console.log('Conta administrativa inicial criada a partir das variáveis de ambiente.');
 }
 
-app.get('/api/health', (_req, res) => res.json({ status: 'ok', service: 'SGVE', environment: isProduction ? 'production' : 'development' }));
+app.get('/api/health', (_req, res) => res.json({ status: 'ok', service: 'SGVE', environment: isProduction ? 'production' : 'development', firebaseAdmin: firebaseConfigured ? 'initialized' : 'not_configured' }));
 
 app.post('/api/registration-requests', async (req, res, next) => {
   try {
