@@ -69,28 +69,8 @@ async function deleteExpiredSessions(now = new Date().toISOString()) {
 }
 
 async function createRegistrationRequest({ display_name, email, password_hash, role, verification_code }) {
-  const existing = await store.getByUnique('registrationRequests', 'email', email);
-  if (existing) {
-    if (existing.status === 'pending') {
-      const error = new Error('Já existe uma solicitação pendente para este e-mail.');
-      error.code = 'already-pending';
-      throw error;
-    }
-    const updated = {
-      ...existing,
-      display_name,
-      password_hash,
-      role,
-      verification_code,
-      status: 'pending',
-      reviewed_by: null,
-      reviewed_at: null,
-      created_at: new Date().toISOString()
-    };
-    await store.set('registrationRequests', existing.id, updated);
-    return existing.id;
-  }
-  return store.createUnique('registrationRequests', 'email', email, {
+  const now = new Date().toISOString();
+  return store.upsertUnique('registrationRequests', 'email', email, {
     display_name,
     password_hash,
     role,
@@ -98,8 +78,17 @@ async function createRegistrationRequest({ display_name, email, password_hash, r
     status: 'pending',
     reviewed_by: null,
     reviewed_at: null,
-    created_at: new Date().toISOString()
-  });
+    created_at: now
+  }, {
+    display_name,
+    password_hash,
+    role,
+    verification_code,
+    status: 'pending',
+    reviewed_by: null,
+    reviewed_at: null,
+    created_at: now
+  }, ['rejected']);
 }
 
 async function listPendingRegistrationRequests() {
