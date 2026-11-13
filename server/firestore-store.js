@@ -228,17 +228,13 @@ async function createUniqueComposite(name, fields, data) {
 async function createTripStudentWithinCapacity(tripId, studentId) {
   const tripKey = normalizeId(tripId);
   const studentKey = normalizeId(studentId);
-  const db = requireFirestore();
   const tripRef = collection('trips').doc(tripKey);
   const studentRef = collection('students').doc(studentKey);
   const participantRef = collection('tripStudents').doc(tripKey + '_' + studentKey);
-  const counterRef = db.collection('_sgve_trip_participant_counts').doc(tripKey);
-  return db.runTransaction(async transaction => {
-    const [tripSnapshot, studentSnapshot, participantSnapshot, counterSnapshot] =
-      await Promise.all([
-        transaction.get(tripRef), transaction.get(studentRef),
-        transaction.get(participantRef), transaction.get(counterRef)
-      ]);
+  return requireFirestore().runTransaction(async transaction => {
+    const [tripSnapshot, studentSnapshot, participantSnapshot] = await Promise.all([
+      transaction.get(tripRef), transaction.get(studentRef), transaction.get(participantRef)
+    ]);
     if (!tripSnapshot.exists || !studentSnapshot.exists || studentSnapshot.data().active === false) {
       return { error: 'not-found' };
     }
@@ -249,21 +245,22 @@ async function createTripStudentWithinCapacity(tripId, studentId) {
     const classLinkSnapshot = await transaction.get(classLinkRef);
     if (!classLinkSnapshot.exists) return { error: 'class-not-linked' };
     if (participantSnapshot.exists) return { ok: true };
-    let count = counterSnapshot.exists ? Number(counterSnapshot.data().value) : null;
-    if (count === null) {
+    let count = Number(trip.participant_count);
+    if (!Number.isSafeInteger(count) || count < 0) {
       const existing = await transaction.get(
         collection('tripStudents').where('trip_id', '==', Number(tripKey))
       );
       count = existing.size;
     }
-    if (!Number.isSafeInteger(count) || count < 0) throw new Error('Contador de participantes inválido.');
     if (count >= Number(trip.capacity)) return { error: 'capacity' };
     transaction.create(participantRef, {
       trip_id: Number(tripKey), student_id: Number(studentKey),
       authorization_status: 'pending', departure_present: null,
       return_present: null, created_at: new Date().toISOString()
     });
-    transaction.set(counterRef, { value: count + 1, updated_at: new Date().toISOString() });
+    transaction.update(tripRef, {
+      participant_count: count + 1, updated_at: new Date().toISOString()
+    });
     return { ok: true };
   });
 }
