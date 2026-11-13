@@ -3,12 +3,19 @@
   "version": "0.3.0",
   "private": true,
   "description": "Sistema de Gerenciamento de Viagens Escolares",
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "check": "node --check server/index.js && node --check server/security.js && node --check server/access.js && node --check public/js/app.js",
+    "check": "node --check server/index.js && node --check server/security.js && node --check server/access.js && node --check public/js/app.js && node --check server/firebase.js",
     "test": "node --test"
   },
-  "dependencies": { "dotenv": "^16.4.7", "express": "^5.1.0", "helmet": "^8.1.0" }
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "firebase-admin": "^14.5.1"
+  }
 }
