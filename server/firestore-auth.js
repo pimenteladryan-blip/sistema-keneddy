@@ -175,7 +175,7 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
     transaction.update(requestRef, {
       status: 'approved',
       password_hash: null,
-      reviewed_by: Number(reviewerId),
+      reviewed_by: reviewer,
       reviewed_at: now
     });
     return userId;
