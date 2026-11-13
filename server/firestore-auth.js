@@ -9,7 +9,7 @@ function publicUser(user) {
     display_name: user.display_name,
     email: user.email,
     role: user.role,
-    active: user.active !== false
+    active: user.active === true
   };
 }
 
@@ -41,9 +41,10 @@ async function createSession({ token_hash, csrf_token, user_id, expires_at }) {
 
 async function findSession(tokenHash, now = new Date().toISOString()) {
   const session = await store.get('sessions', tokenHash);
-  if (!session || session.expires_at <= now) return null;
+  if (!session || typeof session.expires_at !== 'string' ||
+      !Number.isFinite(Date.parse(session.expires_at)) || session.expires_at <= now) return null;
   const user = await store.get('users', session.user_id);
-  if (!user || user.active === false) return null;
+  if (!user || user.active !== true) return null;
   return {
     session_id: session.id,
     csrf_token: session.csrf_token,
@@ -51,7 +52,7 @@ async function findSession(tokenHash, now = new Date().toISOString()) {
     display_name: user.display_name,
     email: user.email,
     role: user.role,
-    active: user.active !== false
+    active: user.active === true
   };
 }
 
@@ -121,6 +122,12 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
       throw error;
     }
     const request = requestSnapshot.data();
+    if (!['teacher', 'guardian', 'student'].includes(request.role) ||
+        typeof request.email !== 'string' || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(request.email)) {
+      const error = new Error('Os dados da solicitação são inválidos.');
+      error.code = 'invalid-request';
+      throw error;
+    }
     if (decision === 'rejected') {
       transaction.update(requestRef, {
         status: 'rejected',
