@@ -225,28 +225,28 @@ async function createUniqueComposite(name, fields, data) {
   });
 }
 
-async function createTripStudentWithinCapacity(tripId, studentId, capacity) {
+async function createTripStudentWithinCapacity(tripId, studentId) {
   const tripKey = normalizeId(tripId);
   const studentKey = normalizeId(studentId);
   const db = requireFirestore();
   const tripRef = collection('trips').doc(tripKey);
   const studentRef = collection('students').doc(studentKey);
-  const classLinkRef = collection('tripClasses').doc(tripKey + '_' + normalizeId(
-    (await get('students', studentKey))?.class_id
-  ));
   const participantRef = collection('tripStudents').doc(tripKey + '_' + studentKey);
   const counterRef = db.collection('_sgve_trip_participant_counts').doc(tripKey);
   return db.runTransaction(async transaction => {
-    const [tripSnapshot, studentSnapshot, classLinkSnapshot, participantSnapshot, counterSnapshot] =
+    const [tripSnapshot, studentSnapshot, participantSnapshot, counterSnapshot] =
       await Promise.all([
         transaction.get(tripRef), transaction.get(studentRef),
-        transaction.get(classLinkRef), transaction.get(participantRef),
-        transaction.get(counterRef)
+        transaction.get(participantRef), transaction.get(counterRef)
       ]);
     if (!tripSnapshot.exists || !studentSnapshot.exists || studentSnapshot.data().active === false) {
       return { error: 'not-found' };
     }
-    if (tripSnapshot.data().status !== 'draft') return { error: 'not-draft' };
+    const trip = tripSnapshot.data();
+    const student = studentSnapshot.data();
+    if (trip.status !== 'draft') return { error: 'not-draft' };
+    const classLinkRef = collection('tripClasses').doc(tripKey + '_' + normalizeId(student.class_id));
+    const classLinkSnapshot = await transaction.get(classLinkRef);
     if (!classLinkSnapshot.exists) return { error: 'class-not-linked' };
     if (participantSnapshot.exists) return { ok: true };
     let count = counterSnapshot.exists ? Number(counterSnapshot.data().value) : null;
@@ -256,7 +256,8 @@ async function createTripStudentWithinCapacity(tripId, studentId, capacity) {
       );
       count = existing.size;
     }
-    if (count >= Number(capacity)) return { error: 'capacity' };
+    if (!Number.isSafeInteger(count) || count < 0) throw new Error('Contador de participantes inválido.');
+    if (count >= Number(trip.capacity)) return { error: 'capacity' };
     transaction.create(participantRef, {
       trip_id: Number(tripKey), student_id: Number(studentKey),
       authorization_status: 'pending', departure_present: null,
