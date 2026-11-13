@@ -33,26 +33,12 @@ async function listClasses() {
 }
 
 async function createClass(data) {
-  const existing = await store.list('classes', {
-    filters: [
-      { field: 'level', op: '==', value: data.level },
-      { field: 'grade', op: '==', value: data.grade },
-      { field: 'course', op: '==', value: data.course },
-      { field: 'section', op: '==', value: data.section },
-      { field: 'school_year', op: '==', value: Number(data.schoolYear) }
-    ],
-    limit: 1
-  });
-  if (existing.length) {
-    const error = new Error('Essa turma já está cadastrada para o ano letivo.');
-    error.code = 'already-exists';
-    throw error;
-  }
-  const id = await store.createWithNumericId('classes', {
-    level: data.level, grade: data.grade, course: data.course,
-    section: data.section, school_year: Number(data.schoolYear),
-    active: true, created_at: new Date().toISOString()
-  });
+  const id = await store.createUniqueComposite('classes',
+    ['level', 'grade', 'course', 'section', 'school_year'], {
+      level: data.level, grade: data.grade, course: data.course,
+      section: data.section, school_year: Number(data.schoolYear),
+      active: true, created_at: new Date().toISOString()
+    });
   return Number(id);
 }
 
@@ -203,24 +189,9 @@ async function linkTripClass(tripId, classId) {
 }
 
 async function linkTripStudent(tripId, studentId) {
-  const [trip, student] = await Promise.all([getTrip(tripId), store.get('students', numericId(studentId, 'Estudante'))]);
-  if (!trip || !student || student.active === false) return { error: 'not-found' };
-  if (trip.status !== 'draft') return { error: 'not-draft' };
-  const classLink = await store.get('tripClasses', Number(trip.id) + '_' + Number(student.class_id));
-  if (!classLink) return { error: 'class-not-linked' };
-  const id = Number(trip.id) + '_' + Number(student.id);
-  if (await store.get('tripStudents', id)) return { ok: true };
-  const current = await store.list('tripStudents', {
-    filters: [{ field: 'trip_id', op: '==', value: Number(trip.id) }],
-    limit: 5000
-  });
-  if (current.length >= Number(trip.capacity)) return { error: 'capacity' };
-  await store.create('tripStudents', {
-    trip_id: Number(trip.id), student_id: Number(student.id),
-    authorization_status: 'pending', departure_present: null,
-    return_present: null, created_at: new Date().toISOString()
-  }, id);
-  return { ok: true };
+  return store.createTripStudentWithinCapacity(
+    numericId(tripId, 'Viagem'), numericId(studentId, 'Estudante')
+  );
 }
 
 async function assignTripTeacher(tripId, userId) {
