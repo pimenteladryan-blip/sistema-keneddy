@@ -119,7 +119,7 @@ async function createTrip(data, createdBy) {
     title: data.title, destination: data.destination,
     educational_purpose: data.purpose,
     departure_at: data.departure, return_at: data.returning,
-    capacity: Number(data.capacity), status: 'draft',
+    capacity: Number(data.capacity), participant_count: 0, status: 'draft',
     created_by: Number(createdBy), approved_by: null,
     created_at: new Date().toISOString(), updated_at: new Date().toISOString()
   });
