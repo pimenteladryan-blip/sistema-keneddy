@@ -175,17 +175,12 @@ async function listTripsForUser(user) {
 }
 
 async function linkTripClass(tripId, classId) {
-  const [trip, schoolClass] = await Promise.all([getTrip(tripId), getClass(classId)]);
-  if (!trip || !schoolClass || schoolClass.active === false) return { error: 'not-found' };
-  if (trip.status !== 'draft') return { error: 'not-draft' };
-  const id = Number(trip.id) + '_' + Number(schoolClass.id);
-  if (!await store.get('tripClasses', id)) {
-    await store.create('tripClasses', {
-      trip_id: Number(trip.id), class_id: Number(schoolClass.id),
-      created_at: new Date().toISOString()
-    }, id);
-  }
-  return { ok: true };
+  const schoolClass = await getClass(classId);
+  if (!schoolClass || schoolClass.active === false) return { error: 'not-found' };
+  return store.createTripRelationIfDraft('tripClasses', tripId, schoolClass.id, {
+    trip_id: Number(tripId), class_id: Number(schoolClass.id),
+    created_at: new Date().toISOString()
+  });
 }
 
 async function linkTripStudent(tripId, studentId) {
@@ -195,43 +190,22 @@ async function linkTripStudent(tripId, studentId) {
 }
 
 async function assignTripTeacher(tripId, userId) {
-  const [trip, teacher] = await Promise.all([
-    getTrip(tripId), store.get('users', numericId(userId, 'Professor'))
-  ]);
-  if (!trip || !teacher || teacher.role !== 'teacher' || teacher.active === false) return { error: 'not-found' };
-  if (trip.status !== 'draft') return { error: 'not-draft' };
-  const id = Number(trip.id) + '_' + Number(teacher.id);
-  if (!await store.get('tripStaff', id)) await store.create('tripStaff', {
-    trip_id: Number(trip.id), user_id: Number(teacher.id),
+  const teacher = await store.get('users', numericId(userId, 'Professor'));
+  if (!teacher || teacher.role !== 'teacher' || teacher.active === false) return { error: 'not-found' };
+  return store.createTripRelationIfDraft('tripStaff', tripId, teacher.id, {
+    trip_id: Number(tripId), user_id: Number(teacher.id),
     assignment_label: 'Professor responsável', created_at: new Date().toISOString()
-  }, id);
-  return { ok: true };
+  });
 }
 
 async function submitTrip(tripId) {
-  const trip = await getTrip(tripId);
-  if (!trip) return { error: 'not-found' };
-  if (trip.status !== 'draft') return { error: 'not-draft' };
-  const classes = await store.list('tripClasses', {
-    filters: [{ field: 'trip_id', op: '==', value: Number(trip.id) }],
-    limit: 500
-  });
-  if (!classes.length) return { error: 'no-classes' };
-  await store.update('trips', trip.id, {
-    status: 'pending_approval', updated_at: new Date().toISOString()
-  });
-  return { ok: true };
+  return store.transitionTripStatus(tripId, 'draft', 'pending_approval', {}, true);
 }
 
 async function approveTrip(tripId, approverId) {
-  const trip = await getTrip(tripId);
-  if (!trip) return { error: 'not-found' };
-  if (trip.status !== 'pending_approval') return { error: 'not-pending' };
-  await store.update('trips', trip.id, {
-    status: 'approved', approved_by: Number(approverId),
-    updated_at: new Date().toISOString()
+  return store.transitionTripStatus(tripId, 'pending_approval', 'approved', {
+    approved_by: Number(approverId)
   });
-  return { ok: true };
 }
 
 module.exports = {
