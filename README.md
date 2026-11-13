@@ -99,3 +99,8 @@ Não existe senha administrativa padrão. Não envie o arquivo `.env` ao GitHub.
 
 **SGVE | Colégio Estadual Presidente Kennedy**  
 Versão publicada: https://pimenteladryan-blip.github.io/sistema-keneddy/
+
+
+## Integração Firebase em preparação
+
+O servidor inclui a inicialização do Firebase Admin SDK por meio de `FIREBASE_PROJECT_ID` e `FIREBASE_SERVICE_ACCOUNT_JSON`. A credencial deve ficar somente nas variáveis secretas do ambiente de hospedagem, nunca no GitHub. Esta etapa prepara a conexão; as rotas ainda usam SQLite e a migração completa para Firestore permanece pendente.
