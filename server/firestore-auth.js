@@ -101,6 +101,10 @@ async function listPendingRegistrationRequests() {
 }
 
 async function reviewRegistrationRequest(id, reviewerId, decision) {
+  const reviewer = Number(reviewerId);
+  if (!Number.isSafeInteger(reviewer) || reviewer < 1) {
+    throw new TypeError('Revisor inválido.');
+  }
   if (!['approved', 'rejected'].includes(decision)) {
     throw new TypeError('Decisão de cadastro inválida.');
   }
@@ -122,10 +126,17 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
       throw error;
     }
     const request = requestSnapshot.data();
+    const requestEmail = typeof request.email === 'string' ? request.email.trim().toLowerCase() : '';
+    const validRequestEmail = requestEmail.length <= 254 &&
+      /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(requestEmail);
+    const validName = typeof request.display_name === 'string' &&
+      request.display_name.trim().length >= 3 && request.display_name.trim().length <= 100;
+    const validPasswordHash = typeof request.password_hash === 'string' &&
+      /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(request.password_hash);
+    const validVerificationCode = typeof request.verification_code === 'string' &&
+      /^[A-HJ-NP-Z2-9]{6}$/.test(request.verification_code);
     if (!['teacher', 'guardian', 'student'].includes(request.role) ||
-        typeof request.email !== 'string' || (request.email.length > 254 || !request.email.includes('@') ||
-          request.email.startsWith('@') || request.email.endsWith('@') ||
-          !request.email.slice(request.email.lastIndexOf('@') + 1).includes('.'))) {
+        !validRequestEmail || !validName || !validPasswordHash || !validVerificationCode) {
       const error = new Error('Os dados da solicitação são inválidos.');
       error.code = 'invalid-request';
       throw error;
@@ -134,7 +145,7 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
       transaction.update(requestRef, {
         status: 'rejected',
         password_hash: null,
-        reviewed_by: Number(reviewerId),
+        reviewed_by: reviewer,
         reviewed_at: new Date().toISOString()
       });
       return null;
@@ -152,7 +163,7 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
     const now = new Date().toISOString();
     transaction.create(userRef, {
       display_name: request.display_name,
-      email: String(request.email).trim().toLowerCase(),
+      email: requestEmail,
       password_hash: request.password_hash,
       role: request.role,
       active: true,
@@ -160,7 +171,7 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
       updated_at: now
     });
     transaction.set(counterRef, { value: userId, updated_at: now });
-    transaction.create(indexRef, { documentId: String(userId), value: String(request.email).trim().toLowerCase() });
+    transaction.create(indexRef, { documentId: String(userId), value: requestEmail });
     transaction.update(requestRef, {
       status: 'approved',
       password_hash: null,
