@@ -154,6 +154,43 @@ async function createWithNumericId(name, data) {
   return id;
 }
 
+
+async function upsertUnique(name, field, value, createData, updateData, allowedExistingValues = []) {
+  if (!createData || typeof createData !== 'object' || Array.isArray(createData) ||
+      !updateData || typeof updateData !== 'object' || Array.isArray(updateData)) {
+    throw new TypeError('Os dados do documento devem ser objetos.');
+  }
+  const db = requireFirestore();
+  const indexRef = uniqueIndexRef(name, field, value);
+  const counterRef = db.collection('_sgve_counters').doc(name);
+  const normalized = String(value).trim().toLowerCase();
+  return db.runTransaction(async transaction => {
+    const indexSnapshot = await transaction.get(indexRef);
+    if (indexSnapshot.exists) {
+      const documentRef = collection(name).doc(normalizeId(indexSnapshot.data().documentId));
+      const documentSnapshot = await transaction.get(documentRef);
+      if (!documentSnapshot.exists) throw new Error('Índice único inconsistente no Firestore.');
+      const existing = documentSnapshot.data();
+      if (!allowedExistingValues.includes(existing.status)) {
+        const error = new Error(existing.status === 'pending'
+          ? 'Já existe uma solicitação pendente para este e-mail.'
+          : 'Já existe um registro para este e-mail.');
+        error.code = existing.status === 'pending' ? 'already-pending' : 'already-exists';
+        throw error;
+      }
+      transaction.update(documentRef, updateData);
+      return { id: documentRef.id, updated: true };
+    }
+    const counterSnapshot = await transaction.get(counterRef);
+    const id = (counterSnapshot.exists ? Number(counterSnapshot.data().value) : 0) + 1;
+    const documentRef = collection(name).doc(String(id));
+    transaction.create(documentRef, { ...createData, [field]: normalized });
+    transaction.set(counterRef, { value: id, updated_at: new Date().toISOString() });
+    transaction.create(indexRef, { documentId: String(id), value: normalized });
+    return { id: String(id), updated: false };
+  });
+}
+
 module.exports = {
   COLLECTIONS,
   get,
@@ -165,5 +202,6 @@ module.exports = {
   nextNumericId,
   createWithNumericId,
   getByUnique,
-  createUnique
+  createUnique,
+  upsertUnique
 };
