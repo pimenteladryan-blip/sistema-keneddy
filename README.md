@@ -103,4 +103,4 @@ Versão publicada: https://pimenteladryan-blip.github.io/sistema-keneddy/
 
 ## Integração Firebase em preparação
 
-O servidor inclui a inicialização do Firebase Admin SDK por meio de `FIREBASE_PROJECT_ID` e `FIREBASE_SERVICE_ACCOUNT_JSON`. A credencial deve ficar somente nas variáveis secretas do ambiente de hospedagem, nunca no GitHub. Esta etapa prepara a conexão; as rotas ainda usam SQLite e a migração completa para Firestore permanece pendente.
+O servidor inclui a inicialização do Firebase Admin SDK por meio de `FIREBASE_PROJECT_ID` e `FIREBASE_SERVICE_ACCOUNT_JSON`. A camada `server/firestore-store.js` prepara operações assíncronas de leitura, gravação, atualização e exclusão, geração de IDs numéricos e índices transacionais de unicidade para e-mails. Essas funções ainda não substituem o banco usado pelas rotas: elas continuam usando SQLite até a migração integral e os testes de integração. A credencial deve ficar somente nas variáveis secretas do ambiente de hospedagem, nunca no GitHub. Não faça deploy para uso real nesta etapa.
