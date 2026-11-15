@@ -90,6 +90,25 @@ test('relações transacionais aceitam somente os tipos previstos', async () => 
   );
 });
 
+test('dados da conta aprovada usam o e-mail normalizado e não expõem campos extras', () => {
+  const result = auth.approvedUserData({
+    display_name: 'Pessoa de Teste',
+    email: 'pessoa@exemplo.com',
+    password_hash: 'scrypt:' + 'a'.repeat(32) + ':' + 'b'.repeat(128),
+    role: 'teacher'
+  }, '2026-11-15T12:00:00.000Z');
+
+  assert.deepEqual(result, {
+    display_name: 'Pessoa de Teste',
+    email: 'pessoa@exemplo.com',
+    password_hash: 'scrypt:' + 'a'.repeat(32) + ':' + 'b'.repeat(128),
+    role: 'teacher',
+    active: true,
+    created_at: '2026-11-15T12:00:00.000Z',
+    updated_at: '2026-11-15T12:00:00.000Z'
+  });
+});
+
 test('validação de cadastro normaliza nome e e-mail', () => {
   const result = auth.validateRegistrationRequest({
     display_name: '  Pessoa de Teste  ',
