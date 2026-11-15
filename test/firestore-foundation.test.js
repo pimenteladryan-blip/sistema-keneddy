@@ -250,3 +250,27 @@ test('operações atômicas de sessão validam entradas antes de acessar o Fires
     /Dados de encerramento de sessão inválidos/
   );
 });
+
+
+test('importação com ID fixo valida identificador e campo único antes do Firestore', async () => {
+  const data = {
+    display_name: 'Pessoa de Teste',
+    email: 'pessoa@exemplo.com',
+    password_hash: 'scrypt:' + 'a'.repeat(32) + ':' + 'b'.repeat(128),
+    role: 'teacher',
+    active: true
+  };
+
+  await assert.rejects(
+    store.createUniqueWithId('users', 'email', data.email, 0, data),
+    /Identificador ou dados de importação inválidos/
+  );
+  await assert.rejects(
+    store.createUniqueWithId('users', 'password_hash', data.password_hash, 12, data),
+    /Campo único não permitido/
+  );
+});
+
+test('o mapa do Firestore mantém a coleção de auditoria no nome canônico', () => {
+  assert.equal(store.COLLECTIONS.auditLogs, 'audit_logs');
+});
