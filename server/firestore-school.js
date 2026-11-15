@@ -47,17 +47,10 @@ async function getClass(id) {
 }
 
 async function createStudent(fullName, classId) {
-  const schoolClass = await getClass(classId);
-  if (!schoolClass || schoolClass.active === false) return null;
-  const id = await store.createWithNumericId('students', {
-    full_name: String(fullName).trim(),
-    class_id: Number(classId),
-    user_id: null,
-    active: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  });
-  return Number(id);
+  const result = await store.createStudentInActiveClass(
+    String(fullName).trim(), numericId(classId, 'Turma')
+  );
+  return result.error ? null : Number(result.id);
 }
 
 async function listStudentsForUser(user) {
@@ -101,17 +94,12 @@ async function listStudentsForUser(user) {
 }
 
 async function linkGuardian(studentId, guardianEmail, relationship) {
-  const student = await store.get('students', numericId(studentId, 'Estudante'));
   const guardian = await store.getByUnique('users', 'email', guardianEmail);
-  if (!student || student.active === false || !guardian ||
-      guardian.role !== 'guardian' || guardian.active === false) return false;
-  const id = Number(student.id) + '_' + Number(guardian.id);
-  const existing = await store.get('studentGuardians', id);
-  if (!existing) await store.create('studentGuardians', {
-    student_id: Number(student.id), guardian_user_id: Number(guardian.id),
-    relationship_label: relationship || null, created_at: new Date().toISOString()
-  }, id);
-  return true;
+  if (!guardian) return false;
+  return store.linkGuardianIfActive(
+    numericId(studentId, 'Estudante'), numericId(guardian.id, 'Responsável'),
+    relationship || null
+  );
 }
 
 async function createTrip(data, createdBy) {
