@@ -152,7 +152,16 @@ async function createUniqueWithId(name, field, value, id, data) {
       transaction.get(indexRef), transaction.get(documentRef), transaction.get(counterRef)
     ]);
     if (indexSnapshot.exists || documentSnapshot.exists) {
-      const error = new Error('Registro já existente durante a importação.');
+      const indexedId = indexSnapshot.exists
+        ? String(indexSnapshot.data().documentId)
+        : null;
+      const existingEmail = documentSnapshot.exists
+        ? String(documentSnapshot.data().email || '').trim().toLowerCase()
+        : null;
+      if (indexedId === documentId && existingEmail === normalized) {
+        return documentId;
+      }
+      const error = new Error('Conflito de ID ou e-mail durante a importação.');
       error.code = 'already-exists';
       throw error;
     }
