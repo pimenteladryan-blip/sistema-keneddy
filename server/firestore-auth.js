@@ -2,6 +2,24 @@
 
 const store = require('./firestore-store');
 
+function validateRegistrationRequest(request) {
+  const email = typeof request?.email === 'string' ? request.email.trim().toLowerCase() : '';
+  const validEmail = email.length <= 254 && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+  const name = typeof request?.display_name === 'string' ? request.display_name.trim() : '';
+  const validPasswordHash = typeof request?.password_hash === 'string' &&
+    /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(request.password_hash);
+  const validVerificationCode = typeof request?.verification_code === 'string' &&
+    /^[A-HJ-NP-Z2-9]{6}$/.test(request.verification_code);
+  if (!['teacher', 'guardian', 'student'].includes(request?.role) ||
+      !validEmail || name.length < 3 || name.length > 100 ||
+      !validPasswordHash || !validVerificationCode) {
+    const error = new Error('Os dados da solicitação são inválidos.');
+    error.code = 'invalid-request';
+    throw error;
+  }
+  return { ...request, email, display_name: name };
+}
+
 function publicUser(user) {
   if (!user) return null;
   return {
@@ -125,22 +143,7 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
       error.code = 'not-found';
       throw error;
     }
-    const request = requestSnapshot.data();
-    const requestEmail = typeof request.email === 'string' ? request.email.trim().toLowerCase() : '';
-    const validRequestEmail = requestEmail.length <= 254 &&
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(requestEmail);
-    const validName = typeof request.display_name === 'string' &&
-      request.display_name.trim().length >= 3 && request.display_name.trim().length <= 100;
-    const validPasswordHash = typeof request.password_hash === 'string' &&
-      /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(request.password_hash);
-    const validVerificationCode = typeof request.verification_code === 'string' &&
-      /^[A-HJ-NP-Z2-9]{6}$/.test(request.verification_code);
-    if (!['teacher', 'guardian', 'student'].includes(request.role) ||
-        !validRequestEmail || !validName || !validPasswordHash || !validVerificationCode) {
-      const error = new Error('Os dados da solicitação são inválidos.');
-      error.code = 'invalid-request';
-      throw error;
-    }
+    const request = validateRegistrationRequest(requestSnapshot.data());
     if (decision === 'rejected') {
       transaction.update(requestRef, {
         status: 'rejected',
@@ -184,6 +187,7 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
 
 module.exports = {
   publicUser,
+  validateRegistrationRequest,
   findUserByEmail,
   createUser,
   createSession,
