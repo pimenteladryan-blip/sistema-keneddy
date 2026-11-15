@@ -4,7 +4,7 @@ const store = require('./firestore-store');
 
 function validateRegistrationRequest(request) {
   const email = typeof request?.email === 'string' ? request.email.trim().toLowerCase() : '';
-  const validEmail = email.length <= 254 && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+  const validEmail = email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const name = typeof request?.display_name === 'string' ? request.display_name.trim() : '';
   const validPasswordHash = typeof request?.password_hash === 'string' &&
     /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(request.password_hash);
