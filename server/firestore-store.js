@@ -155,10 +155,16 @@ async function createUniqueWithId(name, field, value, id, data) {
       const indexedId = indexSnapshot.exists
         ? String(indexSnapshot.data().documentId)
         : null;
-      const existingEmail = documentSnapshot.exists
-        ? String(documentSnapshot.data().email || '').trim().toLowerCase()
+      const existingData = documentSnapshot.exists ? documentSnapshot.data() : null;
+      const existingEmail = existingData
+        ? String(existingData.email || '').trim().toLowerCase()
         : null;
-      if (indexedId === documentId && existingEmail === normalized) {
+      const sameAccount = existingData &&
+        existingData.display_name === data.display_name &&
+        existingData.password_hash === data.password_hash &&
+        existingData.role === data.role &&
+        existingData.active === data.active;
+      if (indexedId === documentId && existingEmail === normalized && sameAccount) {
         return documentId;
       }
       const error = new Error('Conflito de ID ou e-mail durante a importação.');
