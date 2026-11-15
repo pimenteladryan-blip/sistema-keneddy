@@ -88,6 +88,33 @@ async function createUser({ display_name, email, password_hash, role, active = t
   });
 }
 
+async function importUserWithId({ id, display_name, email, password_hash, role, active = true }) {
+  const userId = Number(id);
+  const name = typeof display_name === 'string' ? display_name.trim() : '';
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  const validEmail = normalizedEmail.length <= 254 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+  const validPasswordHash = typeof password_hash === 'string' &&
+    /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(password_hash);
+  if (!Number.isSafeInteger(userId) || userId < 1 || name.length < 3 ||
+      name.length > 100 || !validEmail || !validPasswordHash ||
+      !['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'].includes(role) ||
+      typeof active !== 'boolean') {
+    const error = new Error('Os dados da conta para importação são inválidos.');
+    error.code = 'invalid-user';
+    throw error;
+  }
+  const now = new Date().toISOString();
+  return store.createUniqueWithId('users', 'email', normalizedEmail, userId, {
+    display_name: name,
+    password_hash,
+    role,
+    active,
+    created_at: now,
+    updated_at: now
+  });
+}
+
 async function setUserActive(id, active) {
   if (typeof active !== 'boolean') throw new TypeError('Estado da conta inválido.');
   const user = await findUserById(id);
@@ -238,6 +265,7 @@ module.exports = {
   findUserById,
   listUsers,
   createUser,
+  importUserWithId,
   setUserActive,
   createSession,
   findSession,
