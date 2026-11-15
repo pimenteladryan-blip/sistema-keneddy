@@ -8,6 +8,7 @@ const projectId = String(process.env.FIREBASE_PROJECT_ID || 'svge-14ec7').trim()
 const rawServiceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 
 let firestore = null;
+let firebaseApp = null;
 let firebaseConfigured = false;
 
 if (rawServiceAccount && rawServiceAccount.trim()) {
@@ -26,13 +27,13 @@ if (rawServiceAccount && rawServiceAccount.trim()) {
   }
 
   const existingApp = getApps().find(app => app.name === 'sgve');
-  const app = existingApp || initializeApp({
+  firebaseApp = existingApp || initializeApp({
     credential: cert(serviceAccount),
     projectId
   }, 'sgve');
 
-  firestore = getFirestore(app);
+  firestore = getFirestore(firebaseApp);
   firebaseConfigured = true;
 }
 
-module.exports = { firestore, firebaseConfigured, projectId };
+module.exports = { firestore, firebaseApp, firebaseConfigured, projectId };
