@@ -409,6 +409,7 @@ module.exports = {
   createWithNumericId,
   getByUnique,
   createUnique,
+  createUniqueWithId,
   upsertUnique,
   createUniqueComposite,
   createTripStudentWithinCapacity,
