@@ -126,6 +126,21 @@ async function setUserActive(id, active) {
   return true;
 }
 
+async function createAuditLog({ actor_user_id = null, action, entity_type, entity_id = null }) {
+  if (typeof action !== 'string' || !action.trim() || action.length > 80 ||
+      typeof entity_type !== 'string' || !entity_type.trim() || entity_type.length > 80 ||
+      (actor_user_id !== null && (!Number.isSafeInteger(Number(actor_user_id)) || Number(actor_user_id) < 1))) {
+    throw new TypeError('Evento de auditoria inválido.');
+  }
+  return store.create('auditLogs', {
+    actor_user_id: actor_user_id === null ? null : Number(actor_user_id),
+    action: action.trim(),
+    entity_type: entity_type.trim(),
+    entity_id: entity_id === null ? null : String(entity_id),
+    created_at: new Date().toISOString()
+  });
+}
+
 async function createSession({ token_hash, csrf_token, user_id, expires_at }) {
   const id = String(token_hash);
   await store.create('sessions', {
@@ -267,6 +282,7 @@ module.exports = {
   createUser,
   importUserWithId,
   setUserActive,
+  createAuditLog,
   createSession,
   findSession,
   deleteSession,
