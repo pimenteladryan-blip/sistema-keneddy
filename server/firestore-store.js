@@ -233,13 +233,21 @@ async function createTripRelationIfDraft(name, tripId, relatedId, data) {
   const tripKey = normalizeId(tripId);
   const relatedKey = normalizeId(relatedId);
   const tripRef = collection('trips').doc(tripKey);
+  const targetCollection = name === 'tripClasses' ? 'classes' : 'users';
+  const targetRef = collection(targetCollection).doc(relatedKey);
   const relationRef = collection(name).doc(tripKey + '_' + relatedKey);
   return requireFirestore().runTransaction(async transaction => {
-    const [tripSnapshot, relationSnapshot] = await Promise.all([
-      transaction.get(tripRef), transaction.get(relationRef)
+    const [tripSnapshot, targetSnapshot, relationSnapshot] = await Promise.all([
+      transaction.get(tripRef), transaction.get(targetRef), transaction.get(relationRef)
     ]);
     if (!tripSnapshot.exists) return { error: 'not-found' };
     if (tripSnapshot.data().status !== 'draft') return { error: 'not-draft' };
+    if (!targetSnapshot.exists || targetSnapshot.data().active !== true) {
+      return { error: 'target-not-found' };
+    }
+    if (name === 'tripStaff' && targetSnapshot.data().role !== 'teacher') {
+      return { error: 'target-not-found' };
+    }
     if (!relationSnapshot.exists) transaction.create(relationRef, data);
     return { ok: true };
   });
