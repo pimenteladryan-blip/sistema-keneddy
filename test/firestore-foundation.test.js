@@ -89,3 +89,46 @@ test('relações transacionais aceitam somente os tipos previstos', async () => 
     /Relação de viagem não permitida/
   );
 });
+
+test('validação de cadastro normaliza nome e e-mail', () => {
+  const result = auth.validateRegistrationRequest({
+    display_name: '  Pessoa de Teste  ',
+    email: '  PESSOA@EXEMPLO.COM  ',
+    password_hash: 'scrypt:' + 'a'.repeat(32) + ':' + 'b'.repeat(128),
+    role: 'teacher',
+    verification_code: 'ABC234'
+  });
+
+  assert.equal(result.display_name, 'Pessoa de Teste');
+  assert.equal(result.email, 'pessoa@exemplo.com');
+  assert.equal(result.role, 'teacher');
+});
+
+test('validação de cadastro rejeita perfil não permitido', () => {
+  assert.throws(() => auth.validateRegistrationRequest({
+    display_name: 'Pessoa de Teste',
+    email: 'pessoa@exemplo.com',
+    password_hash: 'scrypt:' + 'a'.repeat(32) + ':' + 'b'.repeat(128),
+    role: 'admin',
+    verification_code: 'ABC234'
+  }), error => error.code === 'invalid-request');
+});
+
+test('validação de cadastro rejeita e-mail, hash e código malformados', () => {
+  const base = {
+    display_name: 'Pessoa de Teste',
+    email: 'pessoa@exemplo.com',
+    password_hash: 'scrypt:' + 'a'.repeat(32) + ':' + 'b'.repeat(128),
+    role: 'guardian',
+    verification_code: 'ABC234'
+  };
+  for (const patch of [
+    { email: 'email-invalido' },
+    { password_hash: 'senha-em-texto' },
+    { verification_code: '000000' },
+    { display_name: '  ' }
+  ]) {
+    assert.throws(() => auth.validateRegistrationRequest({ ...base, ...patch }),
+      error => error.code === 'invalid-request');
+  }
+});
