@@ -136,6 +136,35 @@ async function createUnique(name, field, value, data) {
   });
 }
 
+async function createUniqueWithId(name, field, value, id, data) {
+  if (!Number.isSafeInteger(Number(id)) || Number(id) < 1 ||
+      !data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new TypeError('Identificador ou dados de importação inválidos.');
+  }
+  const db = requireFirestore();
+  const documentId = String(Number(id));
+  const indexRef = uniqueIndexRef(name, field, value);
+  const documentRef = collection(name).doc(documentId);
+  const counterRef = db.collection('_sgve_counters').doc(name);
+  const normalized = String(value ?? '').trim().toLowerCase();
+  return db.runTransaction(async transaction => {
+    const [indexSnapshot, documentSnapshot, counterSnapshot] = await Promise.all([
+      transaction.get(indexRef), transaction.get(documentRef), transaction.get(counterRef)
+    ]);
+    if (indexSnapshot.exists || documentSnapshot.exists) {
+      const error = new Error('Registro já existente durante a importação.');
+      error.code = 'already-exists';
+      throw error;
+    }
+    const current = counterSnapshot.exists ? Number(counterSnapshot.data().value) : 0;
+    const next = Math.max(Number.isSafeInteger(current) ? current : 0, Number(documentId));
+    transaction.create(documentRef, { ...data, [field]: normalized });
+    transaction.create(indexRef, { documentId, value: normalized });
+    transaction.set(counterRef, { value: next, updated_at: new Date().toISOString() });
+    return documentId;
+  });
+}
+
 async function nextNumericId(name) {
   if (!COLLECTIONS[name]) throw new Error('Coleção SGVE desconhecida: ' + name);
   const db = requireFirestore();
