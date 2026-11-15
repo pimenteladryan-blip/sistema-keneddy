@@ -204,3 +204,23 @@ test('importação de usuário exige ID numérico positivo e preserva papéis v�
     );
   }
 });
+
+
+test('auditoria Firestore rejeita eventos incompletos antes de acessar o banco', async () => {
+  await assert.rejects(
+    auth.createAuditLog({ action: '', entity_type: 'user' }),
+    /Evento de auditoria inválido/
+  );
+  await assert.rejects(
+    auth.createAuditLog({ action: 'login', entity_type: '' }),
+    /Evento de auditoria inválido/
+  );
+  await assert.rejects(
+    auth.createAuditLog({ actor_user_id: 0, action: 'login', entity_type: 'user' }),
+    /Evento de auditoria inválido/
+  );
+  await assert.rejects(
+    auth.createAuditLog({ actor_user_id: 'abc', action: 'login', entity_type: 'user' }),
+    /Evento de auditoria inválido/
+  );
+});
