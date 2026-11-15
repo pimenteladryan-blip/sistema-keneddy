@@ -141,6 +141,54 @@ async function createAuditLog({ actor_user_id = null, action, entity_type, entit
   });
 }
 
+async function createSessionWithAudit({ token_hash, csrf_token, user_id, expires_at, action = 'login_google' }) {
+  const userId = Number(user_id);
+  if (typeof token_hash !== 'string' || !/^[a-f0-9]{64}$/.test(token_hash) ||
+      typeof csrf_token !== 'string' || csrf_token.length < 32 ||
+      !Number.isSafeInteger(userId) || userId < 1 ||
+      !Number.isFinite(Date.parse(expires_at)) ||
+      !['login_google'].includes(action)) {
+    throw new TypeError('Dados de sessão inválidos.');
+  }
+  const db = require('./firebase').firestore;
+  if (!db) throw new Error('Firestore não configurado.');
+  const sessionRef = db.collection('sessions').doc(token_hash);
+  const auditRef = db.collection('audit_logs').doc();
+  const now = new Date().toISOString();
+  await db.runTransaction(async transaction => {
+    transaction.create(sessionRef, {
+      csrf_token, user_id: userId, expires_at,
+      created_at: now
+    });
+    transaction.create(auditRef, {
+      actor_user_id: userId, action, entity_type: 'user',
+      entity_id: String(userId), created_at: now
+    });
+  });
+  return token_hash;
+}
+
+async function deleteSessionWithAudit(tokenHash, userId) {
+  const actorId = Number(userId);
+  if (typeof tokenHash !== 'string' || !/^[a-f0-9]{64}$/.test(tokenHash) ||
+      !Number.isSafeInteger(actorId) || actorId < 1) {
+    throw new TypeError('Dados de encerramento de sessão inválidos.');
+  }
+  const db = require('./firebase').firestore;
+  if (!db) throw new Error('Firestore não configurado.');
+  const sessionRef = db.collection('sessions').doc(tokenHash);
+  const auditRef = db.collection('audit_logs').doc();
+  const now = new Date().toISOString();
+  await db.runTransaction(async transaction => {
+    const sessionSnapshot = await transaction.get(sessionRef);
+    if (sessionSnapshot.exists) transaction.delete(sessionRef);
+    transaction.create(auditRef, {
+      actor_user_id: actorId, action: 'logout', entity_type: 'user',
+      entity_id: String(actorId), created_at: now
+    });
+  });
+}
+
 async function createSession({ token_hash, csrf_token, user_id, expires_at }) {
   const id = String(token_hash);
   await store.create('sessions', {
@@ -283,6 +331,8 @@ module.exports = {
   importUserWithId,
   setUserActive,
   createAuditLog,
+  createSessionWithAudit,
+  deleteSessionWithAudit,
   createSession,
   findSession,
   deleteSession,
