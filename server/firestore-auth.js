@@ -44,18 +44,59 @@ function publicUser(user) {
 }
 
 async function findUserByEmail(email) {
-  return store.getByUnique('users', 'email', String(email).trim().toLowerCase());
+  if (typeof email !== 'string') return null;
+  return store.getByUnique('users', 'email', email.trim().toLowerCase());
+}
+
+async function findUserById(id) {
+  const userId = Number(id);
+  if (!Number.isSafeInteger(userId) || userId < 1) return null;
+  return store.get('users', userId);
+}
+
+async function listUsers(limit = 300) {
+  const safeLimit = Number.isInteger(limit) ? Math.max(1, Math.min(limit, 300)) : 300;
+  const users = await store.list('users', {
+    orderBy: { field: 'display_name', direction: 'asc' },
+    limit: safeLimit
+  });
+  return users.map(publicUser);
 }
 
 async function createUser({ display_name, email, password_hash, role, active = true }) {
-  const id = await store.createUnique('users', 'email', email, {
-    display_name: String(display_name).trim(),
+  const name = typeof display_name === 'string' ? display_name.trim() : '';
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  const validEmail = normalizedEmail.length <= 254 &&
+    /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(normalizedEmail);
+  const validPasswordHash = typeof password_hash === 'string' &&
+    /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(password_hash);
+  if (name.length < 3 || name.length > 100 || !validEmail ||
+      !validPasswordHash || !['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'].includes(role) ||
+      typeof active !== 'boolean') {
+    const error = new Error('Os dados da conta são inválidos.');
+    error.code = 'invalid-user';
+    throw error;
+  }
+  const now = new Date().toISOString();
+  return store.createUnique('users', 'email', normalizedEmail, {
+    display_name: name,
     password_hash,
     role,
-    active: Boolean(active),
+    active,
+    created_at: now,
+    updated_at: now
+  });
+}
+
+async function setUserActive(id, active) {
+  if (typeof active !== 'boolean') throw new TypeError('Estado da conta inválido.');
+  const user = await findUserById(id);
+  if (!user) return false;
+  await store.update('users', user.id, {
+    active,
     updated_at: new Date().toISOString()
   });
-  return id;
+  return true;
 }
 
 async function createSession({ token_hash, csrf_token, user_id, expires_at }) {
@@ -194,7 +235,10 @@ module.exports = {
   approvedUserData,
   validateRegistrationRequest,
   findUserByEmail,
+  findUserById,
+  listUsers,
   createUser,
+  setUserActive,
   createSession,
   findSession,
   deleteSession,
