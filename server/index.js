@@ -4,7 +4,7 @@ const path = require('node:path');
 const express = require('express');
 const helmet = require('helmet');
 const { db, audit } = require('./db');
-const { firebaseConfigured, projectId } = require('./firebase');
+const { firebaseConfigured, projectId, firebaseApp } = require('./firebase');
 const { getAuth } = require('firebase-admin/auth');
 const firestoreAuth = require('./firestore-auth');
 const { hashPassword, verifyPassword, randomToken, sha256 } = require('./security');
@@ -203,7 +203,7 @@ app.post('/api/auth/google', async (req, res, next) => {
     if (!firebaseConfigured) return res.status(503).json({ error: 'Login Google ainda não está configurado no servidor.' });
     const idToken = typeof req.body.idToken === 'string' ? req.body.idToken : '';
     if (!idToken || idToken.length > 12000) return res.status(400).json({ error: 'Token Google ausente ou inválido.' });
-    const decoded = await getAuth().verifyIdToken(idToken, true);
+    const decoded = await getAuth(firebaseApp).verifyIdToken(idToken, true);
     if (decoded.aud !== projectId || decoded.iss !== 'https://securetoken.google.com/' + projectId ||
         decoded.firebase?.sign_in_provider !== 'google.com' || decoded.email_verified !== true ||
         typeof decoded.email !== 'string') {
