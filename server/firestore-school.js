@@ -66,7 +66,7 @@ async function listStudentsForUser(user) {
       limit: 500
     });
     const results = await Promise.all(links.map(link => store.get('students', link.student_id)));
-    students = results.filter(student => student && student.active !== false);
+    students = results.filter(student => student && student.active === true);
   } else if (user.role === 'student') {
     students = await store.list('students', {
       filters: [
