@@ -4,7 +4,9 @@ const path = require('node:path');
 const express = require('express');
 const helmet = require('helmet');
 const { db, audit } = require('./db');
-const { firebaseConfigured } = require('./firebase');
+const { firebaseConfigured, projectId } = require('./firebase');
+const { getAuth } = require('firebase-admin/auth');
+const firestoreAuth = require('./firestore-auth');
 const { hashPassword, verifyPassword, randomToken, sha256 } = require('./security');
 const { randomInt } = require('node:crypto');
 const { ROLE_LABELS, RECORD_MANAGERS, USER_MANAGERS, hasRole } = require('./access');
@@ -57,17 +59,26 @@ function sameOrigin(req) {
   if (!origin) return true;
   try { return new URL(origin).host === req.get('host'); } catch { return false; }
 }
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   try {
     const token = parseCookies(req.headers.cookie)[COOKIE_NAME];
     if (!token || token.length > 200) return next();
-    const session = db.prepare('SELECT s.id AS session_id, s.csrf_token, u.id, u.display_name, u.email, u.role, u.active FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?').get(sha256(token), new Date().toISOString());
-    if (!session || !session.active) {
-      if (session) db.prepare('DELETE FROM sessions WHERE id = ?').run(session.session_id);
+    const tokenHash = sha256(token);
+    const now = new Date().toISOString();
+    const session = db.prepare('SELECT s.id AS session_id, s.csrf_token, u.id, u.display_name, u.email, u.role, u.active FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?').get(tokenHash, now);
+    if (session && session.active) {
+      req.auth = { sessionId: session.session_id, sessionStore: 'sqlite', csrfToken: session.csrf_token,
+        user: { id: session.id, name: session.display_name, email: session.email, role: session.role } };
       return next();
     }
-    req.auth = { sessionId: session.session_id, csrfToken: session.csrf_token,
-      user: { id: session.id, name: session.display_name, email: session.email, role: session.role } };
+    if (firebaseConfigured) {
+      const cloudSession = await firestoreAuth.findSession(tokenHash, now);
+      if (cloudSession) {
+        req.auth = { sessionId: cloudSession.session_id, sessionStore: 'firestore', tokenHash,
+          csrfToken: cloudSession.csrf_token,
+          user: { id: cloudSession.id, name: cloudSession.display_name, email: cloudSession.email, role: cloudSession.role } };
+      }
+    }
     next();
   } catch (error) { next(error); }
 });
@@ -186,12 +197,52 @@ app.post('/api/auth/login', async (req, res, next) => {
     res.json({ user: { id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role] }, csrfToken });
   } catch (error) { next(error); }
 });
+app.post('/api/auth/google', async (req, res, next) => {
+  try {
+    if (!sameOrigin(req)) return res.status(403).json({ error: 'Origem não permitida.' });
+    if (!firebaseConfigured) return res.status(503).json({ error: 'Login Google ainda não está configurado no servidor.' });
+    const idToken = typeof req.body.idToken === 'string' ? req.body.idToken : '';
+    if (!idToken || idToken.length > 12000) return res.status(400).json({ error: 'Token Google ausente ou inválido.' });
+    const decoded = await getAuth().verifyIdToken(idToken, true);
+    if (decoded.aud !== projectId || decoded.iss !== 'https://securetoken.google.com/' + projectId ||
+        decoded.firebase?.sign_in_provider !== 'google.com' || decoded.email_verified !== true ||
+        typeof decoded.email !== 'string') {
+      return res.status(401).json({ error: 'A conta Google precisa ter e-mail verificado.' });
+    }
+    const user = await firestoreAuth.findUserByEmail(decoded.email);
+    if (!user || user.active !== true || !ROLE_LABELS[user.role]) {
+      return res.status(403).json({ error: 'Esta conta ainda não foi autorizada pela administração do SGVE.' });
+    }
+    const now = Date.now();
+    const token = randomToken(32);
+    const csrfToken = randomToken(24);
+    const expiresAt = new Date(now + SESSION_HOURS * 3600000).toISOString();
+    await firestoreAuth.deleteExpiredSessions(new Date(now).toISOString());
+    await firestoreAuth.createSession({
+      token_hash: sha256(token), csrf_token: csrfToken,
+      user_id: Number(user.id), expires_at: expiresAt
+    });
+    audit(user.id, 'login_google', 'user', user.id);
+    setSessionCookie(res, token);
+    res.json({ user: { id: Number(user.id), name: user.display_name, email: user.email,
+      role: user.role, roleLabel: ROLE_LABELS[user.role] }, csrfToken });
+  } catch (error) {
+    if (error.code === 'auth/id-token-expired' || error.code === 'auth/argument-error' ||
+        error.code === 'auth/invalid-id-token' || error.code === 'auth/revoked-id-token') {
+      return res.status(401).json({ error: 'A sessão Google expirou. Entre novamente.' });
+    }
+    next(error);
+  }
+});
 app.get('/api/auth/me', requireAuth, (req, res) => res.json({ user: { ...req.auth.user, roleLabel: ROLE_LABELS[req.auth.user.role] }, csrfToken: req.auth.csrfToken }));
-app.post('/api/auth/logout', requireAuth, requireCsrf, (req, res) => {
-  db.prepare('DELETE FROM sessions WHERE id = ?').run(req.auth.sessionId);
-  audit(req.auth.user.id, 'logout', 'user', req.auth.user.id);
-  clearSessionCookie(res);
-  res.json({ ok: true });
+app.post('/api/auth/logout', requireAuth, requireCsrf, async (req, res, next) => {
+  try {
+    if (req.auth.sessionStore === 'firestore') await firestoreAuth.deleteSession(req.auth.tokenHash);
+    else db.prepare('DELETE FROM sessions WHERE id = ?').run(req.auth.sessionId);
+    audit(req.auth.user.id, 'logout', 'user', req.auth.user.id);
+    clearSessionCookie(res);
+    res.json({ ok: true });
+  } catch (error) { next(error); }
 });
 
 app.get('/api/classes', requireAuth, (_req, res) => {
