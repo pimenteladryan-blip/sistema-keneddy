@@ -224,3 +224,29 @@ test('auditoria Firestore rejeita eventos incompletos antes de acessar o banco',
     /Evento de auditoria inválido/
   );
 });
+
+
+test('operações atômicas de sessão validam entradas antes de acessar o Firestore', async () => {
+  await assert.rejects(
+    auth.createSessionWithAudit({
+      token_hash: 'curto', csrf_token: 'x'.repeat(32),
+      user_id: 3, expires_at: new Date(Date.now() + 60000).toISOString()
+    }),
+    /Dados de sessão inválidos/
+  );
+  await assert.rejects(
+    auth.createSessionWithAudit({
+      token_hash: 'a'.repeat(64), csrf_token: 'x'.repeat(32),
+      user_id: 0, expires_at: new Date(Date.now() + 60000).toISOString()
+    }),
+    /Dados de sessão inválidos/
+  );
+  await assert.rejects(
+    auth.deleteSessionWithAudit('token-inválido', 3),
+    /Dados de encerramento de sessão inválidos/
+  );
+  await assert.rejects(
+    auth.deleteSessionWithAudit('a'.repeat(64), 'usuário'),
+    /Dados de encerramento de sessão inválidos/
+  );
+});
