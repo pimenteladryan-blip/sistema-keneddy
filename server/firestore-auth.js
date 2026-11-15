@@ -20,6 +20,18 @@ function validateRegistrationRequest(request) {
   return { ...request, email, display_name: name };
 }
 
+function approvedUserData(request, now = new Date().toISOString()) {
+  return {
+    display_name: request.display_name,
+    email: request.email,
+    password_hash: request.password_hash,
+    role: request.role,
+    active: true,
+    created_at: now,
+    updated_at: now
+  };
+}
+
 function publicUser(user) {
   if (!user) return null;
   return {
@@ -164,17 +176,9 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
     const userId = (counterSnapshot.exists ? Number(counterSnapshot.data().value) : 0) + 1;
     const userRef = db.collection('users').doc(String(userId));
     const now = new Date().toISOString();
-    transaction.create(userRef, {
-      display_name: request.display_name,
-      email: requestEmail,
-      password_hash: request.password_hash,
-      role: request.role,
-      active: true,
-      created_at: now,
-      updated_at: now
-    });
+    transaction.create(userRef, approvedUserData(request, now));
     transaction.set(counterRef, { value: userId, updated_at: now });
-    transaction.create(indexRef, { documentId: String(userId), value: requestEmail });
+    transaction.create(indexRef, { documentId: String(userId), value: request.email });
     transaction.update(requestRef, {
       status: 'approved',
       password_hash: null,
@@ -187,6 +191,7 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
 
 module.exports = {
   publicUser,
+  approvedUserData,
   validateRegistrationRequest,
   findUserByEmail,
   createUser,
