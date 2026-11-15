@@ -163,10 +163,9 @@ async function listTripsForUser(user) {
 }
 
 async function linkTripClass(tripId, classId) {
-  const schoolClass = await getClass(classId);
-  if (!schoolClass || schoolClass.active === false) return { error: 'not-found' };
-  return store.createTripRelationIfDraft('tripClasses', tripId, schoolClass.id, {
-    trip_id: Number(tripId), class_id: Number(schoolClass.id),
+  const id = numericId(classId, 'Turma');
+  return store.createTripRelationIfDraft('tripClasses', tripId, id, {
+    trip_id: numericId(tripId, 'Viagem'), class_id: id,
     created_at: new Date().toISOString()
   });
 }
@@ -178,10 +177,9 @@ async function linkTripStudent(tripId, studentId) {
 }
 
 async function assignTripTeacher(tripId, userId) {
-  const teacher = await store.get('users', numericId(userId, 'Professor'));
-  if (!teacher || teacher.role !== 'teacher' || teacher.active === false) return { error: 'not-found' };
-  return store.createTripRelationIfDraft('tripStaff', tripId, teacher.id, {
-    trip_id: Number(tripId), user_id: Number(teacher.id),
+  const id = numericId(userId, 'Professor');
+  return store.createTripRelationIfDraft('tripStaff', tripId, id, {
+    trip_id: numericId(tripId, 'Viagem'), user_id: id,
     assignment_label: 'Professor responsável', created_at: new Date().toISOString()
   });
 }
