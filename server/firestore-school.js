@@ -133,11 +133,15 @@ async function listTripsForUser(user) {
     visible = trips.filter(item => ids.has(Number(item.id)));
   } else if (user.role === 'guardian') {
     const linked = new Set(guardians.map(item => Number(item.student_id)));
-    const owned = new Set(students.filter(item => linked.has(Number(item.id))).map(item => Number(item.id)));
+    const owned = new Set(students.filter(item =>
+      item.active === true && linked.has(Number(item.id))
+    ).map(item => Number(item.id)));
     const tripIds = new Set(participations.filter(item => owned.has(Number(item.student_id))).map(item => Number(item.trip_id)));
     visible = trips.filter(item => tripIds.has(Number(item.id)));
   } else if (user.role === 'student') {
-    const owned = new Set(students.filter(item => Number(item.user_id) === Number(user.id)).map(item => Number(item.id)));
+    const owned = new Set(students.filter(item =>
+      item.active === true && Number(item.user_id) === Number(user.id)
+    ).map(item => Number(item.id)));
     const tripIds = new Set(participations.filter(item => owned.has(Number(item.student_id))).map(item => Number(item.trip_id)));
     visible = trips.filter(item => tripIds.has(Number(item.id)));
   } else if (!['admin', 'direction', 'secretariat'].includes(user.role)) {
