@@ -336,6 +336,8 @@ async function createTripStudentWithinCapacity(tripId, studentId) {
     const trip = tripSnapshot.data();
     const student = studentSnapshot.data();
     if (trip.status !== 'draft') return { error: 'not-draft' };
+    const capacity = Number(trip.capacity);
+    if (!Number.isSafeInteger(capacity) || capacity < 1) return { error: 'invalid-capacity' };
     const classKey = normalizeId(student.class_id);
     const classLinkRef = collection('tripClasses').doc(tripKey + '_' + classKey);
     const classRef = collection('classes').doc(classKey);
@@ -352,7 +354,8 @@ async function createTripStudentWithinCapacity(tripId, studentId) {
       );
       count = existing.size;
     }
-    if (count >= Number(trip.capacity)) return { error: 'capacity' };
+    if (!Number.isSafeInteger(count) || count < 0) return { error: 'invalid-count' };
+    if (count >= capacity) return { error: 'capacity' };
     transaction.create(participantRef, {
       trip_id: Number(tripKey), student_id: Number(studentKey),
       authorization_status: 'pending', departure_present: null,
