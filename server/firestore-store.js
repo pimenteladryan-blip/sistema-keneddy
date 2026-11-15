@@ -372,6 +372,8 @@ module.exports = {
   upsertUnique,
   createUniqueComposite,
   createTripStudentWithinCapacity,
+  createStudentInActiveClass,
+  linkGuardianIfActive,
   createTripRelationIfDraft,
   transitionTripStatus
 };
