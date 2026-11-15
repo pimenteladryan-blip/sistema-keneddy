@@ -268,6 +268,50 @@ async function transitionTripStatus(tripId, expectedStatus, nextStatus, extra = 
   });
 }
 
+async function createStudentInActiveClass(fullName, classId) {
+  const classKey = normalizeId(classId);
+  const db = requireFirestore();
+  const classRef = collection('classes').doc(classKey);
+  const counterRef = db.collection('_sgve_counters').doc('students');
+  return db.runTransaction(async transaction => {
+    const [classSnapshot, counterSnapshot] = await Promise.all([
+      transaction.get(classRef), transaction.get(counterRef)
+    ]);
+    if (!classSnapshot.exists || classSnapshot.data().active !== true) {
+      return { error: 'class-not-found' };
+    }
+    const id = (counterSnapshot.exists ? Number(counterSnapshot.data().value) : 0) + 1;
+    const now = new Date().toISOString();
+    transaction.create(collection('students').doc(String(id)), {
+      full_name: String(fullName).trim(), class_id: Number(classKey),
+      user_id: null, active: true, created_at: now, updated_at: now
+    });
+    transaction.set(counterRef, { value: id, updated_at: now });
+    return { id };
+  });
+}
+
+async function linkGuardianIfActive(studentId, guardianId, relationship) {
+  const studentKey = normalizeId(studentId);
+  const guardianKey = normalizeId(guardianId);
+  const studentRef = collection('students').doc(studentKey);
+  const guardianRef = collection('users').doc(guardianKey);
+  const relationRef = collection('studentGuardians').doc(studentKey + '_' + guardianKey);
+  return requireFirestore().runTransaction(async transaction => {
+    const [studentSnapshot, guardianSnapshot, relationSnapshot] = await Promise.all([
+      transaction.get(studentRef), transaction.get(guardianRef), transaction.get(relationRef)
+    ]);
+    if (!studentSnapshot.exists || studentSnapshot.data().active !== true ||
+        !guardianSnapshot.exists || guardianSnapshot.data().active !== true ||
+        guardianSnapshot.data().role !== 'guardian') return false;
+    if (!relationSnapshot.exists) transaction.create(relationRef, {
+      student_id: Number(studentKey), guardian_user_id: Number(guardianKey),
+      relationship_label: relationship || null, created_at: new Date().toISOString()
+    });
+    return true;
+  });
+}
+
 async function createTripStudentWithinCapacity(tripId, studentId) {
   const tripKey = normalizeId(tripId);
   const studentKey = normalizeId(studentId);
@@ -278,15 +322,20 @@ async function createTripStudentWithinCapacity(tripId, studentId) {
     const [tripSnapshot, studentSnapshot, participantSnapshot] = await Promise.all([
       transaction.get(tripRef), transaction.get(studentRef), transaction.get(participantRef)
     ]);
-    if (!tripSnapshot.exists || !studentSnapshot.exists || studentSnapshot.data().active === false) {
+    if (!tripSnapshot.exists || !studentSnapshot.exists || studentSnapshot.data().active !== true) {
       return { error: 'not-found' };
     }
     const trip = tripSnapshot.data();
     const student = studentSnapshot.data();
     if (trip.status !== 'draft') return { error: 'not-draft' };
-    const classLinkRef = collection('tripClasses').doc(tripKey + '_' + normalizeId(student.class_id));
-    const classLinkSnapshot = await transaction.get(classLinkRef);
+    const classKey = normalizeId(student.class_id);
+    const classLinkRef = collection('tripClasses').doc(tripKey + '_' + classKey);
+    const classRef = collection('classes').doc(classKey);
+    const [classLinkSnapshot, classSnapshot] = await Promise.all([
+      transaction.get(classLinkRef), transaction.get(classRef)
+    ]);
     if (!classLinkSnapshot.exists) return { error: 'class-not-linked' };
+    if (!classSnapshot.exists || classSnapshot.data().active !== true) return { error: 'class-not-found' };
     if (participantSnapshot.exists) return { ok: true };
     let count = Number(trip.participant_count);
     if (!Number.isSafeInteger(count) || count < 0) {
