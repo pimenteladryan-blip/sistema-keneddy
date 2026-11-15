@@ -67,7 +67,7 @@ async function createUser({ display_name, email, password_hash, role, active = t
   const name = typeof display_name === 'string' ? display_name.trim() : '';
   const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
   const validEmail = normalizedEmail.length <= 254 &&
-    /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(normalizedEmail);
+    /^[^\s@]+@[^\s@]+\\.[^\s@]+$/.test(normalizedEmail);
   const validPasswordHash = typeof password_hash === 'string' &&
     /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(password_hash);
   if (name.length < 3 || name.length > 100 || !validEmail ||
