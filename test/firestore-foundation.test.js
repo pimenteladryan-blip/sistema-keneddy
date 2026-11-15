@@ -151,3 +151,56 @@ test('validação de cadastro rejeita e-mail, hash e código malformados', () =>
       error => error.code === 'invalid-request');
   }
 });
+
+
+test('criação de usuário Firestore rejeita dados inválidos antes de acessar o banco', async () => {
+  const valid = {
+    display_name: 'Pessoa de Teste',
+    email: 'PESSOA@EXEMPLO.COM',
+    password_hash: 'scrypt:' + 'a'.repeat(32) + ':' + 'b'.repeat(128),
+    role: 'teacher'
+  };
+
+  await assert.rejects(
+    auth.createUser({ ...valid, email: 'email-invalido' }),
+    error => error.code === 'invalid-user'
+  );
+  await assert.rejects(
+    auth.createUser({ ...valid, role: 'admin' }),
+    error => error.code === 'invalid-user'
+  );
+  await assert.rejects(
+    auth.createUser({ ...valid, password_hash: 'senha-em-texto' }),
+    error => error.code === 'invalid-user'
+  );
+  await assert.rejects(
+    auth.createUser({ ...valid, display_name: ' x ' }),
+    error => error.code === 'invalid-user'
+  );
+});
+
+test('importação de usuário exige ID numérico positivo e preserva papéis válidos', async () => {
+  const valid = {
+    id: 15,
+    display_name: 'Pessoa de Teste',
+    email: 'pessoa@exemplo.com',
+    password_hash: 'scrypt:' + 'a'.repeat(32) + ':' + 'b'.repeat(128),
+    role: 'guardian',
+    active: true
+  };
+
+  for (const patch of [
+    { id: 0 },
+    { id: '1.5' },
+    { id: 'abc' },
+    { role: 'owner' },
+    { active: 'true' },
+    { email: 'invalido' },
+    { password_hash: 'texto' }
+  ]) {
+    await assert.rejects(
+      auth.importUserWithId({ ...valid, ...patch }),
+      error => error.code === 'invalid-user'
+    );
+  }
+});
