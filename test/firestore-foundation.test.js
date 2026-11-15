@@ -166,7 +166,7 @@ test('criação de usuário Firestore rejeita dados inválidos antes de acessar 
     error => error.code === 'invalid-user'
   );
   await assert.rejects(
-    auth.createUser({ ...valid, role: 'admin' }),
+    auth.createUser({ ...valid, role: 'owner' }),
     error => error.code === 'invalid-user'
   );
   await assert.rejects(
