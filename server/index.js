@@ -218,11 +218,11 @@ app.post('/api/auth/google', async (req, res, next) => {
     const csrfToken = randomToken(24);
     const expiresAt = new Date(now + SESSION_HOURS * 3600000).toISOString();
     await firestoreAuth.deleteExpiredSessions(new Date(now).toISOString());
-    await firestoreAuth.createSession({
+    await firestoreAuth.createSessionWithAudit({
       token_hash: sha256(token), csrf_token: csrfToken,
-      user_id: Number(user.id), expires_at: expiresAt
+      user_id: Number(user.id), expires_at: expiresAt,
+      action: 'login_google'
     });
-    await firestoreAuth.createAuditLog({ actor_user_id: user.id, action: 'login_google', entity_type: 'user', entity_id: user.id });
     setSessionCookie(res, token);
     res.json({ user: { id: Number(user.id), name: user.display_name, email: user.email,
       role: user.role, roleLabel: ROLE_LABELS[user.role] }, csrfToken });
@@ -238,11 +238,7 @@ app.get('/api/auth/me', requireAuth, (req, res) => res.json({ user: { ...req.aut
 app.post('/api/auth/logout', requireAuth, requireCsrf, async (req, res, next) => {
   try {
     if (req.auth.sessionStore === 'firestore') {
-      await firestoreAuth.deleteSession(req.auth.tokenHash);
-      await firestoreAuth.createAuditLog({
-        actor_user_id: req.auth.user.id, action: 'logout',
-        entity_type: 'user', entity_id: req.auth.user.id
-      });
+      await firestoreAuth.deleteSessionWithAudit(req.auth.tokenHash, req.auth.user.id);
     } else {
       db.prepare('DELETE FROM sessions WHERE id = ?').run(req.auth.sessionId);
       audit(req.auth.user.id, 'logout', 'user', req.auth.user.id);
