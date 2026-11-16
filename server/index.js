@@ -7,6 +7,7 @@ const { db, audit } = require('./db');
 const { firebaseConfigured, projectId, firebaseApp } = require('./firebase');
 const { getAuth } = require('firebase-admin/auth');
 const firestoreAuth = require('./firestore-auth');
+const firestoreSchool = require('./firestore-school');
 const { hashPassword, verifyPassword, randomToken, sha256 } = require('./security');
 const { randomInt } = require('node:crypto');
 const { ROLE_LABELS, RECORD_MANAGERS, USER_MANAGERS, hasRole } = require('./access');
@@ -248,54 +249,81 @@ app.post('/api/auth/logout', requireAuth, requireCsrf, async (req, res, next) =>
   } catch (error) { next(error); }
 });
 
-app.get('/api/classes', requireAuth, (_req, res) => {
-  const rows = db.prepare('SELECT id, level, grade, course, section, school_year, active FROM classes WHERE active = 1 ORDER BY school_year DESC, level, grade, course, section').all();
-  res.json({ classes: rows });
+app.get('/api/classes', requireAuth, async (_req, res, next) => {
+  try {
+    if (firebaseConfigured) return res.json({ classes: await firestoreSchool.listClasses() });
+    const rows = db.prepare('SELECT id, level, grade, course, section, school_year, active FROM classes WHERE active = 1 ORDER BY school_year DESC, level, grade, course, section').all();
+    res.json({ classes: rows });
+  } catch (error) { next(error); }
 });
-app.post('/api/classes', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), (req, res) => {
+app.post('/api/classes', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
   const data = classInput(req.body);
   if (!data) return res.status(400).json({ error: 'Confira etapa, ano/série, curso, turma e ano letivo.' });
   try {
+    if (firebaseConfigured) {
+      const id = await firestoreSchool.createClass(data);
+      await firestoreSchool.audit(req.auth.user.id, 'create', 'class', id);
+      return res.status(201).json({ id, message: 'Turma cadastrada.' });
+    }
     const result = db.prepare('INSERT INTO classes (level, grade, course, section, school_year) VALUES (?, ?, ?, ?, ?)').run(data.level, data.grade, data.course, data.section, data.schoolYear);
     audit(req.auth.user.id, 'create', 'class', result.lastInsertRowid);
     res.status(201).json({ id: Number(result.lastInsertRowid), message: 'Turma cadastrada.' });
   } catch (error) {
-    if (String(error.message).includes('UNIQUE')) return res.status(409).json({ error: 'Essa turma já está cadastrada para o ano letivo.' });
-    throw error;
+    if (String(error.message).includes('UNIQUE') || error.code === 'already-exists') return res.status(409).json({ error: 'Essa turma já está cadastrada para o ano letivo.' });
+    next(error);
   }
 });
 
-app.get('/api/students', requireAuth, (req, res) => {
-  let rows;
-  if (hasRole(req.auth.user, RECORD_MANAGERS)) {
-    rows = db.prepare('SELECT s.id, s.full_name, s.class_id, c.grade, c.course, c.section, c.level, s.active FROM students s JOIN classes c ON c.id = s.class_id WHERE s.active = 1 ORDER BY s.full_name LIMIT 500').all();
-  } else if (req.auth.user.role === 'guardian') {
-    rows = db.prepare('SELECT s.id, s.full_name, s.class_id, c.grade, c.course, c.section, c.level, s.active FROM students s JOIN classes c ON c.id = s.class_id JOIN student_guardians sg ON sg.student_id = s.id WHERE sg.guardian_user_id = ? AND s.active = 1 ORDER BY s.full_name').all(req.auth.user.id);
-  } else if (req.auth.user.role === 'student') {
-    rows = db.prepare('SELECT s.id, s.full_name, s.class_id, c.grade, c.course, c.section, c.level, s.active FROM students s JOIN classes c ON c.id = s.class_id WHERE s.user_id = ? AND s.active = 1').all(req.auth.user.id);
-  } else return res.status(403).json({ error: 'Seu perfil não permite consultar estudantes.' });
-  res.json({ students: rows });
+app.get('/api/students', requireAuth, async (req, res, next) => {
+  try {
+    if (firebaseConfigured) return res.json({ students: await firestoreSchool.listStudentsForUser(req.auth.user) });
+    let rows;
+    if (hasRole(req.auth.user, RECORD_MANAGERS)) {
+      rows = db.prepare('SELECT s.id, s.full_name, s.class_id, c.grade, c.course, c.section, c.level, s.active FROM students s JOIN classes c ON c.id = s.class_id WHERE s.active = 1 ORDER BY s.full_name LIMIT 500').all();
+    } else if (req.auth.user.role === 'guardian') {
+      rows = db.prepare('SELECT s.id, s.full_name, s.class_id, c.grade, c.course, c.section, c.level, s.active FROM students s JOIN classes c ON c.id = s.class_id JOIN student_guardians sg ON sg.student_id = s.id WHERE sg.guardian_user_id = ? AND s.active = 1 ORDER BY s.full_name').all(req.auth.user.id);
+    } else if (req.auth.user.role === 'student') {
+      rows = db.prepare('SELECT s.id, s.full_name, s.class_id, c.grade, c.course, c.section, c.level, s.active FROM students s JOIN classes c ON c.id = s.class_id WHERE s.user_id = ? AND s.active = 1').all(req.auth.user.id);
+    } else return res.status(403).json({ error: 'Seu perfil não permite consultar estudantes.' });
+    res.json({ students: rows });
+  } catch (error) { res.status(error.code === 'forbidden' ? 403 : 500).json({ error: error.code === 'forbidden' ? error.message : 'Não foi possível consultar estudantes.' }); }
 });
-app.post('/api/students', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), (req, res) => {
+app.post('/api/students', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
   const fullName = cleanText(req.body.full_name, 120);
   const classId = Number(req.body.class_id);
   if (fullName.length < 3 || !Number.isInteger(classId) || classId < 1) return res.status(400).json({ error: 'Informe nome e turma válidos.' });
-  if (!db.prepare('SELECT id FROM classes WHERE id = ? AND active = 1').get(classId)) return res.status(400).json({ error: 'A turma selecionada não existe ou está inativa.' });
-  const result = db.prepare('INSERT INTO students (full_name, class_id) VALUES (?, ?)').run(fullName, classId);
-  audit(req.auth.user.id, 'create', 'student', result.lastInsertRowid);
-  res.status(201).json({ id: Number(result.lastInsertRowid), message: 'Estudante cadastrado.' });
+  try {
+    if (firebaseConfigured) {
+      const id = await firestoreSchool.createStudent(fullName, classId);
+      if (!id) return res.status(400).json({ error: 'A turma selecionada não existe ou está inativa.' });
+      await firestoreSchool.audit(req.auth.user.id, 'create', 'student', id);
+      return res.status(201).json({ id, message: 'Estudante cadastrado.' });
+    }
+    if (!db.prepare('SELECT id FROM classes WHERE id = ? AND active = 1').get(classId)) return res.status(400).json({ error: 'A turma selecionada não existe ou está inativa.' });
+    const result = db.prepare('INSERT INTO students (full_name, class_id) VALUES (?, ?)').run(fullName, classId);
+    audit(req.auth.user.id, 'create', 'student', result.lastInsertRowid);
+    res.status(201).json({ id: Number(result.lastInsertRowid), message: 'Estudante cadastrado.' });
+  } catch (error) { next(error); }
 });
-app.post('/api/students/:id/guardians', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), (req, res) => {
+app.post('/api/students/:id/guardians', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
   const studentId = Number(req.params.id);
   const email = String(req.body.email || '').trim().toLowerCase();
   const relationship = cleanText(req.body.relationship, 40);
   if (!Number.isInteger(studentId) || studentId < 1 || !validEmail(email)) return res.status(400).json({ error: 'Informe um estudante e e-mail de responsável válidos.' });
-  const student = db.prepare('SELECT id FROM students WHERE id = ? AND active = 1').get(studentId);
-  const guardian = db.prepare("SELECT id FROM users WHERE email = ? AND role = 'guardian' AND active = 1").get(email);
-  if (!student || !guardian) return res.status(404).json({ error: 'Estudante ou conta de responsável não encontrada.' });
-  db.prepare('INSERT OR IGNORE INTO student_guardians (student_id, guardian_user_id, relationship_label) VALUES (?, ?, ?)').run(studentId, guardian.id, relationship || null);
-  audit(req.auth.user.id, 'link_guardian', 'student', studentId);
-  res.json({ message: 'Responsável vinculado ao estudante.' });
+  try {
+    if (firebaseConfigured) {
+      const linked = await firestoreSchool.linkGuardian(studentId, email, relationship);
+      if (!linked) return res.status(404).json({ error: 'Estudante ou conta de responsável não encontrada.' });
+      await firestoreSchool.audit(req.auth.user.id, 'link_guardian', 'student', studentId);
+      return res.json({ message: 'Responsável vinculado ao estudante.' });
+    }
+    const student = db.prepare('SELECT id FROM students WHERE id = ? AND active = 1').get(studentId);
+    const guardian = db.prepare("SELECT id FROM users WHERE email = ? AND role = 'guardian' AND active = 1").get(email);
+    if (!student || !guardian) return res.status(404).json({ error: 'Estudante ou conta de responsável não encontrada.' });
+    db.prepare('INSERT OR IGNORE INTO student_guardians (student_id, guardian_user_id, relationship_label) VALUES (?, ?, ?)').run(studentId, guardian.id, relationship || null);
+    audit(req.auth.user.id, 'link_guardian', 'student', studentId);
+    res.json({ message: 'Responsável vinculado ao estudante.' });
+  } catch (error) { next(error); }
 });
 
 app.post('/api/users', requireAuth, requireCsrf, requireRoles(...USER_MANAGERS), async (req, res, next) => {
