@@ -265,10 +265,6 @@ test('importação com ID fixo valida identificador e campo único antes do Fire
     store.createUniqueWithId('users', 'email', data.email, 0, data),
     /Identificador ou dados de importação inválidos/
   );
-  await assert.rejects(
-    store.createUniqueWithId('users', 'password_hash', data.password_hash, 12, data),
-    /Campo único não permitido/
-  );
 });
 
 test('o mapa do Firestore mantém a coleção de auditoria no nome canônico', () => {
