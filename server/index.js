@@ -397,88 +397,154 @@ function getTripStatusLabel(status) {
   return ({ draft: 'Rascunho', pending_approval: 'Aguardando aprovação', approved: 'Aprovada',
     open: 'Inscrições abertas', completed: 'Concluída', cancelled: 'Cancelada' })[status] || status;
 }
-app.get('/api/trips', requireAuth, (req, res) => {
-  const user = req.auth.user;
-  let rows;
-  const select = 'SELECT DISTINCT t.id, t.title, t.destination, t.educational_purpose, t.departure_at, t.return_at, t.capacity, t.status, (SELECT COUNT(*) FROM trip_students ts WHERE ts.trip_id = t.id) AS participant_count FROM trips t';
-  if (hasRole(user, RECORD_MANAGERS)) {
-    rows = db.prepare(select + ' ORDER BY t.departure_at DESC LIMIT 100').all();
-  } else if (user.role === 'teacher') {
-    rows = db.prepare(select + ' JOIN trip_staff tsf ON tsf.trip_id = t.id WHERE tsf.user_id = ? ORDER BY t.departure_at DESC').all(user.id);
-  } else if (user.role === 'guardian') {
-    rows = db.prepare(select + ' JOIN trip_students ts ON ts.trip_id = t.id JOIN students s ON s.id = ts.student_id JOIN student_guardians sg ON sg.student_id = s.id WHERE sg.guardian_user_id = ? ORDER BY t.departure_at DESC').all(user.id);
-  } else if (user.role === 'student') {
-    rows = db.prepare(select + ' JOIN trip_students ts ON ts.trip_id = t.id JOIN students s ON s.id = ts.student_id WHERE s.user_id = ? ORDER BY t.departure_at DESC').all(user.id);
-  } else return res.status(403).json({ error: 'Seu perfil não permite consultar viagens.' });
-  res.json({ trips: rows.map(row => ({ ...row, statusLabel: getTripStatusLabel(row.status) })) });
+app.get('/api/trips', requireAuth, async (req, res, next) => {
+  try {
+    if (firebaseConfigured) {
+      return res.json({ trips: await firestoreSchool.listTripsForUser(req.auth.user) });
+    }
+    const user = req.auth.user;
+    let rows;
+    const select = 'SELECT DISTINCT t.id, t.title, t.destination, t.educational_purpose, t.departure_at, t.return_at, t.capacity, t.status, (SELECT COUNT(*) FROM trip_students ts WHERE ts.trip_id = t.id) AS participant_count FROM trips t';
+    if (hasRole(user, RECORD_MANAGERS)) {
+      rows = db.prepare(select + ' ORDER BY t.departure_at DESC LIMIT 100').all();
+    } else if (user.role === 'teacher') {
+      rows = db.prepare(select + ' JOIN trip_staff tsf ON tsf.trip_id = t.id WHERE tsf.user_id = ? ORDER BY t.departure_at DESC').all(user.id);
+    } else if (user.role === 'guardian') {
+      rows = db.prepare(select + ' JOIN trip_students ts ON ts.trip_id = t.id JOIN students s ON s.id = ts.student_id JOIN student_guardians sg ON sg.student_id = s.id WHERE sg.guardian_user_id = ? ORDER BY t.departure_at DESC').all(user.id);
+    } else if (user.role === 'student') {
+      rows = db.prepare(select + ' JOIN trip_students ts ON ts.trip_id = t.id JOIN students s ON s.id = ts.student_id WHERE s.user_id = ? ORDER BY t.departure_at DESC').all(user.id);
+    } else return res.status(403).json({ error: 'Seu perfil não permite consultar viagens.' });
+    res.json({ trips: rows.map(row => ({ ...row, statusLabel: getTripStatusLabel(row.status) })) });
+  } catch (error) {
+    if (error.code === 'forbidden') return res.status(403).json({ error: error.message });
+    next(error);
+  }
 });
-app.post('/api/trips', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), (req, res) => {
+app.post('/api/trips', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
   const data = tripInput(req.body);
   if (!data) return res.status(400).json({ error: 'Confira título, destino, objetivo, horários e capacidade da viagem.' });
-  const result = db.prepare('INSERT INTO trips (title, destination, educational_purpose, departure_at, return_at, capacity, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)').
-    run(data.title, data.destination, data.purpose, data.departure, data.returning, data.capacity, req.auth.user.id);
-  audit(req.auth.user.id, 'create', 'trip', result.lastInsertRowid);
-  res.status(201).json({ id: Number(result.lastInsertRowid), message: 'Viagem criada como rascunho.' });
+  try {
+    if (firebaseConfigured) {
+      const id = await firestoreSchool.createTrip(data, req.auth.user.id);
+      await firestoreSchool.audit(req.auth.user.id, 'create', 'trip', id);
+      return res.status(201).json({ id, message: 'Viagem criada como rascunho.' });
+    }
+    const result = db.prepare('INSERT INTO trips (title, destination, educational_purpose, departure_at, return_at, capacity, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)').
+      run(data.title, data.destination, data.purpose, data.departure, data.returning, data.capacity, req.auth.user.id);
+    audit(req.auth.user.id, 'create', 'trip', result.lastInsertRowid);
+    res.status(201).json({ id: Number(result.lastInsertRowid), message: 'Viagem criada como rascunho.' });
+  } catch (error) { next(error); }
 });
-app.post('/api/trips/:id/classes', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), (req, res) => {
+app.post('/api/trips/:id/classes', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
   const tripId = Number(req.params.id);
   const classId = Number(req.body.class_id);
   if (!Number.isInteger(tripId) || tripId < 1 || !Number.isInteger(classId) || classId < 1) return res.status(400).json({ error: 'Viagem ou turma inválida.' });
-  const trip = db.prepare("SELECT id, status FROM trips WHERE id = ?").get(tripId);
-  const schoolClass = db.prepare('SELECT id FROM classes WHERE id = ? AND active = 1').get(classId);
-  if (!trip || !schoolClass) return res.status(404).json({ error: 'Viagem ou turma não encontrada.' });
-  if (trip.status !== 'draft') return res.status(409).json({ error: 'Turmas só podem ser vinculadas enquanto a viagem estiver em rascunho.' });
-  db.prepare('INSERT OR IGNORE INTO trip_classes (trip_id, class_id) VALUES (?, ?)').run(tripId, classId);
-  audit(req.auth.user.id, 'link_class', 'trip', tripId);
-  res.json({ message: 'Turma vinculada à viagem.' });
+  try {
+    if (firebaseConfigured) {
+      const result = await firestoreSchool.linkTripClass(tripId, classId);
+      if (result.error === 'not-found' || result.error === 'target-not-found') return res.status(404).json({ error: 'Viagem ou turma não encontrada.' });
+      if (result.error === 'not-draft') return res.status(409).json({ error: 'Turmas só podem ser vinculadas enquanto a viagem estiver em rascunho.' });
+      await firestoreSchool.audit(req.auth.user.id, 'link_class', 'trip', tripId);
+      return res.json({ message: 'Turma vinculada à viagem.' });
+    }
+    const trip = db.prepare("SELECT id, status FROM trips WHERE id = ?").get(tripId);
+    const schoolClass = db.prepare('SELECT id FROM classes WHERE id = ? AND active = 1').get(classId);
+    if (!trip || !schoolClass) return res.status(404).json({ error: 'Viagem ou turma não encontrada.' });
+    if (trip.status !== 'draft') return res.status(409).json({ error: 'Turmas só podem ser vinculadas enquanto a viagem estiver em rascunho.' });
+    db.prepare('INSERT OR IGNORE INTO trip_classes (trip_id, class_id) VALUES (?, ?)').run(tripId, classId);
+    audit(req.auth.user.id, 'link_class', 'trip', tripId);
+    res.json({ message: 'Turma vinculada à viagem.' });
+  } catch (error) { next(error); }
 });
-app.post('/api/trips/:id/students', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), (req, res) => {
+app.post('/api/trips/:id/students', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
   const tripId = Number(req.params.id);
   const studentId = Number(req.body.student_id);
   if (!Number.isInteger(tripId) || tripId < 1 || !Number.isInteger(studentId) || studentId < 1) return res.status(400).json({ error: 'Viagem ou estudante inválido.' });
-  const trip = db.prepare("SELECT id, status, capacity FROM trips WHERE id = ?").get(tripId);
-  const student = db.prepare('SELECT id, class_id FROM students WHERE id = ? AND active = 1').get(studentId);
-  if (!trip || !student) return res.status(404).json({ error: 'Viagem ou estudante não encontrado.' });
-  if (trip.status !== 'draft') return res.status(409).json({ error: 'Participantes só podem ser vinculados enquanto a viagem estiver em rascunho.' });
-  if (!db.prepare('SELECT trip_id FROM trip_classes WHERE trip_id = ? AND class_id = ?').get(tripId, student.class_id)) return res.status(400).json({ error: 'Vincule primeiro a turma do estudante à viagem.' });
-  const exists = db.prepare('SELECT 1 AS found FROM trip_students WHERE trip_id = ? AND student_id = ?').get(tripId, studentId);
-  const count = db.prepare('SELECT COUNT(*) AS total FROM trip_students WHERE trip_id = ?').get(tripId).total;
-  if (!exists && count >= trip.capacity) return res.status(409).json({ error: 'A capacidade da viagem foi atingida.' });
-  db.prepare("INSERT OR IGNORE INTO trip_students (trip_id, student_id) VALUES (?, ?)").run(tripId, studentId);
-  audit(req.auth.user.id, 'link_student', 'trip', tripId);
-  res.json({ message: 'Estudante vinculado à viagem.' });
+  try {
+    if (firebaseConfigured) {
+      const result = await firestoreSchool.linkTripStudent(tripId, studentId);
+      if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem ou estudante não encontrado.' });
+      if (result.error === 'not-draft') return res.status(409).json({ error: 'Participantes só podem ser vinculados enquanto a viagem estiver em rascunho.' });
+      if (result.error === 'class-not-linked') return res.status(400).json({ error: 'Vincule primeiro a turma do estudante à viagem.' });
+      if (result.error === 'capacity-reached') return res.status(409).json({ error: 'A capacidade da viagem foi atingida.' });
+      if (result.error) return res.status(409).json({ error: 'Não foi possível vincular o estudante à viagem.' });
+      await firestoreSchool.audit(req.auth.user.id, 'link_student', 'trip', tripId);
+      return res.json({ message: 'Estudante vinculado à viagem.' });
+    }
+    const trip = db.prepare("SELECT id, status, capacity FROM trips WHERE id = ?").get(tripId);
+    const student = db.prepare('SELECT id, class_id FROM students WHERE id = ? AND active = 1').get(studentId);
+    if (!trip || !student) return res.status(404).json({ error: 'Viagem ou estudante não encontrado.' });
+    if (trip.status !== 'draft') return res.status(409).json({ error: 'Participantes só podem ser vinculados enquanto a viagem estiver em rascunho.' });
+    if (!db.prepare('SELECT trip_id FROM trip_classes WHERE trip_id = ? AND class_id = ?').get(tripId, student.class_id)) return res.status(400).json({ error: 'Vincule primeiro a turma do estudante à viagem.' });
+    const exists = db.prepare('SELECT 1 AS found FROM trip_students WHERE trip_id = ? AND student_id = ?').get(tripId, studentId);
+    const count = db.prepare('SELECT COUNT(*) AS total FROM trip_students WHERE trip_id = ?').get(tripId).total;
+    if (!exists && count >= trip.capacity) return res.status(409).json({ error: 'A capacidade da viagem foi atingida.' });
+    db.prepare("INSERT OR IGNORE INTO trip_students (trip_id, student_id) VALUES (?, ?)").run(tripId, studentId);
+    audit(req.auth.user.id, 'link_student', 'trip', tripId);
+    res.json({ message: 'Estudante vinculado à viagem.' });
+  } catch (error) { next(error); }
 });
-app.post('/api/trips/:id/staff', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), (req, res) => {
+app.post('/api/trips/:id/staff', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
   const tripId = Number(req.params.id);
   const userId = Number(req.body.user_id);
   if (!Number.isInteger(tripId) || tripId < 1 || !Number.isInteger(userId) || userId < 1) return res.status(400).json({ error: 'Viagem ou usuário inválido.' });
-  const trip = db.prepare('SELECT id, status FROM trips WHERE id = ?').get(tripId);
-  const teacher = db.prepare("SELECT id FROM users WHERE id = ? AND role = 'teacher' AND active = 1").get(userId);
-  if (!trip || !teacher) return res.status(404).json({ error: 'Viagem ou professor não encontrado.' });
-  if (trip.status !== 'draft') return res.status(409).json({ error: 'Equipe só pode ser alterada enquanto a viagem estiver em rascunho.' });
-  db.prepare('INSERT OR IGNORE INTO trip_staff (trip_id, user_id) VALUES (?, ?)').run(tripId, userId);
-  audit(req.auth.user.id, 'assign_teacher', 'trip', tripId);
-  res.json({ message: 'Professor vinculado à viagem.' });
+  try {
+    if (firebaseConfigured) {
+      const result = await firestoreSchool.assignTripTeacher(tripId, userId);
+      if (result.error === 'not-found' || result.error === 'target-not-found') return res.status(404).json({ error: 'Viagem ou professor não encontrado.' });
+      if (result.error === 'not-draft') return res.status(409).json({ error: 'Equipe só pode ser alterada enquanto a viagem estiver em rascunho.' });
+      await firestoreSchool.audit(req.auth.user.id, 'assign_teacher', 'trip', tripId);
+      return res.json({ message: 'Professor vinculado à viagem.' });
+    }
+    const trip = db.prepare('SELECT id, status FROM trips WHERE id = ?').get(tripId);
+    const teacher = db.prepare("SELECT id FROM users WHERE id = ? AND role = 'teacher' AND active = 1").get(userId);
+    if (!trip || !teacher) return res.status(404).json({ error: 'Viagem ou professor não encontrado.' });
+    if (trip.status !== 'draft') return res.status(409).json({ error: 'Equipe só pode ser alterada enquanto a viagem estiver em rascunho.' });
+    db.prepare('INSERT OR IGNORE INTO trip_staff (trip_id, user_id) VALUES (?, ?)').run(tripId, userId);
+    audit(req.auth.user.id, 'assign_teacher', 'trip', tripId);
+    res.json({ message: 'Professor vinculado à viagem.' });
+  } catch (error) { next(error); }
 });
-app.post('/api/trips/:id/submit', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), (req, res) => {
+app.post('/api/trips/:id/submit', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
   const tripId = Number(req.params.id);
-  const trip = db.prepare('SELECT id, status FROM trips WHERE id = ?').get(tripId);
-  if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
-  if (trip.status !== 'draft') return res.status(409).json({ error: 'Somente rascunhos podem ser enviados para aprovação.' });
-  const classes = db.prepare('SELECT COUNT(*) AS total FROM trip_classes WHERE trip_id = ?').get(tripId).total;
-  if (!classes) return res.status(400).json({ error: 'Vincule pelo menos uma turma antes de enviar para aprovação.' });
-  db.prepare("UPDATE trips SET status = 'pending_approval', updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(tripId);
-  audit(req.auth.user.id, 'submit_for_approval', 'trip', tripId);
-  res.json({ message: 'Viagem enviada para aprovação da direção.' });
+  if (!Number.isInteger(tripId) || tripId < 1) return res.status(400).json({ error: 'Viagem inválida.' });
+  try {
+    if (firebaseConfigured) {
+      const result = await firestoreSchool.submitTrip(tripId);
+      if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem não encontrada.' });
+      if (result.error === 'no-classes') return res.status(400).json({ error: 'Vincule pelo menos uma turma antes de enviar para aprovação.' });
+      if (result.error) return res.status(409).json({ error: 'Somente rascunhos podem ser enviados para aprovação.' });
+      await firestoreSchool.audit(req.auth.user.id, 'submit_for_approval', 'trip', tripId);
+      return res.json({ message: 'Viagem enviada para aprovação da direção.' });
+    }
+    const trip = db.prepare('SELECT id, status FROM trips WHERE id = ?').get(tripId);
+    if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
+    if (trip.status !== 'draft') return res.status(409).json({ error: 'Somente rascunhos podem ser enviados para aprovação.' });
+    const classes = db.prepare('SELECT COUNT(*) AS total FROM trip_classes WHERE trip_id = ?').get(tripId).total;
+    if (!classes) return res.status(400).json({ error: 'Vincule pelo menos uma turma antes de enviar para aprovação.' });
+    db.prepare("UPDATE trips SET status = 'pending_approval', updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(tripId);
+    audit(req.auth.user.id, 'submit_for_approval', 'trip', tripId);
+    res.json({ message: 'Viagem enviada para aprovação da direção.' });
+  } catch (error) { next(error); }
 });
-app.post('/api/trips/:id/approve', requireAuth, requireCsrf, requireRoles('admin', 'direction'), (req, res) => {
+app.post('/api/trips/:id/approve', requireAuth, requireCsrf, requireRoles('admin', 'direction'), async (req, res, next) => {
   const tripId = Number(req.params.id);
-  const trip = db.prepare("SELECT id, status FROM trips WHERE id = ?").get(tripId);
-  if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
-  if (trip.status !== 'pending_approval') return res.status(409).json({ error: 'A viagem não está aguardando aprovação.' });
-  db.prepare("UPDATE trips SET status = 'approved', approved_by = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(req.auth.user.id, tripId);
-  audit(req.auth.user.id, 'approve', 'trip', tripId);
-  res.json({ message: 'Viagem aprovada.' });
+  if (!Number.isInteger(tripId) || tripId < 1) return res.status(400).json({ error: 'Viagem inválida.' });
+  try {
+    if (firebaseConfigured) {
+      const result = await firestoreSchool.approveTrip(tripId, req.auth.user.id);
+      if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem não encontrada.' });
+      if (result.error) return res.status(409).json({ error: 'A viagem não está aguardando aprovação.' });
+      await firestoreSchool.audit(req.auth.user.id, 'approve', 'trip', tripId);
+      return res.json({ message: 'Viagem aprovada.' });
+    }
+    const trip = db.prepare("SELECT id, status FROM trips WHERE id = ?").get(tripId);
+    if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
+    if (trip.status !== 'pending_approval') return res.status(409).json({ error: 'A viagem não está aguardando aprovação.' });
+    db.prepare("UPDATE trips SET status = 'approved', approved_by = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(req.auth.user.id, tripId);
+    audit(req.auth.user.id, 'approve', 'trip', tripId);
+    res.json({ message: 'Viagem aprovada.' });
+  } catch (error) { next(error); }
 });
 
 app.use(express.static(path.join(__dirname, '..', 'public'), { extensions: ['html'], index: 'index.html', maxAge: isProduction ? '1h' : 0 }));
