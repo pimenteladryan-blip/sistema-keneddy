@@ -463,10 +463,10 @@ app.post('/api/trips/:id/students', requireAuth, requireCsrf, requireRoles(...RE
   try {
     if (firebaseConfigured) {
       const result = await firestoreSchool.linkTripStudent(tripId, studentId);
-      if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem ou estudante não encontrado.' });
+      if (result.error === 'not-found' || result.error === 'class-not-found') return res.status(404).json({ error: 'Viagem, estudante ou turma não encontrado.' });
       if (result.error === 'not-draft') return res.status(409).json({ error: 'Participantes só podem ser vinculados enquanto a viagem estiver em rascunho.' });
       if (result.error === 'class-not-linked') return res.status(400).json({ error: 'Vincule primeiro a turma do estudante à viagem.' });
-      if (result.error === 'capacity-reached') return res.status(409).json({ error: 'A capacidade da viagem foi atingida.' });
+      if (result.error === 'capacity') return res.status(409).json({ error: 'A capacidade da viagem foi atingida.' });
       if (result.error) return res.status(409).json({ error: 'Não foi possível vincular o estudante à viagem.' });
       await firestoreSchool.audit(req.auth.user.id, 'link_student', 'trip', tripId);
       return res.json({ message: 'Estudante vinculado à viagem.' });
