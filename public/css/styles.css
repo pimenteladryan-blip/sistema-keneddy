@@ -415,3 +415,5 @@ body.dark-mode .verification-code-badge{border-color:#42694e;background:#1b3826;
  .content-panel{padding:18px 13px 28px}
  .auth-card{padding:22px 18px;border-radius:17px}
 }
+
+#pwa-install[hidden]{display:none!important}
