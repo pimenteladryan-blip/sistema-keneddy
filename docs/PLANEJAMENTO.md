@@ -400,7 +400,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Adicionados testes com base sintética para aprovação, conflito de e-mail, referência órfã, ausência de saída com dados pessoais e garantia de que o arquivo não é alterado.
 - [x] Atualizados `npm run check` e `npm test` para incluir o validador e seus testes.
 - [x] Runbook atualizado com comando, pré-condições e códigos de saída.
-- [ ] Aguardar CI do novo commit e corrigir qualquer falha de sintaxe ou teste.
+- [x] CI do validador passou no PR no commit `d920c80c88b24eb8bf2363b1a920d6c2562c7106`, execução `44100450186`: instalação, sintaxe, testes automatizados, protótipo e Firestore Emulator concluídos com sucesso.
 - [ ] Executar somente com cópia sintética/controle autorizada; não abrir a base escolar ativa nem importar dados reais nesta fase.
 - [ ] O importador Firestore continua não implementado; nenhuma gravação ou migração real foi realizada.
 - [ ] A execução anterior do PR CI `44098667872` terminou antes das verificações por falha de rede do npm (`ECONNRESET` ao baixar dependência do registry); não foi falha de teste ou do código. Repetir CI nos commits desta etapa.
