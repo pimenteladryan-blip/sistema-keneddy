@@ -320,6 +320,16 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
         'vínculo repetido não deve duplicar auditoria: ' + action);
     }
   } finally { verifyDb.close(); }
+  const reportResponse = await adminApi('/api/reports/summary');
+  assert.equal(reportResponse.status, 200);
+  const report = await reportResponse.json();
+  const tripReport = report.trips.find(item => item.id === tripId);
+  assert.ok(tripReport);
+  assert.equal(tripReport.participants, 1);
+  assert.equal(tripReport.authorized, 1);
+  assert.equal(tripReport.departure_present, 1);
+  assert.equal(report.totals.authorized, 1);
+  assert.equal(report.totals.departure_present, 1);
 });
 
 test('frota e atribuição de veículos validam capacidade, conflito de horários e permissões no SQLite', async () => {
@@ -419,5 +429,9 @@ test('frota e atribuição de veículos validam capacidade, conflito de horário
     headers: { Origin: baseUrl, Cookie: teacherCookie }
   });
   assert.equal(teacherVehicles.status, 403);
+  const teacherReports = await fetch(baseUrl + '/api/reports/summary', {
+    headers: { Origin: baseUrl, Cookie: teacherCookie }
+  });
+  assert.equal(teacherReports.status, 403);
 });
 
