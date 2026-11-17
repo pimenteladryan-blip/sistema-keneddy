@@ -320,4 +320,4 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Corrigido o registro de auditoria ao vincular turma à viagem, professor à viagem ou responsável ao estudante: uma tentativa repetida não cria novo evento quando a relação já existe.
 - [x] Mantida a resposta idempotente das operações: o vínculo já existente continua sendo considerado válido, sem duplicar a relação nem o evento de auditoria.
 - [x] Acrescentados testes no Firestore Emulator para repetir os três vínculos e confirmar que cada operação gera somente um evento de auditoria para a alteração efetiva.
-- [ ] Aguardar CI do GitHub Actions para validar a correção e os testes no Firestore Emulator.
+- [x] CI do GitHub Actions passou em push e pull request nas execuções `44085879599` e `44085889268`, incluindo testes unitários e Firestore Emulator.
