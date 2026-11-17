@@ -4,6 +4,10 @@ const path = require('node:path');
 const express = require('express');
 const helmet = require('helmet');
 const { firebaseConfigured, projectId, firebaseApp } = require('./firebase');
+const isProduction = process.env.NODE_ENV === 'production';
+if (isProduction && !firebaseConfigured) {
+  throw new Error('Firebase Admin precisa estar configurado antes de iniciar o SGVE em produção.');
+}
 // Firebase mode must not initialize an ephemeral SQLite database on the hosting filesystem.
 const { db, audit } = firebaseConfigured ? { db: null, audit: () => {} } : require('./db');
 const { getAuth } = require('firebase-admin/auth');
@@ -15,10 +19,6 @@ const { createMemoryRateLimiter } = require('./rate-limit');
 const { ROLE_LABELS, RECORD_MANAGERS, USER_MANAGERS, hasRole } = require('./access');
 
 const app = express();
-const isProduction = process.env.NODE_ENV === 'production';
-if (isProduction && !firebaseConfigured) {
-  throw new Error('Firebase Admin precisa estar configurado antes de iniciar o SGVE em produção.');
-}
 const PORT = Number(process.env.PORT || 3000);
 const SESSION_HOURS = 8;
 const COOKIE_NAME = 'sgve_session';
