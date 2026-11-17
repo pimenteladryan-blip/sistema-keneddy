@@ -357,7 +357,7 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
     if (decision === 'rejected') {
       const now = new Date().toISOString();
       transaction.update(requestRef, {
-        status: 'rejected', password_hash: null,
+        status: 'rejected', password_hash: null, verification_code: null,
         reviewed_by: reviewer, reviewed_at: now
       });
       transaction.create(auditRef, {
@@ -381,7 +381,7 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
     transaction.set(counterRef, { value: userId, updated_at: now });
     transaction.create(indexRef, { documentId: String(userId), value: request.email });
     transaction.update(requestRef, {
-      status: 'approved', password_hash: null,
+      status: 'approved', password_hash: null, verification_code: null,
       reviewed_by: reviewer, reviewed_at: now
     });
     transaction.create(auditRef, {
