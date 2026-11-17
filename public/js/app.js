@@ -17,6 +17,7 @@ function showDashboard(user) {
   document.querySelector('#welcome-title').textContent = 'Olá, ' + user.name + '!';
   document.querySelector('#user-role').textContent = 'Perfil de acesso: ' + (user.roleLabel || user.role);
   const canManage = ['admin', 'direction', 'secretariat'].includes(user.role);
+  if (!canManage) lastReport = null;
   document.querySelector('#class-form').classList.toggle('hidden', !canManage);
   document.querySelector('#student-form').classList.toggle('hidden', !canManage);
   document.querySelector('#trip-form').classList.toggle('hidden', !canManage);
@@ -37,6 +38,7 @@ function showDashboard(user) {
 }
 function showLogin() {
   currentUser = null;
+  lastReport = null;
   dashboardView.classList.add('hidden');
   loginView.classList.remove('hidden');
   csrfToken = '';
