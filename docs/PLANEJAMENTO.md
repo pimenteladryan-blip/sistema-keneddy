@@ -435,6 +435,6 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Login real ganhou seleção de perfil; o servidor compara o perfil selecionado com o perfil cadastrado antes de criar a sessão. O login Google também exige a seleção e valida o perfil no servidor.
 - [x] Adicionado suporte PWA à aplicação real, com manifest, ícone, botão de instalação e cache restrito a CSS/JavaScript/arquivos estáticos. Rotas `/api/` e páginas autenticadas não são armazenadas pelo Service Worker.
 - [x] Teste de integração SQLite verifica que perfil incorreto retorna HTTP 403 e não cria cookie de sessão.
-- [ ] Executar CI completo desta atualização e corrigir eventuais falhas.
+- [x] CI completo desta atualização aprovado no GitHub Actions, execução `44197960974` (run 888): sintaxe/estrutura, testes automatizados e integração Firestore Emulator concluídos com sucesso.
 - [ ] Validar visualmente login, seleção de perfil, instalação PWA e módulos com contas de teste, sem cadastrar dados pessoais reais.
 - [ ] Após revisão, solicitar autorização explícita antes de mesclar e publicar as alterações no Render.
