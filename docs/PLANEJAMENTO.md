@@ -346,5 +346,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Adicionado painel de frota no frontend Express, com cadastro e vínculo de veículos às viagens.
 - [x] Testes SQLite e Firestore Emulator cobrem identificação duplicada, tipo/capacidade inválidos, capacidade insuficiente, conflito de horário, horários consecutivos, viagem já aprovada, permissões e auditoria.
 - [x] Adicionado teste de migração que inicia com banco SQLite legado e confirma que a viagem antiga permanece após a inclusão de `vehicle_id`.
-- [ ] Aguardar CI desta implementação e dos testes de migração; só marcar a etapa como validada após a execução completa.
+- [x] CI da implementação e dos testes de migração passou em push e pull request no commit `739b3aaa35835c2a9a1aa7a92424fec5ca4325b6`, execuções `44090267231` e `44090275633`; sintaxe, testes SQLite e Firestore Emulator concluídos com sucesso.
 - [ ] Validar visualmente o cadastro e a atribuição com contas fictícias; não cadastrar veículos reais nem informações de condutores nesta fase.
