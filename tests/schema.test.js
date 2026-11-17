@@ -12,11 +12,12 @@ test('schema creates school records and trip workflow tables', () => {
   const schema = fs.readFileSync(path.join(__dirname, '..', 'database', 'schema.sql'), 'utf8');
   db.exec(schema);
   const names = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map(row => row.name);
-  for (const table of ['users', 'classes', 'students', 'student_guardians', 'vehicles', 'trips', 'trip_classes', 'trip_students', 'trip_staff', 'audit_logs']) {
+  for (const table of ['users', 'classes', 'students', 'student_guardians', 'vehicles', 'drivers', 'trips', 'trip_classes', 'trip_students', 'trip_staff', 'audit_logs']) {
     assert.ok(names.includes(table), 'missing table: ' + table);
   }
   const tripColumns = db.prepare('PRAGMA table_info(trips)').all().map(column => column.name);
   assert.ok(tripColumns.includes('vehicle_id'), 'trips must include the optional vehicle relation');
+  assert.ok(tripColumns.includes('driver_id'), 'trips must include the optional driver relation');
   db.close();
 });
 test('trip participants start with pending authorization', () => {
@@ -33,7 +34,7 @@ test('trip participants start with pending authorization', () => {
   db.close();
 });
 
-test('bancos SQLite existentes recebem a coluna opcional de veículo sem perder viagens', () => {
+test('bancos SQLite existentes recebem as colunas opcionais de veículo e condutor sem perder viagens', () => {
   const root = path.resolve(__dirname, '..');
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'sgve-vehicle-migration-'));
   const databasePath = path.join(directory, 'legacy.sqlite');
@@ -68,8 +69,10 @@ test('bancos SQLite existentes recebem a coluna opcional de veículo sem perder 
     try {
       const columns = migrated.prepare('PRAGMA table_info(trips)').all().map(column => column.name);
       assert.ok(columns.includes('vehicle_id'));
+      assert.ok(columns.includes('driver_id'));
       assert.equal(migrated.prepare('SELECT title FROM trips WHERE id = 1').get().title, 'Viagem antiga');
       assert.ok(migrated.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'vehicles'").get());
+      assert.ok(migrated.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'drivers'").get());
     } finally { migrated.close(); }
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
