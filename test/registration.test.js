@@ -99,6 +99,22 @@ async function adminSession() {
   return { cookie, csrfToken: data.csrfToken };
 }
 
+test('login rejeita perfil selecionado diferente do perfil cadastrado', async () => {
+  const mismatch = await fetch(baseUrl + '/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+    body: JSON.stringify({ email: adminEmail, password: adminPassword, role: 'teacher' })
+  });
+  assert.equal(mismatch.status, 403);
+  assert.equal(mismatch.headers.get('set-cookie'), null, 'perfil incorreto não deve criar sessão');
+  const matching = await fetch(baseUrl + '/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+    body: JSON.stringify({ email: adminEmail, password: adminPassword, role: 'admin' })
+  });
+  assert.equal(matching.status, 200);
+});
+
 test('cadastro público só libera acesso após aprovação do administrador', async () => {
   const pendingEmail = 'professor-pendente@sgve.local';
   const submitted = await submitRequest(pendingEmail);
