@@ -480,6 +480,12 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       password_hash: rolePasswordHash,
       role: 'teacher'
     });
+    await auth.createUser({
+      display_name: 'Responsável sem vínculo',
+      email: 'responsavel-sem-vinculo@emulator.sgve',
+      password_hash: rolePasswordHash,
+      role: 'guardian'
+    });
     const teacherApi = await loginAs('teacher-api@emulator.sgve');
     assert.equal((await teacherApi('/api/trips')).status, 200);
     assert.equal((await teacherApi('/api/students')).status, 403);
@@ -537,7 +543,7 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     });
     assert.equal(authorizationAuditAfter.length, authorizationAuditBefore.length + 1,
       'repetir a mesma autorização não deve duplicar auditoria');
-    const unrelatedGuardianApi = await loginAs('responsavel@emulator.sgve');
+    const unrelatedGuardianApi = await loginAs('responsavel-sem-vinculo@emulator.sgve');
     assert.equal((await unrelatedGuardianApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/authorization', {
       method: 'POST', body: JSON.stringify({ status: 'authorized' })
     })).status, 404, 'responsável sem vínculo não pode autorizar estudante alheio');
