@@ -290,7 +290,7 @@ async function resetRateLimit({ scope, keys }) {
   const db = require('./firebase').firestore;
   if (!db) throw new Error('Firestore não configurado para limpar tentativas.');
   const refs = [...new Set(keys)].map(key => {
-    const digest = crypto.createHash('sha256').update(scope + '\\0' + key).digest('hex');
+    const digest = crypto.createHash('sha256').update(scope + '\0' + key).digest('hex');
     return db.collection('_sgve_rate_limits').doc(digest);
   });
   await Promise.all(refs.map(ref => ref.delete()));
