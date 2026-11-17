@@ -87,13 +87,13 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Nesta etapa: login por e-mail/senha, solicitações de cadastro, criação de contas, aprovação/rejeição de solicitações, listagem de usuários e bootstrap administrativo com ramificação Firestore quando configurado.
 
 ### Em andamento / próximos passos
-- [ ] Adicionar testes isolados para rotas e transações de autenticação/cadastros Firestore, incluindo duplicidade, aprovação concorrente, conta inativa e permissões por perfil.
-- [ ] Verificar integração de ponta a ponta com projeto de teste Firestore, usando somente contas e dados fictícios.
-- [ ] Corrigir arquitetura de origem entre GitHub Pages e API: definir domínio/proxy same-origin ou estratégia de sessão segura. Não relaxar CORS, SameSite, CSRF ou cookies sem revisão.
+- [x] Adicionados testes isolados e de integração para autenticação/cadastros Firestore, duplicidade, conta inativa, aprovação/rejeição via API e permissões dos seis perfis.\n- [ ] Acrescentar teste específico de duas aprovações simultâneas da mesma solicitação; a revisão transacional já impede a segunda decisão, mas falta cobertura concorrente dedicada.
+- [x] Integração ponta a ponta com dados fictícios validada no Firestore Emulator, incluindo Express/API.\n- [ ] Executar teste controlado no projeto Firebase real, com contas fictícias e sem dados de estudantes.
+- [x] Arquitetura same-origin definida: Express serve `public/` e a API no mesmo host; `docs/` permanece demonstração separada. Cookies, Origin e CSRF mantidos.
 - [x] Evitar a inicialização do SQLite quando Firebase estiver configurado: sessão, autenticação, cadastros e módulos integrados passam a usar Firestore sem criar banco local efêmero.
-- [ ] Migrar os demais módulos e revisar toda dependência residual do SQLite; o caminho Firestore foi separado, mas precisa de validação ponta a ponta antes de ser considerado pronto.
+- [ ] Implementar/migrar os módulos ainda previstos (autorização digital, presença, transporte e relatórios) e revisar dependências SQLite; os módulos de autenticação, usuários, turmas, estudantes, responsáveis e viagens já têm caminho Firestore.
 - [ ] Planejar migração/importação controlada dos dados existentes, preservando IDs e relações; não importar dados pessoais reais nesta fase.
-- [ ] Implementar gestão de ativação/desativação de contas no Firestore e revisar o provisionamento inicial de administrador.
+- [x] Gestão de ativação/desativação de contas e bootstrap administrativo implementados no Firestore; a validação real ainda depende de teste controlado no projeto Firebase.
 - [ ] Implementar autorização digital, presença, transporte, relatórios e demais módulos previstos.
 - [ ] Fazer revisão de segurança, privacidade/LGPD, acessibilidade, backup/restauração e validação institucional.
 - [ ] Só depois configurar segredo de conta de serviço no Render, testar leitura e escrita real, configurar persistência/infraestrutura adequada e preparar implantação. Não implantar antes de aprovação explícita.
@@ -115,8 +115,8 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Conferido GitHub Actions desse commit: execução `44007977240` concluída com resultado `success`.
 - [x] Auditoria estática de `server/index.js`: os acessos SQLite encontrados nas rotas de autenticação, turmas, estudantes, responsáveis, usuários, solicitações e viagens estão dentro dos caminhos de fallback SQLite; no modo Firebase, os respectivos caminhos retornam/ramificam para Firestore antes de acessar `db`. O middleware de sessão e o bootstrap administrativo também têm ramificação explícita.
 - [ ] Isso ainda não comprova que todas as rotas e regras de negócio funcionam no Firestore real; manter testes de integração e revisão de permissões como bloqueadores.
-- [ ] Prioridade para reduzir retrabalho: usar o próprio servidor Express/Render para servir o frontend real de `public/` e a API em mesma origem, evitando depender do GitHub Pages para autenticação com cookies. Manter `docs/` como demonstração separada. Validar configuração de cookies, CSRF, domínio e HTTPS antes de publicar.
-- [ ] Próxima sequência curta: (1) revisar `public/index.html` e `public/js/app.js` para confirmar chamadas relativas à API e estado de login; (2) implementar/testar autenticação Google no frontend com o ID token; (3) criar testes Firestore/emulador para as operações críticas; (4) revisar endpoints restantes e só então preparar Render.
+- [x] Frontend real `public/` servido pelo Express na mesma origem da API; GitHub Pages `docs/` permanece demonstração separada. A validação final de cookies/domínio/HTTPS no Render continua pendente.
+- [x] Etapas de frontend/API same-origin, login Google com ID token, testes Firestore Emulator e revisão inicial de endpoints concluídas. Permanecem pendentes testes reais, revisão independente e módulos restantes.
 - Não mesclar o PR nem implantar sem aprovação explícita. Nenhuma chave privada deve ser enviada ao chat ou commitada.
 
 ### Integração inicial do login Google no frontend (17/11/2026)
@@ -124,13 +124,13 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Adicionados SDKs Firebase compat via CDN e botão “Entrar com Google” em `public/index.html`.
 - [x] Integrado `public/js/app.js`: popup Google, obtenção do Firebase ID token, envio para `POST /api/auth/google`, criação da sessão do servidor e encerramento da sessão Firebase ao sair.
 - [x] Ajustada a Content Security Policy do Express para permitir somente os hosts necessários ao SDK/Auth do Firebase nesta implementação.
-- [ ] Aguardar e conferir GitHub Actions após os commits de frontend e CSP.
+- [x] GitHub Actions de frontend/CSP e login Google passaram nos workflows mais recentes da branch, incluindo o commit `c9c6f0b864fb6f8ad25f835241ab4e5786d8fbbe`.
 - [ ] Testar login Google somente quando o frontend `public/` e a API estiverem servidos na mesma origem HTTPS; GitHub Pages `docs/` continua sendo demonstração separada e não deve ser usado para testar a sessão do backend.
 - [ ] Antes do teste real, revisar a CSP com o navegador, confirmar domínio autorizado do Firebase e configurar a credencial privada apenas no ambiente seguro do Render por um adulto responsável. Não usar dados reais de estudantes.
 
 ### Testes automatizados do login Google (17/11/2026)
 - [x] Criado `test/google-login-frontend.test.js` para validar ordem de carregamento dos SDKs, botão Google, obtenção/envio do ID token, configuração pública sem credenciais privadas, verificação do token no servidor e hospedagem do frontend/API na mesma origem.
-- [ ] Confirmar o resultado do GitHub Actions após a inclusão dos testes; corrigir qualquer falha antes de seguir.
+- [x] Testes automatizados do login Google passaram no GitHub Actions, inclusive no commit `c9c6f0b864fb6f8ad25f835241ab4e5786d8fbbe`.
 - [ ] Testes estáticos não substituem um teste ponta a ponta com popup Google e Firestore real/emulador.
 
 ### Etapa concluída: testes de integração do Firestore (17/11/2026)
@@ -143,17 +143,17 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] O emulador não substitui teste de conectividade/autorização no projeto Firebase real. Isso depende de configurar a conta de serviço de forma privada no ambiente de hospedagem, sem compartilhar a chave no chat ou GitHub.
 
 ### Próxima etapa prioritária
-- [ ] Auditoria completa dos endpoints e permissões em modo Firestore, com testes HTTP por perfil (admin, direção, secretaria, professor, responsável e estudante), incluindo casos proibidos.
-- [ ] Confirmar índices compostos necessários no Firestore de produção e criar `firestore.indexes.json` quando a auditoria das consultas estiver concluída.
-- [ ] Revisar atomicidade da auditoria de eventos de negócio e consistência dos contadores/índices; não declarar o banco pronto para produção antes dessa revisão.
+- [x] Matriz HTTP inicial dos seis perfis exercitada no Firestore Emulator, com leituras permitidas e operações proibidas; revisão independente final permanece pendente.
+- [x] `firestore.indexes.json` criado e vinculado ao `firebase.json`, com índices das consultas conhecidas.\n- [ ] Confirmar índices adicionais após consultas reais controladas no Firebase.
+- [x] Atomicidade dos eventos de auditoria nas operações críticas e integridade transacional dos contadores numéricos revisadas e testadas no Firestore Emulator.
 - [ ] Preparar Render somente depois dos testes e da revisão de segurança. Não mesclar nem implantar sem autorização explícita.
 
 ### Etapa de índices e matriz de permissões (17/11/2026)
 - [x] Criado `firestore.indexes.json` com índices compostos para consultas de estudantes por `user_id + active` e fila de solicitações por `status + created_at`.
 - [x] Referenciado o arquivo de índices em `firebase.json` e incluída validação JSON no comando `npm run check`.
 - [x] Ampliados os testes do emulador para iniciar o servidor Express no modo Firestore e percorrer a API HTTP, além dos testes diretos do repositório.
-- [ ] Validar a matriz completa de permissões dos seis perfis no CI após a última ampliação de testes. O teste cobre leitura permitida e operações negadas para professor, responsável e estudante, e permissões de direção/secretaria.
-- [ ] Depois da matriz, revisar atomicidade dos logs de auditoria e integridade de contadores/índices; confirmar se há outros índices necessários com consultas reais.
+- [x] Matriz dos seis perfis validada no CI e no Firestore Emulator; resultados detalhados registrados na seção anterior.
+- [x] Auditoria atômica e contadores transacionais revisados e testados.\n- [ ] Confirmar necessidade de índices adicionais e desempenho de consultas somente após teste controlado com dados fictícios no Firebase real.
 
 ### Resultado da matriz de permissões no emulador (17/11/2026)
 - [x] Testes HTTP no Express em modo Firestore para os perfis professor, responsável, estudante, direção e secretaria, além do administrador.
@@ -163,15 +163,15 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Direção: pode listar usuários e tem acesso ao fluxo de aprovação de viagem; não acessa a fila de solicitações de cadastro.
 - [x] Secretaria: consulta estudantes, mas não lista usuários nem acessa solicitações de cadastro.
 - [x] Execuções do CI para commit `5809d7ab03e585de957945b28031737169d2e9bd`: push e pull request concluídos com sucesso.
-- [ ] Revisar os eventos de auditoria de operações escolares para reduzir o risco de uma gravação de negócio concluir e o log separado falhar.
-- [ ] Revisar os contadores numéricos e o desempenho de listagens em coleções grandes.
+- [x] Eventos de auditoria das operações críticas passaram a ser gravados atomicamente na mesma transação Firestore.
+- [x] Contadores numéricos protegidos por transações e teste concorrente.\n- [ ] Medir desempenho de listagens em coleções grandes antes da produção.
 
 ### Integridade de contadores numéricos (17/11/2026)
 - [x] Refatorado `createWithNumericId`: agora lê o contador, cria o documento e atualiza o contador dentro da mesma transação Firestore. Evita reservar um ID numa transação e falhar a gravação do documento numa segunda operação.
 - [x] Validação explícita de coleção, objeto de dados e contador numérico seguro.
 - [x] Adicionado teste concorrente com 12 gravações simultâneas para verificar que os IDs gerados não se repetem.
 - [x] CI passou para o commit `8422fd5c37ef5f58f488ecb91f89e608d6b902b2`: verificações gerais, testes HTTP por perfil e integração com Firestore Emulator concluídos com sucesso.
-- [ ] Próxima revisão: tornar as gravações de negócio e os respectivos eventos de auditoria atômicos nas operações escolares críticas; atualmente alguns logs são gravados após a operação principal.
+- [x] Revisão concluída: gravações de negócio e eventos de auditoria estão na mesma transação nas operações críticas listadas acima.
 - [x] Teste ponta a ponta adicional confirma que o Express serve `/`, `/firebase-config.js` e `/js/app.js` na mesma origem da API, que `/api/health` identifica o Admin SDK inicializado no emulador e que `/api/auth/me` recupera a sessão autenticada.
 - [x] CI do commit `07eccc64bd1ab4befcdafe4c3bd15da41de07135` concluído com sucesso nas execuções push e pull request.
 
@@ -180,7 +180,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Removidas as gravações de auditoria separadas após as operações correspondentes no caminho Firestore, evitando respostas de erro após uma alteração já ter sido confirmada sem log.
 - [x] Login, login Google, envio de cadastro e mutações autenticadas agora exigem cabeçalho Origin explícito e mesma origem. Origens ausentes, inválidas ou de outro host são recusadas.
 - [x] Adicionados testes para confirmar os eventos de auditoria críticos e bloquear login sem Origin no Firestore Emulator.
-- [ ] Aguardar CI desta revisão e corrigir qualquer falha antes de avançar.
+- [x] CI da revisão de auditoria atômica e validação de origem passou em push e pull request, incluindo o commit `1aa206dbc2409d4719d7feb3bc6c349e008c2da2`.
 - [ ] Permanecem pendentes teste controlado no Firebase real, revisão final de segurança/privacidade, migração de dados e implantação segura no Render.
 - [x] Auditoria transacional finalizada para os fluxos escolares e de contas listados acima; os eventos de criação agora guardam também o ID exato do registro criado.
 - [x] Testes do emulador verificam que os eventos de auditoria são gravados junto com as alterações e que cada evento de criação referencia o registro correto.
@@ -193,7 +193,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Adicionado teste automatizado para confirmar que a configuração aponta para as regras e que elas não permitem acesso público.
 - [ ] As regras estão preparadas no repositório, mas ainda NÃO foram publicadas no projeto Firebase real. A publicação será feita somente na etapa controlada de implantação, após revisão e autorização.
 - [x] Acrescentado teste de integração que consulta a API REST do Firestore Emulator sem autenticação; deve receber HTTP 403, confirmando que as regras negam leitura anônima direta e não apenas que o arquivo de regras existe.
-- [ ] Aguardar CI do teste de bloqueio anônimo antes de considerar esta etapa validada.
+- [x] CI do teste de bloqueio anônimo passou no commit `cf5c2f04a56a5af999630726d2ceb58b9e441bc3`; o Firestore Emulator respondeu HTTP 403 à leitura anônima.
 - [x] CI do commit `cf5c2f04a56a5af999630726d2ceb58b9e441bc3` passou em push e pull request. A consulta REST anônima ao Firestore Emulator foi recusada com HTTP 403, enquanto os testes de servidor/Admin SDK continuaram passando.
 - [x] CI do commit de documentação `018a5b11377928b2bfb9fe41e5570022f26e5cf2` passou no evento push; verificação do pull request ainda estava em andamento durante esta atualização.
 
@@ -266,13 +266,17 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Ampliado o teste de integração para executar rejeição e aprovação pela API, confirmar resposta HTTP 200 e verificar que a conta aprovada fica ativa.
 - [x] CI após a correção das rotas e ampliação dos testes passou nas execuções 44080374025 e 44080384981.
 - [x] CI integral aprovado no commit `c9c6f0b864fb6f8ad25f835241ab4e5786d8fbbe`: sintaxe, testes unitários, frontend e Firestore Emulator, incluindo aprovação/rejeição por API e privacidade das listagens.
-- [ ] Aguardar CI desta atualização do planejamento.
+- [x] CI do planejamento passou nas execuções 44080580250 e 44080589091.
 
 
 ### Minimização de dados de solicitações analisadas (17/11/2026)
 - [x] Após aprovação ou rejeição, o hash de senha temporário e o código de solicitação são apagados do registro pendente no Firestore.
 - [x] No fallback SQLite, o hash temporário é apagado e o campo obrigatório do código é limpo para string vazia, sem exigir migração do esquema.
 - [x] Testes do Firestore Emulator verificam que senha e código deixam de existir no registro após aprovação e rejeição.
-- [ ] Aguardar CI desta limpeza adicional de dados.
+- [x] CI da limpeza adicional de dados passou nas execuções 44080922888 e 44080929949.
 - [x] Adicionados testes SQLite que consultam o banco temporário e confirmam que `password_hash` é nulo e `verification_code` vazio após aprovação e rejeição.
-- [ ] Aguardar CI dos testes de limpeza de dados nos dois armazenamentos.
+- [x] Testes de limpeza de dados no Firestore Emulator e no SQLite passaram no commit `5d42e0c9b5385159926204cc8d6331c35d9ea6e9`, execuções 44080922888 e 44080929949.
+
+### Consolidação do planejamento (17/11/2026)
+- [x] Reconciliadas pendências históricas com as etapas efetivamente concluídas, mantendo separados os testes no Emulator e os testes ainda necessários no Firebase real.
+- [ ] Aguardar CI desta consolidação.
