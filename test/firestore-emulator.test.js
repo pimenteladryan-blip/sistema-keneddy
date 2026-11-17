@@ -474,6 +474,12 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       });
     };
 
+    await auth.createUser({
+      display_name: 'Professor sem vínculo',
+      email: 'professor-sem-vinculo@emulator.sgve',
+      password_hash: rolePasswordHash,
+      role: 'teacher'
+    });
     const teacherApi = await loginAs('teacher-api@emulator.sgve');
     assert.equal((await teacherApi('/api/trips')).status, 200);
     assert.equal((await teacherApi('/api/students')).status, 403);
@@ -500,6 +506,11 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     });
     assert.equal(attendanceAuditAfter.length, attendanceAuditBefore.length + 1,
       'repetir a mesma presença não deve duplicar auditoria');
+    const unassignedTeacherApi = await loginAs('professor-sem-vinculo@emulator.sgve');
+    assert.equal((await unassignedTeacherApi('/api/trips/' + apiTripId + '/participants')).status, 403);
+    assert.equal((await unassignedTeacherApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/attendance', {
+      method: 'POST', body: JSON.stringify({ checkpoint: 'departure', present: true })
+    })).status, 403, 'professor sem vínculo não pode registrar presença');
 
     const guardianApi = await loginAs('guardian-api@emulator.sgve');
     const guardianStudentList = await guardianApi('/api/students');
@@ -526,6 +537,10 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     });
     assert.equal(authorizationAuditAfter.length, authorizationAuditBefore.length + 1,
       'repetir a mesma autorização não deve duplicar auditoria');
+    const unrelatedGuardianApi = await loginAs('responsavel@emulator.sgve');
+    assert.equal((await unrelatedGuardianApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/authorization', {
+      method: 'POST', body: JSON.stringify({ status: 'authorized' })
+    })).status, 404, 'responsável sem vínculo não pode autorizar estudante alheio');
     assert.equal((await guardianApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/attendance', {
       method: 'POST', body: JSON.stringify({ checkpoint: 'departure', present: true })
     })).status, 403, 'responsável não pode registrar presença');
