@@ -497,9 +497,9 @@ async function setTripStudentAuthorization(tripId, studentId, guardianId, status
     if (!['approved', 'open'].includes(trip.status)) return { error: 'not-approved' };
     const departureAt = Date.parse(trip.departure_at);
     if (!Number.isFinite(departureAt) || Date.now() >= departureAt) return { error: 'closed' };
-    if (participantSnapshot.data().authorization_status === status) {
-      return { ok: true, changed: false };
-    }
+    const currentStatus = participantSnapshot.data().authorization_status || 'pending';
+    if (currentStatus === status) return { ok: true, changed: false };
+    if (currentStatus === 'paper_recorded') return { error: 'already-decided' };
     const now = new Date().toISOString();
     transaction.update(participantRef, {
       authorization_status: status,
