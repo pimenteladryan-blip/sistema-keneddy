@@ -11,10 +11,14 @@ const firestoreAuth = require('./firestore-auth');
 const firestoreSchool = require('./firestore-school');
 const { hashPassword, verifyPassword, randomToken, sha256 } = require('./security');
 const { randomInt } = require('node:crypto');
+const { createMemoryRateLimiter } = require('./rate-limit');
 const { ROLE_LABELS, RECORD_MANAGERS, USER_MANAGERS, hasRole } = require('./access');
 
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
+if (isProduction && !firebaseConfigured) {
+  throw new Error('Firebase Admin precisa estar configurado antes de iniciar o SGVE em produção.');
+}
 const PORT = Number(process.env.PORT || 3000);
 const SESSION_HOURS = 8;
 const COOKIE_NAME = 'sgve_session';
@@ -31,12 +35,19 @@ app.use(helmet({ contentSecurityPolicy: { directives: {
 app.use(express.json({ limit: '20kb' }));
 app.use(express.urlencoded({ extended: false, limit: '20kb' }));
 
-const loginAttempts = new Map();
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
 const MAX_LOGIN_ATTEMPTS = 5;
-const registrationAttempts = new Map();
 const REGISTRATION_WINDOW_MS = 60 * 60 * 1000;
 const MAX_REGISTRATION_ATTEMPTS = 5;
+const memoryRateLimiter = createMemoryRateLimiter({ maxBuckets: 10000 });
+async function consumeAttempts(scope, keys, windowMs, maxAttempts) {
+  const input = { scope, keys, windowMs, maxAttempts };
+  if (firebaseConfigured) {
+    const result = await firestoreAuth.consumeRateLimit(input);
+    return result.allowed;
+  }
+  return memoryRateLimiter.consume(input);
+}
 const VERIFICATION_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 function createVerificationCode() {
   return Array.from({ length: 6 }, () => VERIFICATION_CODE_ALPHABET[randomInt(VERIFICATION_CODE_ALPHABET.length)]).join('');
@@ -156,14 +167,11 @@ app.post('/api/registration-requests', async (req, res, next) => {
         password.length < 14 || password.length > 200) {
       return res.status(400).json({ error: 'Informe nome, e-mail, perfil e senha com pelo menos 14 caracteres.' });
     }
-    const now = Date.now();
-    const key = String(req.ip || 'unknown') + ':' + email;
-    const attempt = registrationAttempts.get(key);
-    if (attempt && now - attempt.startedAt < REGISTRATION_WINDOW_MS && attempt.count >= MAX_REGISTRATION_ATTEMPTS) {
-      return res.status(429).json({ error: 'Muitas solicitações para este e-mail. Aguarde uma hora e tente novamente.' });
+    const allowedIp = await consumeAttempts('registration-ip', [String(req.ip || 'unknown')], REGISTRATION_WINDOW_MS, 20);
+    const allowedEmail = allowedIp && await consumeAttempts('registration-email', [email], REGISTRATION_WINDOW_MS, MAX_REGISTRATION_ATTEMPTS);
+    if (!allowedIp || !allowedEmail) {
+      return res.status(429).json({ error: 'Muitas solicitações. Aguarde um pouco e tente novamente.' });
     }
-    if (!attempt || now - attempt.startedAt >= REGISTRATION_WINDOW_MS) registrationAttempts.set(key, { startedAt: now, count: 1 });
-    else attempt.count += 1;
     const existingUser = firebaseConfigured
       ? await firestoreAuth.findUserByEmail(email)
       : db.prepare('SELECT id FROM users WHERE email = ?').get(email);
@@ -196,19 +204,14 @@ app.post('/api/auth/login', async (req, res, next) => {
     const password = String(req.body.password || '');
     if (!email || !password || email.length > 254 || password.length > 200) return res.status(400).json({ error: 'Informe e-mail e senha válidos.' });
     const now = Date.now();
-    const attempts = loginAttempts.get(email);
-    if (attempts && now - attempts.startedAt < LOGIN_WINDOW_MS && attempts.count >= MAX_LOGIN_ATTEMPTS) return res.status(429).json({ error: 'Muitas tentativas. Aguarde alguns minutos.' });
+    const allowedIp = await consumeAttempts('login-ip', [String(req.ip || 'unknown')], LOGIN_WINDOW_MS, 60);
+    const allowedEmail = allowedIp && await consumeAttempts('login-email', [email], LOGIN_WINDOW_MS, MAX_LOGIN_ATTEMPTS);
+    if (!allowedIp || !allowedEmail) return res.status(429).json({ error: 'Muitas tentativas. Aguarde alguns minutos.' });
     const user = firebaseConfigured
       ? await firestoreAuth.findUserByEmail(email)
       : db.prepare('SELECT id, display_name, email, password_hash, role, active FROM users WHERE email = ?').get(email);
     const valid = user && (firebaseConfigured ? user.active === true : Boolean(user.active)) && await verifyPassword(password, user.password_hash);
-    if (!valid) {
-      const current = loginAttempts.get(email);
-      if (!current || now - current.startedAt >= LOGIN_WINDOW_MS) loginAttempts.set(email, { startedAt: now, count: 1 });
-      else current.count += 1;
-      return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
-    }
-    loginAttempts.delete(email);
+    if (!valid) return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
     const token = randomToken(32);
     const csrfToken = randomToken(24);
     const expiresAt = new Date(now + SESSION_HOURS * 3600000).toISOString();
