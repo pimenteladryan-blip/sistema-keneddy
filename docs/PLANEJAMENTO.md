@@ -127,3 +127,8 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Aguardar e conferir GitHub Actions após os commits de frontend e CSP.
 - [ ] Testar login Google somente quando o frontend `public/` e a API estiverem servidos na mesma origem HTTPS; GitHub Pages `docs/` continua sendo demonstração separada e não deve ser usado para testar a sessão do backend.
 - [ ] Antes do teste real, revisar a CSP com o navegador, confirmar domínio autorizado do Firebase e configurar a credencial privada apenas no ambiente seguro do Render por um adulto responsável. Não usar dados reais de estudantes.
+
+### Testes automatizados do login Google (17/11/2026)
+- [x] Criado `test/google-login-frontend.test.js` para validar ordem de carregamento dos SDKs, botão Google, obtenção/envio do ID token, configuração pública sem credenciais privadas, verificação do token no servidor e hospedagem do frontend/API na mesma origem.
+- [ ] Confirmar o resultado do GitHub Actions após a inclusão dos testes; corrigir qualquer falha antes de seguir.
+- [ ] Testes estáticos não substituem um teste ponta a ponta com popup Google e Firestore real/emulador.
