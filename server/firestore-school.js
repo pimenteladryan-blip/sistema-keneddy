@@ -32,13 +32,13 @@ async function listClasses() {
   );
 }
 
-async function createClass(data) {
+async function createClass(data, actorUserId = null) {
   const id = await store.createUniqueComposite('classes',
     ['level', 'grade', 'course', 'section', 'school_year'], {
       level: data.level, grade: data.grade, course: data.course,
       section: data.section, school_year: Number(data.schoolYear),
       active: true, created_at: new Date().toISOString()
-    });
+    }, actorUserId == null ? null : { actor_user_id: actorUserId, action: 'create', entity_type: 'class' });
   return Number(id);
 }
 
@@ -46,9 +46,10 @@ async function getClass(id) {
   return store.get('classes', numericId(id, 'Turma'));
 }
 
-async function createStudent(fullName, classId) {
+async function createStudent(fullName, classId, actorUserId = null) {
   const result = await store.createStudentInActiveClass(
-    String(fullName).trim(), numericId(classId, 'Turma')
+    String(fullName).trim(), numericId(classId, 'Turma'),
+    actorUserId == null ? null : { actor_user_id: actorUserId, action: 'create', entity_type: 'student' }
   );
   return result.error ? null : Number(result.id);
 }
@@ -93,12 +94,13 @@ async function listStudentsForUser(user) {
   return result.filter(Boolean).sort((a, b) => a.full_name.localeCompare(b.full_name));
 }
 
-async function linkGuardian(studentId, guardianEmail, relationship) {
+async function linkGuardian(studentId, guardianEmail, relationship, actorUserId = null) {
   const guardian = await store.getByUnique('users', 'email', guardianEmail);
   if (!guardian) return false;
   return store.linkGuardianIfActive(
     numericId(studentId, 'Estudante'), numericId(guardian.id, 'Responsável'),
-    relationship || null
+    relationship || null,
+    actorUserId == null ? null : { actor_user_id: actorUserId, action: 'link_guardian', entity_type: 'student', entity_id: studentId }
   );
 }
 
@@ -110,7 +112,7 @@ async function createTrip(data, createdBy) {
     capacity: Number(data.capacity), participant_count: 0, status: 'draft',
     created_by: Number(createdBy), approved_by: null,
     created_at: new Date().toISOString(), updated_at: new Date().toISOString()
-  });
+  }, { actor_user_id: createdBy, action: 'create', entity_type: 'trip' });
   return Number(id);
 }
 
@@ -166,36 +168,38 @@ async function listTripsForUser(user) {
   return result.sort((a, b) => String(b.departure_at).localeCompare(String(a.departure_at))).slice(0, 100);
 }
 
-async function linkTripClass(tripId, classId) {
+async function linkTripClass(tripId, classId, actorUserId = null) {
   const id = numericId(classId, 'Turma');
   return store.createTripRelationIfDraft('tripClasses', tripId, id, {
     trip_id: numericId(tripId, 'Viagem'), class_id: id,
     created_at: new Date().toISOString()
-  });
+  }, actorUserId == null ? null : { actor_user_id: actorUserId, action: 'link_class', entity_type: 'trip', entity_id: tripId });
 }
 
-async function linkTripStudent(tripId, studentId) {
+async function linkTripStudent(tripId, studentId, actorUserId = null) {
   return store.createTripStudentWithinCapacity(
-    numericId(tripId, 'Viagem'), numericId(studentId, 'Estudante')
+    numericId(tripId, 'Viagem'), numericId(studentId, 'Estudante'),
+    actorUserId == null ? null : { actor_user_id: actorUserId, action: 'link_student', entity_type: 'trip', entity_id: tripId }
   );
 }
 
-async function assignTripTeacher(tripId, userId) {
+async function assignTripTeacher(tripId, userId, actorUserId = null) {
   const id = numericId(userId, 'Professor');
   return store.createTripRelationIfDraft('tripStaff', tripId, id, {
     trip_id: numericId(tripId, 'Viagem'), user_id: id,
     assignment_label: 'Professor responsável', created_at: new Date().toISOString()
-  });
+  }, actorUserId == null ? null : { actor_user_id: actorUserId, action: 'assign_teacher', entity_type: 'trip', entity_id: tripId });
 }
 
-async function submitTrip(tripId) {
-  return store.transitionTripStatus(tripId, 'draft', 'pending_approval', {}, true);
+async function submitTrip(tripId, actorUserId = null) {
+  return store.transitionTripStatus(tripId, 'draft', 'pending_approval', {}, true,
+    actorUserId == null ? null : { actor_user_id: actorUserId, action: 'submit_for_approval', entity_type: 'trip', entity_id: tripId });
 }
 
 async function approveTrip(tripId, approverId) {
   return store.transitionTripStatus(tripId, 'pending_approval', 'approved', {
     approved_by: Number(approverId)
-  });
+  }, false, { actor_user_id: approverId, action: 'approve', entity_type: 'trip', entity_id: tripId });
 }
 
 module.exports = {
