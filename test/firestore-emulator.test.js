@@ -625,6 +625,20 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       method: 'POST', body: JSON.stringify({ checkpoint: 'departure', present: true })
     })).status, 403, 'responsável não pode registrar presença');
 
+    const reportResponse = await api('/api/reports/summary');
+    assert.equal(reportResponse.status, 200);
+    const report = await reportResponse.json();
+    const tripReport = report.trips.find(item => item.id === apiTripId);
+    assert.ok(tripReport, 'relatório deve incluir a viagem fictícia');
+    assert.equal(tripReport.participants, 1);
+    assert.equal(tripReport.authorized, 1);
+    assert.equal(tripReport.departure_present, 1);
+    assert.equal(tripReport.vehicle_name, 'Van Emulator 01');
+    assert.equal(report.totals.authorized, 1);
+    assert.equal(report.totals.departure_present, 1);
+    assert.equal((await teacherApi('/api/reports/summary')).status, 403,
+      'relatórios agregados são restritos à equipe gestora');
+
     const studentApi = await loginAs('student-api@emulator.sgve');
     const ownStudents = await studentApi('/api/students');
     assert.equal(ownStudents.status, 200);
