@@ -14,6 +14,7 @@ const { firestore, firebaseConfigured } = require('../server/firebase');
 const auth = require('../server/firestore-auth');
 const school = require('../server/firestore-school');
 const store = require('../server/firestore-store');
+const { hashPassword } = require('../server/security');
 
 const passwordHash = 'scrypt:' + 'a'.repeat(32) + ':' + 'b'.repeat(128);
 const future = () => new Date(Date.now() + 60 * 60 * 1000).toISOString();
@@ -115,6 +116,18 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
   await auth.setUserActive(guardianId, false);
   assert.equal((await auth.findUserById(guardianId)).active, false);
 
+  const rolePassword = 'SenhaDeTeste2026!SGVE';
+  const rolePasswordHash = await hashPassword(rolePassword);
+  const roleAccounts = {};
+  for (const role of ['direction', 'secretariat', 'teacher', 'guardian', 'student']) {
+    roleAccounts[role] = await auth.createUser({
+      display_name: 'Conta ' + role,
+      email: role + '-api@emulator.sgve',
+      password_hash: rolePasswordHash,
+      role
+    });
+  }
+
   const portServer = createServer();
   await new Promise(resolve => portServer.listen(0, '127.0.0.1', resolve));
   const port = portServer.address().port;
@@ -192,6 +205,8 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     });
     assert.equal(tripResponse.status, 201);
     const apiTripId = (await tripResponse.json()).id;
+    await school.linkGuardian(apiStudentId, 'guardian-api@emulator.sgve', 'Responsável');
+    await store.update('students', apiStudentId, { user_id: roleAccounts.student });
 
     const linkedClass = await api('/api/trips/' + apiTripId + '/classes', {
       method: 'POST', body: JSON.stringify({ class_id: apiClassId })
@@ -201,6 +216,10 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       method: 'POST', body: JSON.stringify({ student_id: apiStudentId })
     });
     assert.equal(linkedStudent.status, 200);
+    const assignedTeacher = await api('/api/trips/' + apiTripId + '/staff', {
+      method: 'POST', body: JSON.stringify({ user_id: roleAccounts.teacher })
+    });
+    assert.equal(assignedTeacher.status, 200);
     const submittedTrip = await api('/api/trips/' + apiTripId + '/submit', {
       method: 'POST', body: JSON.stringify({})
     });
@@ -215,7 +234,60 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const tripsData = await tripsResponse.json();
     assert.equal(tripsData.trips.find(item => item.id === apiTripId).status, 'approved');
 
-    const logoutResponse = await api('/api/auth/logout', {
+    const loginAs = async (email) => {
+      const response = await fetch(baseUrl + '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+        body: JSON.stringify({ email, password: rolePassword })
+      });
+      assert.equal(response.status, 200, 'login de perfil ' + email);
+      const data = await response.json();
+      const roleCookie = response.headers.get('set-cookie').split(';')[0];
+      return (route, options = {}) => fetch(baseUrl + route, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json', Origin: baseUrl,
+          Cookie: roleCookie, 'X-CSRF-Token': data.csrfToken,
+          ...(options.headers || {})
+        }
+      });
+    };
+
+    const teacherApi = await loginAs('teacher-api@emulator.sgve');
+    assert.equal((await teacherApi('/api/trips')).status, 200);
+    assert.equal((await teacherApi('/api/students')).status, 403);
+    assert.equal((await teacherApi('/api/users')).status, 403);
+    assert.equal((await teacherApi('/api/classes', {
+      method: 'POST', body: JSON.stringify({ level: 'medio', grade: '4º ano', course: 'regular', section: 'A', school_year: 2026 })
+    })).status, 403);
+
+    const guardianApi = await loginAs('guardian-api@emulator.sgve');
+    const guardianStudentList = await guardianApi('/api/students');
+    assert.equal(guardianStudentList.status, 200);
+    assert.equal((await guardianStudentList.json()).students.length, 1);
+    assert.equal((await guardianApi('/api/trips')).status, 200);
+    assert.equal((await guardianApi('/api/users')).status, 403);
+
+    const studentApi = await loginAs('student-api@emulator.sgve');
+    const ownStudents = await studentApi('/api/students');
+    assert.equal(ownStudents.status, 200);
+    assert.equal((await ownStudents.json()).students.length, 1);
+    assert.equal((await studentApi('/api/trips')).status, 200);
+    assert.equal((await studentApi('/api/users')).status, 403);
+
+    const directionApi = await loginAs('direction-api@emulator.sgve');
+    assert.equal((await directionApi('/api/users')).status, 200);
+    assert.equal((await directionApi('/api/registration-requests')).status, 403);
+    assert.equal((await directionApi('/api/trips/' + apiTripId + '/approve', {
+      method: 'POST', body: JSON.stringify({})
+    })).status, 409);
+
+    const secretariatApi = await loginAs('secretariat-api@emulator.sgve');
+    assert.equal((await secretariatApi('/api/users')).status, 403);
+    assert.equal((await secretariatApi('/api/registration-requests')).status, 403);
+    assert.equal((await secretariatApi('/api/students')).status, 200);
+
+        const logoutResponse = await api('/api/auth/logout', {
       method: 'POST', body: JSON.stringify({})
     });
     assert.equal(logoutResponse.status, 200);
