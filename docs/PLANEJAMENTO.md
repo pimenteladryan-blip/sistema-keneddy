@@ -416,3 +416,13 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - Definido o tema escuro institucional como padrão inicial, mantendo a alternância de tema.
 - **Não foram copiadas** contas de demonstração, senhas fictícias, dados locais de alunos ou fluxos de autenticação do protótipo.
 - **Status:** alterações registradas na branch de trabalho; validação automatizada e revisão visual ainda pendentes. Nada foi mesclado na branch publicada e nenhum novo deploy foi iniciado.
+
+
+### Retirada da demonstração fictícia da publicação estática (17/11/2026)
+- [x] Substituída a página GitHub Pages que simulava login e armazenava alunos/viagens de exemplo por uma página de encaminhamento para a aplicação no Render.
+- [x] Retirados da página pública os e-mails `@sgve.demo`, a senha compartilhada de demonstração e os registros de estudantes de exemplo.
+- [x] Atualizado o Service Worker para remover caches antigos da demonstração e deixar de armazenar páginas e dados localmente.
+- [x] Removido o teste de sintaxe do JavaScript demonstrativo e substituído por verificação do destino do redirecionamento e ausência de credenciais/dados fictícios na página publicada.
+- [x] README atualizado para documentar a aplicação no Render e explicar que dados sintéticos ficam restritos aos testes automatizados e ao Firestore Emulator.
+- [ ] Validar a publicação do redirecionamento no GitHub Pages após a integração da branch.
+- [ ] Revisar os fluxos de ponta a ponta na aplicação hospedada antes de qualquer uso institucional.
