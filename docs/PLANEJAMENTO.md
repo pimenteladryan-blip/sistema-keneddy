@@ -225,10 +225,14 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Adicionada configuração TTL para `expires_at` na coleção `_sgve_rate_limits`; a configuração está versionada, mas ainda precisa ser aplicada ao Firebase real e verificada após implantação.
 - [x] Produção agora falha na inicialização se Firebase Admin não estiver configurado, impedindo que o backend de produção use acidentalmente o SQLite local.
 - [x] Adicionados testes unitários para janelas, bloqueio atômico e limite de memória, além de testes do Firestore Emulator para concorrência lógica, expiração e bloqueio HTTP após tentativas excessivas.
-- [ ] Aguardar CI do commit mais recente e corrigir qualquer falha antes de considerar esta etapa validada.
+- [x] CI do commit `b48a2cb39be33d7b3182d9570bd75326cc7c430c` passou integralmente nas execuções 44078581719 e 44078590536, incluindo teste concorrente no Firestore Emulator.
 - [ ] Antes de produção, aplicar a política TTL no Firebase real, validar custos/limites do Firestore e testar com tráfego controlado; a proteção Firestore depende da disponibilidade do banco.
 - [ ] O modo sem Firebase continua destinado apenas ao desenvolvimento local; o limitador em memória não é distribuído entre processos e não deve ser usado como proteção de produção.
 - [x] A rota de login Google também recebeu limite por IP, com teste estático para impedir regressão.
 - [x] CI do commit `c1a3cab832d38978d145e4aa6eada5ce8db424d3` passou integralmente (execuções 44073140327 e 44073151728): sintaxe, testes unitários, frontend e Firestore Emulator.
 - [x] Revisado o uso de `trust proxy` em produção: Express confia em um salto de proxy para obter o IP do cliente no Render.
 - [ ] Aguardar CI do teste de concorrência do Firestore Emulator antes de marcar esta última alteração como validada.
+
+- [x] O teste concorrente confirmou que, entre três requisições simultâneas para as mesmas chaves, exatamente duas são aceitas quando o limite é dois.
+- [x] Padronizado o separador usado no hash dos identificadores do limitador Firestore.
+- [ ] Aguardar CI do ajuste final de hash no commit `e8c3456dcf9e433a3e07ad65a0fb8fda750a4eeb`.
