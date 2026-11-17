@@ -154,3 +154,14 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Ampliados os testes do emulador para iniciar o servidor Express no modo Firestore e percorrer a API HTTP, além dos testes diretos do repositório.
 - [ ] Validar a matriz completa de permissões dos seis perfis no CI após a última ampliação de testes. O teste cobre leitura permitida e operações negadas para professor, responsável e estudante, e permissões de direção/secretaria.
 - [ ] Depois da matriz, revisar atomicidade dos logs de auditoria e integridade de contadores/índices; confirmar se há outros índices necessários com consultas reais.
+
+### Resultado da matriz de permissões no emulador (17/11/2026)
+- [x] Testes HTTP no Express em modo Firestore para os perfis professor, responsável, estudante, direção e secretaria, além do administrador.
+- [x] Professor: consulta somente viagens atribuídas; bloqueado para estudantes, lista de usuários e criação de turma.
+- [x] Responsável: consulta apenas estudantes vinculados e viagens relacionadas; bloqueado para lista de usuários.
+- [x] Estudante: consulta apenas seu próprio cadastro e viagens relacionadas; bloqueado para lista de usuários.
+- [x] Direção: pode listar usuários e tem acesso ao fluxo de aprovação de viagem; não acessa a fila de solicitações de cadastro.
+- [x] Secretaria: consulta estudantes, mas não lista usuários nem acessa solicitações de cadastro.
+- [x] Execuções do CI para commit `5809d7ab03e585de957945b28031737169d2e9bd`: push e pull request concluídos com sucesso.
+- [ ] Revisar os eventos de auditoria de operações escolares para reduzir o risco de uma gravação de negócio concluir e o log separado falhar.
+- [ ] Revisar os contadores numéricos e o desempenho de listagens em coleções grandes.
