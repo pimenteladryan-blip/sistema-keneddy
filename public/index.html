@@ -89,6 +89,7 @@
           <button type="button" class="tab" data-tab="students-panel">Estudantes</button>
           <button type="button" class="tab" data-tab="trips-panel">Viagens</button>
           <button type="button" class="tab" data-tab="vehicles-panel" id="vehicles-tab">Transportes</button>
+          <button type="button" class="tab" data-tab="reports-panel" id="reports-tab">Relatórios</button>
           <button type="button" class="tab" data-tab="users-panel" id="users-tab">Contas</button>
         </nav>
         <section id="classes-panel" class="module-panel">
@@ -157,6 +158,30 @@
           <p id="vehicle-message" class="message" role="status"></p>
           <div id="vehicles-list" class="data-list"><p class="muted">Carregando frota...</p></div>
           <p class="privacy-note">Cadastre somente identificação, tipo e capacidade. A atribuição é permitida em rascunhos e bloqueia conflitos de horário e veículos menores que a capacidade da viagem.</p>
+        </section>
+        <section id="reports-panel" class="module-panel hidden">
+          <div class="section-heading">
+            <div><p class="eyebrow green">ACOMPANHAMENTO</p><h3>Relatórios agregados</h3></div>
+            <button type="button" class="button-secondary" id="refresh-reports">Atualizar</button>
+          </div>
+          <div class="report-stats">
+            <article class="report-stat"><span>Viagens</span><strong id="report-trip-count">0</strong></article>
+            <article class="report-stat"><span>Estudantes ativos</span><strong id="report-student-count">0</strong></article>
+            <article class="report-stat"><span>Veículos ativos</span><strong id="report-vehicle-count">0</strong></article>
+            <article class="report-stat"><span>Participações</span><strong id="report-participant-count">0</strong></article>
+            <article class="report-stat"><span>Autorizadas</span><strong id="report-authorized-count">0</strong></article>
+            <article class="report-stat"><span>Pendentes</span><strong id="report-pending-count">0</strong></article>
+          </div>
+          <p id="report-note" class="privacy-note">Relatórios sem nomes de estudantes.</p>
+          <div class="section-heading"><div><h4>Resumo por viagem</h4></div><button type="button" id="export-report-csv">Exportar CSV</button></div>
+          <div class="report-table-wrap">
+            <table class="report-table">
+              <thead><tr><th>Viagem</th><th>Saída</th><th>Situação</th><th>Participantes</th><th>Autorizadas</th><th>Pendentes</th><th>Presença na saída</th><th>Presença no retorno</th><th>Veículo</th></tr></thead>
+              <tbody id="report-trips-body"><tr><td colspan="9">Carregando relatório...</td></tr></tbody>
+            </table>
+          </div>
+          <p id="report-message" class="message" role="status"></p>
+          <p class="privacy-note">O relatório mostra apenas totais e dados operacionais da viagem. Não exporta nomes, contatos ou documentos de estudantes.</p>
         </section>
         <section id="users-panel" class="module-panel hidden">
           <div class="section-heading"><div><p class="eyebrow green">ACESSO AO SISTEMA</p><h3>Criar conta</h3></div></div>
