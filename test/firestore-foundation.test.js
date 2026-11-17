@@ -61,6 +61,24 @@ test('as regras do Firestore bloqueiam acesso direto de clientes e estão ligada
   assert.equal(firebaseConfig.firestore.indexes, 'firestore.indexes.json');
 });
 
+test('o Firestore configura expiração TTL para os documentos de limite', () => {
+  const root = path.resolve(__dirname, '..');
+  const config = JSON.parse(fs.readFileSync(path.join(root, 'firestore.indexes.json'), 'utf8'));
+  assert.equal(config.fieldOverrides.some(item =>
+    item.collectionGroup === '_sgve_rate_limits' &&
+    item.fieldPath === 'expires_at' && item.ttl === true &&
+    Array.isArray(item.indexes) && item.indexes.length === 0
+  ), true);
+});
+
+test('produção exige Firebase antes de inicializar o banco SQLite local', () => {
+  const root = path.resolve(__dirname, '..');
+  const source = fs.readFileSync(path.join(root, 'server/index.js'), 'utf8');
+  const guard = source.indexOf("if (isProduction && !firebaseConfigured)");
+  const sqlite = source.indexOf("require('./db')");
+  assert.ok(guard >= 0 && guard < sqlite);
+});
+
 test('o armazenamento rejeita nomes de coleção desconhecidos', async () => {
   await assert.rejects(
     store.create('colecao_inexistente', { value: 1 }),
