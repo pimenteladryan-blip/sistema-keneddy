@@ -45,6 +45,10 @@ function showLogin() {
   dashboardView.classList.add('hidden');
   loginView.classList.remove('hidden');
   csrfToken = '';
+  document.querySelector('#drivers-list').textContent = '';
+  document.querySelector('#vehicles-list').textContent = '';
+  document.querySelector('#trip-driver-select').innerHTML = '<option value="">Cadastre um condutor</option>';
+  document.querySelector('#trip-vehicle-select').innerHTML = '<option value="">Cadastre um veículo</option>';
 }
 async function api(url, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
