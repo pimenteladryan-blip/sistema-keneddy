@@ -172,3 +172,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Adicionado teste concorrente com 12 gravações simultâneas para verificar que os IDs gerados não se repetem.
 - [x] CI passou para o commit `8422fd5c37ef5f58f488ecb91f89e608d6b902b2`: verificações gerais, testes HTTP por perfil e integração com Firestore Emulator concluídos com sucesso.
 - [ ] Próxima revisão: tornar as gravações de negócio e os respectivos eventos de auditoria atômicos nas operações escolares críticas; atualmente alguns logs são gravados após a operação principal.
+- [x] Teste ponta a ponta adicional confirma que o Express serve `/`, `/firebase-config.js` e `/js/app.js` na mesma origem da API, que `/api/health` identifica o Admin SDK inicializado no emulador e que `/api/auth/me` recupera a sessão autenticada.
+- [x] CI do commit `07eccc64bd1ab4befcdafe4c3bd15da41de07135` concluído com sucesso nas execuções push e pull request.
