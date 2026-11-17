@@ -566,5 +566,7 @@ module.exports = {
   createStudentInActiveClass,
   linkGuardianIfActive,
   createTripRelationIfDraft,
-  transitionTripStatus
+  transitionTripStatus,
+  setTripStudentAuthorization,
+  setTripAttendance
 };
