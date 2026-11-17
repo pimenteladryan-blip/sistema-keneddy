@@ -259,3 +259,9 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Adicionados testes no Firestore Emulator para confirmar que a lista administrativa de solicitações de cadastro e a listagem de usuários nunca retornam `password_hash`.
 - [x] O teste também exercita a rejeição de uma solicitação via API administrativa, com autenticação, CSRF e auditoria.
 - [ ] Aguardar CI desta cobertura adicional de privacidade.
+
+### Correção das rotas de aprovação/rejeição (17/11/2026)
+- [x] O teste de integração detectou que a validação de ID numérico nas rotas Firestore de aprovar/rejeitar cadastro estava com escape incorreto e rejeitava IDs válidos com HTTP 400.
+- [x] Corrigida a expressão regular nas duas rotas.
+- [x] Ampliado o teste de integração para executar rejeição e aprovação pela API, confirmar resposta HTTP 200 e verificar que a conta aprovada fica ativa.
+- [ ] Aguardar CI após a correção das rotas e a ampliação dos testes.
