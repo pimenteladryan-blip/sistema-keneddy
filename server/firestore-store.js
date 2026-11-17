@@ -193,9 +193,28 @@ async function nextNumericId(name) {
 }
 
 async function createWithNumericId(name, data) {
-  const id = await nextNumericId(name);
-  await create(name, data, id);
-  return id;
+  if (!COLLECTIONS[name]) throw new Error('Coleção SGVE desconhecida: ' + name);
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new TypeError('Os dados do documento devem ser um objeto.');
+  }
+  const db = requireFirestore();
+  const counterRef = db.collection('_sgve_counters').doc(name);
+  return db.runTransaction(async transaction => {
+    const counterSnapshot = await transaction.get(counterRef);
+    const current = counterSnapshot.exists ? Number(counterSnapshot.data().value) : 0;
+    if (!Number.isSafeInteger(current) || current < 0 || current >= Number.MAX_SAFE_INTEGER) {
+      throw new Error('Contador numérico inválido para a coleção: ' + name);
+    }
+    const id = current + 1;
+    const now = new Date().toISOString();
+    const documentRef = collection(name).doc(String(id));
+    transaction.create(documentRef, {
+      ...data,
+      created_at: data.created_at || now
+    });
+    transaction.set(counterRef, { value: id, updated_at: now });
+    return id;
+  });
 }
 
 
