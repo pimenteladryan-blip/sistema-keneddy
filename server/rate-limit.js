@@ -40,7 +40,15 @@ function createMemoryRateLimiter({ maxBuckets = 10000, clock = Date.now } = {}) 
     return true;
   }
 
-  return { consume, get size() { return buckets.size; } };
+  function reset({ scope, keys }) {
+    if (typeof scope !== 'string' || !scope || !Array.isArray(keys) || !keys.length ||
+        keys.some(key => typeof key !== 'string' || !key)) {
+      throw new TypeError('Parâmetros de limpeza do limitador inválidos.');
+    }
+    for (const key of keys) buckets.delete(keyDigest(scope, key));
+  }
+
+  return { consume, reset, get size() { return buckets.size; } };
 }
 
 module.exports = { createMemoryRateLimiter };
