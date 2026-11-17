@@ -182,3 +182,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Adicionados testes para confirmar os eventos de auditoria críticos e bloquear login sem Origin no Firestore Emulator.
 - [ ] Aguardar CI desta revisão e corrigir qualquer falha antes de avançar.
 - [ ] Permanecem pendentes teste controlado no Firebase real, revisão final de segurança/privacidade, migração de dados e implantação segura no Render.
+- [x] Auditoria transacional finalizada para os fluxos escolares e de contas listados acima; os eventos de criação agora guardam também o ID exato do registro criado.
+- [x] Testes do emulador verificam que os eventos de auditoria são gravados junto com as alterações e que cada evento de criação referencia o registro correto.
+- [x] A proteção de origem foi endurecida: cabeçalho Origin ausente também é recusado. Os testes automatizados de cadastro foram ajustados para simular corretamente o navegador.
+- [x] CI do commit `1aa206dbc2409d4719d7feb3bc6c349e008c2da2` passou em push e pull request, incluindo testes unitários, autenticação, permissões, auditoria e Firestore Emulator.
