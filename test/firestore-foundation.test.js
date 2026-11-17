@@ -252,6 +252,27 @@ test('operações atômicas de sessão validam entradas antes de acessar o Fires
 });
 
 
+test('sessões Firestore aceitam login por senha e por Google', async () => {
+  const session = {
+    token_hash: 'a'.repeat(64),
+    csrf_token: 'x'.repeat(32),
+    user_id: 3,
+    expires_at: new Date(Date.now() + 60000).toISOString()
+  };
+  await assert.rejects(
+    auth.createSessionWithAudit({ ...session, action: 'login_password' }),
+    /Firestore não configurado/
+  );
+  await assert.rejects(
+    auth.createSessionWithAudit({ ...session, action: 'login_google' }),
+    /Firestore não configurado/
+  );
+  await assert.rejects(
+    auth.createSessionWithAudit({ ...session, action: 'login_unknown' }),
+    /Dados de sessão inválidos/
+  );
+});
+
 test('importação com ID fixo valida identificador e campo único antes do Firestore', async () => {
   const data = {
     display_name: 'Pessoa de Teste',
