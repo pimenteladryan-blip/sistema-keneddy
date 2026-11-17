@@ -319,3 +319,19 @@ body.dark-mode .verification-code-badge{border-color:#42694e;background:#1b3826;
   .verification-code-badge{font-size:11px;letter-spacing:.13em}
   select{min-height:48px;font-size:14px}
 }
+
+
+/* Participantes, autorização familiar e presença por etapa */
+.trip-card{flex-wrap:wrap}
+.trip-card-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.participants-area{display:grid;flex:1 0 100%;gap:9px;margin-top:4px;padding-top:14px;border-top:1px solid var(--line)}
+.participant-row{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.participant-details{display:grid;gap:4px;min-width:0}
+.participant-details strong{color:var(--ink)}
+.participant-details span,.participant-details small{color:var(--muted);font-size:11px}
+.participant-actions{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.participant-actions .small-action{flex:1 1 145px;min-height:34px}
+@media(max-width:520px){
+  .trip-card-actions,.participant-actions{width:100%}
+  .trip-card-actions button,.participant-actions button{width:100%}
+}
