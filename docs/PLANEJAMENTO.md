@@ -231,7 +231,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] A rota de login Google também recebeu limite por IP, com teste estático para impedir regressão.
 - [x] CI do commit `c1a3cab832d38978d145e4aa6eada5ce8db424d3` passou integralmente (execuções 44073140327 e 44073151728): sintaxe, testes unitários, frontend e Firestore Emulator.
 - [x] Revisado o uso de `trust proxy` em produção: Express confia em um salto de proxy para obter o IP do cliente no Render.
-- [ ] Aguardar CI do teste de concorrência do Firestore Emulator antes de marcar esta última alteração como validada.
+- [x] CI do teste concorrente passou integralmente no commit `b48a2cb39be33d7b3182d9570bd75326cc7c430c`.
 
 - [x] O teste concorrente confirmou que, entre três requisições simultâneas para as mesmas chaves, exatamente duas são aceitas quando o limite é dois.
 - [x] Padronizado o separador usado no hash dos identificadores do limitador Firestore.
@@ -251,17 +251,19 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Adicionados testes unitários, testes diretos no Firestore Emulator e teste da API que confirma que um login válido libera novas tentativas por conta.
 - [x] CI da limpeza de limite após login válido passou integralmente nas execuções 44079513584 e 44079521470, incluindo testes unitários e Firestore Emulator.
 - [x] O fluxo de autenticação, o teste de concorrência Firestore, o teste de CSRF nas rotas POST e a limpeza de limite após login válido passaram no CI do GitHub Actions.
-- [ ] Aguardar CI desta atualização final do planejamento.
+- [x] CI da atualização do planejamento passou nas execuções 44079715109 e 44079726541.
 
 - [x] Registrado cuidado de privacidade: hashes determinísticos de IP/e-mail são pseudonimização, não anonimização; os registros de limite continuam sujeitos a controle de acesso, retenção e revisão LGPD.
 
 ### Proteção de dados nas listagens administrativas (17/11/2026)
 - [x] Adicionados testes no Firestore Emulator para confirmar que a lista administrativa de solicitações de cadastro e a listagem de usuários nunca retornam `password_hash`.
 - [x] O teste também exercita a rejeição de uma solicitação via API administrativa, com autenticação, CSRF e auditoria.
-- [ ] Aguardar CI desta cobertura adicional de privacidade.
+- [x] CI da cobertura adicional de privacidade passou nas execuções 44080374025 e 44080384981.
 
 ### Correção das rotas de aprovação/rejeição (17/11/2026)
 - [x] O teste de integração detectou que a validação de ID numérico nas rotas Firestore de aprovar/rejeitar cadastro estava com escape incorreto e rejeitava IDs válidos com HTTP 400.
 - [x] Corrigida a expressão regular nas duas rotas.
 - [x] Ampliado o teste de integração para executar rejeição e aprovação pela API, confirmar resposta HTTP 200 e verificar que a conta aprovada fica ativa.
-- [ ] Aguardar CI após a correção das rotas e a ampliação dos testes.
+- [x] CI após a correção das rotas e ampliação dos testes passou nas execuções 44080374025 e 44080384981.
+- [x] CI integral aprovado no commit `c9c6f0b864fb6f8ad25f835241ab4e5786d8fbbe`: sintaxe, testes unitários, frontend e Firestore Emulator, incluindo aprovação/rejeição por API e privacidade das listagens.
+- [ ] Aguardar CI desta atualização do planejamento.
