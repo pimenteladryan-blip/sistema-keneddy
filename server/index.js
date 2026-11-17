@@ -193,7 +193,7 @@ app.post('/api/auth/login', async (req, res, next) => {
     const user = firebaseConfigured
       ? await firestoreAuth.findUserByEmail(email)
       : db.prepare('SELECT id, display_name, email, password_hash, role, active FROM users WHERE email = ?').get(email);
-    const valid = user && user.active === true && await verifyPassword(password, user.password_hash);
+    const valid = user && (firebaseConfigured ? user.active === true : Boolean(user.active)) && await verifyPassword(password, user.password_hash);
     if (!valid) {
       const current = loginAttempts.get(email);
       if (!current || now - current.startedAt >= LOGIN_WINDOW_MS) loginAttempts.set(email, { startedAt: now, count: 1 });
