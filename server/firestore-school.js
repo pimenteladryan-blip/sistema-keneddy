@@ -392,6 +392,21 @@ async function setTripStudentAuthorization(tripId, studentId, guardianId, status
   );
 }
 
+
+async function recordPaperAuthorization(tripId, studentId, actorUser) {
+  const tripKey = numericId(tripId, 'Viagem');
+  const studentKey = numericId(studentId, 'Estudante');
+  return store.recordPaperAuthorization(
+    tripKey, studentKey, numericId(actorUser.id, 'Usuário'), actorUser.role,
+    {
+      actor_user_id: Number(actorUser.id),
+      action: 'record_paper_authorization',
+      entity_type: 'trip_student',
+      entity_id: tripKey + '_' + studentKey
+    }
+  );
+}
+
 async function setTripAttendance(tripId, studentId, actorUser, checkpoint, present) {
   const tripKey = numericId(tripId, 'Viagem');
   const studentKey = numericId(studentId, 'Estudante');
@@ -413,5 +428,6 @@ module.exports = {
   listTripsForUser, linkTripClass, linkTripStudent,
   assignTripTeacher, submitTrip, approveTrip,
   listTripParticipantsForUser, setTripStudentAuthorization, setTripAttendance,
-  listVehicles, createVehicle, assignTripVehicle, getReportSummary
+  listVehicles, createVehicle, assignTripVehicle, getReportSummary,
+  recordPaperAuthorization
 };
