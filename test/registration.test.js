@@ -519,6 +519,16 @@ test('frota e atribuição de veículos validam capacidade, conflito de horário
   assert.equal((await fetch(baseUrl + '/api/drivers', {
     headers: { Origin: baseUrl, Cookie: teacherCookie }
   })).status, 403, 'professores não podem consultar cadastro de condutores');
+  assert.equal((await fetch(baseUrl + '/api/drivers', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: baseUrl, Cookie: teacherCookie, 'X-CSRF-Token': teacherData.csrfToken },
+    body: JSON.stringify({ name: 'Condutor não autorizado' })
+  })).status, 403, 'professores não podem cadastrar condutores');
+  assert.equal((await fetch(baseUrl + '/api/trips/' + teacherPrivacyTrip + '/driver', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: baseUrl, Cookie: teacherCookie, 'X-CSRF-Token': teacherData.csrfToken },
+    body: JSON.stringify({ driver_id: driverId })
+  })).status, 403, 'professores não podem alterar escala de condutores');
   const teacherReports = await fetch(baseUrl + '/api/reports/summary', {
     headers: { Origin: baseUrl, Cookie: teacherCookie }
   });
