@@ -267,3 +267,10 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] CI após a correção das rotas e ampliação dos testes passou nas execuções 44080374025 e 44080384981.
 - [x] CI integral aprovado no commit `c9c6f0b864fb6f8ad25f835241ab4e5786d8fbbe`: sintaxe, testes unitários, frontend e Firestore Emulator, incluindo aprovação/rejeição por API e privacidade das listagens.
 - [ ] Aguardar CI desta atualização do planejamento.
+
+
+### Minimização de dados de solicitações analisadas (17/11/2026)
+- [x] Após aprovação ou rejeição, o hash de senha temporário e o código de solicitação são apagados do registro pendente no Firestore.
+- [x] No fallback SQLite, o hash temporário é apagado e o campo obrigatório do código é limpo para string vazia, sem exigir migração do esquema.
+- [x] Testes do Firestore Emulator verificam que senha e código deixam de existir no registro após aprovação e rejeição.
+- [ ] Aguardar CI desta limpeza adicional de dados.
