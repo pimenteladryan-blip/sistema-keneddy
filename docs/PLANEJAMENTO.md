@@ -252,3 +252,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] CI da limpeza de limite após login válido passou integralmente nas execuções 44079513584 e 44079521470, incluindo testes unitários e Firestore Emulator.
 - [x] O fluxo de autenticação, o teste de concorrência Firestore, o teste de CSRF nas rotas POST e a limpeza de limite após login válido passaram no CI do GitHub Actions.
 - [ ] Aguardar CI desta atualização final do planejamento.
+
+- [x] Registrado cuidado de privacidade: hashes determinísticos de IP/e-mail são pseudonimização, não anonimização; os registros de limite continuam sujeitos a controle de acesso, retenção e revisão LGPD.
