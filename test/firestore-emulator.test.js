@@ -277,6 +277,24 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       method: 'POST', body: JSON.stringify({})
     })).status, 200);
 
+    await auth.createRegistrationRequest({
+      display_name: 'Solicitação para aprovação via API',
+      email: 'solicitacao-aprovacao-api@emulator.sgve',
+      password_hash: rolePasswordHash,
+      role: 'teacher',
+      verification_code: 'QRS456'
+    });
+    const approvalListResponse = await api('/api/registration-requests');
+    assert.equal(approvalListResponse.status, 200);
+    const approvalList = await approvalListResponse.json();
+    const approvalRequest = approvalList.requests.find(item => item.email === 'solicitacao-aprovacao-api@emulator.sgve');
+    assert.ok(approvalRequest);
+    const approvalResponse = await api('/api/registration-requests/' + approvalRequest.id + '/approve', {
+      method: 'POST', body: JSON.stringify({})
+    });
+    assert.equal(approvalResponse.status, 200, 'a rota administrativa deve aceitar IDs numéricos válidos');
+    assert.equal((await auth.findUserByEmail('solicitacao-aprovacao-api@emulator.sgve')).active, true);
+
     const classResponse = await api('/api/classes', {
       method: 'POST',
       body: JSON.stringify({ level: 'medio', grade: '3º ano', course: 'regular', section: 'B', school_year: 2026 })
