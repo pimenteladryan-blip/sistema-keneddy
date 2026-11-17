@@ -274,3 +274,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] No fallback SQLite, o hash temporário é apagado e o campo obrigatório do código é limpo para string vazia, sem exigir migração do esquema.
 - [x] Testes do Firestore Emulator verificam que senha e código deixam de existir no registro após aprovação e rejeição.
 - [ ] Aguardar CI desta limpeza adicional de dados.
+- [x] Adicionados testes SQLite que consultam o banco temporário e confirmam que `password_hash` é nulo e `verification_code` vazio após aprovação e rejeição.
+- [ ] Aguardar CI dos testes de limpeza de dados nos dois armazenamentos.
