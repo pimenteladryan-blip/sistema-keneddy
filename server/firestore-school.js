@@ -466,6 +466,7 @@ module.exports = {
   listTripsForUser, linkTripClass, linkTripStudent,
   assignTripTeacher, submitTrip, approveTrip,
   listTripParticipantsForUser, setTripStudentAuthorization, setTripAttendance,
-  listVehicles, createVehicle, assignTripVehicle,\n  listDrivers, createDriver, assignTripDriver, getReportSummary,
+  listVehicles, createVehicle, assignTripVehicle,
+  listDrivers, createDriver, assignTripDriver, getReportSummary,
   recordPaperAuthorization
 };
