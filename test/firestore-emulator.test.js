@@ -52,6 +52,13 @@ before(async () => {
     'transações concorrentes devem respeitar o limite compartilhado sem excedê-lo');
   assert.equal(simultaneousAttempts.filter(result => !result.allowed).length, 1);
 
+  const resetLimit = { scope: 'emulator-reset', keys: ['email:reset@example.invalid'], windowMs: 60000, maxAttempts: 1, nowMs: 300000 };
+  assert.deepEqual(await auth.consumeRateLimit(resetLimit), { allowed: true });
+  assert.deepEqual(await auth.consumeRateLimit(resetLimit), { allowed: false });
+  await auth.resetRateLimit({ scope: resetLimit.scope, keys: resetLimit.keys });
+  assert.deepEqual(await auth.consumeRateLimit(resetLimit), { allowed: true },
+    'limite de conta deve ser limpo após autenticação válida');
+
   const response = await fetch(
     'http://127.0.0.1:8080/emulator/v1/projects/demo-sgve/databases/(default)/documents',
     { method: 'DELETE' }
