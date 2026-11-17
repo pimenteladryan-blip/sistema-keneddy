@@ -496,16 +496,22 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const teacherParticipantsResponse = await teacherApi('/api/trips/' + apiTripId + '/participants');
     assert.equal(teacherParticipantsResponse.status, 200);
     assert.equal((await teacherParticipantsResponse.json()).participants.length, 1);
-    assert.equal((await teacherApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/authorization', {
+    const teacherAuthorizationAttempt = await teacherApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/authorization', {
       method: 'POST', body: JSON.stringify({ status: 'authorized' })
-    })).status, 403, 'professor não pode responder pela autorização familiar');
+    });
+    assert.equal(teacherAuthorizationAttempt.status, 403,
+      'professor não pode responder pela autorização familiar: ' +
+      await teacherAuthorizationAttempt.text() + '; logs=' + serverOutput);
     const attendanceAuditBefore = await store.list('auditLogs', {
       filters: [{ field: 'action', op: '==', value: 'mark_departure_present' }]
     });
     for (let attempt = 0; attempt < 2; attempt += 1) {
-      assert.equal((await teacherApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/attendance', {
+      const attendanceResponse = await teacherApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/attendance', {
         method: 'POST', body: JSON.stringify({ checkpoint: 'departure', present: true })
-      })).status, 200);
+      });
+      const attendanceBody = await attendanceResponse.text();
+      assert.equal(attendanceResponse.status, 200,
+        'registro de presença falhou: ' + attendanceBody + '; logs=' + serverOutput);
     }
     const attendanceAuditAfter = await store.list('auditLogs', {
       filters: [{ field: 'action', op: '==', value: 'mark_departure_present' }]
