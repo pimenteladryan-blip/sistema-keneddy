@@ -467,6 +467,14 @@ function tripInput(body) {
       returning <= departure || !Number.isInteger(capacity) || capacity < 1 || capacity > 5000) return null;
   return { title, destination, purpose, departure: departure.toISOString(), returning: returning.toISOString(), capacity };
 }
+function vehicleInput(body) {
+  const name = cleanText(body.name, 40);
+  const type = String(body.type || '');
+  const capacity = Number(body.capacity);
+  if (name.length < 3 || !['Ônibus', 'Micro-ônibus', 'Van'].includes(type) ||
+      !Number.isSafeInteger(capacity) || capacity < 1 || capacity > 100) return null;
+  return { name, type, capacity };
+}
 function getTripStatusLabel(status) {
   return ({ draft: 'Rascunho', pending_approval: 'Aguardando aprovação', approved: 'Aprovada',
     open: 'Inscrições abertas', completed: 'Concluída', cancelled: 'Cancelada' })[status] || status;
@@ -615,6 +623,107 @@ app.post('/api/trips/:id/approve', requireAuth, requireCsrf, requireRoles('admin
   } catch (error) { next(error); }
 });
 
+
+
+app.get('/api/vehicles', requireAuth, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
+  try {
+    if (firebaseConfigured) {
+      return res.json({ vehicles: await firestoreSchool.listVehicles() });
+    }
+    const vehicles = db.prepare(
+      'SELECT id, name, type, capacity FROM vehicles WHERE active = 1 ORDER BY name'
+    ).all();
+    return res.json({ vehicles });
+  } catch (error) { next(error); }
+});
+
+app.post('/api/vehicles', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
+  const data = vehicleInput(req.body);
+  if (!data) return res.status(400).json({ error: 'Informe identificação, tipo e capacidade válidos (1 a 100 lugares).' });
+  try {
+    if (firebaseConfigured) {
+      const id = await firestoreSchool.createVehicle(data, req.auth.user.id);
+      return res.status(201).json({ id, message: 'Veículo cadastrado.' });
+    }
+    const result = db.prepare(
+      'INSERT INTO vehicles (name, type, capacity, created_by) VALUES (?, ?, ?, ?)'
+    ).run(data.name, data.type, data.capacity, req.auth.user.id);
+    audit(req.auth.user.id, 'create', 'vehicle', result.lastInsertRowid);
+    return res.status(201).json({ id: Number(result.lastInsertRowid), message: 'Veículo cadastrado.' });
+  } catch (error) {
+    if (error.code === 'already-exists' || /UNIQUE constraint failed: vehicles\.name/i.test(error.message)) {
+      return res.status(409).json({ error: 'Já existe um veículo com essa identificação.' });
+    }
+    next(error);
+  }
+});
+
+app.post('/api/trips/:id/vehicle', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
+  const tripId = Number(req.params.id);
+  const vehicleId = Number(req.body.vehicle_id);
+  if (!Number.isSafeInteger(tripId) || tripId < 1 ||
+      !Number.isSafeInteger(vehicleId) || vehicleId < 1) {
+    return res.status(400).json({ error: 'Informe uma viagem e um veículo válidos.' });
+  }
+  let transactionOpen = false;
+  try {
+    if (firebaseConfigured) {
+      const result = await firestoreSchool.assignTripVehicle(tripId, vehicleId, req.auth.user.id);
+      if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem não encontrada.' });
+      if (result.error === 'vehicle-not-found') return res.status(404).json({ error: 'Veículo não encontrado ou inativo.' });
+      if (result.error === 'not-draft') return res.status(409).json({ error: 'O transporte só pode ser alterado enquanto a viagem estiver em rascunho.' });
+      if (result.error === 'insufficient-capacity') return res.status(409).json({ error: 'A capacidade do veículo precisa ser igual ou maior que a capacidade da viagem.' });
+      if (result.error === 'invalid-schedule') return res.status(409).json({ error: 'Os horários da viagem são inválidos.' });
+      if (result.error === 'schedule-conflict') return res.status(409).json({ error: 'Este veículo já está reservado em uma viagem com horário sobreposto.' });
+      return res.json({ message: 'Veículo vinculado à viagem.' });
+    }
+    const fail = (code, message) => {
+      if (transactionOpen) { db.exec('ROLLBACK'); transactionOpen = false; }
+      return res.status(code).json({ error: message });
+    };
+    db.exec('BEGIN IMMEDIATE');
+    transactionOpen = true;
+    const trip = db.prepare(
+      'SELECT id, status, capacity, departure_at, return_at, vehicle_id FROM trips WHERE id = ?'
+    ).get(tripId);
+    if (!trip) return fail(404, 'Viagem não encontrada.');
+    if (trip.status !== 'draft') return fail(409, 'O transporte só pode ser alterado enquanto a viagem estiver em rascunho.');
+    const vehicle = db.prepare(
+      'SELECT id, capacity FROM vehicles WHERE id = ? AND active = 1'
+    ).get(vehicleId);
+    if (!vehicle) return fail(404, 'Veículo não encontrado ou inativo.');
+    if (vehicle.capacity < trip.capacity) {
+      return fail(409, 'A capacidade do veículo precisa ser igual ou maior que a capacidade da viagem.');
+    }
+    const departure = Date.parse(trip.departure_at);
+    const returning = Date.parse(trip.return_at);
+    if (!Number.isFinite(departure) || !Number.isFinite(returning) || departure >= returning) {
+      return fail(409, 'Os horários da viagem são inválidos.');
+    }
+    const assignments = db.prepare(
+      "SELECT id, departure_at, return_at FROM trips WHERE vehicle_id = ? AND id <> ? AND status NOT IN ('cancelled','completed')"
+    ).all(vehicleId, tripId);
+    for (const assigned of assignments) {
+      const existingDeparture = Date.parse(assigned.departure_at);
+      const existingReturn = Date.parse(assigned.return_at);
+      if (!Number.isFinite(existingDeparture) || !Number.isFinite(existingReturn) ||
+          (departure < existingReturn && returning > existingDeparture)) {
+        return fail(409, 'Este veículo já está reservado em uma viagem com horário sobreposto.');
+      }
+    }
+    if (Number(trip.vehicle_id) !== vehicleId) {
+      db.prepare('UPDATE trips SET vehicle_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+        .run(vehicleId, tripId);
+      audit(req.auth.user.id, 'assign_vehicle', 'trip', tripId);
+    }
+    db.exec('COMMIT');
+    transactionOpen = false;
+    return res.json({ message: 'Veículo vinculado à viagem.' });
+  } catch (error) {
+    if (transactionOpen) { try { db.exec('ROLLBACK'); } catch {} }
+    next(error);
+  }
+});
 
 app.get('/api/trips/:id/participants', requireAuth, async (req, res, next) => {
   const tripId = Number(req.params.id);
