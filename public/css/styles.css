@@ -417,3 +417,41 @@ body.dark-mode .verification-code-badge{border-color:#42694e;background:#1b3826;
 }
 
 #pwa-install[hidden]{display:none!important}
+
+
+/* Revisão visual: o tema claro também precisa clarear o cartão de login,
+   os controles e o banner; o tema escuro fica restrito a body.dark-mode. */
+.auth-card{border-color:#e2ebe4;background:#fff;box-shadow:0 18px 55px #163d2812}
+.auth-card h2{color:var(--ink)}
+.auth-card>.muted{color:var(--muted)}
+.login-school-mark strong{color:var(--green)}
+.login-school-mark small{color:var(--muted)}
+.auth-card label{color:#405047}
+.auth-card input,.auth-card select{border-color:#dce5de;background:#fff;color:var(--ink)}
+.auth-card input::placeholder{color:#829287}
+.auth-card .button-secondary{border-color:var(--line);background:#fff;color:var(--ink)}
+.auth-card .link-button{color:var(--green)}
+.auth-card .helper,.auth-card .registration-intro,.auth-card .field-hint{color:var(--muted)}
+.auth-card .registration-form{border-color:var(--line)}
+.theme-toggle{border-color:var(--line);background:#fff;color:var(--ink)}
+.dashboard-welcome-banner{border-color:#d8eadc;background:linear-gradient(100deg,#eaf6ed,#fff 68%,#e5f3e8)}
+.dashboard-welcome-banner strong{color:#17452d}
+.dashboard-welcome-banner div span{color:#6e8174}
+.banner-years{color:var(--green)}
+@media(max-width:850px){.content-panel{background:transparent}}
+body.dark-mode .auth-card{border-color:#304238;background:#15251b;box-shadow:0 20px 60px #00000030}
+body.dark-mode .auth-card h2{color:#f0f7f2}
+body.dark-mode .auth-card>.muted{color:#b7c8bd}
+body.dark-mode .login-school-mark strong{color:#a8d8b7}
+body.dark-mode .login-school-mark small{color:#a5b3a9}
+body.dark-mode .auth-card label{color:#d5e1d8}
+body.dark-mode .auth-card input,body.dark-mode .auth-card select{border-color:#3b5143;background:#101c15;color:#edf5ef}
+body.dark-mode .auth-card .button-secondary{border-color:#3b5143;background:#17251c;color:#e7eee9}
+body.dark-mode .auth-card .link-button{color:#a8d8b7}
+body.dark-mode .auth-card .helper,body.dark-mode .auth-card .registration-intro,body.dark-mode .auth-card .field-hint{color:#a5b3a9}
+body.dark-mode .auth-card .registration-form{border-color:#304238}
+body.dark-mode .theme-toggle{border-color:#3b5143;background:#17251c;color:#e7eee9}
+body.dark-mode .dashboard-welcome-banner{border-color:#31513c;background:linear-gradient(100deg,#183323,#14231a 68%,#1b3425)}
+body.dark-mode .dashboard-welcome-banner strong{color:#d7ebdc}
+body.dark-mode .dashboard-welcome-banner div span{color:#a5b3a9}
+body.dark-mode .banner-years{color:#a8d8b7}
