@@ -17,6 +17,26 @@ const COLLECTIONS = Object.freeze({
   registrationRequests: 'registration_requests'
 });
 
+function addAuditWrite(transaction, db, event) {
+  if (!event) return;
+  const actor = event.actor_user_id == null ? null : Number(event.actor_user_id);
+  if (actor !== null && (!Number.isSafeInteger(actor) || actor < 1)) {
+    throw new TypeError('Responsável pelo evento de auditoria inválido.');
+  }
+  if (typeof event.action !== 'string' || !event.action.trim() || event.action.length > 80 ||
+      typeof event.entity_type !== 'string' || !event.entity_type.trim() || event.entity_type.length > 80) {
+    throw new TypeError('Evento de auditoria inválido.');
+  }
+  const ref = db.collection('audit_logs').doc();
+  transaction.create(ref, {
+    actor_user_id: actor,
+    action: event.action.trim(),
+    entity_type: event.entity_type.trim(),
+    entity_id: event.entity_id == null ? null : String(event.entity_id),
+    created_at: new Date().toISOString()
+  });
+}
+
 function requireFirestore() {
   if (!firestore) {
     throw new Error('Firestore não configurado. Defina FIREBASE_PROJECT_ID e FIREBASE_SERVICE_ACCOUNT_JSON.');
@@ -111,7 +131,7 @@ async function getByUnique(name, field, value) {
   return get(name, index.data().documentId);
 }
 
-async function createUnique(name, field, value, data) {
+async function createUnique(name, field, value, data, auditEvent = null) {
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
     throw new TypeError('Os dados do documento devem ser um objeto.');
   }
@@ -132,6 +152,7 @@ async function createUnique(name, field, value, data) {
     transaction.create(documentRef, { ...data, [field]: normalized });
     transaction.set(counterRef, { value: id, updated_at: new Date().toISOString() });
     transaction.create(indexRef, { documentId: String(id), value: normalized });
+    addAuditWrite(transaction, db, auditEvent);
     return id;
   });
 }
@@ -192,7 +213,7 @@ async function nextNumericId(name) {
   });
 }
 
-async function createWithNumericId(name, data) {
+async function createWithNumericId(name, data, auditEvent = null) {
   if (!COLLECTIONS[name]) throw new Error('Coleção SGVE desconhecida: ' + name);
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
     throw new TypeError('Os dados do documento devem ser um objeto.');
@@ -213,6 +234,7 @@ async function createWithNumericId(name, data) {
       created_at: data.created_at || now
     });
     transaction.set(counterRef, { value: id, updated_at: now });
+    addAuditWrite(transaction, db, auditEvent);
     return id;
   });
 }
@@ -255,7 +277,7 @@ async function upsertUnique(name, field, value, createData, updateData, allowedE
 }
 
 
-async function createUniqueComposite(name, fields, data) {
+async function createUniqueComposite(name, fields, data, auditEvent = null) {
   if (!['classes'].includes(name) || !Array.isArray(fields) || fields.length !== 5 ||
       fields.some(field => typeof field !== 'string' || !field)) {
     throw new TypeError('Chave composta não permitida.');
@@ -284,12 +306,13 @@ async function createUniqueComposite(name, fields, data) {
     transaction.create(documentRef, { ...data, id, created_at: data.created_at || new Date().toISOString() });
     transaction.set(counterRef, { value: id, updated_at: new Date().toISOString() });
     transaction.create(indexRef, { documentId: String(id), fields: normalized });
+    addAuditWrite(transaction, db, auditEvent);
     return id;
   });
 }
 
 
-async function createTripRelationIfDraft(name, tripId, relatedId, data) {
+async function createTripRelationIfDraft(name, tripId, relatedId, data, auditEvent = null) {
   if (!['tripClasses', 'tripStaff'].includes(name)) {
     throw new TypeError('Relação de viagem não permitida.');
   }
@@ -312,11 +335,12 @@ async function createTripRelationIfDraft(name, tripId, relatedId, data) {
       return { error: 'target-not-found' };
     }
     if (!relationSnapshot.exists) transaction.create(relationRef, data);
+    addAuditWrite(transaction, requireFirestore(), auditEvent);
     return { ok: true };
   });
 }
 
-async function transitionTripStatus(tripId, expectedStatus, nextStatus, extra = {}, requireLinkedClass = false) {
+async function transitionTripStatus(tripId, expectedStatus, nextStatus, extra = {}, requireLinkedClass = false, auditEvent = null) {
   const tripKey = normalizeId(tripId);
   const db = requireFirestore();
   const tripRef = collection('trips').doc(tripKey);
@@ -335,11 +359,12 @@ async function transitionTripStatus(tripId, expectedStatus, nextStatus, extra = 
     transaction.update(tripRef, {
       status: nextStatus, ...extra, updated_at: new Date().toISOString()
     });
+    addAuditWrite(transaction, db, auditEvent);
     return { ok: true };
   });
 }
 
-async function createStudentInActiveClass(fullName, classId) {
+async function createStudentInActiveClass(fullName, classId, auditEvent = null) {
   const classKey = normalizeId(classId);
   const db = requireFirestore();
   const classRef = collection('classes').doc(classKey);
@@ -358,11 +383,12 @@ async function createStudentInActiveClass(fullName, classId) {
       user_id: null, active: true, created_at: now, updated_at: now
     });
     transaction.set(counterRef, { value: id, updated_at: now });
+    addAuditWrite(transaction, db, auditEvent);
     return { id };
   });
 }
 
-async function linkGuardianIfActive(studentId, guardianId, relationship) {
+async function linkGuardianIfActive(studentId, guardianId, relationship, auditEvent = null) {
   const studentKey = normalizeId(studentId);
   const guardianKey = normalizeId(guardianId);
   const studentRef = collection('students').doc(studentKey);
@@ -379,11 +405,12 @@ async function linkGuardianIfActive(studentId, guardianId, relationship) {
       student_id: Number(studentKey), guardian_user_id: Number(guardianKey),
       relationship_label: relationship || null, created_at: new Date().toISOString()
     });
+    addAuditWrite(transaction, requireFirestore(), auditEvent);
     return true;
   });
 }
 
-async function createTripStudentWithinCapacity(tripId, studentId) {
+async function createTripStudentWithinCapacity(tripId, studentId, auditEvent = null) {
   const tripKey = normalizeId(tripId);
   const studentKey = normalizeId(studentId);
   const tripRef = collection('trips').doc(tripKey);
@@ -427,6 +454,7 @@ async function createTripStudentWithinCapacity(tripId, studentId) {
     transaction.update(tripRef, {
       participant_count: count + 1, updated_at: new Date().toISOString()
     });
+    addAuditWrite(transaction, requireFirestore(), auditEvent);
     return { ok: true };
   });
 }
