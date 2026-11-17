@@ -63,7 +63,7 @@ async function listUsers(limit = 300) {
   return users.map(publicUser);
 }
 
-async function createUser({ display_name, email, password_hash, role, active = true }) {
+async function createUser({ display_name, email, password_hash, role, active = true, actor_user_id = null }) {
   const name = typeof display_name === 'string' ? display_name.trim() : '';
   const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
   const validEmail = normalizedEmail.length <= 254 &&
@@ -85,7 +85,7 @@ async function createUser({ display_name, email, password_hash, role, active = t
     active,
     created_at: now,
     updated_at: now
-  });
+  }, actor_user_id == null ? null : { actor_user_id, action: 'create', entity_type: 'user' });
 }
 
 async function importUserWithId({ id, display_name, email, password_hash, role, active = true }) {
@@ -272,6 +272,7 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
   const db = require('./firebase').firestore;
   if (!db) throw new Error('Firestore não configurado.');
   const requestRef = db.collection('registration_requests').doc(String(id));
+  const auditRef = db.collection('audit_logs').doc();
   const counterRef = db.collection('_sgve_counters').doc('users');
   const userIndexRef = email => {
     const { createHash } = require('node:crypto');
@@ -288,11 +289,14 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
     }
     const request = validateRegistrationRequest(requestSnapshot.data());
     if (decision === 'rejected') {
+      const now = new Date().toISOString();
       transaction.update(requestRef, {
-        status: 'rejected',
-        password_hash: null,
-        reviewed_by: reviewer,
-        reviewed_at: new Date().toISOString()
+        status: 'rejected', password_hash: null,
+        reviewed_by: reviewer, reviewed_at: now
+      });
+      transaction.create(auditRef, {
+        actor_user_id: reviewer, action: 'reject_registration',
+        entity_type: 'registration_request', entity_id: String(id), created_at: now
       });
       return null;
     }
@@ -311,10 +315,12 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
     transaction.set(counterRef, { value: userId, updated_at: now });
     transaction.create(indexRef, { documentId: String(userId), value: request.email });
     transaction.update(requestRef, {
-      status: 'approved',
-      password_hash: null,
-      reviewed_by: reviewer,
-      reviewed_at: now
+      status: 'approved', password_hash: null,
+      reviewed_by: reviewer, reviewed_at: now
+    });
+    transaction.create(auditRef, {
+      actor_user_id: reviewer, action: 'approve_registration',
+      entity_type: 'registration_request', entity_id: String(id), created_at: now
     });
     return userId;
   });
