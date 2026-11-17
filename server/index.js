@@ -355,8 +355,8 @@ app.post('/api/students/:id/guardians', requireAuth, requireCsrf, requireRoles(.
     const student = db.prepare('SELECT id FROM students WHERE id = ? AND active = 1').get(studentId);
     const guardian = db.prepare("SELECT id FROM users WHERE email = ? AND role = 'guardian' AND active = 1").get(email);
     if (!student || !guardian) return res.status(404).json({ error: 'Estudante ou conta de responsável não encontrada.' });
-    db.prepare('INSERT OR IGNORE INTO student_guardians (student_id, guardian_user_id, relationship_label) VALUES (?, ?, ?)').run(studentId, guardian.id, relationship || null);
-    audit(req.auth.user.id, 'link_guardian', 'student', studentId);
+    const linkedGuardian = db.prepare('INSERT OR IGNORE INTO student_guardians (student_id, guardian_user_id, relationship_label) VALUES (?, ?, ?)').run(studentId, guardian.id, relationship || null);
+    if (linkedGuardian.changes) audit(req.auth.user.id, 'link_guardian', 'student', studentId);
     res.json({ message: 'Responsável vinculado ao estudante.' });
   } catch (error) { next(error); }
 });
@@ -523,8 +523,8 @@ app.post('/api/trips/:id/classes', requireAuth, requireCsrf, requireRoles(...REC
     const schoolClass = db.prepare('SELECT id FROM classes WHERE id = ? AND active = 1').get(classId);
     if (!trip || !schoolClass) return res.status(404).json({ error: 'Viagem ou turma não encontrada.' });
     if (trip.status !== 'draft') return res.status(409).json({ error: 'Turmas só podem ser vinculadas enquanto a viagem estiver em rascunho.' });
-    db.prepare('INSERT OR IGNORE INTO trip_classes (trip_id, class_id) VALUES (?, ?)').run(tripId, classId);
-    audit(req.auth.user.id, 'link_class', 'trip', tripId);
+    const linkedClass = db.prepare('INSERT OR IGNORE INTO trip_classes (trip_id, class_id) VALUES (?, ?)').run(tripId, classId);
+    if (linkedClass.changes) audit(req.auth.user.id, 'link_class', 'trip', tripId);
     res.json({ message: 'Turma vinculada à viagem.' });
   } catch (error) { next(error); }
 });
@@ -550,8 +550,8 @@ app.post('/api/trips/:id/students', requireAuth, requireCsrf, requireRoles(...RE
     const exists = db.prepare('SELECT 1 AS found FROM trip_students WHERE trip_id = ? AND student_id = ?').get(tripId, studentId);
     const count = db.prepare('SELECT COUNT(*) AS total FROM trip_students WHERE trip_id = ?').get(tripId).total;
     if (!exists && count >= trip.capacity) return res.status(409).json({ error: 'A capacidade da viagem foi atingida.' });
-    db.prepare("INSERT OR IGNORE INTO trip_students (trip_id, student_id) VALUES (?, ?)").run(tripId, studentId);
-    audit(req.auth.user.id, 'link_student', 'trip', tripId);
+    const linkedStudent = db.prepare("INSERT OR IGNORE INTO trip_students (trip_id, student_id) VALUES (?, ?)").run(tripId, studentId);
+    if (linkedStudent.changes) audit(req.auth.user.id, 'link_student', 'trip', tripId);
     res.json({ message: 'Estudante vinculado à viagem.' });
   } catch (error) { next(error); }
 });
@@ -570,8 +570,8 @@ app.post('/api/trips/:id/staff', requireAuth, requireCsrf, requireRoles(...RECOR
     const teacher = db.prepare("SELECT id FROM users WHERE id = ? AND role = 'teacher' AND active = 1").get(userId);
     if (!trip || !teacher) return res.status(404).json({ error: 'Viagem ou professor não encontrado.' });
     if (trip.status !== 'draft') return res.status(409).json({ error: 'Equipe só pode ser alterada enquanto a viagem estiver em rascunho.' });
-    db.prepare('INSERT OR IGNORE INTO trip_staff (trip_id, user_id) VALUES (?, ?)').run(tripId, userId);
-    audit(req.auth.user.id, 'assign_teacher', 'trip', tripId);
+    const assignedTeacher = db.prepare('INSERT OR IGNORE INTO trip_staff (trip_id, user_id) VALUES (?, ?)').run(tripId, userId);
+    if (assignedTeacher.changes) audit(req.auth.user.id, 'assign_teacher', 'trip', tripId);
     res.json({ message: 'Professor vinculado à viagem.' });
   } catch (error) { next(error); }
 });
