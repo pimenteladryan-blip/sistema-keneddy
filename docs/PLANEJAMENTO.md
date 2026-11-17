@@ -186,3 +186,9 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Testes do emulador verificam que os eventos de auditoria são gravados junto com as alterações e que cada evento de criação referencia o registro correto.
 - [x] A proteção de origem foi endurecida: cabeçalho Origin ausente também é recusado. Os testes automatizados de cadastro foram ajustados para simular corretamente o navegador.
 - [x] CI do commit `1aa206dbc2409d4719d7feb3bc6c349e008c2da2` passou em push e pull request, incluindo testes unitários, autenticação, permissões, auditoria e Firestore Emulator.
+
+### Proteção contra acesso direto ao Firestore (17/11/2026)
+- [x] Criado `firestore.rules` com negação padrão de leitura e gravação para clientes web/mobile. O sistema usa o Firebase Admin SDK no servidor, que não depende das regras de cliente.
+- [x] Vinculadas as regras e os índices ao `firebase.json`.
+- [x] Adicionado teste automatizado para confirmar que a configuração aponta para as regras e que elas não permitem acesso público.
+- [ ] As regras estão preparadas no repositório, mas ainda NÃO foram publicadas no projeto Firebase real. A publicação será feita somente na etapa controlada de implantação, após revisão e autorização.
