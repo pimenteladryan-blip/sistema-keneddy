@@ -205,4 +205,4 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] README atualizado para separar claramente a demonstração estática do GitHub Pages e o backend Express/Firestore em desenvolvimento.
 - [x] Documentado que a integração Firestore está na branch de migração, não foi mesclada nem implantada, e que o emulador não equivale à validação do Firebase real.
 - [x] Documentados os limites de uso com dados fictícios e o tratamento obrigatório de credenciais privadas como segredos.
-- [x] Reforçado `.gitignore` para ignorar arquivos locais de contas de serviço Firebase, chaves privadas `.pem/.key` e variações comuns de nomes de service account. Isso reduz risco de inclusão acidental de credenciais no Git.
+- [x] Reforçado `.gitignore` para ignorar arquivos locais de contas de serviço Firebase, chaves privadas `.pem/.key` e variações comuns de nomes de service account. Isso reduz risco de inclusão acidental de credenciais no Git.- [x] Descrição do PR #1 atualizada com escopo implementado, validações, pendências de produção e aviso explícito de que continua em rascunho, sem mesclagem ou implantação.
