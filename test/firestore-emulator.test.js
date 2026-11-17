@@ -123,7 +123,16 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
   assert.ok(firstStudentId > 0 && secondStudentId > firstStudentId);
   assert.equal((await school.listStudentsForUser({ id: adminId, role: 'admin' })).length, 2);
 
-  assert.equal(await school.linkGuardian(firstStudentId, 'responsavel@emulator.sgve', 'Mãe'), true);
+  const guardianAuditBefore = await store.list('auditLogs', {
+    filters: [{ field: 'action', op: '==', value: 'link_guardian' }]
+  });
+  assert.equal(await school.linkGuardian(firstStudentId, 'responsavel@emulator.sgve', 'Mãe', adminId), true);
+  assert.equal(await school.linkGuardian(firstStudentId, 'responsavel@emulator.sgve', 'Mãe', adminId), true);
+  const guardianAuditAfter = await store.list('auditLogs', {
+    filters: [{ field: 'action', op: '==', value: 'link_guardian' }]
+  });
+  assert.equal(guardianAuditAfter.length, guardianAuditBefore.length + 1,
+    'vínculo de responsável repetido não deve gerar auditoria duplicada');
   const guardianStudents = await school.listStudentsForUser({ id: guardianId, role: 'guardian' });
   assert.equal(guardianStudents.length, 1);
   assert.equal(guardianStudents[0].id, firstStudentId);
@@ -136,8 +145,28 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     returning: '2026-12-01T17:00:00.000Z',
     capacity: 1
   }, adminId);
-  assert.deepEqual(await school.linkTripClass(tripId, classId), { ok: true });
-  assert.deepEqual(await school.assignTripTeacher(tripId, teacherId), { ok: true });
+  const classLinkAuditBefore = await store.list('auditLogs', {
+    filters: [{ field: 'action', op: '==', value: 'link_class' }]
+  });
+  assert.deepEqual(await school.linkTripClass(tripId, classId, adminId), { ok: true });
+  assert.deepEqual(await school.linkTripClass(tripId, classId, adminId), { ok: true });
+  const classLinkAuditAfter = await store.list('auditLogs', {
+    filters: [{ field: 'action', op: '==', value: 'link_class' }]
+  });
+  assert.equal(classLinkAuditAfter.length, classLinkAuditBefore.length + 1,
+    'vínculo de turma repetido não deve gerar auditoria duplicada');
+
+  const staffAuditBefore = await store.list('auditLogs', {
+    filters: [{ field: 'action', op: '==', value: 'assign_teacher' }]
+  });
+  assert.deepEqual(await school.assignTripTeacher(tripId, teacherId, adminId), { ok: true });
+  assert.deepEqual(await school.assignTripTeacher(tripId, teacherId, adminId), { ok: true });
+  const staffAuditAfter = await store.list('auditLogs', {
+    filters: [{ field: 'action', op: '==', value: 'assign_teacher' }]
+  });
+  assert.equal(staffAuditAfter.length, staffAuditBefore.length + 1,
+    'vínculo de professor repetido não deve gerar auditoria duplicada');
+
   assert.deepEqual(await school.linkTripStudent(tripId, firstStudentId), { ok: true });
   assert.deepEqual(await school.linkTripStudent(tripId, secondStudentId), { error: 'capacity' });
 
