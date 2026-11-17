@@ -161,11 +161,12 @@ async function listTripsForUser(user) {
       filters: [{ field: 'trip_id', op: '==', value: Number(trip.id) }],
       limit: 1000
     });
+    const { driver_id: assignedDriverId, ...tripData } = trip;
     return {
-      ...trip, id: Number(trip.id), participant_count: members.length,
+      ...tripData, id: Number(trip.id), participant_count: members.length,
       vehicle_name: vehicleNames.get(Number(trip.vehicle_id)) || null,
       ...(['admin', 'direction', 'secretariat'].includes(user.role)
-        ? { driver_name: driverNames.get(Number(trip.driver_id)) || null } : {}),
+        ? { driver_name: driverNames.get(Number(assignedDriverId)) || null } : {}),
       statusLabel: ({
         draft: 'Rascunho', pending_approval: 'Aguardando aprovação',
         approved: 'Aprovada', open: 'Inscrições abertas',
@@ -319,7 +320,8 @@ async function listDrivers() {
     filters: [{ field: 'active', op: '==', value: true }],
     limit: 500
   });
-  return drivers.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  return drivers.sort((a, b) => String(a.name).localeCompare(String(b.name)))
+    .map(driver => ({ id: Number(driver.id), name: String(driver.name) }));
 }
 
 async function createDriver(data, actorUserId) {
