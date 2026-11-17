@@ -79,6 +79,12 @@ test('produção exige Firebase antes de inicializar o banco SQLite local', () =
   assert.ok(guard >= 0 && guard < sqlite);
 });
 
+test('login Google também possui limitação de tentativas por IP', () => {
+  const root = path.resolve(__dirname, '..');
+  const source = fs.readFileSync(path.join(root, 'server/index.js'), 'utf8');
+  assert.match(source, /consumeAttempts\('google-login-ip'/);
+});
+
 test('o armazenamento rejeita nomes de coleção desconhecidos', async () => {
   await assert.rejects(
     store.create('colecao_inexistente', { value: 1 }),
