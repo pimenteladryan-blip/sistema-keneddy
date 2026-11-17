@@ -3,7 +3,7 @@
 
 **Instituição de referência:** Colégio Estadual Presidente Kennedy — Ponta Grossa/PR  
 **Repositório:** https://github.com/pimenteladryan-blip/sistema-keneddy  
-**Status:** Fundação, cadastros e fluxo inicial de viagens implementados.
+**Status:** Fundação, cadastros, viagens, autorizações, presença, transporte básico e relatórios agregados implementados; validação institucional e produção pendentes.
 
 ## Objetivo
 Aplicação web responsiva para organizar viagens escolares, participantes, autorizações, frequência, transporte e relatórios. Como poderá tratar dados de crianças e adolescentes, não deve ser usada com dados reais antes de revisão técnica, validação institucional e avaliação de privacidade/LGPD.
@@ -24,7 +24,7 @@ As permissões são verificadas no servidor. Esconder opções na interface não
 3. **Gestão inicial de viagens — implementado:** criação de rascunho, vínculo de turmas/estudantes, envio para aprovação e aprovação pela direção/administração.
 4. **Autorizações — backend implementado:** decisão digital pelo responsável vinculado e registro administrativo de autorização em papel, com trilha de auditoria. O sistema registra o status, não recebe nem armazena fotografia/documento assinado.
 5. **Presença — backend e interface implementados:** listas de saída e retorno, com trilha de auditoria; validação visual final ainda pendente.
-6. **Equipe e transporte — parcialmente implementado:** atribuição de professores e cadastro/atribuição de veículos; gestão de condutores e validação operacional da frota ainda pendentes.
+6. **Equipe e transporte — backend e interface básicos implementados:** atribuição de professores, cadastro de veículos e condutores e atribuição de ambos às viagens, com bloqueio de conflitos de horário; validação operacional e regras institucionais da frota ainda pendentes.
 7. **Relatórios — parcialmente implementado:** resumo agregado e exportação CSV restritos à gestão, sem nomes de estudantes; filtros, relatórios específicos e eventual módulo financeiro ainda pendentes.
 8. **Implantação — pendente:** revisão de segurança, privacidade, acessibilidade, backups, monitoramento e aprovação institucional.
 
@@ -56,7 +56,7 @@ As permissões são verificadas no servidor. Esconder opções na interface não
 GPS em tempo real, aplicativo nativo, integração automática com sistemas oficiais e processamento de pagamentos.
 
 ## Próxima entrega
-Concluir gestão de condutores, relatórios específicos necessários à escola e validação visual; depois revisar segurança, privacidade e operação institucional.
+Validar visualmente os fluxos de transporte e relatórios com contas fictícias, definir relatórios e regras operacionais com a escola; depois revisar segurança, privacidade e operação institucional.
 
 ## Funcionalidades do protótipo estático (GitHub Pages)
 
@@ -93,7 +93,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Executar teste controlado no projeto Firebase real, com contas fictícias e sem dados de estudantes.
 - [x] Arquitetura same-origin definida: Express serve `public/` e a API no mesmo host; `docs/` permanece demonstração separada. Cookies, Origin e CSRF mantidos.
 - [x] Evitar a inicialização do SQLite quando Firebase estiver configurado: sessão, autenticação, cadastros e módulos integrados passam a usar Firestore sem criar banco local efêmero.
-- [ ] Concluir gestão de condutores, relatórios agregados e revisão das dependências SQLite; autorização digital, presença e cadastro/atribuição básica de veículos agora têm backend, interface e testes nos dois modos de armazenamento.
+- [x] Cadastro e atribuição básica de condutores concluídos no SQLite e Firestore, com controle de conflito de agenda e interface; relatórios agregados já têm backend e interface.\n- [ ] Confirmar regras operacionais da frota e relatórios específicos com a escola; revisar dependências SQLite e plano de importação preservando IDs e relações.
 - [ ] Planejar migração/importação controlada dos dados existentes, preservando IDs e relações; não importar dados pessoais reais nesta fase.
 - [x] Gestão de ativação/desativação de contas e bootstrap administrativo implementados no Firestore; a validação real ainda depende de teste controlado no projeto Firebase.
 - [ ] Fazer revisão de segurança, privacidade/LGPD, acessibilidade, backup/restauração e validação institucional.
@@ -371,3 +371,13 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] CI da atualização final da interface (ocultação de ações incompatíveis com autorização em papel) passou em push e pull request no commit `e523f1ef3cbbbe206d4df66bb3cd8a12709718e1`, execuções `44092572065` e `44092584118`.
 - [x] CI dos testes finais de privacidade dos relatórios passou em push e pull request no commit `355e05975811bf625f1933bac8c85ebfdcdf75fb`, execuções `44093054594` e `44093061041`; sintaxe, suíte automatizada e Firestore Emulator concluídos com sucesso.
 - [ ] Validar visualmente o fluxo com contas fictícias; não anexar documentos reais nem dados pessoais nesta fase.
+### Cadastro e atribuição básica de condutores (17/11/2026)
+- [x] Criada coleção Firestore `drivers` e tabela SQLite `drivers`, com identificador, nome e estado ativo; cadastro não coleta CPF, número de CNH, telefone ou endereço.
+- [x] Criadas rotas autenticadas e protegidas por CSRF para equipe gestora listar/cadastrar condutores e atribuir condutor a viagem em rascunho.
+- [x] Atribuição bloqueia conflitos de horário, permite viagens consecutivas e é idempotente; Firestore usa transação e atualização do documento do condutor para serializar atribuições concorrentes; SQLite usa `BEGIN IMMEDIATE`.
+- [x] Nome do condutor e lista de condutores ficam restritos à administração, direção e secretaria; demais perfis não recebem nome nem identificador interno do condutor.
+- [x] Interface permite cadastrar condutores, selecionar viagem e atribuir; cartões de viagem mostram o nome apenas à equipe gestora.
+- [x] Migração SQLite adiciona `driver_id` sem apagar viagens antigas e cria índice para consultas de agenda.
+- [x] Testes cobrem duplicidade de nomes, dados inválidos, conflitos, intervalos consecutivos, idempotência, auditoria, migração e permissões nos testes SQLite e Firestore Emulator.
+- [x] CI completo passou no commit `206199b3b89d8f83ad7387fff8308380f30e29ee`, execuções `44096325779` (push) e `44096336173` (pull request), incluindo sintaxe, testes automatizados, migração SQLite e Firestore Emulator.
+- [ ] Validar visualmente o fluxo com contas fictícias e confirmar com a escola quais verificações operacionais dos condutores devem ocorrer fora do sistema.
