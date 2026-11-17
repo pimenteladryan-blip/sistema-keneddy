@@ -294,3 +294,9 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] CI da correção e dos novos testes passou integralmente nas execuções 44081669964 e 44081679667, incluindo testes unitários e Firestore Emulator.
 - [x] Confirmado no CI que aprovação e rejeição de solicitações funcionam pela API com IDs numéricos válidos; a conta aprovada fica ativa e as listagens não expõem hashes de senha.
 - [ ] Aguardar CI desta atualização final do planejamento.
+
+
+### Concorrência na aprovação de cadastros (17/11/2026)
+- [x] Adicionado teste de integração que dispara duas aprovações simultâneas para a mesma solicitação no Firestore Emulator.
+- [x] O comportamento esperado é exatamente uma resposta de sucesso (200) e uma resposta de solicitação já analisada (404), sem duplicar a conta.
+- [ ] Aguardar CI deste teste concorrente.
