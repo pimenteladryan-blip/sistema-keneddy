@@ -649,6 +649,12 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal((await teacherApi('/api/vehicles')).status, 403);
     assert.equal((await teacherApi('/api/drivers')).status, 403,
       'professor não pode consultar cadastro de condutores');
+    assert.equal((await teacherApi('/api/drivers', {
+      method: 'POST', body: JSON.stringify({ name: 'Condutor não autorizado' })
+    })).status, 403, 'professor não pode cadastrar condutores');
+    assert.equal((await teacherApi('/api/trips/' + apiTripId + '/driver', {
+      method: 'POST', body: JSON.stringify({ driver_id: driverId })
+    })).status, 403, 'professor não pode alterar escala de condutores');
     assert.equal((await teacherApi('/api/classes', {
       method: 'POST', body: JSON.stringify({ level: 'medio', grade: '4º ano', course: 'regular', section: 'A', school_year: 2026 })
     })).status, 403);
