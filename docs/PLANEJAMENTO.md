@@ -192,3 +192,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Vinculadas as regras e os índices ao `firebase.json`.
 - [x] Adicionado teste automatizado para confirmar que a configuração aponta para as regras e que elas não permitem acesso público.
 - [ ] As regras estão preparadas no repositório, mas ainda NÃO foram publicadas no projeto Firebase real. A publicação será feita somente na etapa controlada de implantação, após revisão e autorização.
+- [x] Acrescentado teste de integração que consulta a API REST do Firestore Emulator sem autenticação; deve receber HTTP 403, confirmando que as regras negam leitura anônima direta e não apenas que o arquivo de regras existe.
+- [ ] Aguardar CI do teste de bloqueio anônimo antes de considerar esta etapa validada.
