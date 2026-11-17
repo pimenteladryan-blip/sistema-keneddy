@@ -21,11 +21,13 @@ function showDashboard(user) {
   document.querySelector('#trip-form').classList.toggle('hidden', !canManage);
   document.querySelector('#trip-assignment').classList.toggle('hidden', !canManage);
   document.querySelector('#users-tab').classList.toggle('hidden', !canManage);
+  document.querySelector('#vehicles-tab').classList.toggle('hidden', !canManage);
   document.querySelector('#registration-requests-section').classList.toggle('hidden', user.role !== 'admin');
   document.querySelectorAll('[data-admin-only]').forEach(option => { option.hidden = user.role !== 'admin'; });
   loadClasses();
   loadStudents();
   loadTrips();
+  if (canManage) loadVehicles();
   if (user.role === 'admin') loadRegistrationRequests();
 }
 function showLogin() {
@@ -99,6 +101,30 @@ async function loadStudents() {
   } catch (error) { list.textContent = error.message; }
 }
 
+
+async function loadVehicles() {
+  if (!currentUser || !['admin', 'direction', 'secretariat'].includes(currentUser.role)) return;
+  const list = document.querySelector('#vehicles-list');
+  try {
+    const data = await api('/api/vehicles');
+    document.querySelector('#vehicles-count').textContent = String(data.vehicles.length);
+    list.innerHTML = data.vehicles.length ? data.vehicles.map(vehicle =>
+      '<article class="data-row"><strong>' + escapeHtml(vehicle.name) + '</strong><span>' +
+      escapeHtml(vehicle.type) + ' · ' + Number(vehicle.capacity) + ' lugares</span></article>'
+    ).join('') : '<p class="muted">Nenhum veículo cadastrado.</p>';
+    const select = document.querySelector('#trip-vehicle-select');
+    const previous = select.value;
+    select.innerHTML = '<option value="">Selecione um veículo</option>' + data.vehicles.map(vehicle =>
+      '<option value="' + Number(vehicle.id) + '">' +
+      escapeHtml(vehicle.name + ' · ' + vehicle.type + ' · ' + vehicle.capacity + ' lugares') +
+      '</option>'
+    ).join('');
+    if (previous) select.value = previous;
+  } catch (error) {
+    list.textContent = error.message;
+  }
+}
+
 function dateLabel(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? 'Data não informada' : date.toLocaleString('pt-BR');
@@ -152,13 +178,14 @@ async function loadTrips() {
       if (canManage && trip.status === 'draft') action = '<button type="button" class="small-action" data-trip-action="submit" data-trip-id="' + trip.id + '">Enviar para aprovação</button>';
       if (currentUser && ['admin', 'direction'].includes(currentUser.role) && trip.status === 'pending_approval') action = '<button type="button" class="small-action" data-trip-action="approve" data-trip-id="' + trip.id + '">Aprovar viagem</button>';
       const participantsButton = '<button type="button" class="small-action button-secondary" data-trip-action="participants" data-trip-id="' + trip.id + '">Participantes</button>';
-      return '<article class="trip-card"><div class="trip-card-main"><div class="trip-title-row"><strong>' + escapeHtml(trip.title) + '</strong><span class="status-pill status-' + escapeHtml(trip.status) + '">' + escapeHtml(trip.statusLabel) + '</span></div><p>' + escapeHtml(trip.destination) + '</p><small>Saída: ' + escapeHtml(dateLabel(trip.departure_at)) + '</small><small>Retorno: ' + escapeHtml(dateLabel(trip.return_at)) + '</small><small>Participantes: ' + trip.participant_count + ' / ' + trip.capacity + '</small></div><div class="trip-card-actions">' + action + participantsButton + '</div><div class="participants-area hidden" data-trip-participants="' + trip.id + '" data-trip-status="' + escapeHtml(trip.status) + '"></div></article>';
+      return '<article class="trip-card"><div class="trip-card-main"><div class="trip-title-row"><strong>' + escapeHtml(trip.title) + '</strong><span class="status-pill status-' + escapeHtml(trip.status) + '">' + escapeHtml(trip.statusLabel) + '</span></div><p>' + escapeHtml(trip.destination) + '</p><small>Saída: ' + escapeHtml(dateLabel(trip.departure_at)) + '</small><small>Retorno: ' + escapeHtml(dateLabel(trip.return_at)) + '</small><small>Participantes: ' + trip.participant_count + ' / ' + trip.capacity + '</small><small>Veículo: ' + escapeHtml(trip.vehicle_name || 'Não atribuído') + '</small></div><div class="trip-card-actions">' + action + participantsButton + '</div><div class="participants-area hidden" data-trip-participants="' + trip.id + '" data-trip-status="' + escapeHtml(trip.status) + '"></div></article>';
     }).join('') : '<p class="muted">Nenhuma viagem cadastrada.</p>';
     const options = '<option value="">Selecione uma viagem</option>' + data.trips.filter(t => t.status === 'draft').map(t =>
       '<option value="' + t.id + '">' + escapeHtml(t.title + ' · ' + t.destination) + '</option>'
     ).join('');
     document.querySelector('#trip-class-trip').innerHTML = options;
     document.querySelector('#trip-student-trip').innerHTML = options;
+    document.querySelector('#trip-vehicle-trip').innerHTML = options;
   } catch (error) { list.textContent = error.message; }
 }
 async function loadRegistrationRequests() {
@@ -216,6 +243,38 @@ document.querySelector('#trip-class-form').addEventListener('submit', async even
     showMessage('#trip-message', result.message);
   } catch (error) { showMessage('#trip-message', error.message, true); }
 });
+
+document.querySelector('#vehicle-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  payload.capacity = Number(payload.capacity);
+  try {
+    const result = await api('/api/vehicles', {
+      method: 'POST', body: JSON.stringify(payload)
+    });
+    event.currentTarget.reset();
+    event.currentTarget.elements.capacity.value = '40';
+    showMessage('#vehicle-message', result.message);
+    await loadVehicles();
+  } catch (error) {
+    showMessage('#vehicle-message', error.message, true);
+  }
+});
+
+document.querySelector('#trip-vehicle-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  try {
+    const result = await api('/api/trips/' + Number(payload.trip_id) + '/vehicle', {
+      method: 'POST', body: JSON.stringify({ vehicle_id: Number(payload.vehicle_id) })
+    });
+    showMessage('#trip-message', result.message);
+    await loadTrips();
+  } catch (error) {
+    showMessage('#trip-message', error.message, true);
+  }
+});
+
 document.querySelector('#trip-student-form').addEventListener('submit', async event => {
   event.preventDefault();
   const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
