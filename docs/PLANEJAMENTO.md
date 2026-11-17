@@ -357,5 +357,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Exportação CSV trata campos iniciados por caracteres que podem executar fórmulas em planilhas e usa codificação UTF-8.
 - [x] Dados do relatório são limpos ao sair ou trocar para perfil sem permissão.
 - [x] Testes de integração validam contagens, vínculo de veículo e bloqueio de acesso por perfil no SQLite e Firestore Emulator.
-- [ ] Aguardar CI da implementação e dos novos testes; não considerar concluído até o resultado final.
+- [x] CI da implementação e dos testes passou em push e pull request nos commits `a3b9a447d32455c7767483bfc98d78fb1e62b51a` e `d4306b23176179db991f26851aa456c48b6671f9`, execuções `44091163168` e `44091199067`; sintaxe, testes SQLite e Firestore Emulator concluídos com sucesso.
 - [ ] Validar visualmente o painel com contas fictícias e confirmar quais relatórios a escola realmente precisa.
