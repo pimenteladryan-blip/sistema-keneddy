@@ -171,3 +171,148 @@ test('solicitação rejeitada não cria uma conta', async () => {
   });
   assert.equal(login.status, 401);
 });
+
+test('autorização familiar e presença respeitam vínculos e perfis no SQLite', async () => {
+  const admin = await adminSession();
+  const adminApi = (route, options = {}) => fetch(baseUrl + route, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      Origin: baseUrl,
+      Cookie: admin.cookie,
+      'X-CSRF-Token': admin.csrfToken,
+      ...(options.headers || {})
+    }
+  });
+  const rolePassword = 'SenhaSegura123!ABC';
+  for (const [name, email, role] of [
+    ['Professor da viagem', 'professor-viagem@sgve.local', 'teacher'],
+    ['Responsável da viagem', 'responsavel-viagem@sgve.local', 'guardian'],
+    ['Responsável externo', 'responsavel-externo@sgve.local', 'guardian'],
+    ['Professor externo', 'professor-externo@sgve.local', 'teacher']
+  ]) {
+    const created = await adminApi('/api/users', {
+      method: 'POST', body: JSON.stringify({ name, email, role, password: rolePassword })
+    });
+    assert.equal(created.status, 201);
+  }
+
+  const classResponse = await adminApi('/api/classes', {
+    method: 'POST',
+    body: JSON.stringify({ level: 'medio', grade: '1º ano', course: 'regular', section: 'A', school_year: 2026 })
+  });
+  assert.equal(classResponse.status, 201);
+  const classId = (await classResponse.json()).id;
+  const studentResponse = await adminApi('/api/students', {
+    method: 'POST', body: JSON.stringify({ full_name: 'Estudante Fictício', class_id: classId })
+  });
+  assert.equal(studentResponse.status, 201);
+  const studentId = (await studentResponse.json()).id;
+  const guardianLink = await adminApi('/api/students/' + studentId + '/guardians', {
+    method: 'POST',
+    body: JSON.stringify({ email: 'responsavel-viagem@sgve.local', relationship: 'Responsável' })
+  });
+  assert.equal(guardianLink.status, 200);
+
+  const tripResponse = await adminApi('/api/trips', {
+    method: 'POST',
+    body: JSON.stringify({
+      title: 'Visita de validação', destination: 'Museu fictício',
+      educational_purpose: 'Atividade pedagógica de teste',
+      departure_at: '2099-12-10T08:00:00.000Z',
+      return_at: '2099-12-10T17:00:00.000Z', capacity: 2
+    })
+  });
+  assert.equal(tripResponse.status, 201);
+  const tripId = (await tripResponse.json()).id;
+  assert.equal((await adminApi('/api/trips/' + tripId + '/classes', {
+    method: 'POST', body: JSON.stringify({ class_id: classId })
+  })).status, 200);
+  assert.equal((await adminApi('/api/trips/' + tripId + '/students', {
+    method: 'POST', body: JSON.stringify({ student_id: studentId })
+  })).status, 200);
+  const teacherLink = await adminApi('/api/trips/' + tripId + '/staff', {
+    method: 'POST',
+    body: JSON.stringify({ user_id: Number((await adminApi('/api/users')).status === 200 ? 0 : 0) })
+  });
+  assert.equal(teacherLink.status, 404);
+  const teacherUsersDb = new DatabaseSync(path.join(tempDir, 'sgve.sqlite'), { readOnly: true });
+  let teacherId;
+  try {
+    teacherId = teacherUsersDb.prepare('SELECT id FROM users WHERE email = ?').get('professor-viagem@sgve.local').id;
+  } finally { teacherUsersDb.close(); }
+  assert.equal((await adminApi('/api/trips/' + tripId + '/staff', {
+    method: 'POST', body: JSON.stringify({ user_id: teacherId })
+  })).status, 200);
+  assert.equal((await adminApi('/api/trips/' + tripId + '/submit', {
+    method: 'POST', body: JSON.stringify({})
+  })).status, 200);
+  assert.equal((await adminApi('/api/trips/' + tripId + '/approve', {
+    method: 'POST', body: JSON.stringify({})
+  })).status, 200);
+
+  const loginRole = async email => {
+    const response = await fetch(baseUrl + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ email, password: rolePassword })
+    });
+    assert.equal(response.status, 200);
+    const data = await response.json();
+    const cookie = response.headers.get('set-cookie').split(';')[0];
+    return (route, options = {}) => fetch(baseUrl + route, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json', Origin: baseUrl,
+        Cookie: cookie, 'X-CSRF-Token': data.csrfToken,
+        ...(options.headers || {})
+      }
+    });
+  };
+  const teacherApi = await loginRole('professor-viagem@sgve.local');
+  const teacherParticipants = await teacherApi('/api/trips/' + tripId + '/participants');
+  assert.equal(teacherParticipants.status, 200);
+  assert.equal((await teacherParticipants.json()).participants.length, 1);
+  assert.equal((await teacherApi('/api/trips/' + tripId + '/participants/' + studentId + '/authorization', {
+    method: 'POST', body: JSON.stringify({ status: 'authorized' })
+  })).status, 403);
+  const guardianApi = await loginRole('responsavel-viagem@sgve.local');
+  const guardianParticipants = await guardianApi('/api/trips/' + tripId + '/participants');
+  assert.equal(guardianParticipants.status, 200);
+  assert.equal((await guardianParticipants.json()).participants.length, 1);
+  const authResult = () => guardianApi('/api/trips/' + tripId + '/participants/' + studentId + '/authorization', {
+    method: 'POST', body: JSON.stringify({ status: 'authorized' })
+  });
+  assert.equal((await authResult()).status, 200);
+  assert.equal((await authResult()).status, 200);
+  const unrelatedGuardian = await loginRole('responsavel-externo@sgve.local');
+  assert.equal((await unrelatedGuardian('/api/trips/' + tripId + '/participants/' + studentId + '/authorization', {
+    method: 'POST', body: JSON.stringify({ status: 'authorized' })
+  })).status, 404);
+  assert.equal((await guardianApi('/api/trips/' + tripId + '/participants/' + studentId + '/attendance', {
+    method: 'POST', body: JSON.stringify({ checkpoint: 'departure', present: true })
+  })).status, 403);
+
+  const attendanceResult = () => teacherApi('/api/trips/' + tripId + '/participants/' + studentId + '/attendance', {
+    method: 'POST', body: JSON.stringify({ checkpoint: 'departure', present: true })
+  });
+  assert.equal((await attendanceResult()).status, 200);
+  assert.equal((await attendanceResult()).status, 200);
+  assert.equal((await teacherApi('/api/trips/' + tripId + '/participants/' + studentId + '/attendance', {
+    method: 'POST', body: JSON.stringify({ checkpoint: 'invalid', present: true })
+  })).status, 400);
+  const unassignedTeacher = await loginRole('professor-externo@sgve.local');
+  assert.equal((await unassignedTeacher('/api/trips/' + tripId + '/participants/' + studentId + '/attendance', {
+    method: 'POST', body: JSON.stringify({ checkpoint: 'departure', present: true })
+  })).status, 403);
+
+  const verifyDb = new DatabaseSync(path.join(tempDir, 'sgve.sqlite'), { readOnly: true });
+  try {
+    const participant = verifyDb.prepare('SELECT authorization_status, departure_present FROM trip_students WHERE trip_id = ? AND student_id = ?').get(tripId, studentId);
+    assert.equal(participant.authorization_status, 'authorized');
+    assert.equal(participant.departure_present, 1);
+    assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'authorize_trip_student'").get().total, 1);
+    assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'mark_departure_present'").get().total, 1);
+  } finally { verifyDb.close(); }
+});
+
