@@ -614,7 +614,7 @@ loginForm.addEventListener('submit', async event => {
     loginForm.reset();
     showDashboard(data.user);
   } catch (error) { loginMessage.textContent = error.message; }
-  finally { loginButton.disabled = false; loginButton.textContent = 'Entrar no sistema'; }
+  finally { loginButton.disabled = false; loginButton.textContent = 'Entrar'; }
 });
 googleLoginButton.addEventListener('click', async () => {
   loginMessage.textContent = '';
