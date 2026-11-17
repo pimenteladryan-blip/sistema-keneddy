@@ -843,6 +843,7 @@ app.post('/api/trips/:id/participants/:studentId/authorization', requireAuth, re
       }
       if (result.error === 'not-approved') return res.status(409).json({ error: 'A autorização só pode ser registrada após a aprovação da viagem.' });
       if (result.error === 'closed') return res.status(409).json({ error: 'O prazo de autorização desta viagem foi encerrado.' });
+      if (result.error === 'already-decided') return res.status(409).json({ error: 'A autorização em papel já foi registrada e não pode ser substituída digitalmente.' });
       return res.json({ message: status === 'authorized' ? 'Autorização registrada.' : 'Não autorização registrada.' });
     }
     const fail = (code, message) => {
@@ -861,6 +862,9 @@ app.post('/api/trips/:id/participants/:studentId/authorization', requireAuth, re
     if (!student || !guardianLink) return fail(404, 'Participação ou vínculo de responsável não encontrado.');
     const participant = db.prepare('SELECT authorization_status FROM trip_students WHERE trip_id = ? AND student_id = ?').get(tripId, studentId);
     if (!participant) return fail(404, 'Participação ou vínculo de responsável não encontrado.');
+    if (participant.authorization_status === 'paper_recorded') {
+      return fail(409, 'A autorização em papel já foi registrada e não pode ser substituída digitalmente.');
+    }
     if (participant.authorization_status !== status) {
       db.prepare('UPDATE trip_students SET authorization_status = ? WHERE trip_id = ? AND student_id = ?').run(status, tripId, studentId);
       audit(req.auth.user.id, status === 'authorized' ? 'authorize_trip_student' : 'decline_trip_student',
