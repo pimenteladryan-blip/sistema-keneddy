@@ -103,6 +103,44 @@ function dateLabel(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? 'Data não informada' : date.toLocaleString('pt-BR');
 }
+function authorizationLabel(status) {
+  return ({ pending: 'Pendente', authorized: 'Autorizado', declined: 'Não autorizado', paper_recorded: 'Registrado em papel' })[status] || 'Pendente';
+}
+function presenceLabel(value) {
+  return value === true ? 'Presente' : value === false ? 'Ausente' : 'Não registrada';
+}
+async function loadTripParticipants(tripId, area) {
+  area.textContent = 'Carregando participantes...';
+  try {
+    const data = await api('/api/trips/' + Number(tripId) + '/participants');
+    const tripStatus = area.dataset.tripStatus || '';
+    const canAuthorize = currentUser?.role === 'guardian' && ['approved', 'open'].includes(tripStatus);
+    const canMarkAttendance = currentUser && ['admin', 'direction', 'secretariat', 'teacher'].includes(currentUser.role) &&
+      ['approved', 'open'].includes(tripStatus);
+    area.innerHTML = data.participants.length ? data.participants.map(item => {
+      let controls = '';
+      if (canAuthorize) {
+        controls = '<div class="participant-actions">' +
+          '<button type="button" class="small-action" data-participant-action="authorization" data-status="authorized" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Autorizar</button>' +
+          '<button type="button" class="small-action reject-action" data-participant-action="authorization" data-status="declined" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Não autorizar</button></div>';
+      } else if (canMarkAttendance) {
+        controls = '<div class="participant-actions">' +
+          '<button type="button" class="small-action" data-participant-action="attendance" data-checkpoint="departure" data-present="true" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Presente na saída</button>' +
+          '<button type="button" class="small-action reject-action" data-participant-action="attendance" data-checkpoint="departure" data-present="false" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Ausente na saída</button>' +
+          '<button type="button" class="small-action" data-participant-action="attendance" data-checkpoint="return" data-present="true" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Presente no retorno</button>' +
+          '<button type="button" class="small-action reject-action" data-participant-action="attendance" data-checkpoint="return" data-present="false" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Ausente no retorno</button></div>';
+      }
+      return '<article class="data-row participant-row"><div class="participant-details"><strong>' + escapeHtml(item.full_name) + '</strong>' +
+        '<span>Autorização: ' + escapeHtml(authorizationLabel(item.authorization_status)) + '</span>' +
+        '<small>Saída: ' + escapeHtml(presenceLabel(item.departure_present)) + ' · Retorno: ' + escapeHtml(presenceLabel(item.return_present)) + '</small></div>' +
+        controls + '</article>';
+    }).join('') : '<p class="muted">Nenhum participante vinculado a esta viagem.</p>';
+    area.dataset.loaded = 'true';
+  } catch (error) {
+    area.textContent = error.message;
+    area.dataset.loaded = 'false';
+  }
+}
 async function loadTrips() {
   const list = document.querySelector('#trips-list');
   try {
@@ -113,7 +151,8 @@ async function loadTrips() {
       let action = '';
       if (canManage && trip.status === 'draft') action = '<button type="button" class="small-action" data-trip-action="submit" data-trip-id="' + trip.id + '">Enviar para aprovação</button>';
       if (currentUser && ['admin', 'direction'].includes(currentUser.role) && trip.status === 'pending_approval') action = '<button type="button" class="small-action" data-trip-action="approve" data-trip-id="' + trip.id + '">Aprovar viagem</button>';
-      return '<article class="trip-card"><div class="trip-card-main"><div class="trip-title-row"><strong>' + escapeHtml(trip.title) + '</strong><span class="status-pill status-' + escapeHtml(trip.status) + '">' + escapeHtml(trip.statusLabel) + '</span></div><p>' + escapeHtml(trip.destination) + '</p><small>Saída: ' + escapeHtml(dateLabel(trip.departure_at)) + '</small><small>Retorno: ' + escapeHtml(dateLabel(trip.return_at)) + '</small><small>Participantes: ' + trip.participant_count + ' / ' + trip.capacity + '</small></div>' + action + '</article>';
+      const participantsButton = '<button type="button" class="small-action button-secondary" data-trip-action="participants" data-trip-id="' + trip.id + '">Participantes</button>';
+      return '<article class="trip-card"><div class="trip-card-main"><div class="trip-title-row"><strong>' + escapeHtml(trip.title) + '</strong><span class="status-pill status-' + escapeHtml(trip.status) + '">' + escapeHtml(trip.statusLabel) + '</span></div><p>' + escapeHtml(trip.destination) + '</p><small>Saída: ' + escapeHtml(dateLabel(trip.departure_at)) + '</small><small>Retorno: ' + escapeHtml(dateLabel(trip.return_at)) + '</small><small>Participantes: ' + trip.participant_count + ' / ' + trip.capacity + '</small></div><div class="trip-card-actions">' + action + participantsButton + '</div><div class="participants-area hidden" data-trip-participants="' + trip.id + '" data-trip-status="' + escapeHtml(trip.status) + '"></div></article>';
     }).join('') : '<p class="muted">Nenhuma viagem cadastrada.</p>';
     const options = '<option value="">Selecione uma viagem</option>' + data.trips.filter(t => t.status === 'draft').map(t =>
       '<option value="' + t.id + '">' + escapeHtml(t.title + ' · ' + t.destination) + '</option>'
@@ -189,8 +228,44 @@ document.querySelector('#trip-student-form').addEventListener('submit', async ev
   } catch (error) { showMessage('#trip-message', error.message, true); }
 });
 document.querySelector('#trips-list').addEventListener('click', async event => {
+  const participantButton = event.target.closest('[data-participant-action]');
+  if (participantButton) {
+    participantButton.disabled = true;
+    const tripId = Number(participantButton.dataset.tripId);
+    const studentId = Number(participantButton.dataset.studentId);
+    const action = participantButton.dataset.participantAction;
+    const route = '/api/trips/' + tripId + '/participants/' + studentId + '/' + action;
+    let payload;
+    if (action === 'authorization') {
+      payload = { status: participantButton.dataset.status };
+    } else {
+      payload = {
+        checkpoint: participantButton.dataset.checkpoint,
+        present: participantButton.dataset.present === 'true'
+      };
+    }
+    try {
+      const result = await api(route, { method: 'POST', body: JSON.stringify(payload) });
+      showMessage('#trip-message', result.message);
+      const area = participantButton.closest('.participants-area');
+      await loadTripParticipants(tripId, area);
+    } catch (error) {
+      showMessage('#trip-message', error.message, true);
+      participantButton.disabled = false;
+    }
+    return;
+  }
+
   const button = event.target.closest('[data-trip-action]');
   if (!button) return;
+  if (button.dataset.tripAction === 'participants') {
+    const area = button.closest('.trip-card').querySelector('.participants-area');
+    area.classList.toggle('hidden');
+    if (!area.classList.contains('hidden') && area.dataset.loaded !== 'true') {
+      await loadTripParticipants(button.dataset.tripId, area);
+    }
+    return;
+  }
   button.disabled = true;
   try {
     const result = await api('/api/trips/' + button.dataset.tripId + '/' + button.dataset.tripAction, { method: 'POST', body: '{}' });
