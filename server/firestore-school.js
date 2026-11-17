@@ -309,6 +309,44 @@ async function createVehicle(data, actorUserId) {
   return Number(id);
 }
 
+async function listDrivers() {
+  const drivers = await store.list('drivers', {
+    filters: [{ field: 'active', op: '==', value: true }],
+    limit: 500
+  });
+  return drivers.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+}
+
+async function createDriver(data, actorUserId) {
+  const name = String(data.name).trim();
+  const id = await store.createUnique('drivers', 'name_key', name.toLocaleLowerCase('pt-BR'), {
+    name,
+    active: true,
+    created_by: Number(actorUserId),
+    schedule_version: 0,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }, {
+    actor_user_id: Number(actorUserId),
+    action: 'create',
+    entity_type: 'driver'
+  });
+  return Number(id);
+}
+
+async function assignTripDriver(tripId, driverId, actorUserId) {
+  return store.assignTripDriver(
+    numericId(tripId, 'Viagem'),
+    numericId(driverId, 'Condutor'),
+    {
+      actor_user_id: Number(actorUserId),
+      action: 'assign_driver',
+      entity_type: 'trip',
+      entity_id: numericId(tripId, 'Viagem')
+    }
+  );
+}
+
 async function assignTripVehicle(tripId, vehicleId, actorUserId) {
   return store.assignTripVehicle(
     numericId(tripId, 'Viagem'),
@@ -428,6 +466,6 @@ module.exports = {
   listTripsForUser, linkTripClass, linkTripStudent,
   assignTripTeacher, submitTrip, approveTrip,
   listTripParticipantsForUser, setTripStudentAuthorization, setTripAttendance,
-  listVehicles, createVehicle, assignTripVehicle, getReportSummary,
+  listVehicles, createVehicle, assignTripVehicle,\n  listDrivers, createDriver, assignTripDriver, getReportSummary,
   recordPaperAuthorization
 };
