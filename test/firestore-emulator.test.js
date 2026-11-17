@@ -481,6 +481,25 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal((await teacherApi('/api/classes', {
       method: 'POST', body: JSON.stringify({ level: 'medio', grade: '4º ano', course: 'regular', section: 'A', school_year: 2026 })
     })).status, 403);
+    const teacherParticipantsResponse = await teacherApi('/api/trips/' + apiTripId + '/participants');
+    assert.equal(teacherParticipantsResponse.status, 200);
+    assert.equal((await teacherParticipantsResponse.json()).participants.length, 1);
+    assert.equal((await teacherApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/authorization', {
+      method: 'POST', body: JSON.stringify({ status: 'authorized' })
+    })).status, 403, 'professor não pode responder pela autorização familiar');
+    const attendanceAuditBefore = await store.list('auditLogs', {
+      filters: [{ field: 'action', op: '==', value: 'mark_departure_present' }]
+    });
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      assert.equal((await teacherApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/attendance', {
+        method: 'POST', body: JSON.stringify({ checkpoint: 'departure', present: true })
+      })).status, 200);
+    }
+    const attendanceAuditAfter = await store.list('auditLogs', {
+      filters: [{ field: 'action', op: '==', value: 'mark_departure_present' }]
+    });
+    assert.equal(attendanceAuditAfter.length, attendanceAuditBefore.length + 1,
+      'repetir a mesma presença não deve duplicar auditoria');
 
     const guardianApi = await loginAs('guardian-api@emulator.sgve');
     const guardianStudentList = await guardianApi('/api/students');
@@ -488,12 +507,40 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal((await guardianStudentList.json()).students.length, 1);
     assert.equal((await guardianApi('/api/trips')).status, 200);
     assert.equal((await guardianApi('/api/users')).status, 403);
+    const guardianParticipantsResponse = await guardianApi('/api/trips/' + apiTripId + '/participants');
+    assert.equal(guardianParticipantsResponse.status, 200);
+    const guardianParticipants = (await guardianParticipantsResponse.json()).participants;
+    assert.equal(guardianParticipants.length, 1);
+    assert.equal(guardianParticipants[0].student_id, apiStudentId);
+    assert.equal(guardianParticipants[0].authorization_status, 'pending');
+    const authorizationAuditBefore = await store.list('auditLogs', {
+      filters: [{ field: 'action', op: '==', value: 'authorize_trip_student' }]
+    });
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      assert.equal((await guardianApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/authorization', {
+        method: 'POST', body: JSON.stringify({ status: 'authorized' })
+      })).status, 200);
+    }
+    const authorizationAuditAfter = await store.list('auditLogs', {
+      filters: [{ field: 'action', op: '==', value: 'authorize_trip_student' }]
+    });
+    assert.equal(authorizationAuditAfter.length, authorizationAuditBefore.length + 1,
+      'repetir a mesma autorização não deve duplicar auditoria');
+    assert.equal((await guardianApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/attendance', {
+      method: 'POST', body: JSON.stringify({ checkpoint: 'departure', present: true })
+    })).status, 403, 'responsável não pode registrar presença');
 
     const studentApi = await loginAs('student-api@emulator.sgve');
     const ownStudents = await studentApi('/api/students');
     assert.equal(ownStudents.status, 200);
     assert.equal((await ownStudents.json()).students.length, 1);
     assert.equal((await studentApi('/api/trips')).status, 200);
+    const studentParticipantsResponse = await studentApi('/api/trips/' + apiTripId + '/participants');
+    assert.equal(studentParticipantsResponse.status, 200);
+    assert.equal((await studentParticipantsResponse.json()).participants.length, 1);
+    assert.equal((await studentApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/authorization', {
+      method: 'POST', body: JSON.stringify({ status: 'authorized' })
+    })).status, 403);
     assert.equal((await studentApi('/api/users')).status, 403);
 
     const directionApi = await loginAs('direction-api@emulator.sgve');
