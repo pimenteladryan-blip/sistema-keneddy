@@ -122,6 +122,13 @@ async function bootstrapAdmin() {
   const name = String(process.env.ADMIN_NAME || 'Administrador').trim();
   if (!password) return;
   if (!validEmail(email) || password.length < 14) throw new Error('Configure ADMIN_EMAIL válido e ADMIN_PASSWORD com pelo menos 14 caracteres.');
+  if (firebaseConfigured) {
+    if (await firestoreAuth.findUserByEmail(email)) return;
+    const passwordHash = await hashPassword(password);
+    await firestoreAuth.createUser({ display_name: name || 'Administrador', email, password_hash: passwordHash, role: 'admin', active: true });
+    console.log('Conta administrativa inicial criada no Firestore a partir das variáveis de ambiente.');
+    return;
+  }
   if (db.prepare('SELECT id FROM users WHERE email = ?').get(email)) return;
   const passwordHash = await hashPassword(password);
   db.prepare('INSERT INTO users (display_name, email, password_hash, role) VALUES (?, ?, ?, ?)').run(name || 'Administrador', email, passwordHash, 'admin');
@@ -149,16 +156,20 @@ app.post('/api/registration-requests', async (req, res, next) => {
     }
     if (!attempt || now - attempt.startedAt >= REGISTRATION_WINDOW_MS) registrationAttempts.set(key, { startedAt: now, count: 1 });
     else attempt.count += 1;
-    if (db.prepare('SELECT id FROM users WHERE email = ?').get(email)) {
-      return res.status(409).json({ error: 'Este e-mail já possui uma conta. Tente entrar ou fale com a secretaria.' });
-    }
-    const previousRequest = db.prepare('SELECT id, status FROM registration_requests WHERE email = ?').get(email);
+    const existingUser = firebaseConfigured
+      ? await firestoreAuth.findUserByEmail(email)
+      : db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+    if (existingUser) return res.status(409).json({ error: 'Este e-mail já possui uma conta. Tente entrar ou fale com a secretaria.' });
+    const previousRequest = firebaseConfigured ? null
+      : db.prepare('SELECT id, status FROM registration_requests WHERE email = ?').get(email);
     if (previousRequest?.status === 'pending') {
       return res.status(409).json({ error: 'Já existe uma solicitação pendente para este e-mail.' });
     }
     const passwordHash = await hashPassword(password);
     const verificationCode = createVerificationCode();
-    if (previousRequest?.status === 'rejected') {
+    if (firebaseConfigured) {
+      await firestoreAuth.createRegistrationRequest({ display_name: name, email, password_hash: passwordHash, role, verification_code: verificationCode });
+    } else if (previousRequest?.status === 'rejected') {
       db.prepare("UPDATE registration_requests SET display_name = ?, password_hash = ?, role = ?, verification_code = ?, status = 'pending', reviewed_by = NULL, reviewed_at = NULL, created_at = CURRENT_TIMESTAMP WHERE id = ?")
         .run(name, passwordHash, role, verificationCode, previousRequest.id);
     } else {
@@ -166,7 +177,7 @@ app.post('/api/registration-requests', async (req, res, next) => {
     }
     res.status(201).json({ message: 'Solicitação enviada. Informe o código ao administrador para conferir seu cadastro. A conta só será liberada após a aprovação.', verificationCode });
   } catch (error) {
-    if (String(error.message).includes('UNIQUE')) return res.status(409).json({ error: 'Já existe uma solicitação para este e-mail.' });
+    if (String(error.message).includes('UNIQUE') || error.code === 'already-pending' || error.code === 'already-exists') return res.status(409).json({ error: 'Já existe uma solicitação para este e-mail.' });
     next(error);
   }
 });
@@ -179,8 +190,10 @@ app.post('/api/auth/login', async (req, res, next) => {
     const now = Date.now();
     const attempts = loginAttempts.get(email);
     if (attempts && now - attempts.startedAt < LOGIN_WINDOW_MS && attempts.count >= MAX_LOGIN_ATTEMPTS) return res.status(429).json({ error: 'Muitas tentativas. Aguarde alguns minutos.' });
-    const user = db.prepare('SELECT id, display_name, email, password_hash, role, active FROM users WHERE email = ?').get(email);
-    const valid = user && user.active && await verifyPassword(password, user.password_hash);
+    const user = firebaseConfigured
+      ? await firestoreAuth.findUserByEmail(email)
+      : db.prepare('SELECT id, display_name, email, password_hash, role, active FROM users WHERE email = ?').get(email);
+    const valid = user && user.active === true && await verifyPassword(password, user.password_hash);
     if (!valid) {
       const current = loginAttempts.get(email);
       if (!current || now - current.startedAt >= LOGIN_WINDOW_MS) loginAttempts.set(email, { startedAt: now, count: 1 });
@@ -191,9 +204,15 @@ app.post('/api/auth/login', async (req, res, next) => {
     const token = randomToken(32);
     const csrfToken = randomToken(24);
     const expiresAt = new Date(now + SESSION_HOURS * 3600000).toISOString();
-    db.prepare('DELETE FROM sessions WHERE expires_at <= ?').run(new Date(now).toISOString());
-    db.prepare('INSERT INTO sessions (token_hash, csrf_token, user_id, expires_at) VALUES (?, ?, ?, ?)').run(sha256(token), csrfToken, user.id, expiresAt);
-    audit(user.id, 'login', 'user', user.id);
+    if (firebaseConfigured) {
+      await firestoreAuth.deleteExpiredSessions(new Date(now).toISOString());
+      await firestoreAuth.createSessionWithAudit({ token_hash: sha256(token), csrf_token: csrfToken,
+        user_id: Number(user.id), expires_at: expiresAt, action: 'login_password' });
+    } else {
+      db.prepare('DELETE FROM sessions WHERE expires_at <= ?').run(new Date(now).toISOString());
+      db.prepare('INSERT INTO sessions (token_hash, csrf_token, user_id, expires_at) VALUES (?, ?, ?, ?)').run(sha256(token), csrfToken, user.id, expiresAt);
+      audit(user.id, 'login', 'user', user.id);
+    }
     setSessionCookie(res, token);
     res.json({ user: { id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role] }, csrfToken });
   } catch (error) { next(error); }
@@ -336,6 +355,11 @@ app.post('/api/users', requireAuth, requireCsrf, requireRoles(...USER_MANAGERS),
     if (req.auth.user.role === 'secretariat' && !['teacher', 'guardian', 'student'].includes(role)) return res.status(403).json({ error: 'A secretaria não pode criar contas administrativas ou de direção.' });
     if (req.auth.user.role === 'direction' && role === 'admin') return res.status(403).json({ error: 'Somente um administrador pode criar outro administrador.' });
     const passwordHash = await hashPassword(password);
+    if (firebaseConfigured) {
+      const id = await firestoreAuth.createUser({ display_name: name, email, password_hash: passwordHash, role, active: true });
+      await firestoreAuth.createAuditLog({ actor_user_id: req.auth.user.id, action: 'create', entity_type: 'user', entity_id: id });
+      return res.status(201).json({ user: { id: Number(id), name, email, role, roleLabel: ROLE_LABELS[role], active: true }, message: 'Conta criada.' });
+    }
     const result = db.prepare('INSERT INTO users (display_name, email, password_hash, role) VALUES (?, ?, ?, ?)').run(name, email, passwordHash, role);
     audit(req.auth.user.id, 'create', 'user', result.lastInsertRowid);
     res.status(201).json({ user: { id: Number(result.lastInsertRowid), name, email, role, roleLabel: ROLE_LABELS[role] }, message: 'Conta criada.' });
@@ -344,11 +368,30 @@ app.post('/api/users', requireAuth, requireCsrf, requireRoles(...USER_MANAGERS),
     next(error);
   }
 });
-app.get('/api/registration-requests', requireAuth, requireRoles('admin'), (_req, res) => {
-  const requests = db.prepare("SELECT id, display_name AS name, email, role, verification_code, status, created_at FROM registration_requests WHERE status = 'pending' ORDER BY created_at ASC LIMIT 200").all();
-  res.json({ requests: requests.map(item => ({ ...item, roleLabel: ROLE_LABELS[item.role] })) });
+app.get('/api/registration-requests', requireAuth, requireRoles('admin'), async (_req, res, next) => {
+  try {
+    if (firebaseConfigured) {
+      const requests = await firestoreAuth.listPendingRegistrationRequests();
+      return res.json({ requests: requests.map(item => ({ id: item.id, name: item.display_name, email: item.email, role: item.role, verification_code: item.verification_code, status: item.status, created_at: item.created_at, roleLabel: ROLE_LABELS[item.role] })) });
+    }
+    const requests = db.prepare("SELECT id, display_name AS name, email, role, verification_code, status, created_at FROM registration_requests WHERE status = 'pending' ORDER BY created_at ASC LIMIT 200").all();
+    res.json({ requests: requests.map(item => ({ ...item, roleLabel: ROLE_LABELS[item.role] })) });
+  } catch (error) { next(error); }
 });
-app.post('/api/registration-requests/:id/approve', requireAuth, requireCsrf, requireRoles('admin'), (req, res) => {
+app.post('/api/registration-requests/:id/approve', requireAuth, requireCsrf, requireRoles('admin'), async (req, res, next) => {
+  if (firebaseConfigured) {
+    try {
+      const id = req.params.id;
+      if (!/^\\d+$/.test(id) || Number(id) < 1) return res.status(400).json({ error: 'Solicitação inválida.' });
+      const userId = await firestoreAuth.reviewRegistrationRequest(id, req.auth.user.id, 'approved');
+      await firestoreAuth.createAuditLog({ actor_user_id: req.auth.user.id, action: 'approve_registration', entity_type: 'registration_request', entity_id: id });
+      return res.json({ message: 'Cadastro aprovado. A pessoa já pode entrar com o e-mail e a senha cadastrados.', userId });
+    } catch (error) {
+      if (error.code === 'not-found') return res.status(404).json({ error: 'Solicitação não encontrada ou já analisada.' });
+      if (error.code === 'already-exists') return res.status(409).json({ error: 'Já existe uma conta com este e-mail.' });
+      return next(error);
+    }
+  }
   const id = Number(req.params.id);
   if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: 'Solicitação inválida.' });
   const request = db.prepare("SELECT id, display_name, email, password_hash, role FROM registration_requests WHERE id = ? AND status = 'pending'").get(id);
@@ -367,7 +410,19 @@ app.post('/api/registration-requests/:id/approve', requireAuth, requireCsrf, req
     throw error;
   }
 });
-app.post('/api/registration-requests/:id/reject', requireAuth, requireCsrf, requireRoles('admin'), (req, res) => {
+app.post('/api/registration-requests/:id/reject', requireAuth, requireCsrf, requireRoles('admin'), async (req, res, next) => {
+  if (firebaseConfigured) {
+    try {
+      const id = req.params.id;
+      if (!/^\\d+$/.test(id) || Number(id) < 1) return res.status(400).json({ error: 'Solicitação inválida.' });
+      await firestoreAuth.reviewRegistrationRequest(id, req.auth.user.id, 'rejected');
+      await firestoreAuth.createAuditLog({ actor_user_id: req.auth.user.id, action: 'reject_registration', entity_type: 'registration_request', entity_id: id });
+      return res.json({ message: 'Solicitação rejeitada.' });
+    } catch (error) {
+      if (error.code === 'not-found') return res.status(404).json({ error: 'Solicitação não encontrada ou já analisada.' });
+      return next(error);
+    }
+  }
   const id = Number(req.params.id);
   if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: 'Solicitação inválida.' });
   const result = db.prepare("UPDATE registration_requests SET status = 'rejected', password_hash = NULL, reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'pending'").run(req.auth.user.id, id);
@@ -375,9 +430,15 @@ app.post('/api/registration-requests/:id/reject', requireAuth, requireCsrf, requ
   audit(req.auth.user.id, 'reject_registration', 'registration_request', id);
   res.json({ message: 'Solicitação rejeitada.' });
 });
-app.get('/api/users', requireAuth, requireRoles('admin', 'direction'), (_req, res) => {
-  const rows = db.prepare('SELECT id, display_name, email, role, active FROM users ORDER BY display_name LIMIT 300').all();
-  res.json({ users: rows.map(user => ({ id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role], active: Boolean(user.active) })) });
+app.get('/api/users', requireAuth, requireRoles('admin', 'direction'), async (_req, res, next) => {
+  try {
+    if (firebaseConfigured) {
+      const users = await firestoreAuth.listUsers(300);
+      return res.json({ users: users.map(user => ({ id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role], active: user.active })) });
+    }
+    const rows = db.prepare('SELECT id, display_name, email, role, active FROM users ORDER BY display_name LIMIT 300').all();
+    res.json({ users: rows.map(user => ({ id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role], active: Boolean(user.active) })) });
+  } catch (error) { next(error); }
 });
 
 
