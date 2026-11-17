@@ -379,5 +379,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Interface permite cadastrar condutores, selecionar viagem e atribuir; cartões de viagem mostram o nome apenas à equipe gestora.
 - [x] Migração SQLite adiciona `driver_id` sem apagar viagens antigas e cria índice para consultas de agenda.
 - [x] Testes cobrem duplicidade de nomes, dados inválidos, conflitos, intervalos consecutivos, idempotência, auditoria, migração e permissões nos testes SQLite e Firestore Emulator.
+- [x] Testes concorrentes confirmam que duas tentativas simultâneas de reservar o mesmo condutor em horários sobrepostos resultam em exatamente uma atribuição aceita e uma recusada, tanto no SQLite quanto no Firestore Emulator.
 - [x] CI completo passou no commit `206199b3b89d8f83ad7387fff8308380f30e29ee`, execuções `44096325779` (push) e `44096336173` (pull request), incluindo sintaxe, testes automatizados, migração SQLite e Firestore Emulator.
+- [x] CI da cobertura concorrente, das permissões de cadastro/atribuição e da limpeza dos dados ao sair passou no commit `64d3338404567b827a3c4bf7ce9e8164c1aef1bd`, execuções `44097175469` (push) e `44097181098` (pull request), com testes SQLite e Firestore Emulator aprovados.
 - [ ] Validar visualmente o fluxo com contas fictícias e confirmar com a escola quais verificações operacionais dos condutores devem ocorrer fora do sistema.
