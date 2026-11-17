@@ -450,3 +450,13 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Conferidos os seletores de ID usados em `public/js/app.js`: nenhuma referência estática aponta para elemento inexistente e não há IDs duplicados no HTML.
 - [x] Corrigida a inconsistência do tema claro: cartão de login, campos, botão de tema e banner do painel agora usam cores claras quando o tema claro está ativo; os estilos escuros ficam condicionados a `body.dark-mode`.
 - [ ] Ainda falta abrir a aplicação em navegador real em desktop e celular para validar o resultado renderizado, rolagem, contraste e comportamento dos módulos. A inspeção estática do código não substitui essa conferência visual em execução.
+
+
+
+### Revisão do backend Firestore e validação da branch (17/11/2026)
+- [x] Conferido o roteamento principal de autenticação e dos módulos escolares no servidor: quando o Firebase está configurado, as rotas usam os serviços Firestore; os comandos SQLite ficam nos caminhos alternativos de desenvolvimento.
+- [x] Conferidos os serviços Firestore para turmas, estudantes, responsáveis, viagens, participantes, autorizações, presença, veículos, condutores, relatórios e auditoria.
+- [x] Conferidos os testes de integração no Firestore Emulator, incluindo autenticação, aprovação de cadastro, permissões por perfil, vínculos, limite de participantes, agenda de veículos/condutores e registros de autorização/presença.
+- [x] Confirmado que a branch de trabalho está no commit `9bd19a7103a5709d8b3427badc27b7bdc96f2f05` e que o GitHub Actions run `44201723576` (run 906) terminou com sucesso.
+- [ ] A aprovação do CI não substitui a validação visual e funcional em navegador real; ainda falta testar os fluxos na versão de prévia com contas sintéticas.
+- [ ] Ainda não foi mesclada a PR #2 nem alterado o Render de produção. A publicação continua condicionada à revisão final e autorização explícita.
