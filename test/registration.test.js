@@ -213,6 +213,9 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
     body: JSON.stringify({ email: 'responsavel-viagem@sgve.local', relationship: 'Responsável' })
   });
   assert.equal(guardianLink.status, 200);
+  assert.equal((await adminApi('/api/students/' + studentId + '/guardians', {
+    method: 'POST', body: JSON.stringify({ email: 'responsavel-viagem@sgve.local', relationship: 'Responsável' })
+  })).status, 200);
 
   const tripResponse = await adminApi('/api/trips', {
     method: 'POST',
@@ -225,20 +228,24 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
   });
   assert.equal(tripResponse.status, 201);
   const tripId = (await tripResponse.json()).id;
-  assert.equal((await adminApi('/api/trips/' + tripId + '/classes', {
-    method: 'POST', body: JSON.stringify({ class_id: classId })
-  })).status, 200);
-  assert.equal((await adminApi('/api/trips/' + tripId + '/students', {
-    method: 'POST', body: JSON.stringify({ student_id: studentId })
-  })).status, 200);
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    assert.equal((await adminApi('/api/trips/' + tripId + '/classes', {
+      method: 'POST', body: JSON.stringify({ class_id: classId })
+    })).status, 200);
+    assert.equal((await adminApi('/api/trips/' + tripId + '/students', {
+      method: 'POST', body: JSON.stringify({ student_id: studentId })
+    })).status, 200);
+  }
   const teacherUsersDb = new DatabaseSync(path.join(tempDir, 'sgve.sqlite'), { readOnly: true });
   let teacherId;
   try {
     teacherId = teacherUsersDb.prepare('SELECT id FROM users WHERE email = ?').get('professor-viagem@sgve.local').id;
   } finally { teacherUsersDb.close(); }
-  assert.equal((await adminApi('/api/trips/' + tripId + '/staff', {
-    method: 'POST', body: JSON.stringify({ user_id: teacherId })
-  })).status, 200);
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    assert.equal((await adminApi('/api/trips/' + tripId + '/staff', {
+      method: 'POST', body: JSON.stringify({ user_id: teacherId })
+    })).status, 200);
+  }
   assert.equal((await adminApi('/api/trips/' + tripId + '/submit', {
     method: 'POST', body: JSON.stringify({})
   })).status, 200);
@@ -308,6 +315,10 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
     assert.equal(participant.departure_present, 1);
     assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'authorize_trip_student'").get().total, 1);
     assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'mark_departure_present'").get().total, 1);
+    for (const action of ['link_guardian', 'link_class', 'link_student', 'assign_teacher']) {
+      assert.equal(verifyDb.prepare('SELECT COUNT(*) AS total FROM audit_logs WHERE action = ?').get(action).total, 1,
+        'vínculo repetido não deve duplicar auditoria: ' + action);
+    }
   } finally { verifyDb.close(); }
 });
 
