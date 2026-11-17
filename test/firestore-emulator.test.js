@@ -311,7 +311,7 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       email: 'aprovacao-concorrente@emulator.sgve',
       password_hash: rolePasswordHash,
       role: 'teacher',
-      verification_code: 'TUV123'
+      verification_code: 'TUV234'
     });
     const concurrentListResponse = await api('/api/registration-requests');
     const concurrentList = await concurrentListResponse.json();
