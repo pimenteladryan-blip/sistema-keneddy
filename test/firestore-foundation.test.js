@@ -49,6 +49,7 @@ test('o mapa de coleções Firestore é fixo e contém as relações do SGVE', (
   assert.equal(store.COLLECTIONS.users, 'users');
   assert.equal(store.COLLECTIONS.registrationRequests, 'registration_requests');
   assert.equal(store.COLLECTIONS.tripStudents, 'trip_students');
+  assert.equal(store.COLLECTIONS.vehicles, 'vehicles');
   assert.equal(Object.isFrozen(store.COLLECTIONS), true);
 });
 
