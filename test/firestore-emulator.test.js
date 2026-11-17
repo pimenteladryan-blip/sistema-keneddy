@@ -376,6 +376,12 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     });
     assert.equal(studentResponse.status, 201);
     const apiStudentId = (await studentResponse.json()).id;
+    const paperStudentResponse = await api('/api/students', {
+      method: 'POST',
+      body: JSON.stringify({ full_name: 'Estudante com autorização em papel', class_id: apiClassId })
+    });
+    assert.equal(paperStudentResponse.status, 201);
+    const paperStudentId = (await paperStudentResponse.json()).id;
 
     const tripResponse = await api('/api/trips', {
       method: 'POST',
@@ -458,6 +464,10 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       method: 'POST', body: JSON.stringify({ student_id: apiStudentId })
     });
     assert.equal(linkedStudent.status, 200);
+    const linkedPaperStudent = await api('/api/trips/' + apiTripId + '/students', {
+      method: 'POST', body: JSON.stringify({ student_id: paperStudentId })
+    });
+    assert.equal(linkedPaperStudent.status, 200);
     const assignedTeacher = await api('/api/trips/' + apiTripId + '/staff', {
       method: 'POST', body: JSON.stringify({ user_id: roleAccounts.teacher })
     });
@@ -470,6 +480,11 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       method: 'POST', body: JSON.stringify({})
     });
     assert.equal(approvedTrip.status, 200);
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      assert.equal((await api('/api/trips/' + apiTripId + '/participants/' + paperStudentId + '/paper-authorization', {
+        method: 'POST', body: JSON.stringify({})
+      })).status, 200);
+    }
     assert.equal((await assignVehicle(apiTripId)).status, 409,
       'transporte não pode ser alterado após aprovação');
 
@@ -498,7 +513,7 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       .map(event => event.action));
     for (const action of [
       'login_password', 'create', 'link_class', 'link_student',
-      'assign_teacher', 'submit_for_approval', 'approve'
+      'assign_teacher', 'submit_for_approval', 'approve', 'record_paper_authorization'
     ]) assert.equal(adminActions.has(action), true, 'evento de auditoria ausente: ' + action);
     assert.equal(apiAudit.some(event =>
       Number(event.actor_user_id) === adminActorId &&
@@ -563,13 +578,16 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     })).status, 403);
     const teacherParticipantsResponse = await teacherApi('/api/trips/' + apiTripId + '/participants');
     assert.equal(teacherParticipantsResponse.status, 200);
-    assert.equal((await teacherParticipantsResponse.json()).participants.length, 1);
+    assert.equal((await teacherParticipantsResponse.json()).participants.length, 2);
     const teacherAuthorizationAttempt = await teacherApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/authorization', {
       method: 'POST', body: JSON.stringify({ status: 'authorized' })
     });
     assert.equal(teacherAuthorizationAttempt.status, 403,
       'professor não pode responder pela autorização familiar: ' +
       await teacherAuthorizationAttempt.text() + '; logs=' + serverOutput);
+    assert.equal((await teacherApi('/api/trips/' + apiTripId + '/participants/' + paperStudentId + '/paper-authorization', {
+      method: 'POST', body: JSON.stringify({})
+    })).status, 403, 'professor não pode registrar autorização em papel');
     const attendanceAuditBefore = await store.list('auditLogs', {
       filters: [{ field: 'action', op: '==', value: 'mark_departure_present' }]
     });
@@ -630,11 +648,13 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const report = await reportResponse.json();
     const tripReport = report.trips.find(item => item.id === apiTripId);
     assert.ok(tripReport, 'relatório deve incluir a viagem fictícia');
-    assert.equal(tripReport.participants, 1);
+    assert.equal(tripReport.participants, 2);
     assert.equal(tripReport.authorized, 1);
+    assert.equal(tripReport.paper_recorded, 1);
     assert.equal(tripReport.departure_present, 1);
     assert.equal(tripReport.vehicle_name, 'Van Emulator 01');
     assert.equal(report.totals.authorized, 1);
+    assert.equal(report.totals.paper_recorded, 1);
     assert.equal(report.totals.departure_present, 1);
     assert.equal((await teacherApi('/api/reports/summary')).status, 403,
       'relatórios agregados são restritos à equipe gestora');
