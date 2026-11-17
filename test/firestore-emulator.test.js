@@ -388,6 +388,65 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     });
     assert.equal(tripResponse.status, 201);
     const apiTripId = (await tripResponse.json()).id;
+
+    const vehicleResponse = await api('/api/vehicles', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Van Emulator 01', type: 'Van', capacity: 30 })
+    });
+    assert.equal(vehicleResponse.status, 201);
+    const vehicleId = (await vehicleResponse.json()).id;
+    assert.equal((await api('/api/vehicles')).status, 200);
+    assert.equal((await api('/api/vehicles', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'van emulator 01', type: 'Van', capacity: 30 })
+    })).status, 409);
+    assert.equal((await api('/api/vehicles', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Veículo Inválido', type: 'Carro', capacity: 0 })
+    })).status, 400);
+    const assignVehicle = (tripId, id = vehicleId) => api('/api/trips/' + tripId + '/vehicle', {
+      method: 'POST', body: JSON.stringify({ vehicle_id: id })
+    });
+    assert.equal((await assignVehicle(apiTripId)).status, 200);
+    assert.equal((await assignVehicle(apiTripId)).status, 200,
+      'repetir atribuição não deve duplicar a auditoria');
+    const overlapTripResponse = await api('/api/trips', {
+      method: 'POST',
+      body: JSON.stringify({
+        title: 'Viagem sobreposta', destination: 'Destino fictício',
+        educational_purpose: 'Teste de conflito de frota',
+        departure_at: '2026-12-10T16:59:00.000Z',
+        return_at: '2026-12-10T18:00:00.000Z', capacity: 2
+      })
+    });
+    assert.equal(overlapTripResponse.status, 201);
+    const overlapTripId = (await overlapTripResponse.json()).id;
+    assert.equal((await assignVehicle(overlapTripId)).status, 409);
+    const adjacentTripResponse = await api('/api/trips', {
+      method: 'POST',
+      body: JSON.stringify({
+        title: 'Viagem adjacente', destination: 'Destino fictício',
+        educational_purpose: 'Teste de intervalo sem conflito',
+        departure_at: '2026-12-10T17:00:00.000Z',
+        return_at: '2026-12-10T18:00:00.000Z', capacity: 2
+      })
+    });
+    assert.equal(adjacentTripResponse.status, 201);
+    const adjacentTripId = (await adjacentTripResponse.json()).id;
+    assert.equal((await assignVehicle(adjacentTripId)).status, 200);
+    const oversizedTripResponse = await api('/api/trips', {
+      method: 'POST',
+      body: JSON.stringify({
+        title: 'Viagem maior que veículo', destination: 'Destino fictício',
+        educational_purpose: 'Teste de capacidade de transporte',
+        departure_at: '2026-12-11T08:00:00.000Z',
+        return_at: '2026-12-11T10:00:00.000Z', capacity: 31
+      })
+    });
+    assert.equal(oversizedTripResponse.status, 201);
+    const oversizedTripId = (await oversizedTripResponse.json()).id;
+    assert.equal((await assignVehicle(oversizedTripId)).status, 409);
+
     await school.linkGuardian(apiStudentId, 'guardian-api@emulator.sgve', 'Responsável');
     await store.update('students', apiStudentId, { user_id: roleAccounts.student });
 
@@ -411,11 +470,14 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       method: 'POST', body: JSON.stringify({})
     });
     assert.equal(approvedTrip.status, 200);
+    assert.equal((await assignVehicle(apiTripId)).status, 409,
+      'transporte não pode ser alterado após aprovação');
 
     const tripsResponse = await api('/api/trips');
     assert.equal(tripsResponse.status, 200);
     const tripsData = await tripsResponse.json();
     assert.equal(tripsData.trips.find(item => item.id === apiTripId).status, 'approved');
+    assert.equal(tripsData.trips.find(item => item.id === apiTripId).vehicle_name, 'Van Emulator 01');
 
     const createdUser = await api('/api/users', {
       method: 'POST',
@@ -442,6 +504,11 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       Number(event.actor_user_id) === adminActorId &&
       event.action === 'create' && event.entity_type === 'user'
     ), true, 'criação de usuário não foi auditada na transação');
+    const vehicleAudit = apiAudit.filter(event =>
+      Number(event.actor_user_id) === adminActorId && event.action === 'assign_vehicle'
+    );
+    assert.equal(vehicleAudit.length, 2,
+      'somente as duas atribuições efetivas devem gerar auditoria');
     for (const [action, entityType, entityId] of [
       ['create', 'class', apiClassId],
       ['create', 'student', apiStudentId],
@@ -490,6 +557,7 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal((await teacherApi('/api/trips')).status, 200);
     assert.equal((await teacherApi('/api/students')).status, 403);
     assert.equal((await teacherApi('/api/users')).status, 403);
+    assert.equal((await teacherApi('/api/vehicles')).status, 403);
     assert.equal((await teacherApi('/api/classes', {
       method: 'POST', body: JSON.stringify({ level: 'medio', grade: '4º ano', course: 'regular', section: 'A', school_year: 2026 })
     })).status, 403);
