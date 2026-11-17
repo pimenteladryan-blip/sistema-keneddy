@@ -395,6 +395,18 @@ test('frota e atribuição de veículos validam capacidade, conflito de horário
     method: 'POST',
     body: JSON.stringify({ name: 'Veículo Inválido', type: 'Carro', capacity: 0 })
   })).status, 400);
+  const driverResponse = await adminApi('/api/drivers', {
+    method: 'POST', body: JSON.stringify({ name: 'Condutor Teste 01' })
+  });
+  assert.equal(driverResponse.status, 201);
+  const driverId = (await driverResponse.json()).id;
+  assert.equal((await adminApi('/api/drivers')).status, 200);
+  assert.equal((await adminApi('/api/drivers', {
+    method: 'POST', body: JSON.stringify({ name: 'condutor teste 01' })
+  })).status, 409, 'nomes duplicados sem diferenciar maiúsculas devem ser bloqueados');
+  assert.equal((await adminApi('/api/drivers', {
+    method: 'POST', body: JSON.stringify({ name: 'X' })
+  })).status, 400);
 
   const createTrip = async (title, departure, returning, capacity = 30) => {
     const response = await adminApi('/api/trips', {
@@ -421,6 +433,14 @@ test('frota e atribuição de veículos validam capacidade, conflito de horário
   assert.equal((await assign(overlappingTrip)).status, 409, 'horários sobrepostos devem ser bloqueados');
   assert.equal((await assign(adjacentTrip)).status, 200, 'viagens consecutivas sem sobreposição podem usar o mesmo veículo');
   assert.equal((await assign(oversizedTrip)).status, 409, 'veículo menor que a capacidade da viagem deve ser bloqueado');
+  const assignDriver = (tripId, id = driverId) => adminApi('/api/trips/' + tripId + '/driver', {
+    method: 'POST', body: JSON.stringify({ driver_id: id })
+  });
+  assert.equal((await assignDriver(baseTrip)).status, 200);
+  assert.equal((await assignDriver(baseTrip)).status, 200, 'repetir a mesma atribuição de condutor deve ser idempotente');
+  assert.equal((await assignDriver(overlappingTrip)).status, 409, 'condutor não pode estar em viagens com horários sobrepostos');
+  assert.equal((await assignDriver(adjacentTrip)).status, 200, 'condutor pode atender viagens consecutivas sem sobreposição');
+  assert.equal((await assignDriver(oversizedTrip)).status, 200);
 
   const classResponse = await adminApi('/api/classes', {
     method: 'POST',
@@ -442,10 +462,13 @@ test('frota e atribuição de veículos validam capacidade, conflito de horário
   const trips = await adminApi('/api/trips');
   const tripList = (await trips.json()).trips;
   assert.equal(tripList.find(item => item.id === baseTrip).vehicle_name, 'Van Teste 01');
+  assert.equal(tripList.find(item => item.id === baseTrip).driver_name, 'Condutor Teste 01');
   const verifyDb = new DatabaseSync(path.join(tempDir, 'sgve.sqlite'), { readOnly: true });
   try {
     assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'assign_vehicle'").get().total, 2,
       'somente as duas atribuições efetivas devem gerar auditoria');
+    assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'assign_driver'").get().total, 3,
+      'somente as três atribuições efetivas de condutor devem gerar auditoria');
     assert.equal(verifyDb.prepare('SELECT vehicle_id FROM trips WHERE id = ?').get(baseTrip).vehicle_id, vehicleId);
     assert.equal(verifyDb.prepare('SELECT vehicle_id FROM trips WHERE id = ?').get(overlappingTrip).vehicle_id, null);
   } finally { verifyDb.close(); }
@@ -467,6 +490,9 @@ test('frota e atribuição de veículos validam capacidade, conflito de horário
     headers: { Origin: baseUrl, Cookie: teacherCookie }
   });
   assert.equal(teacherVehicles.status, 403);
+  assert.equal((await fetch(baseUrl + '/api/drivers', {
+    headers: { Origin: baseUrl, Cookie: teacherCookie }
+  })).status, 403, 'professores não podem consultar cadastro de condutores');
   const teacherReports = await fetch(baseUrl + '/api/reports/summary', {
     headers: { Origin: baseUrl, Cookie: teacherCookie }
   });
