@@ -322,3 +322,102 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
   } finally { verifyDb.close(); }
 });
 
+test('frota e atribuição de veículos validam capacidade, conflito de horários e permissões no SQLite', async () => {
+  const admin = await adminSession();
+  const adminApi = (route, options = {}) => fetch(baseUrl + route, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json', Origin: baseUrl,
+      Cookie: admin.cookie, 'X-CSRF-Token': admin.csrfToken,
+      ...(options.headers || {})
+    }
+  });
+  const vehicleResponse = await adminApi('/api/vehicles', {
+    method: 'POST',
+    body: JSON.stringify({ name: 'Van Teste 01', type: 'Van', capacity: 30 })
+  });
+  assert.equal(vehicleResponse.status, 201);
+  const vehicleId = (await vehicleResponse.json()).id;
+  assert.equal((await adminApi('/api/vehicles')).status, 200);
+  assert.equal((await adminApi('/api/vehicles', {
+    method: 'POST',
+    body: JSON.stringify({ name: 'van teste 01', type: 'Van', capacity: 30 })
+  })).status, 409);
+  assert.equal((await adminApi('/api/vehicles', {
+    method: 'POST',
+    body: JSON.stringify({ name: 'Veículo Inválido', type: 'Carro', capacity: 0 })
+  })).status, 400);
+
+  const createTrip = async (title, departure, returning, capacity = 30) => {
+    const response = await adminApi('/api/trips', {
+      method: 'POST',
+      body: JSON.stringify({
+        title, destination: 'Destino fictício',
+        educational_purpose: 'Atividade pedagógica de teste',
+        departure_at: departure, return_at: returning, capacity
+      })
+    });
+    assert.equal(response.status, 201);
+    return (await response.json()).id;
+  };
+  const baseTrip = await createTrip('Viagem base', '2099-12-10T08:00:00.000Z', '2099-12-10T10:00:00.000Z');
+  const overlappingTrip = await createTrip('Viagem sobreposta', '2099-12-10T09:59:00.000Z', '2099-12-10T11:00:00.000Z');
+  const adjacentTrip = await createTrip('Viagem adjacente', '2099-12-10T10:00:00.000Z', '2099-12-10T11:00:00.000Z');
+  const oversizedTrip = await createTrip('Viagem maior', '2099-12-11T08:00:00.000Z', '2099-12-11T10:00:00.000Z', 31);
+
+  const assign = (tripId, id = vehicleId) => adminApi('/api/trips/' + tripId + '/vehicle', {
+    method: 'POST', body: JSON.stringify({ vehicle_id: id })
+  });
+  assert.equal((await assign(baseTrip)).status, 200);
+  assert.equal((await assign(baseTrip)).status, 200, 'repetir a mesma atribuição deve ser idempotente');
+  assert.equal((await assign(overlappingTrip)).status, 409, 'horários sobrepostos devem ser bloqueados');
+  assert.equal((await assign(adjacentTrip)).status, 200, 'viagens consecutivas sem sobreposição podem usar o mesmo veículo');
+  assert.equal((await assign(oversizedTrip)).status, 409, 'veículo menor que a capacidade da viagem deve ser bloqueado');
+
+  const classResponse = await adminApi('/api/classes', {
+    method: 'POST',
+    body: JSON.stringify({ level: 'medio', grade: '2º ano', course: 'regular', section: 'V', school_year: 2026 })
+  });
+  assert.equal(classResponse.status, 201);
+  const classId = (await classResponse.json()).id;
+  assert.equal((await adminApi('/api/trips/' + baseTrip + '/classes', {
+    method: 'POST', body: JSON.stringify({ class_id: classId })
+  })).status, 200);
+  assert.equal((await adminApi('/api/trips/' + baseTrip + '/submit', {
+    method: 'POST', body: JSON.stringify({})
+  })).status, 200);
+  assert.equal((await adminApi('/api/trips/' + baseTrip + '/approve', {
+    method: 'POST', body: JSON.stringify({})
+  })).status, 200);
+  assert.equal((await assign(baseTrip)).status, 409, 'viagem aprovada não pode ter transporte alterado');
+
+  const trips = await adminApi('/api/trips');
+  const tripList = (await trips.json()).trips;
+  assert.equal(tripList.find(item => item.id === baseTrip).vehicle_name, 'Van Teste 01');
+  const verifyDb = new DatabaseSync(path.join(tempDir, 'sgve.sqlite'), { readOnly: true });
+  try {
+    assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'assign_vehicle'").get().total, 2,
+      'somente as duas atribuições efetivas devem gerar auditoria');
+    assert.equal(verifyDb.prepare('SELECT vehicle_id FROM trips WHERE id = ?').get(baseTrip).vehicle_id, vehicleId);
+    assert.equal(verifyDb.prepare('SELECT vehicle_id FROM trips WHERE id = ?').get(overlappingTrip).vehicle_id, null);
+  } finally { verifyDb.close(); }
+
+  const teacherCreated = await adminApi('/api/users', {
+    method: 'POST',
+    body: JSON.stringify({ name: 'Professor sem gestão', email: 'professor-frota@sgve.local', role: 'teacher', password: 'SenhaSegura123!ABC' })
+  });
+  assert.equal(teacherCreated.status, 201);
+  const teacherLogin = await fetch(baseUrl + '/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+    body: JSON.stringify({ email: 'professor-frota@sgve.local', password: 'SenhaSegura123!ABC' })
+  });
+  assert.equal(teacherLogin.status, 200);
+  const teacherData = await teacherLogin.json();
+  const teacherCookie = teacherLogin.headers.get('set-cookie').split(';')[0];
+  const teacherVehicles = await fetch(baseUrl + '/api/vehicles', {
+    headers: { Origin: baseUrl, Cookie: teacherCookie }
+  });
+  assert.equal(teacherVehicles.status, 403);
+});
+
