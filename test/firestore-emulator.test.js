@@ -200,8 +200,11 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       ADMIN_PASSWORD: 'AdminTesteSenha2026!',
       ADMIN_NAME: 'Administrador API'
     },
-    stdio: 'ignore'
+    stdio: ['ignore', 'pipe', 'pipe']
   });
+  let serverOutput = '';
+  appProcess.stdout.on('data', chunk => { serverOutput = (serverOutput + chunk.toString()).slice(-12000); });
+  appProcess.stderr.on('data', chunk => { serverOutput = (serverOutput + chunk.toString()).slice(-12000); });
   try {
     let ready = false;
     const deadline = Date.now() + 15000;
@@ -322,9 +325,13 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
         method: 'POST', body: JSON.stringify({})
       })
     ]);
-    const approvalStatuses = concurrentApprovals.map(response => response.status).sort();
+    const approvalResults = await Promise.all(concurrentApprovals.map(async response => ({
+      status: response.status, body: await response.clone().text()
+    })));
+    const approvalStatuses = approvalResults.map(result => result.status).sort();
     assert.deepEqual(approvalStatuses, [200, 404],
-      'duas aprovações simultâneas devem resultar em exatamente uma aprovação');
+      'duas aprovações simultâneas devem resultar em exatamente uma aprovação; respostas=' +
+      JSON.stringify(approvalResults) + '; logs=' + serverOutput);
     assert.equal((await auth.findUserByEmail('aprovacao-concorrente@emulator.sgve')).active, true);
 
     const classResponse = await api('/api/classes', {
