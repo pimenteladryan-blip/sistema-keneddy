@@ -21,6 +21,24 @@ const future = () => new Date(Date.now() + 60 * 60 * 1000).toISOString();
 
 before(async () => {
   assert.equal(firebaseConfigured, true, 'o teste precisa executar dentro do Firestore Emulator');
+  const firstLimit = await auth.consumeRateLimit({
+    scope: 'emulator-test', keys: ['ip:one', 'email:test@example.invalid'],
+    windowMs: 60000, maxAttempts: 2, nowMs: 100000
+  });
+  assert.deepEqual(firstLimit, { allowed: true });
+  assert.deepEqual(await auth.consumeRateLimit({
+    scope: 'emulator-test', keys: ['ip:one', 'email:test@example.invalid'],
+    windowMs: 60000, maxAttempts: 2, nowMs: 101000
+  }), { allowed: true });
+  assert.deepEqual(await auth.consumeRateLimit({
+    scope: 'emulator-test', keys: ['ip:one', 'email:other@example.invalid'],
+    windowMs: 60000, maxAttempts: 2, nowMs: 102000
+  }), { allowed: false }, 'bucket bloqueado não deve incrementar parcialmente outros buckets');
+  assert.deepEqual(await auth.consumeRateLimit({
+    scope: 'emulator-test', keys: ['ip:one', 'email:test@example.invalid'],
+    windowMs: 60000, maxAttempts: 2, nowMs: 160000
+  }), { allowed: true }, 'janela expirada deve liberar novas tentativas');
+
   const response = await fetch(
     'http://127.0.0.1:8080/emulator/v1/projects/demo-sgve/databases/(default)/documents',
     { method: 'DELETE' }
@@ -365,6 +383,27 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal((await secretariatApi('/api/users')).status, 403);
     assert.equal((await secretariatApi('/api/registration-requests')).status, 403);
     assert.equal((await secretariatApi('/api/students')).status, 200);
+
+    await auth.createUser({
+      display_name: 'Conta Limite de Login',
+      email: 'rate-limit-api@emulator.sgve',
+      password_hash: rolePasswordHash,
+      role: 'teacher'
+    });
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const failedLogin = await fetch(baseUrl + '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+        body: JSON.stringify({ email: 'rate-limit-api@emulator.sgve', password: 'SenhaIncorreta2026!' })
+      });
+      assert.equal(failedLogin.status, 401);
+    }
+    const blockedLogin = await fetch(baseUrl + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ email: 'rate-limit-api@emulator.sgve', password: rolePassword })
+    });
+    assert.equal(blockedLogin.status, 429, 'API deve bloquear novas tentativas após o limite por conta');
 
         const logoutResponse = await api('/api/auth/logout', {
       method: 'POST', body: JSON.stringify({})
