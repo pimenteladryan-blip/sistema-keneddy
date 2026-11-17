@@ -215,6 +215,82 @@ async function listVehicles() {
   return vehicles.sort((a, b) => String(a.name).localeCompare(String(b.name)));
 }
 
+
+async function getReportSummary() {
+  const [trips, students, vehicles, participants] = await Promise.all([
+    store.list('trips', { limit: 500 }),
+    store.list('students', { filters: [{ field: 'active', op: '==', value: true }], limit: 5000 }),
+    store.list('vehicles', { filters: [{ field: 'active', op: '==', value: true }], limit: 500 }),
+    store.list('tripStudents', { limit: 5000 })
+  ]);
+  const vehicleNames = new Map(vehicles.map(vehicle => [Number(vehicle.id), vehicle.name]));
+  const perTrip = new Map();
+  const totals = {
+    trips: trips.length,
+    students: students.length,
+    vehicles: vehicles.length,
+    participants: participants.length,
+    authorized: 0,
+    pending: 0,
+    declined: 0,
+    paper_recorded: 0,
+    departure_present: 0,
+    departure_absent: 0,
+    return_present: 0,
+    return_absent: 0
+  };
+  for (const participant of participants) {
+    const tripId = Number(participant.trip_id);
+    if (!perTrip.has(tripId)) {
+      perTrip.set(tripId, {
+        participants: 0, authorized: 0, pending: 0, declined: 0,
+        paper_recorded: 0, departure_present: 0, departure_absent: 0,
+        return_present: 0, return_absent: 0
+      });
+    }
+    const row = perTrip.get(tripId);
+    row.participants += 1;
+    const authorization = ['authorized', 'declined', 'paper_recorded'].includes(participant.authorization_status)
+      ? participant.authorization_status : 'pending';
+    row[authorization] += 1;
+    totals[authorization] += 1;
+    if (participant.departure_present === true) {
+      row.departure_present += 1;
+      totals.departure_present += 1;
+    } else if (participant.departure_present === false) {
+      row.departure_absent += 1;
+      totals.departure_absent += 1;
+    }
+    if (participant.return_present === true) {
+      row.return_present += 1;
+      totals.return_present += 1;
+    } else if (participant.return_present === false) {
+      row.return_absent += 1;
+      totals.return_absent += 1;
+    }
+  }
+  const rows = trips.map(trip => {
+    const counts = perTrip.get(Number(trip.id)) || {
+      participants: 0, authorized: 0, pending: 0, declined: 0,
+      paper_recorded: 0, departure_present: 0, departure_absent: 0,
+      return_present: 0, return_absent: 0
+    };
+    return {
+      id: Number(trip.id), title: trip.title, destination: trip.destination,
+      departure_at: trip.departure_at, status: trip.status,
+      capacity: Number(trip.capacity), vehicle_name: vehicleNames.get(Number(trip.vehicle_id)) || null,
+      ...counts
+    };
+  }).sort((a, b) => String(b.departure_at).localeCompare(String(a.departure_at))).slice(0, 100);
+  return {
+    generated_at: new Date().toISOString(),
+    partial: trips.length === 500 || students.length === 5000 ||
+      vehicles.length === 500 || participants.length === 5000,
+    totals,
+    trips: rows
+  };
+}
+
 async function createVehicle(data, actorUserId) {
   const name = String(data.name).trim();
   const id = await store.createUnique('vehicles', 'name_key', name.toLocaleLowerCase('pt-BR'), {
@@ -337,5 +413,5 @@ module.exports = {
   listTripsForUser, linkTripClass, linkTripStudent,
   assignTripTeacher, submitTrip, approveTrip,
   listTripParticipantsForUser, setTripStudentAuthorization, setTripAttendance,
-  listVehicles, createVehicle, assignTripVehicle
+  listVehicles, createVehicle, assignTripVehicle, getReportSummary
 };
