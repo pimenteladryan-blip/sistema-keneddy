@@ -8,9 +8,7 @@ const TABLES = Object.freeze([
   'student_guardians', 'vehicles', 'drivers', 'trips',
   'trip_classes', 'trip_students', 'trip_staff', 'audit_logs'
 ]);
-
 const EXCLUDED_TABLES = Object.freeze(['sessions']);
-
 const REQUIRED_COLUMNS = Object.freeze({
   users: ['id', 'display_name', 'email', 'password_hash', 'role', 'active'],
   registration_requests: ['id', 'display_name', 'email', 'password_hash', 'role', 'verification_code', 'status'],
@@ -25,7 +23,6 @@ const REQUIRED_COLUMNS = Object.freeze({
   trip_staff: ['trip_id', 'user_id', 'assignment_label'],
   audit_logs: ['id', 'actor_user_id', 'action', 'entity_type', 'entity_id', 'created_at']
 });
-
 const NUMERIC_ID_TABLES = Object.freeze([
   'users', 'registration_requests', 'classes', 'students',
   'vehicles', 'drivers', 'trips', 'audit_logs'
@@ -35,21 +32,17 @@ function parseArgs(argv) {
   const result = { dbPath: null, help: false };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
-    if (argument === '--help' || argument === '-h') {
-      result.help = true;
-    } else if (argument === '--db' && argv[index + 1]) {
-      result.dbPath = argv[++index];
-    } else {
-      throw new Error('invalid_arguments');
-    }
+    if (argument === '--help' || argument === '-h') result.help = true;
+    else if (argument === '--db' && argv[index + 1]) result.dbPath = argv[++index];
+    else throw new Error('invalid_arguments');
   }
   return result;
 }
 
 function printUsage() {
   process.stdout.write(
-    'Uso: node scripts/validate-firestore-migration.js --db <caminho-do-sqlite>\\n' +
-    'Valida uma cópia do SQLite em modo somente leitura. Não conecta ao Firebase.\\n'
+    'Uso: node scripts/validate-firestore-migration.js --db <caminho-do-sqlite>\n' +
+    'Valida uma cópia do SQLite em modo somente leitura. Não conecta ao Firebase.\n'
   );
 }
 
@@ -62,12 +55,10 @@ function main() {
     process.exitCode = 2;
     return;
   }
-
   if (args.help) {
     printUsage();
     return;
   }
-
   if (!args.dbPath) {
     printUsage();
     process.exitCode = 2;
@@ -78,7 +69,6 @@ function main() {
   try {
     const resolvedPath = fs.realpathSync(args.dbPath);
     if (!fs.statSync(resolvedPath).isFile()) throw new Error('not_a_file');
-
     database = new DatabaseSync(resolvedPath, { readOnly: true });
     database.exec('PRAGMA query_only = ON; PRAGMA foreign_keys = ON;');
 
@@ -117,7 +107,6 @@ function main() {
         if (!columnsByTable[table].has(column)) addIssue('missing_column', 1);
       }
     }
-
     const has = (table, columns) =>
       tableNames.has(table) && columns.every(column => columnsByTable[table]?.has(column));
 
@@ -125,14 +114,12 @@ function main() {
     if (integrity.length !== 1 || integrity[0].integrity_check !== 'ok') {
       addIssue('sqlite_integrity_check_failed', Math.max(1, integrity.length));
     }
-
-    const foreignKeyIssues = database.prepare('PRAGMA foreign_key_check').all().length;
-    addIssue('foreign_key_violation', foreignKeyIssues);
+    addIssue('foreign_key_violation', database.prepare('PRAGMA foreign_key_check').all().length);
 
     for (const table of NUMERIC_ID_TABLES) {
       if (has(table, ['id'])) {
         addIssue('invalid_numeric_id', scalar(
-          'SELECT COUNT(*) AS count FROM "' + table + '" WHERE id IS NULL OR typeof(id) <> \\'integer\\' OR id < 1'
+          "SELECT COUNT(*) AS count FROM \"" + table + "\" WHERE id IS NULL OR typeof(id) <> 'integer' OR id < 1"
         ));
       }
     }
@@ -178,11 +165,12 @@ function main() {
 
     for (const table of ['vehicles', 'drivers']) {
       if (!has(table, ['name', 'active'])) continue;
-      addIssue('duplicate_' + (table === 'vehicles' ? 'vehicle' : 'driver') + '_name', scalar(
+      const label = table === 'vehicles' ? 'vehicle' : 'driver';
+      addIssue('duplicate_' + label + '_name', scalar(
         'SELECT COUNT(*) AS count FROM (SELECT lower(trim(name)) FROM "' + table + '" GROUP BY lower(trim(name)) HAVING COUNT(*) > 1)'
       ));
-      addIssue('invalid_' + (table === 'vehicles' ? 'vehicle' : 'driver') + '_record', scalar(
-        "SELECT COUNT(*) AS count FROM '" + table + "' WHERE trim(name) = '' OR active NOT IN (0,1)"
+      addIssue('invalid_' + label + '_record', scalar(
+        'SELECT COUNT(*) AS count FROM "' + table + '" WHERE trim(name) = \\'\\' OR active NOT IN (0,1)'
       ));
     }
 
@@ -231,7 +219,6 @@ function main() {
     const issueList = [...issues.entries()]
       .map(([code, count]) => ({ code, count }))
       .sort((left, right) => left.code.localeCompare(right.code));
-
     const report = {
       mode: 'read-only-dry-run',
       firebase_connection: false,
@@ -242,15 +229,14 @@ function main() {
       max_ids: maxIds,
       issues: issueList
     };
-
-    process.stdout.write(JSON.stringify(report, null, 2) + '\\n');
+    process.stdout.write(JSON.stringify(report, null, 2) + '\n');
     if (!report.valid) process.exitCode = 1;
   } catch {
     process.stdout.write(JSON.stringify({
       mode: 'read-only-dry-run',
       valid: false,
       issues: [{ code: 'database_unavailable_or_invalid', count: 1 }]
-    }, null, 2) + '\\n');
+    }, null, 2) + '\n');
     process.exitCode = 2;
   } finally {
     if (database) database.close();
