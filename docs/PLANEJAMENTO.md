@@ -235,7 +235,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 
 - [x] O teste concorrente confirmou que, entre três requisições simultâneas para as mesmas chaves, exatamente duas são aceitas quando o limite é dois.
 - [x] Padronizado o separador usado no hash dos identificadores do limitador Firestore.
-- [ ] Aguardar CI do ajuste final de hash no commit `e8c3456dcf9e433a3e07ad65a0fb8fda750a4eeb`.
+- [x] CI do ajuste final de hash passou nas execuções 44078780465 e 44078788580.
 
 
 ### Revisão do fluxo de solicitação de cadastro (17/11/2026)
@@ -243,10 +243,12 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Antes da produção, definir com a escola o processo de confirmação de identidade/contato (por exemplo, conferência presencial pela secretaria ou integração de e-mail institucional). Não apresentar o e-mail como verificado enquanto esse processo não existir.
 - [ ] Revisar com a escola a necessidade de reduzir a exposição de dados pessoais na resposta e no fluxo de aprovação de cadastros.
 - [x] Adicionado teste de regressão que percorre todas as rotas POST privadas e exige `requireAuth` e `requireCsrf`; somente cadastro inicial e logins password/Google são exceções públicas explícitas, protegidas por validação de origem e controles próprios.
-- [ ] Aguardar CI do teste de cobertura CSRF para confirmar a nova verificação.
+- [x] CI do teste de cobertura CSRF passou nas execuções 44079022217 e 44079031735.
 
 ### Ajuste de experiência no limite de login (17/11/2026)
 - [x] Limite por e-mail é limpo após autenticação válida, evitando que várias tentativas anteriores seguidas de uma senha correta mantenham o usuário bloqueado.
 - [x] Limpeza implementada nos dois modos: Firestore compartilhado e limitador em memória de desenvolvimento.
 - [x] Adicionados testes unitários, testes diretos no Firestore Emulator e teste da API que confirma que um login válido libera novas tentativas por conta.
-- [ ] Aguardar CI desta alteração e corrigir qualquer falha antes de considerá-la validada.
+- [x] CI da limpeza de limite após login válido passou integralmente nas execuções 44079513584 e 44079521470, incluindo testes unitários e Firestore Emulator.
+- [x] O fluxo de autenticação, o teste de concorrência Firestore, o teste de CSRF nas rotas POST e a limpeza de limite após login válido passaram no CI do GitHub Actions.
+- [ ] Aguardar CI desta atualização final do planejamento.
