@@ -661,6 +661,7 @@ app.post('/api/trips/:id/participants/:studentId/authorization', requireAuth, re
       !['authorized', 'declined'].includes(status)) {
     return res.status(400).json({ error: 'Informe uma viagem, estudante e decisão válidos.' });
   }
+  let transactionOpen = false;
   try {
     if (firebaseConfigured) {
       const result = await firestoreSchool.setTripStudentAuthorization(
@@ -673,7 +674,6 @@ app.post('/api/trips/:id/participants/:studentId/authorization', requireAuth, re
       if (result.error === 'closed') return res.status(409).json({ error: 'O prazo de autorização desta viagem foi encerrado.' });
       return res.json({ message: status === 'authorized' ? 'Autorização registrada.' : 'Não autorização registrada.' });
     }
-    let transactionOpen = false;
     const fail = (code, message) => {
       if (transactionOpen) { db.exec('ROLLBACK'); transactionOpen = false; }
       return res.status(code).json({ error: message });
@@ -699,6 +699,7 @@ app.post('/api/trips/:id/participants/:studentId/authorization', requireAuth, re
     transactionOpen = false;
     return res.json({ message: status === 'authorized' ? 'Autorização registrada.' : 'Não autorização registrada.' });
   } catch (error) {
+    if (transactionOpen) { try { db.exec('ROLLBACK'); } catch {} }
     next(error);
   }
 });
@@ -713,6 +714,7 @@ app.post('/api/trips/:id/participants/:studentId/attendance', requireAuth, requi
         !['departure', 'return'].includes(checkpoint) || typeof present !== 'boolean') {
       return res.status(400).json({ error: 'Informe viagem, estudante, etapa e presença válidos.' });
     }
+    let transactionOpen = false;
     try {
       if (firebaseConfigured) {
         const result = await firestoreSchool.setTripAttendance(
@@ -726,7 +728,6 @@ app.post('/api/trips/:id/participants/:studentId/attendance', requireAuth, requi
         if (result.error === 'forbidden') return res.status(403).json({ error: 'Seu perfil não permite registrar presença.' });
         return res.json({ message: 'Presença atualizada.' });
       }
-      let transactionOpen = false;
       const fail = (code, message) => {
         if (transactionOpen) { db.exec('ROLLBACK'); transactionOpen = false; }
         return res.status(code).json({ error: message });
@@ -754,6 +755,7 @@ app.post('/api/trips/:id/participants/:studentId/attendance', requireAuth, requi
       transactionOpen = false;
       return res.json({ message: 'Presença atualizada.' });
     } catch (error) {
+      if (transactionOpen) { try { db.exec('ROLLBACK'); } catch {} }
       next(error);
     }
   });
