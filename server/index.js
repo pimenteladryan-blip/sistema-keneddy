@@ -3,8 +3,9 @@ require('dotenv').config();
 const path = require('node:path');
 const express = require('express');
 const helmet = require('helmet');
-const { db, audit } = require('./db');
 const { firebaseConfigured, projectId, firebaseApp } = require('./firebase');
+// Firebase mode must not initialize an ephemeral SQLite database on the hosting filesystem.
+const { db, audit } = firebaseConfigured ? { db: null, audit: () => {} } : require('./db');
 const { getAuth } = require('firebase-admin/auth');
 const firestoreAuth = require('./firestore-auth');
 const firestoreSchool = require('./firestore-school');
@@ -66,13 +67,14 @@ app.use(async (req, res, next) => {
     if (!token || token.length > 200) return next();
     const tokenHash = sha256(token);
     const now = new Date().toISOString();
-    const session = db.prepare('SELECT s.id AS session_id, s.csrf_token, u.id, u.display_name, u.email, u.role, u.active FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?').get(tokenHash, now);
-    if (session && session.active) {
-      req.auth = { sessionId: session.session_id, sessionStore: 'sqlite', csrfToken: session.csrf_token,
-        user: { id: session.id, name: session.display_name, email: session.email, role: session.role } };
-      return next();
-    }
-    if (firebaseConfigured) {
+    if (!firebaseConfigured) {
+      const session = db.prepare('SELECT s.id AS session_id, s.csrf_token, u.id, u.display_name, u.email, u.role, u.active FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?').get(tokenHash, now);
+      if (session && session.active) {
+        req.auth = { sessionId: session.session_id, sessionStore: 'sqlite', csrfToken: session.csrf_token,
+          user: { id: session.id, name: session.display_name, email: session.email, role: session.role } };
+        return next();
+      }
+    } else {
       const cloudSession = await firestoreAuth.findSession(tokenHash, now);
       if (cloudSession) {
         req.auth = { sessionId: cloudSession.session_id, sessionStore: 'firestore', tokenHash,
