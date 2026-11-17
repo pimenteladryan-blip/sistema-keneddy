@@ -6,12 +6,23 @@ const { getFirestore } = require('firebase-admin/firestore');
 
 const projectId = String(process.env.FIREBASE_PROJECT_ID || 'svge-14ec7').trim();
 const rawServiceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+const emulatorHost = String(process.env.FIRESTORE_EMULATOR_HOST || '').trim();
 
 let firestore = null;
 let firebaseApp = null;
 let firebaseConfigured = false;
 
-if (rawServiceAccount && rawServiceAccount.trim()) {
+if (emulatorHost && process.env.NODE_ENV !== 'test') {
+  throw new Error('FIRESTORE_EMULATOR_HOST só pode ser usado com NODE_ENV=test.');
+}
+
+if (emulatorHost && process.env.NODE_ENV === 'test') {
+  // Emulator mode is deliberately restricted to automated tests.
+  const existingApp = getApps().find(app => app.name === 'sgve');
+  firebaseApp = existingApp || initializeApp({ projectId }, 'sgve');
+  firestore = getFirestore(firebaseApp);
+  firebaseConfigured = true;
+} else if (rawServiceAccount && rawServiceAccount.trim()) {
   let serviceAccount;
   try {
     serviceAccount = JSON.parse(rawServiceAccount);
