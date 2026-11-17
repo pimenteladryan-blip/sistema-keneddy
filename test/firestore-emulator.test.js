@@ -454,6 +454,7 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal((await assignVehicle(oversizedTripId)).status, 409);
 
     await school.linkGuardian(apiStudentId, 'guardian-api@emulator.sgve', 'Responsável');
+    await school.linkGuardian(paperStudentId, 'guardian-api@emulator.sgve', 'Responsável');
     await store.update('students', apiStudentId, { user_id: roleAccounts.student });
 
     const linkedClass = await api('/api/trips/' + apiTripId + '/classes', {
@@ -618,15 +619,19 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const guardianApi = await loginAs('guardian-api@emulator.sgve');
     const guardianStudentList = await guardianApi('/api/students');
     assert.equal(guardianStudentList.status, 200);
-    assert.equal((await guardianStudentList.json()).students.length, 1);
+    assert.equal((await guardianStudentList.json()).students.length, 2);
     assert.equal((await guardianApi('/api/trips')).status, 200);
     assert.equal((await guardianApi('/api/users')).status, 403);
     const guardianParticipantsResponse = await guardianApi('/api/trips/' + apiTripId + '/participants');
     assert.equal(guardianParticipantsResponse.status, 200);
     const guardianParticipants = (await guardianParticipantsResponse.json()).participants;
-    assert.equal(guardianParticipants.length, 1);
-    assert.equal(guardianParticipants[0].student_id, apiStudentId);
-    assert.equal(guardianParticipants[0].authorization_status, 'pending');
+    assert.equal(guardianParticipants.length, 2);
+    const guardianParticipant = guardianParticipants.find(item => item.student_id === apiStudentId);
+    const paperGuardianParticipant = guardianParticipants.find(item => item.student_id === paperStudentId);
+    assert.ok(guardianParticipant);
+    assert.equal(guardianParticipant.authorization_status, 'pending');
+    assert.ok(paperGuardianParticipant);
+    assert.equal(paperGuardianParticipant.authorization_status, 'paper_recorded');
     const authorizationAuditBefore = await store.list('auditLogs', {
       filters: [{ field: 'action', op: '==', value: 'authorize_trip_student' }]
     });
@@ -640,6 +645,12 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     });
     assert.equal(authorizationAuditAfter.length, authorizationAuditBefore.length + 1,
       'repetir a mesma autorização não deve duplicar auditoria');
+    assert.equal((await guardianApi('/api/trips/' + apiTripId + '/participants/' + paperStudentId + '/authorization', {
+      method: 'POST', body: JSON.stringify({ status: 'authorized' })
+    })).status, 409, 'decisão digital não pode substituir autorização em papel');
+    assert.equal((await guardianApi('/api/trips/' + apiTripId + '/participants/' + paperStudentId + '/paper-authorization', {
+      method: 'POST', body: JSON.stringify({})
+    })).status, 403, 'responsável não pode registrar autorização em papel administrativamente');
     const unrelatedGuardianApi = await loginAs('responsavel-sem-vinculo@emulator.sgve');
     assert.equal((await unrelatedGuardianApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/authorization', {
       method: 'POST', body: JSON.stringify({ status: 'authorized' })
