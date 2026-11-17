@@ -689,7 +689,7 @@ app.post('/api/drivers', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGE
     audit(req.auth.user.id, 'create', 'driver', result.lastInsertRowid);
     return res.status(201).json({ id: Number(result.lastInsertRowid), message: 'Condutor cadastrado.' });
   } catch (error) {
-    if (error.code === 'already-exists' || /UNIQUE constraint failed: drivers\\.name/i.test(error.message)) {
+    if (error.code === 'already-exists' || error.message.includes('UNIQUE constraint failed: drivers.name')) {
       return res.status(409).json({ error: 'Já existe um condutor com esse nome.' });
     }
     next(error);
