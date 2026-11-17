@@ -303,6 +303,30 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal(approvedRequest.verification_code, null,
       'código de solicitação deve ser apagado após aprovação');
 
+    await auth.createRegistrationRequest({
+      display_name: 'Solicitação para aprovação concorrente',
+      email: 'aprovacao-concorrente@emulator.sgve',
+      password_hash: rolePasswordHash,
+      role: 'teacher',
+      verification_code: 'TUV123'
+    });
+    const concurrentListResponse = await api('/api/registration-requests');
+    const concurrentList = await concurrentListResponse.json();
+    const concurrentRequest = concurrentList.requests.find(item => item.email === 'aprovacao-concorrente@emulator.sgve');
+    assert.ok(concurrentRequest);
+    const concurrentApprovals = await Promise.all([
+      api('/api/registration-requests/' + concurrentRequest.id + '/approve', {
+        method: 'POST', body: JSON.stringify({})
+      }),
+      api('/api/registration-requests/' + concurrentRequest.id + '/approve', {
+        method: 'POST', body: JSON.stringify({})
+      })
+    ]);
+    const approvalStatuses = concurrentApprovals.map(response => response.status).sort();
+    assert.deepEqual(approvalStatuses, [200, 404],
+      'duas aprovações simultâneas devem resultar em exatamente uma aprovação');
+    assert.equal((await auth.findUserByEmail('aprovacao-concorrente@emulator.sgve')).active, true);
+
     const classResponse = await api('/api/classes', {
       method: 'POST',
       body: JSON.stringify({ level: 'medio', grade: '3º ano', course: 'regular', section: 'B', school_year: 2026 })
