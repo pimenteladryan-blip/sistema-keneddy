@@ -182,7 +182,7 @@ async function loadReports() {
 
 function csvCell(value) {
   let text = String(value ?? '');
-  if (/^\\s*[=+\\-@]/.test(text)) text = "'" + text;
+  if (/^\s*[=+\-@]/.test(text)) text = "'" + text;
   return '"' + text.replace(/"/g, '""') + '"';
 }
 
@@ -202,7 +202,7 @@ function exportReportCsv() {
       column[1] === 'status' ? tripStatusLabel(trip.status) : trip[column[1]]
     )).join(';'))
   ];
-  const blob = new Blob(['\\uFEFF' + lines.join('\\r\\n')], { type: 'text/csv;charset=utf-8' });
+  const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
