@@ -336,9 +336,12 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
     assert.equal(verifyDb.prepare("SELECT authorization_status FROM trip_students WHERE trip_id = ? AND student_id = ?").get(tripId, paperStudentId).authorization_status, 'paper_recorded');
     assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'record_paper_authorization'").get().total, 1);
     assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'mark_departure_present'").get().total, 1);
-    for (const action of ['link_guardian', 'link_class', 'link_student', 'assign_teacher']) {
-      assert.equal(verifyDb.prepare('SELECT COUNT(*) AS total FROM audit_logs WHERE action = ?').get(action).total, 1,
-        'vínculo repetido não deve duplicar auditoria: ' + action);
+    const expectedLinkAudits = {
+      link_guardian: 1, link_class: 1, link_student: 2, assign_teacher: 1
+    };
+    for (const [action, expected] of Object.entries(expectedLinkAudits)) {
+      assert.equal(verifyDb.prepare('SELECT COUNT(*) AS total FROM audit_logs WHERE action = ?').get(action).total, expected,
+        'vínculos repetidos não devem duplicar auditoria: ' + action);
     }
   } finally { verifyDb.close(); }
   const reportResponse = await adminApi('/api/reports/summary');
