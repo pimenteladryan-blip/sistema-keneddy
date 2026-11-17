@@ -2,7 +2,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 const { DatabaseSync } = require('node:sqlite');
 
 test('schema creates school records and trip workflow tables', () => {
@@ -30,3 +32,47 @@ test('trip participants start with pending authorization', () => {
   assert.equal(row.authorization_status, 'pending');
   db.close();
 });
+
+test('bancos SQLite existentes recebem a coluna opcional de veículo sem perder viagens', () => {
+  const root = path.resolve(__dirname, '..');
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'sgve-vehicle-migration-'));
+  const databasePath = path.join(directory, 'legacy.sqlite');
+  const legacy = new DatabaseSync(databasePath);
+  legacy.exec(`
+    CREATE TABLE trips (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      destination TEXT NOT NULL,
+      educational_purpose TEXT NOT NULL,
+      departure_at TEXT NOT NULL,
+      return_at TEXT NOT NULL,
+      capacity INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'draft',
+      created_by INTEGER NOT NULL,
+      approved_by INTEGER,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
+    INSERT INTO trips (title, destination, educational_purpose, departure_at, return_at, capacity, created_by)
+    VALUES ('Viagem antiga', 'Destino fictício', 'Registro de migração', '2099-12-10T08:00:00.000Z', '2099-12-10T10:00:00.000Z', 20, 1);
+  `);
+  legacy.close();
+  try {
+    const result = spawnSync(process.execPath, ['-e', "require('./server/db').db.close()"], {
+      cwd: root,
+      env: { ...process.env, DATABASE_PATH: databasePath, NODE_ENV: 'test' },
+      encoding: 'utf8'
+    });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const migrated = new DatabaseSync(databasePath, { readOnly: true });
+    try {
+      const columns = migrated.prepare('PRAGMA table_info(trips)').all().map(column => column.name);
+      assert.ok(columns.includes('vehicle_id'));
+      assert.equal(migrated.prepare('SELECT title FROM trips WHERE id = 1').get().title, 'Viagem antiga');
+      assert.ok(migrated.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'vehicles'").get());
+    } finally { migrated.close(); }
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
