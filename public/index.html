@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#145c3b">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
   <meta name="description" content="Sistema de Gerenciamento de Viagens Escolares">
   <title>SGVE | Colégio Presidente Kennedy</title>
   <link rel="stylesheet" href="/css/styles.css">
@@ -51,10 +53,21 @@
         <p class="eyebrow green">SISTEMA DE VIAGENS ESCOLARES</p><h2>Bem-vindo ao SGVE</h2>
         <p class="muted">Entre com sua conta autorizada pela administração da escola.</p>
         <form id="login-form">
+          <label for="login-role">Tipo de acesso</label>
+          <select id="login-role" name="role" required>
+            <option value="">Selecione seu perfil</option>
+            <option value="admin">Administrador</option>
+            <option value="direction">Direção</option>
+            <option value="secretariat">Secretaria</option>
+            <option value="teacher">Professor</option>
+            <option value="guardian">Responsável</option>
+            <option value="student">Estudante</option>
+          </select>
           <label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="username" maxlength="254" required>
           <label for="password">Senha</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" required>
           <button type="submit" id="login-button">Entrar</button>
           <button type="button" id="google-login-button" class="button-secondary">Entrar com Google</button>
+          <button type="button" id="pwa-install" class="button-secondary" hidden>Instalar SGVE</button>
           <p id="login-message" class="message" role="alert" aria-live="polite"></p>
         </form>
         <button type="button" class="link-button" id="show-registration">Criar uma conta</button>
