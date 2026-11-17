@@ -425,6 +425,34 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     });
     assert.equal(blockedLogin.status, 429, 'API deve bloquear novas tentativas após o limite por conta');
 
+    await auth.createUser({
+      display_name: 'Conta Limite Reset',
+      email: 'rate-limit-reset-api@emulator.sgve',
+      password_hash: rolePasswordHash,
+      role: 'teacher'
+    });
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const failedLogin = await fetch(baseUrl + '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+        body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: 'SenhaIncorreta2026!' })
+      });
+      assert.equal(failedLogin.status, 401);
+    }
+    const validResetLogin = await fetch(baseUrl + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: rolePassword })
+    });
+    assert.equal(validResetLogin.status, 200, 'login correto ainda deve ser permitido no limite');
+    const failedAfterSuccess = await fetch(baseUrl + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: 'SenhaIncorreta2026!' })
+    });
+    assert.equal(failedAfterSuccess.status, 401,
+      'login válido deve limpar o contador por conta para evitar bloqueio de usuário legítimo');
+
         const logoutResponse = await api('/api/auth/logout', {
       method: 'POST', body: JSON.stringify({})
     });
