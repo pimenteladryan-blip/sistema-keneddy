@@ -93,7 +93,7 @@ test('todas as rotas POST privadas exigem autenticação e proteção CSRF', () 
     "app.post('/api/auth/login',",
     "app.post('/api/auth/google',"
   ];
-  const postRoutes = source.split(/\\r?\\n/).filter(line => line.includes("app.post('/api/"));
+  const postRoutes = source.split(/\r?\n/).filter(line => line.includes("app.post('/api/"));
   assert.ok(postRoutes.length >= 10, 'o teste deve encontrar as rotas de mutação do SGVE');
   for (const route of postRoutes) {
     if (publicRoutes.some(prefix => route.includes(prefix))) continue;
