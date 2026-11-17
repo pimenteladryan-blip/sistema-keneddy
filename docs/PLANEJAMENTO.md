@@ -94,7 +94,8 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Arquitetura same-origin definida: Express serve `public/` e a API no mesmo host; `docs/` permanece demonstração separada. Cookies, Origin e CSRF mantidos.
 - [x] Evitar a inicialização do SQLite quando Firebase estiver configurado: sessão, autenticação, cadastros e módulos integrados passam a usar Firestore sem criar banco local efêmero.
 - [x] Cadastro e atribuição básica de condutores concluídos no SQLite e Firestore, com controle de conflito de agenda e interface; relatórios agregados já têm backend e interface.\n- [ ] Confirmar regras operacionais da frota e relatórios específicos com a escola; revisar dependências SQLite e plano de importação preservando IDs e relações.
-- [ ] Planejar migração/importação controlada dos dados existentes, preservando IDs e relações; não importar dados pessoais reais nesta fase.
+- [x] Documentado em `docs/MIGRACAO_FIRESTORE.md` o plano de migração SQLite → Firestore, com mapeamento de tabelas, preservação de IDs/relações, índices/contadores, critérios de aceite e rollback; nenhum dado real foi exportado ou importado.
+- [ ] Criar e revisar um importador idempotente, testá-lo no Emulator com dados sintéticos e só depois planejar teste controlado autorizado no Firebase real.
 - [x] Gestão de ativação/desativação de contas e bootstrap administrativo implementados no Firestore; a validação real ainda depende de teste controlado no projeto Firebase.
 - [ ] Fazer revisão de segurança, privacidade/LGPD, acessibilidade, backup/restauração e validação institucional.
 - [ ] Só depois configurar segredo de conta de serviço no Render, testar leitura e escrita real, configurar persistência/infraestrutura adequada e preparar implantação. Não implantar antes de aprovação explícita.
@@ -371,6 +372,11 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] CI da atualização final da interface (ocultação de ações incompatíveis com autorização em papel) passou em push e pull request no commit `e523f1ef3cbbbe206d4df66bb3cd8a12709718e1`, execuções `44092572065` e `44092584118`.
 - [x] CI dos testes finais de privacidade dos relatórios passou em push e pull request no commit `355e05975811bf625f1933bac8c85ebfdcdf75fb`, execuções `44093054594` e `44093061041`; sintaxe, suíte automatizada e Firestore Emulator concluídos com sucesso.
 - [ ] Validar visualmente o fluxo com contas fictícias; não anexar documentos reais nem dados pessoais nesta fase.
+### Plano de migração SQLite → Firestore (17/11/2026)
+- [x] Criado `docs/MIGRACAO_FIRESTORE.md` com a ordem de importação, mapeamento de coleções, regras para sessões/hashes, índices únicos, contadores, validação, janela de manutenção e rollback.
+- [x] Documento deixa explícito que o importador ainda não existe e que nenhuma migração real foi executada.
+- [ ] Próxima etapa técnica: desenhar e testar importador idempotente com banco sintético e Firestore Emulator; não acessar dados reais sem autorização institucional.
+
 ### Cadastro e atribuição básica de condutores (17/11/2026)
 - [x] Criada coleção Firestore `drivers` e tabela SQLite `drivers`, com identificador, nome e estado ativo; cadastro não coleta CPF, número de CNH, telefone ou endereço.
 - [x] Criadas rotas autenticadas e protegidas por CSRF para equipe gestora listar/cadastrar condutores e atribuir condutor a viagem em rascunho.
