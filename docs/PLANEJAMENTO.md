@@ -90,7 +90,8 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Adicionar testes isolados para rotas e transações de autenticação/cadastros Firestore, incluindo duplicidade, aprovação concorrente, conta inativa e permissões por perfil.
 - [ ] Verificar integração de ponta a ponta com projeto de teste Firestore, usando somente contas e dados fictícios.
 - [ ] Corrigir arquitetura de origem entre GitHub Pages e API: definir domínio/proxy same-origin ou estratégia de sessão segura. Não relaxar CORS, SameSite, CSRF ou cookies sem revisão.
-- [ ] Migrar os demais módulos e eliminar dependência operacional do SQLite; hoje o servidor ainda inicializa SQLite e várias rotas/tabelas continuam dependendo dele.
+- [x] Evitar a inicialização do SQLite quando Firebase estiver configurado: sessão, autenticação, cadastros e módulos integrados passam a usar Firestore sem criar banco local efêmero.
+- [ ] Migrar os demais módulos e revisar toda dependência residual do SQLite; o caminho Firestore foi separado, mas precisa de validação ponta a ponta antes de ser considerado pronto.
 - [ ] Planejar migração/importação controlada dos dados existentes, preservando IDs e relações; não importar dados pessoais reais nesta fase.
 - [ ] Implementar gestão de ativação/desativação de contas no Firestore e revisar o provisionamento inicial de administrador.
 - [ ] Implementar autorização digital, presença, transporte, relatórios e demais módulos previstos.
@@ -101,6 +102,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - Branch de trabalho: `feature/firestore-auth-migration`.
 - PR de desenvolvimento: https://github.com/pimenteladryan-blip/sistema-keneddy/pull/1 (permanece aberto e não mesclado).
 - Commits da fundação Firestore/autenticação Google e integração parcial: `5bdf556`, `2bd0e77`, `0586741`, `9336f49`, `9beeca5`, `f8aef90`.
+- Commit `56fe5f9`: servidor deixa de inicializar SQLite quando Firestore está configurado; GitHub Actions verificou sintaxe e todos os testes passaram.
 - Commits desta etapa: `da371ba` (sessões com senha), `47f94f2` (rotas de contas e solicitações no Firestore), `88ce582` (registro do planejamento), `a844690` (correções de validação/compatibilidade), `48d8b98` (teste de sessões por senha e Google) e `ac4791f` (isolamento dos testes e CI verde).
 - Correção do ambiente dos testes: os testes de integração SQLite agora desativam explicitamente a credencial Firebase, evitando que dependam de segredos externos ou tentem usar Firestore em vez do banco temporário.
 - GitHub Actions no commit `ac4791f` concluiu com sucesso: verificação de sintaxe, protótipo e todos os testes automatizados passaram.
