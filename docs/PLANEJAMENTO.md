@@ -306,6 +306,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] A derivação usa sempre o tamanho fixo esperado de 64 bytes e compara os resultados com `timingSafeEqual`.
 - [x] Criados testes para senha correta/incorreta, hash malformado, entrada excessivamente grande e senha de tipo inválido.
 - [ ] Aguardar CI dos testes de hash e da cobertura de aprovação concorrente.
-- [!] O primeiro teste de aprovação concorrente falhou no Firestore Emulator: ambas as requisições retornaram HTTP 500, embora os testes unitários tenham passado. A implementação ainda não deve ser considerada validada para concorrência.
-- [x] Instrumentado o teste de integração para capturar as respostas e logs do servidor, permitindo identificar a causa antes de alterar a transação.
-- [ ] Diagnosticar e corrigir o conflito/erro de transação; repetir o teste até obter uma única aprovação e uma resposta de solicitação já analisada.
+- [!] O primeiro teste de aprovação concorrente falhou porque o dado fictício usava o código `TUV123`, mas o alfabeto de códigos do sistema exclui o dígito `1`; a validação da solicitação rejeitou o fixture e as duas chamadas retornaram HTTP 500. Não foi evidenciado conflito de transação.
+- [x] Instrumentado o teste de integração para capturar respostas e logs do servidor, identificando que a falha era do dado de teste, não da transação.
+- [x] Corrigido o código fictício para `TUV234`, respeitando o alfabeto de verificação.
+- [ ] Repetir o CI após a correção do fixture e confirmar uma única aprovação concorrente.
