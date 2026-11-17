@@ -2,6 +2,8 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const auth = require('../server/firestore-auth');
 const store = require('../server/firestore-store');
 
@@ -48,6 +50,15 @@ test('o mapa de coleções Firestore é fixo e contém as relações do SGVE', (
   assert.equal(store.COLLECTIONS.registrationRequests, 'registration_requests');
   assert.equal(store.COLLECTIONS.tripStudents, 'trip_students');
   assert.equal(Object.isFrozen(store.COLLECTIONS), true);
+});
+
+test('as regras do Firestore bloqueiam acesso direto de clientes e estão ligadas à configuração', () => {
+  const root = path.resolve(__dirname, '..');
+  const firebaseConfig = JSON.parse(fs.readFileSync(path.join(root, 'firebase.json'), 'utf8'));
+  const rules = fs.readFileSync(path.join(root, firebaseConfig.firestore.rules), 'utf8');
+  assert.match(rules, /allow read, write:\\s*if false;/);
+  assert.doesNotMatch(rules, /allow read, write:\\s*if true;/);
+  assert.equal(firebaseConfig.firestore.indexes, 'firestore.indexes.json');
 });
 
 test('o armazenamento rejeita nomes de coleção desconhecidos', async () => {
