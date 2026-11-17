@@ -152,7 +152,7 @@ async function createUnique(name, field, value, data, auditEvent = null) {
     transaction.create(documentRef, { ...data, [field]: normalized });
     transaction.set(counterRef, { value: id, updated_at: new Date().toISOString() });
     transaction.create(indexRef, { documentId: String(id), value: normalized });
-    addAuditWrite(transaction, db, auditEvent);
+    addAuditWrite(transaction, db, auditEvent ? { ...auditEvent, entity_id: id } : null);
     return id;
   });
 }
@@ -234,7 +234,7 @@ async function createWithNumericId(name, data, auditEvent = null) {
       created_at: data.created_at || now
     });
     transaction.set(counterRef, { value: id, updated_at: now });
-    addAuditWrite(transaction, db, auditEvent);
+    addAuditWrite(transaction, db, auditEvent ? { ...auditEvent, entity_id: id } : null);
     return id;
   });
 }
@@ -306,7 +306,7 @@ async function createUniqueComposite(name, fields, data, auditEvent = null) {
     transaction.create(documentRef, { ...data, id, created_at: data.created_at || new Date().toISOString() });
     transaction.set(counterRef, { value: id, updated_at: new Date().toISOString() });
     transaction.create(indexRef, { documentId: String(id), fields: normalized });
-    addAuditWrite(transaction, db, auditEvent);
+    addAuditWrite(transaction, db, auditEvent ? { ...auditEvent, entity_id: id } : null);
     return id;
   });
 }
@@ -383,7 +383,7 @@ async function createStudentInActiveClass(fullName, classId, auditEvent = null) 
       user_id: null, active: true, created_at: now, updated_at: now
     });
     transaction.set(counterRef, { value: id, updated_at: now });
-    addAuditWrite(transaction, db, auditEvent);
+    addAuditWrite(transaction, db, auditEvent ? { ...auditEvent, entity_id: id } : null);
     return { id };
   });
 }
