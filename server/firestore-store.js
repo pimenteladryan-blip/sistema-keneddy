@@ -11,6 +11,7 @@ const COLLECTIONS = Object.freeze({
   studentGuardians: 'student_guardians',
   trips: 'trips',
   vehicles: 'vehicles',
+  drivers: 'drivers',
   tripClasses: 'trip_classes',
   tripStudents: 'trip_students',
   tripStaff: 'trip_staff',
@@ -114,7 +115,8 @@ async function remove(name, id) {
 const UNIQUE_FIELDS = Object.freeze({
   users: ['email'],
   registrationRequests: ['email'],
-  vehicles: ['name_key']
+  vehicles: ['name_key'],
+  drivers: ['name_key']
 });
 
 function uniqueIndexRef(name, field, value) {
@@ -588,6 +590,56 @@ async function setTripAttendance(tripId, studentId, actorUserId, actorRole, chec
 }
 
 
+async function assignTripDriver(tripId, driverId, auditEvent = null) {
+  const tripKey = normalizeId(tripId);
+  const driverKey = normalizeId(driverId);
+  const db = requireFirestore();
+  const tripRef = collection('trips').doc(tripKey);
+  const driverRef = collection('drivers').doc(driverKey);
+  return db.runTransaction(async transaction => {
+    const [tripSnapshot, driverSnapshot] = await Promise.all([
+      transaction.get(tripRef), transaction.get(driverRef)
+    ]);
+    if (!tripSnapshot.exists) return { error: 'not-found' };
+    if (!driverSnapshot.exists || driverSnapshot.data().active !== true) {
+      return { error: 'driver-not-found' };
+    }
+    const trip = tripSnapshot.data();
+    const driver = driverSnapshot.data();
+    if (trip.status !== 'draft') return { error: 'not-draft' };
+    const departure = Date.parse(trip.departure_at);
+    const returning = Date.parse(trip.return_at);
+    if (!Number.isFinite(departure) || !Number.isFinite(returning) || departure >= returning) {
+      return { error: 'invalid-schedule' };
+    }
+    const assignments = await transaction.get(
+      collection('trips').where('driver_id', '==', Number(driverKey))
+    );
+    for (const assigned of assignments.docs) {
+      if (assigned.id === tripKey) continue;
+      const existing = assigned.data();
+      if (['cancelled', 'completed'].includes(existing.status)) continue;
+      const existingDeparture = Date.parse(existing.departure_at);
+      const existingReturn = Date.parse(existing.return_at);
+      if (!Number.isFinite(existingDeparture) || !Number.isFinite(existingReturn) ||
+          (departure < existingReturn && returning > existingDeparture)) {
+        return { error: 'schedule-conflict' };
+      }
+    }
+    if (Number(trip.driver_id) === Number(driverKey)) return { ok: true, changed: false };
+    transaction.update(driverRef, {
+      schedule_version: Number(driver.schedule_version || 0) + 1,
+      updated_at: new Date().toISOString()
+    });
+    transaction.update(tripRef, {
+      driver_id: Number(driverKey),
+      updated_at: new Date().toISOString()
+    });
+    addAuditWrite(transaction, db, auditEvent);
+    return { ok: true, changed: true };
+  });
+}
+
 async function assignTripVehicle(tripId, vehicleId, auditEvent = null) {
   const tripKey = normalizeId(tripId);
   const vehicleKey = normalizeId(vehicleId);
@@ -663,5 +715,6 @@ module.exports = {
   setTripStudentAuthorization,
   recordPaperAuthorization,
   setTripAttendance,
-  assignTripVehicle
+  assignTripVehicle,
+  assignTripDriver
 };
