@@ -25,7 +25,7 @@ As permissões são verificadas no servidor. Esconder opções na interface não
 4. **Autorizações — parcialmente implementado:** autorização digital pelo responsável vinculado, com histórico; registro administrativo de autorização em papel ainda pendente.
 5. **Presença — backend e interface implementados:** listas de saída e retorno, com trilha de auditoria; validação visual final ainda pendente.
 6. **Equipe e transporte — parcialmente implementado:** atribuição de professores e cadastro/atribuição de veículos; gestão de condutores e validação operacional da frota ainda pendentes.
-7. **Financeiro e relatórios — pendente:** relatórios agregados e exportação com minimização de dados; qualquer módulo financeiro dependerá de definição institucional.
+7. **Relatórios — parcialmente implementado:** resumo agregado e exportação CSV restritos à gestão, sem nomes de estudantes; filtros, relatórios específicos e eventual módulo financeiro ainda pendentes.
 8. **Implantação — pendente:** revisão de segurança, privacidade, acessibilidade, backups, monitoramento e aprovação institucional.
 
 ## Etapas escolares
@@ -56,7 +56,7 @@ As permissões são verificadas no servidor. Esconder opções na interface não
 GPS em tempo real, aplicativo nativo, integração automática com sistemas oficiais e processamento de pagamentos.
 
 ## Próxima entrega
-Implementar autorizações digitais e registro de documentos em papel, com acesso restrito ao responsável vinculado e trilha de auditoria.
+Concluir registro administrativo de autorização em papel, gestão de condutores e relatórios específicos necessários à escola; depois revisar segurança, privacidade e operação institucional.
 
 ## Funcionalidades do protótipo estático (GitHub Pages)
 
@@ -348,3 +348,14 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Adicionado teste de migração que inicia com banco SQLite legado e confirma que a viagem antiga permanece após a inclusão de `vehicle_id`.
 - [x] CI da implementação e dos testes de migração passou em push e pull request no commit `739b3aaa35835c2a9a1aa7a92424fec5ca4325b6`, execuções `44090267231` e `44090275633`; sintaxe, testes SQLite e Firestore Emulator concluídos com sucesso.
 - [ ] Validar visualmente o cadastro e a atribuição com contas fictícias; não cadastrar veículos reais nem informações de condutores nesta fase.
+### Relatórios agregados e exportação (17/11/2026)
+- [x] Criada rota GET `/api/reports/summary`, restrita a administração, direção e secretaria.
+- [x] O resumo apresenta totais de viagens, estudantes ativos, veículos, participações, autorizações e presenças, sem retornar nomes ou contatos de estudantes.
+- [x] Criada tabela por viagem com situação, capacidade, contagem de participantes, autorização, presença na saída/retorno e veículo.
+- [x] Implementados cálculos equivalentes no SQLite e Firestore; limites de consulta são informados como relatório parcial, em vez de apresentar os dados como completos.
+- [x] Adicionado painel de relatórios no frontend, botão de atualização e exportação CSV agregada.
+- [x] Exportação CSV trata campos iniciados por caracteres que podem executar fórmulas em planilhas e usa codificação UTF-8.
+- [x] Dados do relatório são limpos ao sair ou trocar para perfil sem permissão.
+- [x] Testes de integração validam contagens, vínculo de veículo e bloqueio de acesso por perfil no SQLite e Firestore Emulator.
+- [ ] Aguardar CI da implementação e dos novos testes; não considerar concluído até o resultado final.
+- [ ] Validar visualmente o painel com contas fictícias e confirmar quais relatórios a escola realmente precisa.
