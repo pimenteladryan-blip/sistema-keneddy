@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('node:crypto');
 const store = require('./firestore-store');
 
 function validateRegistrationRequest(request) {
@@ -230,6 +231,56 @@ async function deleteExpiredSessions(now = new Date().toISOString()) {
   return expired.length;
 }
 
+
+async function consumeRateLimit({ scope, keys, windowMs, maxAttempts, nowMs = Date.now() }) {
+  if (typeof scope !== 'string' || !/^[a-z0-9_-]{1,60}$/i.test(scope) ||
+      !Array.isArray(keys) || !keys.length || keys.length > 10 ||
+      keys.some(key => typeof key !== 'string' || !key || key.length > 512) ||
+      !Number.isSafeInteger(windowMs) || windowMs < 1000 ||
+      !Number.isSafeInteger(maxAttempts) || maxAttempts < 1 ||
+      !Number.isSafeInteger(nowMs) || nowMs < 0) {
+    throw new TypeError('Parâmetros de limitação de tentativas inválidos.');
+  }
+  const db = require('./firebase').firestore;
+  if (!db) throw new Error('Firestore não configurado para limitar tentativas.');
+  const uniqueKeys = [...new Set(keys)];
+  const refs = uniqueKeys.map(key => {
+    const digest = crypto.createHash('sha256').update(scope + '\\0' + key).digest('hex');
+    return db.collection('_sgve_rate_limits').doc(digest);
+  });
+
+  return db.runTransaction(async transaction => {
+    const snapshots = [];
+    for (const ref of refs) snapshots.push(await transaction.get(ref));
+
+    const now = nowMs;
+    const states = snapshots.map(snapshot => {
+      const data = snapshot.exists ? snapshot.data() : {};
+      const startedAt = Number(data.started_at_ms);
+      const activeWindow = Number.isSafeInteger(startedAt) &&
+        now >= startedAt && now - startedAt < windowMs;
+      const count = activeWindow && Number.isSafeInteger(Number(data.count))
+        ? Number(data.count) : 0;
+      return { startedAt: activeWindow ? startedAt : now, count };
+    });
+
+    if (states.some(state => state.count >= maxAttempts)) {
+      return { allowed: false };
+    }
+
+    refs.forEach((ref, index) => {
+      const state = states[index];
+      transaction.set(ref, {
+        scope,
+        count: state.count + 1,
+        started_at_ms: state.startedAt,
+        expires_at: new Date(state.startedAt + windowMs)
+      });
+    });
+    return { allowed: true };
+  });
+}
+
 async function createRegistrationRequest({ display_name, email, password_hash, role, verification_code }) {
   const now = new Date().toISOString();
   return store.upsertUnique('registrationRequests', 'email', email, {
@@ -343,6 +394,7 @@ module.exports = {
   findSession,
   deleteSession,
   deleteExpiredSessions,
+  consumeRateLimit,
   createRegistrationRequest,
   listPendingRegistrationRequests,
   reviewRegistrationRequest
