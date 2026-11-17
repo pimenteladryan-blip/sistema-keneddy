@@ -93,7 +93,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Executar teste controlado no projeto Firebase real, com contas fictícias e sem dados de estudantes.
 - [x] Arquitetura same-origin definida: Express serve `public/` e a API no mesmo host; `docs/` permanece demonstração separada. Cookies, Origin e CSRF mantidos.
 - [x] Evitar a inicialização do SQLite quando Firebase estiver configurado: sessão, autenticação, cadastros e módulos integrados passam a usar Firestore sem criar banco local efêmero.
-- [ ] Implementar/migrar os módulos ainda previstos (autorização digital, presença, transporte e relatórios) e revisar dependências SQLite; os módulos de autenticação, usuários, turmas, estudantes, responsáveis e viagens já têm caminho Firestore.
+- [ ] Implementar/migrar os módulos restantes de transporte e relatórios e revisar dependências SQLite; autorização digital e presença agora têm backend, interface e testes automatizados nos dois modos de armazenamento.
 - [ ] Planejar migração/importação controlada dos dados existentes, preservando IDs e relações; não importar dados pessoais reais nesta fase.
 - [x] Gestão de ativação/desativação de contas e bootstrap administrativo implementados no Firestore; a validação real ainda depende de teste controlado no projeto Firebase.
 - [ ] Fazer revisão de segurança, privacidade/LGPD, acessibilidade, backup/restauração e validação institucional.
@@ -321,3 +321,17 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Mantida a resposta idempotente das operações: o vínculo já existente continua sendo considerado válido, sem duplicar a relação nem o evento de auditoria.
 - [x] Acrescentados testes no Firestore Emulator para repetir os três vínculos e confirmar que cada operação gera somente um evento de auditoria para a alteração efetiva.
 - [x] CI do GitHub Actions passou em push e pull request nas execuções `44085879599` e `44085889268`, incluindo testes unitários e Firestore Emulator.
+
+### Autorização familiar e controle de presença (17/11/2026)
+- [x] Criada consulta de participantes da viagem com filtragem por perfil: gestão vê todos; professor somente viagens em que está vinculado; responsável somente estudantes sob sua responsabilidade; estudante somente sua própria participação.
+- [x] Criada rota de autorização familiar: somente responsável autenticado e vinculado pode autorizar ou não autorizar estudante participante de viagem aprovada, antes do horário de saída.
+- [x] Criada rota de presença: gestão e professores vinculados podem registrar presença/ausência na saída e no retorno; perfis sem permissão são bloqueados.
+- [x] Operações Firestore são transacionais e registram auditoria somente quando há mudança real; repetição da mesma decisão não duplica eventos.
+- [x] Implementado comportamento equivalente no SQLite com transação imediata e rollback em falhas.
+- [x] Interface de participantes adicionada ao painel de viagens, com ações exibidas conforme perfil e estado da viagem.
+- [x] Testes de integração Firestore Emulator cobrem acesso por perfil, vínculo familiar, professor sem vínculo, autorização e presença idempotentes.
+- [x] Teste de integração SQLite cobre autorização, presença, vínculos e bloqueios por perfil.
+- [x] Testes estáticos verificam que a interface contém as ações e que as rotas exigem autenticação, CSRF e perfil adequado.
+- [ ] Aguardar CI da implementação e dos novos testes de interface; não considerar concluído até o resultado final.
+- [ ] Validar fluxos visualmente com usuários de teste fictícios antes de qualquer uso escolar real.
+
