@@ -618,6 +618,10 @@ loginForm.addEventListener('submit', async event => {
 });
 googleLoginButton.addEventListener('click', async () => {
   loginMessage.textContent = '';
+  if (!document.querySelector('#login-role').value) {
+    loginMessage.textContent = 'Selecione seu perfil antes de continuar.';
+    return;
+  }
   googleLoginButton.disabled = true;
   googleLoginButton.textContent = 'Conectando ao Google...';
   try {
