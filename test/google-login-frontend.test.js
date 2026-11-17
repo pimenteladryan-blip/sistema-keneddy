@@ -59,3 +59,13 @@ test('as rotas de autorização e presença exigem perfis e proteção CSRF', ()
   assert.match(server, /requireRoles\(\.\.\.RECORD_MANAGERS, 'teacher'\)/);
 });
 
+test('o módulo de transporte possui frota, atribuição e validações no servidor', () => {
+  assert.match(html, /id="vehicles-panel"/);
+  assert.match(html, /id="vehicle-form"/);
+  assert.match(app, /api\('\/api\/vehicles'/);
+  assert.match(app, /api\('\/api\/trips\/' \+ Number\(payload\.trip_id\) \+ '\/vehicle'/);
+  assert.match(server, /app\.post\('\/api\/trips\/:id\/vehicle', requireAuth, requireCsrf, requireRoles\(\.\.\.RECORD_MANAGERS\)/);
+  assert.match(server, /schedule-conflict/);
+  assert.match(server, /insufficient-capacity/);
+});
+
