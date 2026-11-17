@@ -231,14 +231,20 @@ async function loadTripParticipants(tripId, area) {
     const canAuthorize = currentUser?.role === 'guardian' && ['approved', 'open'].includes(tripStatus);
     const canMarkAttendance = currentUser && ['admin', 'direction', 'secretariat', 'teacher'].includes(currentUser.role) &&
       ['approved', 'open'].includes(tripStatus);
+    const canRecordPaper = currentUser && ['admin', 'direction', 'secretariat'].includes(currentUser.role) &&
+      ['approved', 'open'].includes(tripStatus);
     area.innerHTML = data.participants.length ? data.participants.map(item => {
       let controls = '';
       if (canAuthorize) {
-        controls = '<div class="participant-actions">' +
+        controls += '<div class="participant-actions">' +
           '<button type="button" class="small-action" data-participant-action="authorization" data-status="authorized" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Autorizar</button>' +
           '<button type="button" class="small-action reject-action" data-participant-action="authorization" data-status="declined" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Não autorizar</button></div>';
-      } else if (canMarkAttendance) {
-        controls = '<div class="participant-actions">' +
+      }
+      if (canRecordPaper && item.authorization_status === 'pending') {
+        controls += '<div class="participant-actions"><button type="button" class="small-action" data-participant-action="paper-authorization" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Registrar autorização em papel</button></div>';
+      }
+      if (canMarkAttendance) {
+        controls += '<div class="participant-actions">' +
           '<button type="button" class="small-action" data-participant-action="attendance" data-checkpoint="departure" data-present="true" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Presente na saída</button>' +
           '<button type="button" class="small-action reject-action" data-participant-action="attendance" data-checkpoint="departure" data-present="false" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Ausente na saída</button>' +
           '<button type="button" class="small-action" data-participant-action="attendance" data-checkpoint="return" data-present="true" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Presente no retorno</button>' +
@@ -389,11 +395,13 @@ document.querySelector('#trips-list').addEventListener('click', async event => {
     let payload;
     if (action === 'authorization') {
       payload = { status: participantButton.dataset.status };
-    } else {
+    } else if (action === 'attendance') {
       payload = {
         checkpoint: participantButton.dataset.checkpoint,
         present: participantButton.dataset.present === 'true'
       };
+    } else {
+      payload = {};
     }
     try {
       const result = await api(route, { method: 'POST', body: JSON.stringify(payload) });
