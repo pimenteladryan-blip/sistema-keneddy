@@ -10,9 +10,11 @@ test('schema creates school records and trip workflow tables', () => {
   const schema = fs.readFileSync(path.join(__dirname, '..', 'database', 'schema.sql'), 'utf8');
   db.exec(schema);
   const names = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map(row => row.name);
-  for (const table of ['users', 'classes', 'students', 'student_guardians', 'trips', 'trip_classes', 'trip_students', 'trip_staff', 'audit_logs']) {
+  for (const table of ['users', 'classes', 'students', 'student_guardians', 'vehicles', 'trips', 'trip_classes', 'trip_students', 'trip_staff', 'audit_logs']) {
     assert.ok(names.includes(table), 'missing table: ' + table);
   }
+  const tripColumns = db.prepare('PRAGMA table_info(trips)').all().map(column => column.name);
+  assert.ok(tripColumns.includes('vehicle_id'), 'trips must include the optional vehicle relation');
   db.close();
 });
 test('trip participants start with pending authorization', () => {
