@@ -47,6 +47,7 @@ test('o frontend real é servido pela mesma origem da API', () => {
 test('a interface de viagens permite consultar participantes e exibe ações conforme o perfil', () => {
   assert.match(app, /data-trip-action="participants"/);
   assert.match(app, /data-participant-action="authorization"/);
+  assert.match(app, /data-participant-action="paper-authorization"/);
   assert.match(app, /data-participant-action="attendance"/);
   assert.match(app, /loadTripParticipants/);
   assert.match(html, /responsáveis vinculados podem autorizar/);
@@ -56,6 +57,7 @@ test('as rotas de autorização e presença exigem perfis e proteção CSRF', ()
   assert.match(server, /\/api\/trips\/:id\/participants/);
   assert.match(server, /\/authorization', requireAuth, requireCsrf, requireRoles\('guardian'\)/);
   assert.match(server, /\/attendance', requireAuth, requireCsrf/);
+  assert.match(server, /\/paper-authorization',\s*requireAuth, requireCsrf, requireRoles\(\.\.\.RECORD_MANAGERS\)/);
   assert.match(server, /requireRoles\(\.\.\.RECORD_MANAGERS, 'teacher'\)/);
 });
 
