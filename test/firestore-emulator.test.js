@@ -120,6 +120,9 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
   assert.ok(approvedId > 0);
   assert.equal((await auth.findUserByEmail('novo-professor@emulator.sgve')).active, true);
   assert.equal((await auth.listPendingRegistrationRequests()).length, 0);
+  assert.equal((await store.list('auditLogs', { limit: 1000 })).some(event =>
+    event.action === 'approve_registration' && event.entity_id === String(request.id)
+  ), true, 'aprovação de cadastro precisa registrar auditoria na mesma transação');
 
   assert.ok(await store.list('auditLogs').then(rows => rows.length >= 2));
   await auth.setUserActive(guardianId, false);
@@ -260,6 +263,31 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal(tripsResponse.status, 200);
     const tripsData = await tripsResponse.json();
     assert.equal(tripsData.trips.find(item => item.id === apiTripId).status, 'approved');
+
+    const createdUser = await api('/api/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Professor criado pela API',
+        email: 'professor-criado@emulator.sgve',
+        role: 'teacher',
+        password: rolePassword
+      })
+    });
+    assert.equal(createdUser.status, 201);
+
+    const apiAudit = await store.list('auditLogs', { limit: 1000 });
+    const adminActorId = Number(loginData.user.id);
+    const adminActions = new Set(apiAudit
+      .filter(event => Number(event.actor_user_id) === adminActorId)
+      .map(event => event.action));
+    for (const action of [
+      'login_password', 'create', 'link_class', 'link_student',
+      'assign_teacher', 'submit_for_approval', 'approve'
+    ]) assert.equal(adminActions.has(action), true, 'evento de auditoria ausente: ' + action);
+    assert.equal(apiAudit.some(event =>
+      Number(event.actor_user_id) === adminActorId &&
+      event.action === 'create' && event.entity_type === 'user'
+    ), true, 'criação de usuário não foi auditada na transação');
 
     const loginAs = async (email) => {
       const response = await fetch(baseUrl + '/api/auth/login', {
