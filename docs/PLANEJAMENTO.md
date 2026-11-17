@@ -375,7 +375,9 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 ### Plano de migração SQLite → Firestore (17/11/2026)
 - [x] Criado `docs/MIGRACAO_FIRESTORE.md` com a ordem de importação, mapeamento de coleções, regras para sessões/hashes, índices únicos, contadores, validação, janela de manutenção e rollback.
 - [x] Documento deixa explícito que o importador ainda não existe e que nenhuma migração real foi executada.
+- [x] CI do runbook de migração passou no commit `3af24603d3f60f874e8ee0abf20d1cd8b6f34b29`, execuções `44098132046` (push) e `44098148289` (pull request).
 - [ ] Próxima etapa técnica: desenhar e testar importador idempotente com banco sintético e Firestore Emulator; não acessar dados reais sem autorização institucional.
+- [x] README atualizado para distinguir a demonstração GitHub Pages do backend e apontar para o runbook; CI passou no commit `f589ed3621d5ca04f96811e91b876bd8c2ffaed3`, execuções `44098386070` (push) e `44098399294` (pull request).
 
 ### Cadastro e atribuição básica de condutores (17/11/2026)
 - [x] Criada coleção Firestore `drivers` e tabela SQLite `drivers`, com identificador, nome e estado ativo; cadastro não coleta CPF, número de CNH, telefone ou endereço.
