@@ -254,3 +254,8 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Aguardar CI desta atualização final do planejamento.
 
 - [x] Registrado cuidado de privacidade: hashes determinísticos de IP/e-mail são pseudonimização, não anonimização; os registros de limite continuam sujeitos a controle de acesso, retenção e revisão LGPD.
+
+### Proteção de dados nas listagens administrativas (17/11/2026)
+- [x] Adicionados testes no Firestore Emulator para confirmar que a lista administrativa de solicitações de cadastro e a listagem de usuários nunca retornam `password_hash`.
+- [x] O teste também exercita a rejeição de uma solicitação via API administrativa, com autenticação, CSRF e auditoria.
+- [ ] Aguardar CI desta cobertura adicional de privacidade.
