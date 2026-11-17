@@ -87,8 +87,10 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Nesta etapa: login por e-mail/senha, solicitações de cadastro, criação de contas, aprovação/rejeição de solicitações, listagem de usuários e bootstrap administrativo com ramificação Firestore quando configurado.
 
 ### Em andamento / próximos passos
-- [x] Adicionados testes isolados e de integração para autenticação/cadastros Firestore, duplicidade, conta inativa, aprovação/rejeição via API e permissões dos seis perfis.\n- [ ] Acrescentar teste específico de duas aprovações simultâneas da mesma solicitação; a revisão transacional já impede a segunda decisão, mas falta cobertura concorrente dedicada.
-- [x] Integração ponta a ponta com dados fictícios validada no Firestore Emulator, incluindo Express/API.\n- [ ] Executar teste controlado no projeto Firebase real, com contas fictícias e sem dados de estudantes.
+- [x] Adicionados testes isolados e de integração para autenticação/cadastros Firestore, duplicidade, conta inativa, aprovação/rejeição via API e permissões dos seis perfis.
+- [ ] Acrescentar teste específico de duas aprovações simultâneas da mesma solicitação; a revisão transacional já impede a segunda decisão, mas falta cobertura concorrente dedicada.
+- [x] Integração ponta a ponta com dados fictícios validada no Firestore Emulator, incluindo Express/API.
+- [ ] Executar teste controlado no projeto Firebase real, com contas fictícias e sem dados de estudantes.
 - [x] Arquitetura same-origin definida: Express serve `public/` e a API no mesmo host; `docs/` permanece demonstração separada. Cookies, Origin e CSRF mantidos.
 - [x] Evitar a inicialização do SQLite quando Firebase estiver configurado: sessão, autenticação, cadastros e módulos integrados passam a usar Firestore sem criar banco local efêmero.
 - [ ] Implementar/migrar os módulos ainda previstos (autorização digital, presença, transporte e relatórios) e revisar dependências SQLite; os módulos de autenticação, usuários, turmas, estudantes, responsáveis e viagens já têm caminho Firestore.
@@ -144,7 +146,8 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 
 ### Próxima etapa prioritária
 - [x] Matriz HTTP inicial dos seis perfis exercitada no Firestore Emulator, com leituras permitidas e operações proibidas; revisão independente final permanece pendente.
-- [x] `firestore.indexes.json` criado e vinculado ao `firebase.json`, com índices das consultas conhecidas.\n- [ ] Confirmar índices adicionais após consultas reais controladas no Firebase.
+- [x] `firestore.indexes.json` criado e vinculado ao `firebase.json`, com índices das consultas conhecidas.
+- [ ] Confirmar índices adicionais após consultas reais controladas no Firebase.
 - [x] Atomicidade dos eventos de auditoria nas operações críticas e integridade transacional dos contadores numéricos revisadas e testadas no Firestore Emulator.
 - [ ] Preparar Render somente depois dos testes e da revisão de segurança. Não mesclar nem implantar sem autorização explícita.
 
@@ -153,7 +156,8 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Referenciado o arquivo de índices em `firebase.json` e incluída validação JSON no comando `npm run check`.
 - [x] Ampliados os testes do emulador para iniciar o servidor Express no modo Firestore e percorrer a API HTTP, além dos testes diretos do repositório.
 - [x] Matriz dos seis perfis validada no CI e no Firestore Emulator; resultados detalhados registrados na seção anterior.
-- [x] Auditoria atômica e contadores transacionais revisados e testados.\n- [ ] Confirmar necessidade de índices adicionais e desempenho de consultas somente após teste controlado com dados fictícios no Firebase real.
+- [x] Auditoria atômica e contadores transacionais revisados e testados.
+- [ ] Confirmar necessidade de índices adicionais e desempenho de consultas somente após teste controlado com dados fictícios no Firebase real.
 
 ### Resultado da matriz de permissões no emulador (17/11/2026)
 - [x] Testes HTTP no Express em modo Firestore para os perfis professor, responsável, estudante, direção e secretaria, além do administrador.
@@ -164,7 +168,8 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Secretaria: consulta estudantes, mas não lista usuários nem acessa solicitações de cadastro.
 - [x] Execuções do CI para commit `5809d7ab03e585de957945b28031737169d2e9bd`: push e pull request concluídos com sucesso.
 - [x] Eventos de auditoria das operações críticas passaram a ser gravados atomicamente na mesma transação Firestore.
-- [x] Contadores numéricos protegidos por transações e teste concorrente.\n- [ ] Medir desempenho de listagens em coleções grandes antes da produção.
+- [x] Contadores numéricos protegidos por transações e teste concorrente.
+- [ ] Medir desempenho de listagens em coleções grandes antes da produção.
 
 ### Integridade de contadores numéricos (17/11/2026)
 - [x] Refatorado `createWithNumericId`: agora lê o contador, cria o documento e atualiza o contador dentro da mesma transação Firestore. Evita reservar um ID numa transação e falhar a gravação do documento numa segunda operação.
