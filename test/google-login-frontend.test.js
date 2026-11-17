@@ -20,7 +20,7 @@ test('a página carrega os SDKs Firebase antes do aplicativo e oferece login Goo
 });
 
 test('o login Google obtém ID token e cria sessão no backend', () => {
-  assert.match(app, /new firebase\.auth\(\)\.GoogleAuthProvider\(\)/);
+  assert.match(app, /new firebase\.auth\.GoogleAuthProvider\(\)/);
   assert.match(app, /getIdToken\(true\)/);
   assert.match(app, /api\('\/api\/auth\/google'/);
   assert.match(app, /X-CSRF-Token/);
