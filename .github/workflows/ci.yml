@@ -2,9 +2,9 @@ name: SGVE - verificações
 
 on:
   push:
-    branches: [main, feature/firestore-auth-migration]
+    branches: [main, feature/firestore-auth-migration, feature/production-kennedy-ui]
   pull_request:
-    branches: [main]
+    branches: [main, feature/firestore-auth-migration]
 
 jobs:
   checks:
