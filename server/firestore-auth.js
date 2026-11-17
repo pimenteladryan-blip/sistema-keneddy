@@ -245,7 +245,7 @@ async function consumeRateLimit({ scope, keys, windowMs, maxAttempts, nowMs = Da
   if (!db) throw new Error('Firestore não configurado para limitar tentativas.');
   const uniqueKeys = [...new Set(keys)];
   const refs = uniqueKeys.map(key => {
-    const digest = crypto.createHash('sha256').update(scope + '\\0' + key).digest('hex');
+    const digest = crypto.createHash('sha256').update(scope + '\0' + key).digest('hex');
     return db.collection('_sgve_rate_limits').doc(digest);
   });
 
