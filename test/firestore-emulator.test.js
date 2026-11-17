@@ -415,7 +415,11 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     });
     assert.equal(driverResponse.status, 201);
     const driverId = (await driverResponse.json()).id;
-    assert.equal((await api('/api/drivers')).status, 200);
+    const driversListResponse = await api('/api/drivers');
+    assert.equal(driversListResponse.status, 200);
+    const publicDriverRecord = (await driversListResponse.json()).drivers.find(item => item.id === driverId);
+    assert.deepEqual(Object.keys(publicDriverRecord).sort(), ['id', 'name'],
+      'a lista de condutores deve expor somente os campos necessários');
     assert.equal((await api('/api/drivers', {
       method: 'POST', body: JSON.stringify({ name: 'condutor emulator 01' })
     })).status, 409);
@@ -608,6 +612,8 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const teacherTripRows = (await teacherTripsResponse.json()).trips;
     assert.equal(teacherTripRows.some(item => Object.hasOwn(item, 'driver_name')), false,
       'nome do condutor só pode ser retornado à equipe gestora');
+    assert.equal(teacherTripRows.some(item => Object.hasOwn(item, 'driver_id')), false,
+      'ID interno de condutor não deve ser exposto a professores');
     assert.equal((await teacherApi('/api/trips')).status, 200);
     assert.equal((await teacherApi('/api/students')).status, 403);
     assert.equal((await teacherApi('/api/users')).status, 403);
