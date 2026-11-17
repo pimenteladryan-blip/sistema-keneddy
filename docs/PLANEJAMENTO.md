@@ -244,3 +244,9 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Revisar com a escola a necessidade de reduzir a exposição de dados pessoais na resposta e no fluxo de aprovação de cadastros.
 - [x] Adicionado teste de regressão que percorre todas as rotas POST privadas e exige `requireAuth` e `requireCsrf`; somente cadastro inicial e logins password/Google são exceções públicas explícitas, protegidas por validação de origem e controles próprios.
 - [ ] Aguardar CI do teste de cobertura CSRF para confirmar a nova verificação.
+
+### Ajuste de experiência no limite de login (17/11/2026)
+- [x] Limite por e-mail é limpo após autenticação válida, evitando que várias tentativas anteriores seguidas de uma senha correta mantenham o usuário bloqueado.
+- [x] Limpeza implementada nos dois modos: Firestore compartilhado e limitador em memória de desenvolvimento.
+- [x] Adicionados testes unitários, testes diretos no Firestore Emulator e teste da API que confirma que um login válido libera novas tentativas por conta.
+- [ ] Aguardar CI desta alteração e corrigir qualquer falha antes de considerá-la validada.
