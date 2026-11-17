@@ -106,7 +106,7 @@ test('cadastro público só libera acesso após aprovação do administrador', a
   assert.equal(blockedLogin.status, 401);
 
   const admin = await adminSession();
-  const headers = { Cookie: admin.cookie, 'X-CSRF-Token': admin.csrfToken };
+  const headers = { Cookie: admin.cookie, 'X-CSRF-Token': admin.csrfToken, Origin: baseUrl };
   const queueResponse = await fetch(baseUrl + '/api/registration-requests', { headers });
   assert.equal(queueResponse.status, 200);
   const queue = await queueResponse.json();
@@ -133,7 +133,7 @@ test('solicitação rejeitada não cria uma conta', async () => {
   const submitted = await submitRequest(rejectedEmail);
   assert.equal(submitted.status, 201);
   const admin = await adminSession();
-  const headers = { Cookie: admin.cookie, 'X-CSRF-Token': admin.csrfToken };
+  const headers = { Cookie: admin.cookie, 'X-CSRF-Token': admin.csrfToken, Origin: baseUrl };
   const queueResponse = await fetch(baseUrl + '/api/registration-requests', { headers });
   const queue = await queueResponse.json();
   const request = queue.requests.find(item => item.email === rejectedEmail);
