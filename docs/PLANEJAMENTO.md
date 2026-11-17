@@ -305,8 +305,10 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] `verifyPassword` agora valida tipo, algoritmo, tamanho e caracteres hexadecimais do hash antes de chamar `scrypt`, evitando custo computacional desnecessário com valores malformados ou enormes.
 - [x] A derivação usa sempre o tamanho fixo esperado de 64 bytes e compara os resultados com `timingSafeEqual`.
 - [x] Criados testes para senha correta/incorreta, hash malformado, entrada excessivamente grande e senha de tipo inválido.
-- [ ] Aguardar CI dos testes de hash e da cobertura de aprovação concorrente.
+- [x] Testes de hash e aprovação concorrente passaram em push e pull request nas execuções 44084612085 e 44084621629.
 - [!] O primeiro teste de aprovação concorrente falhou porque o dado fictício usava o código `TUV123`, mas o alfabeto de códigos do sistema exclui o dígito `1`; a validação da solicitação rejeitou o fixture e as duas chamadas retornaram HTTP 500. Não foi evidenciado conflito de transação.
 - [x] Instrumentado o teste de integração para capturar respostas e logs do servidor, identificando que a falha era do dado de teste, não da transação.
 - [x] Corrigido o código fictício para `TUV234`, respeitando o alfabeto de verificação.
-- [ ] Repetir o CI após a correção do fixture e confirmar uma única aprovação concorrente.
+- [x] CI após a correção do fixture passou em push e pull request nas execuções 44084612085 e 44084621629; o teste confirmou uma única aprovação concorrente e uma resposta 404 para a tentativa duplicada.
+- [x] Validação final desta rodada: 37 testes unitários aprovados, sintaxe aprovada e Firestore Emulator aprovado, incluindo concorrência de aprovação de cadastro.
+- [ ] Aguardar CI desta atualização final do planejamento.
