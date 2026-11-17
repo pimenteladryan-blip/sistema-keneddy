@@ -132,3 +132,18 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Criado `test/google-login-frontend.test.js` para validar ordem de carregamento dos SDKs, botão Google, obtenção/envio do ID token, configuração pública sem credenciais privadas, verificação do token no servidor e hospedagem do frontend/API na mesma origem.
 - [ ] Confirmar o resultado do GitHub Actions após a inclusão dos testes; corrigir qualquer falha antes de seguir.
 - [ ] Testes estáticos não substituem um teste ponta a ponta com popup Google e Firestore real/emulador.
+
+### Etapa concluída: testes de integração do Firestore (17/11/2026)
+- [x] Adicionado modo Firestore Emulator restrito a `NODE_ENV=test`; se `FIRESTORE_EMULATOR_HOST` for informado fora de testes, a inicialização falha com erro explícito. O caminho de produção continua exigindo credencial privada do Firebase Admin.
+- [x] Criado `firebase.json` para o emulador local do Firestore.
+- [x] Criado `test/firestore-emulator.test.js`: exercita índices únicos e usuários, sessões/auditoria, criação/listagem de turmas e estudantes, vínculo de responsáveis, capacidade de viagem, equipe, submissão/aprovação, solicitação de cadastro e desativação de conta.
+- [x] O teste também inicia a aplicação Express em modo Firestore e valida via HTTP login por senha, criação de turma/estudante/viagem, vínculos, aprovação, consulta e logout. Dados são fictícios e isolados no emulador.
+- [x] Pipeline CI agora prepara Java 21 e executa Firestore Emulator; execução `44010800638`, commit `73ee543b8436e9b82e6493e01e00f7d64f115af4`, concluída com sucesso.
+- [x] CI foi configurado para executar também em pushes da branch de migração, não apenas em PRs.
+- [ ] O emulador não substitui teste de conectividade/autorização no projeto Firebase real. Isso depende de configurar a conta de serviço de forma privada no ambiente de hospedagem, sem compartilhar a chave no chat ou GitHub.
+
+### Próxima etapa prioritária
+- [ ] Auditoria completa dos endpoints e permissões em modo Firestore, com testes HTTP por perfil (admin, direção, secretaria, professor, responsável e estudante), incluindo casos proibidos.
+- [ ] Confirmar índices compostos necessários no Firestore de produção e criar `firestore.indexes.json` quando a auditoria das consultas estiver concluída.
+- [ ] Revisar atomicidade da auditoria de eventos de negócio e consistência dos contadores/índices; não declarar o banco pronto para produção antes dessa revisão.
+- [ ] Preparar Render somente depois dos testes e da revisão de segurança. Não mesclar nem implantar sem autorização explícita.
