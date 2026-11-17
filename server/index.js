@@ -615,6 +615,149 @@ app.post('/api/trips/:id/approve', requireAuth, requireCsrf, requireRoles('admin
   } catch (error) { next(error); }
 });
 
+
+app.get('/api/trips/:id/participants', requireAuth, async (req, res, next) => {
+  const tripId = Number(req.params.id);
+  if (!Number.isSafeInteger(tripId) || tripId < 1) return res.status(400).json({ error: 'Viagem inválida.' });
+  try {
+    if (firebaseConfigured) {
+      const participants = await firestoreSchool.listTripParticipantsForUser(tripId, req.auth.user);
+      if (participants === null) return res.status(404).json({ error: 'Viagem não encontrada.' });
+      return res.json({ participants });
+    }
+    if (!db.prepare('SELECT id FROM trips WHERE id = ?').get(tripId)) {
+      return res.status(404).json({ error: 'Viagem não encontrada.' });
+    }
+    const user = req.auth.user;
+    let rows;
+    const query = 'SELECT ts.student_id, s.full_name, ts.authorization_status, ts.departure_present, ts.return_present FROM trip_students ts JOIN students s ON s.id = ts.student_id WHERE ts.trip_id = ? AND s.active = 1';
+    if (hasRole(user, RECORD_MANAGERS)) {
+      rows = db.prepare(query + ' ORDER BY s.full_name').all(tripId);
+    } else if (user.role === 'teacher') {
+      if (!db.prepare('SELECT 1 FROM trip_staff WHERE trip_id = ? AND user_id = ?').get(tripId, user.id)) {
+        return res.status(403).json({ error: 'Você não está vinculado a esta viagem.' });
+      }
+      rows = db.prepare(query + ' ORDER BY s.full_name').all(tripId);
+    } else if (user.role === 'guardian') {
+      rows = db.prepare(query + ' AND EXISTS (SELECT 1 FROM student_guardians sg WHERE sg.student_id = s.id AND sg.guardian_user_id = ?) ORDER BY s.full_name').all(tripId, user.id);
+    } else if (user.role === 'student') {
+      rows = db.prepare(query + ' AND s.user_id = ? ORDER BY s.full_name').all(tripId, user.id);
+    } else {
+      return res.status(403).json({ error: 'Seu perfil não permite consultar participantes.' });
+    }
+    return res.json({ participants: rows });
+  } catch (error) {
+    if (error.code === 'forbidden') return res.status(403).json({ error: error.message });
+    next(error);
+  }
+});
+
+app.post('/api/trips/:id/participants/:studentId/authorization', requireAuth, requireCsrf, requireRoles('guardian'), async (req, res, next) => {
+  const tripId = Number(req.params.id);
+  const studentId = Number(req.params.studentId);
+  const status = req.body.status;
+  if (!Number.isSafeInteger(tripId) || tripId < 1 ||
+      !Number.isSafeInteger(studentId) || studentId < 1 ||
+      !['authorized', 'declined'].includes(status)) {
+    return res.status(400).json({ error: 'Informe uma viagem, estudante e decisão válidos.' });
+  }
+  try {
+    if (firebaseConfigured) {
+      const result = await firestoreSchool.setTripStudentAuthorization(
+        tripId, studentId, req.auth.user.id, status
+      );
+      if (result.error === 'not-found' || result.error === 'not-participant' || result.error === 'forbidden') {
+        return res.status(404).json({ error: 'Participação ou vínculo de responsável não encontrado.' });
+      }
+      if (result.error === 'not-approved') return res.status(409).json({ error: 'A autorização só pode ser registrada após a aprovação da viagem.' });
+      if (result.error === 'closed') return res.status(409).json({ error: 'O prazo de autorização desta viagem foi encerrado.' });
+      return res.json({ message: status === 'authorized' ? 'Autorização registrada.' : 'Não autorização registrada.' });
+    }
+    let transactionOpen = false;
+    const fail = (code, message) => {
+      if (transactionOpen) { db.exec('ROLLBACK'); transactionOpen = false; }
+      return res.status(code).json({ error: message });
+    };
+    db.exec('BEGIN IMMEDIATE');
+    transactionOpen = true;
+    const trip = db.prepare('SELECT status, departure_at FROM trips WHERE id = ?').get(tripId);
+    if (!trip) return fail(404, 'Viagem não encontrada.');
+    if (!['approved', 'open'].includes(trip.status)) return fail(409, 'A autorização só pode ser registrada após a aprovação da viagem.');
+    const departureAt = Date.parse(trip.departure_at);
+    if (!Number.isFinite(departureAt) || Date.now() >= departureAt) return fail(409, 'O prazo de autorização desta viagem foi encerrado.');
+    const student = db.prepare('SELECT id FROM students WHERE id = ? AND active = 1').get(studentId);
+    const guardianLink = db.prepare('SELECT 1 FROM student_guardians WHERE student_id = ? AND guardian_user_id = ?').get(studentId, req.auth.user.id);
+    if (!student || !guardianLink) return fail(404, 'Participação ou vínculo de responsável não encontrado.');
+    const participant = db.prepare('SELECT authorization_status FROM trip_students WHERE trip_id = ? AND student_id = ?').get(tripId, studentId);
+    if (!participant) return fail(404, 'Participação ou vínculo de responsável não encontrado.');
+    if (participant.authorization_status !== status) {
+      db.prepare('UPDATE trip_students SET authorization_status = ? WHERE trip_id = ? AND student_id = ?').run(status, tripId, studentId);
+      audit(req.auth.user.id, status === 'authorized' ? 'authorize_trip_student' : 'decline_trip_student',
+        'trip_student', tripId + '_' + studentId);
+    }
+    db.exec('COMMIT');
+    transactionOpen = false;
+    return res.json({ message: status === 'authorized' ? 'Autorização registrada.' : 'Não autorização registrada.' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/api/trips/:id/participants/:studentId/attendance', requireAuth, requireCsrf,
+  requireRoles(...RECORD_MANAGERS, 'teacher'), async (req, res, next) => {
+    const tripId = Number(req.params.id);
+    const studentId = Number(req.params.studentId);
+    const { checkpoint, present } = req.body;
+    if (!Number.isSafeInteger(tripId) || tripId < 1 ||
+        !Number.isSafeInteger(studentId) || studentId < 1 ||
+        !['departure', 'return'].includes(checkpoint) || typeof present !== 'boolean') {
+      return res.status(400).json({ error: 'Informe viagem, estudante, etapa e presença válidos.' });
+    }
+    try {
+      if (firebaseConfigured) {
+        const result = await firestoreSchool.setTripAttendance(
+          tripId, studentId, req.auth.user, checkpoint, present
+        );
+        if (result.error === 'not-found' || result.error === 'not-participant') {
+          return res.status(404).json({ error: 'Participação não encontrada.' });
+        }
+        if (result.error === 'not-assigned') return res.status(403).json({ error: 'Professor não está vinculado a esta viagem.' });
+        if (result.error === 'not-approved') return res.status(409).json({ error: 'A presença só pode ser registrada em viagens aprovadas.' });
+        if (result.error === 'forbidden') return res.status(403).json({ error: 'Seu perfil não permite registrar presença.' });
+        return res.json({ message: 'Presença atualizada.' });
+      }
+      let transactionOpen = false;
+      const fail = (code, message) => {
+        if (transactionOpen) { db.exec('ROLLBACK'); transactionOpen = false; }
+        return res.status(code).json({ error: message });
+      };
+      db.exec('BEGIN IMMEDIATE');
+      transactionOpen = true;
+      const trip = db.prepare('SELECT status FROM trips WHERE id = ?').get(tripId);
+      if (!trip) return fail(404, 'Viagem não encontrada.');
+      if (!['approved', 'open'].includes(trip.status)) return fail(409, 'A presença só pode ser registrada em viagens aprovadas.');
+      if (req.auth.user.role === 'teacher' &&
+          !db.prepare('SELECT 1 FROM trip_staff WHERE trip_id = ? AND user_id = ?').get(tripId, req.auth.user.id)) {
+        return fail(403, 'Professor não está vinculado a esta viagem.');
+      }
+      const student = db.prepare('SELECT id FROM students WHERE id = ? AND active = 1').get(studentId);
+      const participant = db.prepare('SELECT student_id, departure_present, return_present FROM trip_students WHERE trip_id = ? AND student_id = ?').get(tripId, studentId);
+      if (!student || !participant) return fail(404, 'Participação não encontrada.');
+      const field = checkpoint === 'departure' ? 'departure_present' : 'return_present';
+      if (participant[field] !== Number(present)) {
+        db.prepare('UPDATE trip_students SET ' + field + ' = ? WHERE trip_id = ? AND student_id = ?')
+          .run(Number(present), tripId, studentId);
+        audit(req.auth.user.id, 'mark_' + checkpoint + '_' + (present ? 'present' : 'absent'),
+          'trip_student', tripId + '_' + studentId);
+      }
+      db.exec('COMMIT');
+      transactionOpen = false;
+      return res.json({ message: 'Presença atualizada.' });
+    } catch (error) {
+      next(error);
+    }
+  });
+
 app.use(express.static(path.join(__dirname, '..', 'public'), { extensions: ['html'], index: 'index.html', maxAge: isProduction ? '1h' : 0 }));
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Rota não encontrada.' }));
 app.use((error, _req, res, _next) => {
