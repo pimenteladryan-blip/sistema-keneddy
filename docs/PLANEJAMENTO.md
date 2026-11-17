@@ -286,3 +286,9 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] CI desta consolidação passou em push e pull request nas execuções 44081347027 e 44081354662.
 
 - [x] Consolidação final do planejamento validada no GitHub Actions; nenhuma pendência histórica de CI permanece aberta nesta seção.
+
+
+### Correção e cobertura das rotas de aprovação/rejeição (17/11/2026)
+- [x] Corrigida a validação de IDs numéricos nas rotas administrativas de aprovação e rejeição: a expressão regular estava escapada em duplicidade e rejeitava IDs válidos.
+- [x] Adicionados testes de integração no Firestore Emulator para rejeitar e aprovar solicitações pela API; o teste confirma que a conta aprovada fica ativa.
+- [ ] Aguardar CI da correção e dos novos testes antes de considerar o fluxo administrativo validado.
