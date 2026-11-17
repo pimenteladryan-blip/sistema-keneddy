@@ -196,3 +196,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Aguardar CI do teste de bloqueio anônimo antes de considerar esta etapa validada.
 - [x] CI do commit `cf5c2f04a56a5af999630726d2ceb58b9e441bc3` passou em push e pull request. A consulta REST anônima ao Firestore Emulator foi recusada com HTTP 403, enquanto os testes de servidor/Admin SDK continuaram passando.
 - [x] CI do commit de documentação `018a5b11377928b2bfb9fe41e5570022f26e5cf2` passou no evento push; verificação do pull request ainda estava em andamento durante esta atualização.
+
+### Manutenção de dependências (17/11/2026)
+- [x] Configurado Dependabot para verificar semanalmente dependências npm e GitHub Actions, abrindo atualizações com rótulos de dependência/segurança.
+- [ ] Revisar e aprovar individualmente cada atualização automática; não habilitar merge automático de dependências.
