@@ -486,6 +486,11 @@ test('frota e atribuição de veículos validam capacidade, conflito de horário
   assert.equal(teacherLogin.status, 200);
   const teacherData = await teacherLogin.json();
   const teacherCookie = teacherLogin.headers.get('set-cookie').split(';')[0];
+  const teacherPrivacyTrip = await createTrip('Viagem para teste de privacidade', '2099-12-12T08:00:00.000Z', '2099-12-12T10:00:00.000Z', 20);
+  assert.equal((await assignDriver(teacherPrivacyTrip)).status, 200);
+  assert.equal((await adminApi('/api/trips/' + teacherPrivacyTrip + '/staff', {
+    method: 'POST', body: JSON.stringify({ user_id: teacherData.user.id })
+  })).status, 200);
   const teacherVehicles = await fetch(baseUrl + '/api/vehicles', {
     headers: { Origin: baseUrl, Cookie: teacherCookie }
   });
