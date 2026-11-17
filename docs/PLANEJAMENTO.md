@@ -426,3 +426,15 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] README atualizado para documentar a aplicação no Render e explicar que dados sintéticos ficam restritos aos testes automatizados e ao Firestore Emulator.
 - [ ] Validar a publicação do redirecionamento no GitHub Pages após a integração da branch.
 - [ ] Revisar os fluxos de ponta a ponta na aplicação hospedada antes de qualquer uso institucional.
+
+
+### Remoção de dados fictícios e consolidação da aplicação real (17/11/2026)
+- [x] Retirada da publicação GitHub Pages a interface estática com contas de demonstração, senha compartilhada e cadastros locais de estudantes/viagens fictícios; a página agora encaminha para o SGVE hospedado no Render.
+- [x] Removidos os scripts e a configuração Firebase Web que pertenciam exclusivamente ao protótipo estático.
+- [x] Atualizado o Service Worker antigo para limpar o cache da demonstração; a nova aplicação não deve armazenar respostas de API, autenticação ou dados pessoais em cache.
+- [x] Login real ganhou seleção de perfil; o servidor compara o perfil selecionado com o perfil cadastrado antes de criar a sessão. O login Google também exige a seleção e valida o perfil no servidor.
+- [x] Adicionado suporte PWA à aplicação real, com manifest, ícone, botão de instalação e cache restrito a CSS/JavaScript/arquivos estáticos. Rotas `/api/` e páginas autenticadas não são armazenadas pelo Service Worker.
+- [x] Teste de integração SQLite verifica que perfil incorreto retorna HTTP 403 e não cria cookie de sessão.
+- [ ] Executar CI completo desta atualização e corrigir eventuais falhas.
+- [ ] Validar visualmente login, seleção de perfil, instalação PWA e módulos com contas de teste, sem cadastrar dados pessoais reais.
+- [ ] Após revisão, solicitar autorização explícita antes de mesclar e publicar as alterações no Render.
