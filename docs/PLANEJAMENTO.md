@@ -109,3 +109,12 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - A migração de rotas de contas foi validada pelos testes existentes, mas ainda falta teste de integração real com Firestore e revisão do fluxo de permissões.
 - Cada nova etapa, alteração de código, teste e pendência deve ser registrada neste planejamento.
 - GitHub Actions verde confirma os testes automatizados existentes, não substitui teste real de leitura/escrita no Firestore.
+
+### Revisão técnica rápida (17/11/2026)
+- [x] Conferido o HEAD do PR #1: `dd1e3261675a5bf77d2dea2cc3e8c13375ae1dd3`.
+- [x] Conferido GitHub Actions desse commit: execução `44007977240` concluída com resultado `success`.
+- [x] Auditoria estática de `server/index.js`: os acessos SQLite encontrados nas rotas de autenticação, turmas, estudantes, responsáveis, usuários, solicitações e viagens estão dentro dos caminhos de fallback SQLite; no modo Firebase, os respectivos caminhos retornam/ramificam para Firestore antes de acessar `db`. O middleware de sessão e o bootstrap administrativo também têm ramificação explícita.
+- [ ] Isso ainda não comprova que todas as rotas e regras de negócio funcionam no Firestore real; manter testes de integração e revisão de permissões como bloqueadores.
+- [ ] Prioridade para reduzir retrabalho: usar o próprio servidor Express/Render para servir o frontend real de `public/` e a API em mesma origem, evitando depender do GitHub Pages para autenticação com cookies. Manter `docs/` como demonstração separada. Validar configuração de cookies, CSRF, domínio e HTTPS antes de publicar.
+- [ ] Próxima sequência curta: (1) revisar `public/index.html` e `public/js/app.js` para confirmar chamadas relativas à API e estado de login; (2) implementar/testar autenticação Google no frontend com o ID token; (3) criar testes Firestore/emulador para as operações críticas; (4) revisar endpoints restantes e só então preparar Render.
+- Não mesclar o PR nem implantar sem aprovação explícita. Nenhuma chave privada deve ser enviada ao chat ou commitada.
