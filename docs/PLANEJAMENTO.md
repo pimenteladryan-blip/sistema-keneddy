@@ -22,10 +22,10 @@ As permissões são verificadas no servidor. Esconder opções na interface não
 1. **Fundação e acesso — implementado:** Node.js, Express, SQLite, login, sessões, CSRF, perfis e testes.
 2. **Cadastros iniciais — implementado:** turmas, estudantes com dados mínimos, contas e associação de responsáveis.
 3. **Gestão inicial de viagens — implementado:** criação de rascunho, vínculo de turmas/estudantes, envio para aprovação e aprovação pela direção/administração.
-4. **Autorizações — próximo:** autorização digital do responsável e registro administrativo de autorização em papel, com histórico.
-5. **Presença — próximo:** listas de saída e retorno, com usuário e horário do registro.
-6. **Equipe e transporte — pendente:** atribuição de professores, veículos e condutores com acesso restrito.
-7. **Financeiro e relatórios — pendente:** custos e contribuições opcionais; exportação com minimização de dados.
+4. **Autorizações — parcialmente implementado:** autorização digital pelo responsável vinculado, com histórico; registro administrativo de autorização em papel ainda pendente.
+5. **Presença — backend e interface implementados:** listas de saída e retorno, com trilha de auditoria; validação visual final ainda pendente.
+6. **Equipe e transporte — parcialmente implementado:** atribuição de professores e cadastro/atribuição de veículos; gestão de condutores e validação operacional da frota ainda pendentes.
+7. **Financeiro e relatórios — pendente:** relatórios agregados e exportação com minimização de dados; qualquer módulo financeiro dependerá de definição institucional.
 8. **Implantação — pendente:** revisão de segurança, privacidade, acessibilidade, backups, monitoramento e aprovação institucional.
 
 ## Etapas escolares
@@ -93,7 +93,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Executar teste controlado no projeto Firebase real, com contas fictícias e sem dados de estudantes.
 - [x] Arquitetura same-origin definida: Express serve `public/` e a API no mesmo host; `docs/` permanece demonstração separada. Cookies, Origin e CSRF mantidos.
 - [x] Evitar a inicialização do SQLite quando Firebase estiver configurado: sessão, autenticação, cadastros e módulos integrados passam a usar Firestore sem criar banco local efêmero.
-- [ ] Implementar/migrar os módulos restantes de transporte e relatórios e revisar dependências SQLite; autorização digital e presença agora têm backend, interface e testes automatizados nos dois modos de armazenamento.
+- [ ] Concluir gestão de condutores, relatórios agregados e revisão das dependências SQLite; autorização digital, presença e cadastro/atribuição básica de veículos agora têm backend, interface e testes nos dois modos de armazenamento.
 - [ ] Planejar migração/importação controlada dos dados existentes, preservando IDs e relações; não importar dados pessoais reais nesta fase.
 - [x] Gestão de ativação/desativação de contas e bootstrap administrativo implementados no Firestore; a validação real ainda depende de teste controlado no projeto Firebase.
 - [ ] Fazer revisão de segurança, privacidade/LGPD, acessibilidade, backup/restauração e validação institucional.
@@ -335,4 +335,16 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Testes estáticos verificam que a interface contém as ações e que as rotas exigem autenticação, CSRF e perfil adequado.
 - [x] CI da implementação e dos novos testes de interface passou em push e pull request nas execuções `44088725204` e `44088738354`; sintaxe, testes automatizados e Firestore Emulator concluídos com sucesso.
 - [ ] Validar fluxos visualmente com usuários de teste fictícios antes de qualquer uso escolar real.
-
+### Cadastro e atribuição de veículos (17/11/2026)
+- [x] Criada coleção Firestore `vehicles` com identificador numérico, chave de identificação única, tipo, capacidade e estado ativo.
+- [x] Criada tabela SQLite `vehicles` e migração aditiva para bancos existentes, adicionando `trips.vehicle_id` sem apagar viagens anteriores.
+- [x] Criada API protegida para listar e cadastrar veículos; somente administração, direção e secretaria podem gerenciar a frota.
+- [x] Criada atribuição de veículo somente em viagem rascunho, com validação de capacidade suficiente para toda a capacidade planejada da viagem.
+- [x] Bloqueada a reserva do mesmo veículo em viagens com horários sobrepostos; intervalos consecutivos sem sobreposição são aceitos.
+- [x] Atribuição repetida do mesmo veículo é idempotente e não duplica eventos de auditoria.
+- [x] A lista de viagens informa o veículo atribuído sem expor dados pessoais de condutores.
+- [x] Adicionado painel de frota no frontend Express, com cadastro e vínculo de veículos às viagens.
+- [x] Testes SQLite e Firestore Emulator cobrem identificação duplicada, tipo/capacidade inválidos, capacidade insuficiente, conflito de horário, horários consecutivos, viagem já aprovada, permissões e auditoria.
+- [x] Adicionado teste de migração que inicia com banco SQLite legado e confirma que a viagem antiga permanece após a inclusão de `vehicle_id`.
+- [ ] Aguardar CI desta implementação e dos testes de migração; só marcar a etapa como validada após a execução completa.
+- [ ] Validar visualmente o cadastro e a atribuição com contas fictícias; não cadastrar veículos reais nem informações de condutores nesta fase.
