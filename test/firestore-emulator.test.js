@@ -170,6 +170,17 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     }
     assert.equal(ready, true, 'servidor Express não iniciou no Firestore Emulator');
 
+    const homePage = await fetch(baseUrl + '/');
+    assert.equal(homePage.status, 200);
+    assert.match(await homePage.text(), /google-login-button/);
+    const firebaseConfigResponse = await fetch(baseUrl + '/firebase-config.js');
+    assert.equal(firebaseConfigResponse.status, 200);
+    assert.match(await firebaseConfigResponse.text(), /svge-14ec7/);
+    const frontendScript = await fetch(baseUrl + '/js/app.js');
+    assert.equal(frontendScript.status, 200);
+    const healthResponse = await fetch(baseUrl + '/api/health');
+    assert.equal((await healthResponse.json()).firebaseAdmin, 'initialized');
+
     const loginResponse = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: baseUrl },
@@ -178,6 +189,13 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal(loginResponse.status, 200);
     const cookie = loginResponse.headers.get('set-cookie').split(';')[0];
     const loginData = await loginResponse.json();
+    const currentUserResponse = await fetch(baseUrl + '/api/auth/me', {
+      headers: { Cookie: cookie }
+    });
+    assert.equal(currentUserResponse.status, 200);
+    const currentUserData = await currentUserResponse.json();
+    assert.equal(currentUserData.user.email, 'api-admin@emulator.sgve');
+
     const api = (route, options = {}) => fetch(baseUrl + route, {
       ...options,
       headers: {
