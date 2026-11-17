@@ -28,3 +28,13 @@ test('falha fechada quando o limite de memória é atingido', () => {
   assert.equal(limiter.consume({ scope: 'login', keys: ['ip:2'], windowMs: 60000, maxAttempts: 5 }), false);
   assert.equal(limiter.size, 1);
 });
+
+test('limite por conta pode ser limpo após autenticação válida', () => {
+  const limiter = createMemoryRateLimiter({ clock: () => 1000 });
+  const attempt = { scope: 'login-email', keys: ['pessoa@example.invalid'], windowMs: 60000, maxAttempts: 2 };
+  assert.equal(limiter.consume(attempt), true);
+  assert.equal(limiter.consume(attempt), true);
+  assert.equal(limiter.consume(attempt), false);
+  limiter.reset({ scope: 'login-email', keys: ['pessoa@example.invalid'] });
+  assert.equal(limiter.consume(attempt), true);
+});
