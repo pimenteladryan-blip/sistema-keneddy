@@ -357,6 +357,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Exportação CSV trata campos iniciados por caracteres que podem executar fórmulas em planilhas e usa codificação UTF-8.
 - [x] Dados do relatório são limpos ao sair ou trocar para perfil sem permissão.
 - [x] Testes de integração validam contagens, vínculo de veículo e bloqueio de acesso por perfil no SQLite e Firestore Emulator.
+- [x] Testes verificam que os dados agregados não incluem `student_id` nem `full_name`.
 - [x] CI da implementação e dos testes passou em push e pull request nos commits `a3b9a447d32455c7767483bfc98d78fb1e62b51a` e `d4306b23176179db991f26851aa456c48b6671f9`, execuções `44091163168` e `44091199067`; sintaxe, testes SQLite e Firestore Emulator concluídos com sucesso.
 - [ ] Validar visualmente o painel com contas fictícias e confirmar quais relatórios a escola realmente precisa.
 ### Registro administrativo de autorização em papel (17/11/2026)
@@ -368,4 +369,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Testes SQLite e Firestore Emulator cobrem repetição, conflito entre decisões, perfis e auditoria.
 - [x] CI da implementação e dos testes passou em push e pull request no commit `a1d57a4aba5557b3822f2e3330024a3939320575`, execuções `44092485378` e `44092495455`; testes unitários, SQLite e Firestore Emulator concluídos com sucesso.
 - [x] CI da atualização final da interface (ocultação de ações incompatíveis com autorização em papel) passou em push e pull request no commit `e523f1ef3cbbbe206d4df66bb3cd8a12709718e1`, execuções `44092572065` e `44092584118`.
+- [x] CI dos testes finais de privacidade dos relatórios passou em push e pull request no commit `355e05975811bf625f1933bac8c85ebfdcdf75fb`, execuções `44093054594` e `44093061041`; sintaxe, suíte automatizada e Firestore Emulator concluídos com sucesso.
 - [ ] Validar visualmente o fluxo com contas fictícias; não anexar documentos reais nem dados pessoais nesta fase.
