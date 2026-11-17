@@ -438,3 +438,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] CI completo desta atualização aprovado no GitHub Actions, execução `44197960974` (run 888): sintaxe/estrutura, testes automatizados e integração Firestore Emulator concluídos com sucesso.
 - [ ] Validar visualmente login, seleção de perfil, instalação PWA e módulos com contas de teste, sem cadastrar dados pessoais reais.
 - [ ] Após revisão, solicitar autorização explícita antes de mesclar e publicar as alterações no Render.
+
+- [x] Revisado o PWA antes da publicação: arquivos estáticos usam rede primeiro e cache apenas como alternativa offline; respostas `/api/` nunca são interceptadas; atualização do Service Worker ignora cache HTTP; manifest declara ícones escaláveis nos tamanhos de instalação.
