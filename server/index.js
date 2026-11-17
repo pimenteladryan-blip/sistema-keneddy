@@ -875,6 +875,71 @@ app.post('/api/trips/:id/participants/:studentId/authorization', requireAuth, re
   }
 });
 
+
+app.post('/api/trips/:id/participants/:studentId/paper-authorization',
+  requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
+    const tripId = Number(req.params.id);
+    const studentId = Number(req.params.studentId);
+    if (!Number.isSafeInteger(tripId) || tripId < 1 ||
+        !Number.isSafeInteger(studentId) || studentId < 1) {
+      return res.status(400).json({ error: 'Informe uma viagem e um estudante válidos.' });
+    }
+    let transactionOpen = false;
+    try {
+      if (firebaseConfigured) {
+        const result = await firestoreSchool.recordPaperAuthorization(
+          tripId, studentId, req.auth.user
+        );
+        if (result.error === 'not-found' || result.error === 'not-participant') {
+          return res.status(404).json({ error: 'Participação não encontrada.' });
+        }
+        if (result.error === 'not-approved') return res.status(409).json({ error: 'O registro em papel só pode ser lançado após a aprovação da viagem.' });
+        if (result.error === 'closed') return res.status(409).json({ error: 'O prazo de autorização desta viagem foi encerrado.' });
+        if (result.error === 'already-decided') return res.status(409).json({ error: 'Já existe uma decisão digital registrada para esta participação.' });
+        if (result.error === 'forbidden') return res.status(403).json({ error: 'Seu perfil não permite registrar autorização em papel.' });
+        return res.json({ message: 'Autorização em papel registrada.' });
+      }
+      const fail = (code, message) => {
+        if (transactionOpen) { db.exec('ROLLBACK'); transactionOpen = false; }
+        return res.status(code).json({ error: message });
+      };
+      db.exec('BEGIN IMMEDIATE');
+      transactionOpen = true;
+      const trip = db.prepare('SELECT status, departure_at FROM trips WHERE id = ?').get(tripId);
+      if (!trip) return fail(404, 'Viagem não encontrada.');
+      if (!['approved', 'open'].includes(trip.status)) {
+        return fail(409, 'O registro em papel só pode ser lançado após a aprovação da viagem.');
+      }
+      const departureAt = Date.parse(trip.departure_at);
+      if (!Number.isFinite(departureAt) || Date.now() >= departureAt) {
+        return fail(409, 'O prazo de autorização desta viagem foi encerrado.');
+      }
+      const student = db.prepare('SELECT id FROM students WHERE id = ? AND active = 1').get(studentId);
+      const participant = db.prepare(
+        'SELECT authorization_status FROM trip_students WHERE trip_id = ? AND student_id = ?'
+      ).get(tripId, studentId);
+      if (!student || !participant) return fail(404, 'Participação não encontrada.');
+      if (participant.authorization_status === 'paper_recorded') {
+        db.exec('COMMIT');
+        transactionOpen = false;
+        return res.json({ message: 'Autorização em papel já estava registrada.' });
+      }
+      if (participant.authorization_status !== 'pending') {
+        return fail(409, 'Já existe uma decisão digital registrada para esta participação.');
+      }
+      db.prepare(
+        "UPDATE trip_students SET authorization_status = 'paper_recorded' WHERE trip_id = ? AND student_id = ?"
+      ).run(tripId, studentId);
+      audit(req.auth.user.id, 'record_paper_authorization', 'trip_student', tripId + '_' + studentId);
+      db.exec('COMMIT');
+      transactionOpen = false;
+      return res.json({ message: 'Autorização em papel registrada.' });
+    } catch (error) {
+      if (transactionOpen) { try { db.exec('ROLLBACK'); } catch {} }
+      next(error);
+    }
+  });
+
 app.post('/api/trips/:id/participants/:studentId/attendance', requireAuth, requireCsrf,
   requireRoles(...RECORD_MANAGERS, 'teacher'), async (req, res, next) => {
     const tripId = Number(req.params.id);
