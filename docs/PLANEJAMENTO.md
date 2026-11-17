@@ -440,3 +440,6 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Após revisão, solicitar autorização explícita antes de mesclar e publicar as alterações no Render.
 
 - [x] Revisado o PWA antes da publicação: arquivos estáticos usam rede primeiro e cache apenas como alternativa offline; respostas `/api/` nunca são interceptadas; atualização do Service Worker ignora cache HTTP; manifest declara ícones escaláveis nos tamanhos de instalação.
+- [x] Reexecutada a validação completa após os últimos ajustes do PWA: GitHub Actions run `44201221709` (run 899), commit `06709094d5a641c68b896647c4ce3b01a662247d`; sintaxe/estrutura, testes automatizados e integração Firestore Emulator concluídos com sucesso.
+- [ ] Confirmar visualmente a versão da branch em ambiente de prévia e testar os fluxos ponta a ponta com contas sintéticas; o CI não substitui esses testes de navegador.
+- [ ] Confirmar a configuração de branch/implantação do serviço Render e só então solicitar autorização explícita para mesclar/publicar. Nenhuma mesclagem ou implantação foi realizada nesta revisão.
