@@ -22,8 +22,10 @@ const VALID_ROLES = Object.keys(ROLE_LABELS);
 if (isProduction) app.set('trust proxy', 1);
 app.disable('x-powered-by');
 app.use(helmet({ contentSecurityPolicy: { directives: {
-  defaultSrc: ["'self'"], scriptSrc: ["'self'"], styleSrc: ["'self'"],
-  imgSrc: ["'self'", 'data:'], connectSrc: ["'self'"], objectSrc: ["'none'"],
+  defaultSrc: ["'self'"], scriptSrc: ["'self'", 'https://www.gstatic.com'], styleSrc: ["'self'"],
+  imgSrc: ["'self'", 'data:'],
+  connectSrc: ["'self'", 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://www.googleapis.com'],
+  frameSrc: ["'self'", 'https://svge-14ec7.firebaseapp.com'], objectSrc: ["'none'"],
   frameAncestors: ["'none'"], upgradeInsecureRequests: isProduction ? [] : null
 } } }));
 app.use(express.json({ limit: '20kb' }));
