@@ -335,3 +335,18 @@ body.dark-mode .verification-code-badge{border-color:#42694e;background:#1b3826;
   .trip-card-actions,.participant-actions{width:100%}
   .trip-card-actions button,.participant-actions button{width:100%}
 }
+
+/* Relatórios agregados */
+.report-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:18px 0}
+.report-stat{display:grid;gap:7px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--surface,#fff)}
+.report-stat span{color:var(--muted);font-size:11px}
+.report-stat strong{color:var(--ink);font-size:24px;font-variant-numeric:tabular-nums}
+.report-table-wrap{width:100%;overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+.report-table{width:100%;min-width:850px;border-collapse:collapse;font-size:12px}
+.report-table th,.report-table td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.report-table th{background:var(--green-soft);color:var(--green-dark);font-size:10px}
+.report-table tbody tr:last-child td{border-bottom:0}
+.report-table td:nth-child(n+4):nth-child(-n+8){font-variant-numeric:tabular-nums;text-align:center}
+#reports-panel>.section-heading{gap:12px;flex-wrap:wrap}
+#reports-panel h4{margin:0;font-size:14px}
+@media(max-width:520px){.report-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.report-stat{padding:11px}.report-stat strong{font-size:21px}}
