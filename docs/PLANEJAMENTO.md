@@ -291,4 +291,6 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 ### Correção e cobertura das rotas de aprovação/rejeição (17/11/2026)
 - [x] Corrigida a validação de IDs numéricos nas rotas administrativas de aprovação e rejeição: a expressão regular estava escapada em duplicidade e rejeitava IDs válidos.
 - [x] Adicionados testes de integração no Firestore Emulator para rejeitar e aprovar solicitações pela API; o teste confirma que a conta aprovada fica ativa.
-- [ ] Aguardar CI da correção e dos novos testes antes de considerar o fluxo administrativo validado.
+- [x] CI da correção e dos novos testes passou integralmente nas execuções 44081669964 e 44081679667, incluindo testes unitários e Firestore Emulator.
+- [x] Confirmado no CI que aprovação e rejeição de solicitações funcionam pela API com IDs numéricos válidos; a conta aprovada fica ativa e as listagens não expõem hashes de senha.
+- [ ] Aguardar CI desta atualização final do planejamento.
