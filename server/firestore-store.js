@@ -334,8 +334,10 @@ async function createTripRelationIfDraft(name, tripId, relatedId, data, auditEve
     if (name === 'tripStaff' && targetSnapshot.data().role !== 'teacher') {
       return { error: 'target-not-found' };
     }
-    if (!relationSnapshot.exists) transaction.create(relationRef, data);
-    addAuditWrite(transaction, requireFirestore(), auditEvent);
+    if (!relationSnapshot.exists) {
+      transaction.create(relationRef, data);
+      addAuditWrite(transaction, requireFirestore(), auditEvent);
+    }
     return { ok: true };
   });
 }
@@ -401,11 +403,13 @@ async function linkGuardianIfActive(studentId, guardianId, relationship, auditEv
     if (!studentSnapshot.exists || studentSnapshot.data().active !== true ||
         !guardianSnapshot.exists || guardianSnapshot.data().active !== true ||
         guardianSnapshot.data().role !== 'guardian') return false;
-    if (!relationSnapshot.exists) transaction.create(relationRef, {
-      student_id: Number(studentKey), guardian_user_id: Number(guardianKey),
-      relationship_label: relationship || null, created_at: new Date().toISOString()
-    });
-    addAuditWrite(transaction, requireFirestore(), auditEvent);
+    if (!relationSnapshot.exists) {
+      transaction.create(relationRef, {
+        student_id: Number(studentKey), guardian_user_id: Number(guardianKey),
+        relationship_label: relationship || null, created_at: new Date().toISOString()
+      });
+      addAuditWrite(transaction, requireFirestore(), auditEvent);
+    }
     return true;
   });
 }
