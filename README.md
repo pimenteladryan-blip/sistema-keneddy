@@ -101,8 +101,29 @@ Não existe senha administrativa padrão. Não envie o arquivo `.env` ao GitHub.
 Versão publicada: https://pimenteladryan-blip.github.io/sistema-keneddy/
 
 
-## Integração Firebase em preparação
+## Backend e integração Firebase
 
-O servidor inclui a inicialização do Firebase Admin SDK por meio de `FIREBASE_PROJECT_ID` e `FIREBASE_SERVICE_ACCOUNT_JSON`. A camada `server/firestore-store.js` prepara operações assíncronas de leitura, gravação, atualização e exclusão, geração de IDs numéricos e índices transacionais de unicidade para e-mails. O módulo `server/firestore-auth.js` também implementa operações isoladas para localizar usuários, criar e validar sessões, limpar sessões expiradas, registrar solicitações e aprovar/rejeitar cadastros com transação. Essas funções ainda não substituem o banco usado pelas rotas: elas continuam usando SQLite até a migração integral e os testes de integração. A credencial deve ficar somente nas variáveis secretas do ambiente de hospedagem, nunca no GitHub. Não faça deploy para uso real nesta etapa.
+O repositório mantém duas partes separadas:
 
-As operações de cadastro de turmas e inclusão de estudantes em viagens usam transações do Firestore para proteger contra cadastros duplicados e estouro de capacidade em solicitações simultâneas. O cadastro de estudante confirma, na mesma transação, que a turma continua ativa; o vínculo de responsável confirma que estudante e conta de responsável continuam ativos e que o perfil é `guardian`. A inclusão em viagem também confirma que a turma do estudante permanece ativa. A chave única da turma é registrada em `_sgve_unique_indexes`, e a contagem de participantes fica no próprio documento da viagem. A vinculação de turmas e professores à viagem também valida, dentro da mesma transação, se a turma ou a conta do professor permanece ativa e se o perfil é de professor. As mudanças de status para envio à aprovação e aprovação usam transações, evitando alterações baseadas em um status que já mudou por outra solicitação. A inscrição em viagem rejeita capacidades inválidas e impede que a contagem ultrapasse o limite. Essas funções ainda são uma camada de preparação: as rotas Express continuam ligadas ao SQLite e a migração completa, os testes de integração e a validação das regras de acesso ainda precisam ser feitos.
+- **GitHub Pages (`docs/`)**: demonstração estática com dados locais fictícios em `localStorage/sessionStorage`. Ela não usa o backend e não sincroniza dados entre aparelhos.
+- **Servidor (`server/` e `public/`)**: aplicação Express com API e interface servida na mesma origem. Quando Firebase Admin está configurado, as rotas migradas usam Firestore; sem Firebase configurado, o servidor local mantém o modo SQLite de compatibilidade.
+
+### Recursos implementados na branch de migração
+
+- Firebase Admin SDK no servidor, Firestore e sessões com cookies HttpOnly.
+- Login por e-mail/senha e login Google, com validação do token no servidor e exigência de conta previamente autorizada no SGVE.
+- Gestão de usuários, solicitações de cadastro, turmas, estudantes, responsáveis e viagens usando Firestore.
+- Transações para unicidade, geração de IDs, capacidade de viagens, vínculos e mudança de status.
+- Eventos de auditoria gravados na mesma transação das operações críticas.
+- Regras Firestore com negação de acesso direto para clientes web/mobile. O navegador deve acessar os dados pela API autenticada.
+- Testes automatizados e integração com Firestore Emulator no GitHub Actions, incluindo teste de leitura anônima bloqueada.
+
+### Estado e limites atuais
+
+A integração está em desenvolvimento na branch `feature/firestore-auth-migration` e no [pull request de revisão](https://github.com/pimenteladryan-blip/sistema-keneddy/pull/1). **Ainda não foi mesclada na branch principal nem implantada no Render.** Os testes do emulador usam dados fictícios e não substituem um teste controlado com o projeto Firebase real.
+
+Antes de qualquer uso institucional ainda são necessários: revisão final de segurança e privacidade/LGPD, confirmação dos índices no projeto real, teste de conexão com credenciais privadas no ambiente de hospedagem, estratégia de backup/restauração, migração validada de dados e autorização da escola. Não utilize dados reais de estudantes nesta fase.
+
+### Segredos e credenciais
+
+O servidor usa `FIREBASE_PROJECT_ID` e `FIREBASE_SERVICE_ACCOUNT_JSON`. A conta de serviço é uma credencial privada: configure-a somente como segredo no ambiente de hospedagem, nunca em arquivos versionados, no frontend ou em conversas. A configuração Web do Firebase é pública e não substitui a proteção do servidor. Não publique o backend até concluir as etapas de revisão e teste.
