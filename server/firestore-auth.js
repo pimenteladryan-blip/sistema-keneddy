@@ -281,6 +281,21 @@ async function consumeRateLimit({ scope, keys, windowMs, maxAttempts, nowMs = Da
   });
 }
 
+async function resetRateLimit({ scope, keys }) {
+  if (typeof scope !== 'string' || !/^[a-z0-9_-]{1,60}$/i.test(scope) ||
+      !Array.isArray(keys) || !keys.length || keys.length > 10 ||
+      keys.some(key => typeof key !== 'string' || !key || key.length > 512)) {
+    throw new TypeError('Parâmetros de limpeza do limitador inválidos.');
+  }
+  const db = require('./firebase').firestore;
+  if (!db) throw new Error('Firestore não configurado para limpar tentativas.');
+  const refs = [...new Set(keys)].map(key => {
+    const digest = crypto.createHash('sha256').update(scope + '\\0' + key).digest('hex');
+    return db.collection('_sgve_rate_limits').doc(digest);
+  });
+  await Promise.all(refs.map(ref => ref.delete()));
+}
+
 async function createRegistrationRequest({ display_name, email, password_hash, role, verification_code }) {
   const now = new Date().toISOString();
   return store.upsertUnique('registrationRequests', 'email', email, {
@@ -395,6 +410,7 @@ module.exports = {
   deleteSession,
   deleteExpiredSessions,
   consumeRateLimit,
+  resetRateLimit,
   createRegistrationRequest,
   listPendingRegistrationRequests,
   reviewRegistrationRequest
