@@ -285,7 +285,6 @@ app.post('/api/classes', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGE
   try {
     if (firebaseConfigured) {
       const id = await firestoreSchool.createClass(data, req.auth.user.id);
-      await firestoreSchool.audit(req.auth.user.id, 'create', 'class', id);
       return res.status(201).json({ id, message: 'Turma cadastrada.' });
     }
     const result = db.prepare('INSERT INTO classes (level, grade, course, section, school_year) VALUES (?, ?, ?, ?, ?)').run(data.level, data.grade, data.course, data.section, data.schoolYear);
@@ -319,7 +318,6 @@ app.post('/api/students', requireAuth, requireCsrf, requireRoles(...RECORD_MANAG
     if (firebaseConfigured) {
       const id = await firestoreSchool.createStudent(fullName, classId, req.auth.user.id);
       if (!id) return res.status(400).json({ error: 'A turma selecionada não existe ou está inativa.' });
-      await firestoreSchool.audit(req.auth.user.id, 'create', 'student', id);
       return res.status(201).json({ id, message: 'Estudante cadastrado.' });
     }
     if (!db.prepare('SELECT id FROM classes WHERE id = ? AND active = 1').get(classId)) return res.status(400).json({ error: 'A turma selecionada não existe ou está inativa.' });
@@ -337,7 +335,6 @@ app.post('/api/students/:id/guardians', requireAuth, requireCsrf, requireRoles(.
     if (firebaseConfigured) {
       const linked = await firestoreSchool.linkGuardian(studentId, email, relationship, req.auth.user.id);
       if (!linked) return res.status(404).json({ error: 'Estudante ou conta de responsável não encontrada.' });
-      await firestoreSchool.audit(req.auth.user.id, 'link_guardian', 'student', studentId);
       return res.json({ message: 'Responsável vinculado ao estudante.' });
     }
     const student = db.prepare('SELECT id FROM students WHERE id = ? AND active = 1').get(studentId);
@@ -488,7 +485,6 @@ app.post('/api/trips', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS
   try {
     if (firebaseConfigured) {
       const id = await firestoreSchool.createTrip(data, req.auth.user.id);
-      await firestoreSchool.audit(req.auth.user.id, 'create', 'trip', id);
       return res.status(201).json({ id, message: 'Viagem criada como rascunho.' });
     }
     const result = db.prepare('INSERT INTO trips (title, destination, educational_purpose, departure_at, return_at, capacity, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)').
@@ -506,7 +502,6 @@ app.post('/api/trips/:id/classes', requireAuth, requireCsrf, requireRoles(...REC
       const result = await firestoreSchool.linkTripClass(tripId, classId, req.auth.user.id);
       if (result.error === 'not-found' || result.error === 'target-not-found') return res.status(404).json({ error: 'Viagem ou turma não encontrada.' });
       if (result.error === 'not-draft') return res.status(409).json({ error: 'Turmas só podem ser vinculadas enquanto a viagem estiver em rascunho.' });
-      await firestoreSchool.audit(req.auth.user.id, 'link_class', 'trip', tripId);
       return res.json({ message: 'Turma vinculada à viagem.' });
     }
     const trip = db.prepare("SELECT id, status FROM trips WHERE id = ?").get(tripId);
@@ -530,7 +525,6 @@ app.post('/api/trips/:id/students', requireAuth, requireCsrf, requireRoles(...RE
       if (result.error === 'class-not-linked') return res.status(400).json({ error: 'Vincule primeiro a turma do estudante à viagem.' });
       if (result.error === 'capacity') return res.status(409).json({ error: 'A capacidade da viagem foi atingida.' });
       if (result.error) return res.status(409).json({ error: 'Não foi possível vincular o estudante à viagem.' });
-      await firestoreSchool.audit(req.auth.user.id, 'link_student', 'trip', tripId);
       return res.json({ message: 'Estudante vinculado à viagem.' });
     }
     const trip = db.prepare("SELECT id, status, capacity FROM trips WHERE id = ?").get(tripId);
@@ -555,7 +549,6 @@ app.post('/api/trips/:id/staff', requireAuth, requireCsrf, requireRoles(...RECOR
       const result = await firestoreSchool.assignTripTeacher(tripId, userId, req.auth.user.id);
       if (result.error === 'not-found' || result.error === 'target-not-found') return res.status(404).json({ error: 'Viagem ou professor não encontrado.' });
       if (result.error === 'not-draft') return res.status(409).json({ error: 'Equipe só pode ser alterada enquanto a viagem estiver em rascunho.' });
-      await firestoreSchool.audit(req.auth.user.id, 'assign_teacher', 'trip', tripId);
       return res.json({ message: 'Professor vinculado à viagem.' });
     }
     const trip = db.prepare('SELECT id, status FROM trips WHERE id = ?').get(tripId);
@@ -576,7 +569,6 @@ app.post('/api/trips/:id/submit', requireAuth, requireCsrf, requireRoles(...RECO
       if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem não encontrada.' });
       if (result.error === 'no-classes') return res.status(400).json({ error: 'Vincule pelo menos uma turma antes de enviar para aprovação.' });
       if (result.error) return res.status(409).json({ error: 'Somente rascunhos podem ser enviados para aprovação.' });
-      await firestoreSchool.audit(req.auth.user.id, 'submit_for_approval', 'trip', tripId);
       return res.json({ message: 'Viagem enviada para aprovação da direção.' });
     }
     const trip = db.prepare('SELECT id, status FROM trips WHERE id = ?').get(tripId);
@@ -597,7 +589,6 @@ app.post('/api/trips/:id/approve', requireAuth, requireCsrf, requireRoles('admin
       const result = await firestoreSchool.approveTrip(tripId, req.auth.user.id);
       if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem não encontrada.' });
       if (result.error) return res.status(409).json({ error: 'A viagem não está aguardando aprovação.' });
-      await firestoreSchool.audit(req.auth.user.id, 'approve', 'trip', tripId);
       return res.json({ message: 'Viagem aprovada.' });
     }
     const trip = db.prepare("SELECT id, status FROM trips WHERE id = ?").get(tripId);
