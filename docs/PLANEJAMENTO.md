@@ -174,3 +174,11 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Próxima revisão: tornar as gravações de negócio e os respectivos eventos de auditoria atômicos nas operações escolares críticas; atualmente alguns logs são gravados após a operação principal.
 - [x] Teste ponta a ponta adicional confirma que o Express serve `/`, `/firebase-config.js` e `/js/app.js` na mesma origem da API, que `/api/health` identifica o Admin SDK inicializado no emulador e que `/api/auth/me` recupera a sessão autenticada.
 - [x] CI do commit `07eccc64bd1ab4befcdafe4c3bd15da41de07135` concluído com sucesso nas execuções push e pull request.
+
+### Reforço de segurança: auditoria atômica e validação de origem (17/11/2026)
+- [x] Operações críticas do Firestore agora gravam os respectivos eventos de auditoria na mesma transação que altera os dados: criação de turma/estudante/viagem/usuário, vínculos de responsáveis, turmas, estudantes e professores, envio/aprovação de viagens e aprovação/rejeição de cadastros.
+- [x] Removidas as gravações de auditoria separadas após as operações correspondentes no caminho Firestore, evitando respostas de erro após uma alteração já ter sido confirmada sem log.
+- [x] Login, login Google, envio de cadastro e mutações autenticadas agora exigem cabeçalho Origin explícito e mesma origem. Origens ausentes, inválidas ou de outro host são recusadas.
+- [x] Adicionados testes para confirmar os eventos de auditoria críticos e bloquear login sem Origin no Firestore Emulator.
+- [ ] Aguardar CI desta revisão e corrigir qualquer falha antes de avançar.
+- [ ] Permanecem pendentes teste controlado no Firebase real, revisão final de segurança/privacidade, migração de dados e implantação segura no Render.
