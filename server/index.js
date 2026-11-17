@@ -725,6 +725,68 @@ app.post('/api/trips/:id/vehicle', requireAuth, requireCsrf, requireRoles(...REC
   }
 });
 
+
+app.get('/api/reports/summary', requireAuth, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
+  try {
+    if (firebaseConfigured) {
+      return res.json(await firestoreSchool.getReportSummary());
+    }
+    const count = sql => Number(db.prepare(sql).get().total);
+    const authorization = db.prepare(`
+      SELECT
+        COALESCE(SUM(CASE WHEN authorization_status = 'authorized' THEN 1 ELSE 0 END), 0) AS authorized,
+        COALESCE(SUM(CASE WHEN authorization_status = 'declined' THEN 1 ELSE 0 END), 0) AS declined,
+        COALESCE(SUM(CASE WHEN authorization_status = 'paper_recorded' THEN 1 ELSE 0 END), 0) AS paper_recorded,
+        COALESCE(SUM(CASE WHEN authorization_status = 'pending' THEN 1 ELSE 0 END), 0) AS pending,
+        COALESCE(SUM(CASE WHEN departure_present = 1 THEN 1 ELSE 0 END), 0) AS departure_present,
+        COALESCE(SUM(CASE WHEN departure_present = 0 THEN 1 ELSE 0 END), 0) AS departure_absent,
+        COALESCE(SUM(CASE WHEN return_present = 1 THEN 1 ELSE 0 END), 0) AS return_present,
+        COALESCE(SUM(CASE WHEN return_present = 0 THEN 1 ELSE 0 END), 0) AS return_absent
+      FROM trip_students
+    `).get();
+    const totals = {
+      trips: count('SELECT COUNT(*) AS total FROM trips'),
+      students: count('SELECT COUNT(*) AS total FROM students WHERE active = 1'),
+      vehicles: count('SELECT COUNT(*) AS total FROM vehicles WHERE active = 1'),
+      participants: count('SELECT COUNT(*) AS total FROM trip_students'),
+      authorized: Number(authorization.authorized),
+      pending: Number(authorization.pending),
+      declined: Number(authorization.declined),
+      paper_recorded: Number(authorization.paper_recorded),
+      departure_present: Number(authorization.departure_present),
+      departure_absent: Number(authorization.departure_absent),
+      return_present: Number(authorization.return_present),
+      return_absent: Number(authorization.return_absent)
+    };
+    const trips = db.prepare(`
+      SELECT
+        t.id, t.title, t.destination, t.departure_at, t.status, t.capacity,
+        v.name AS vehicle_name,
+        COUNT(ts.student_id) AS participants,
+        COALESCE(SUM(CASE WHEN ts.authorization_status = 'authorized' THEN 1 ELSE 0 END), 0) AS authorized,
+        COALESCE(SUM(CASE WHEN ts.authorization_status = 'pending' THEN 1 ELSE 0 END), 0) AS pending,
+        COALESCE(SUM(CASE WHEN ts.authorization_status = 'declined' THEN 1 ELSE 0 END), 0) AS declined,
+        COALESCE(SUM(CASE WHEN ts.authorization_status = 'paper_recorded' THEN 1 ELSE 0 END), 0) AS paper_recorded,
+        COALESCE(SUM(CASE WHEN ts.departure_present = 1 THEN 1 ELSE 0 END), 0) AS departure_present,
+        COALESCE(SUM(CASE WHEN ts.departure_present = 0 THEN 1 ELSE 0 END), 0) AS departure_absent,
+        COALESCE(SUM(CASE WHEN ts.return_present = 1 THEN 1 ELSE 0 END), 0) AS return_present,
+        COALESCE(SUM(CASE WHEN ts.return_present = 0 THEN 1 ELSE 0 END), 0) AS return_absent
+      FROM trips t
+      LEFT JOIN vehicles v ON v.id = t.vehicle_id
+      LEFT JOIN trip_students ts ON ts.trip_id = t.id
+      GROUP BY t.id
+      ORDER BY t.departure_at DESC
+      LIMIT 100
+    `).all();
+    return res.json({
+      generated_at: new Date().toISOString(),
+      partial: totals.trips > 100,
+      totals,
+      trips
+    });
+  } catch (error) { next(error); }
+});
+
 app.get('/api/trips/:id/participants', requireAuth, async (req, res, next) => {
   const tripId = Number(req.params.id);
   if (!Number.isSafeInteger(tripId) || tripId < 1) return res.status(400).json({ error: 'Viagem inválida.' });
