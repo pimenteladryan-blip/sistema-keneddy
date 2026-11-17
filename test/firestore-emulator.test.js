@@ -281,6 +281,7 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       })
     });
     assert.equal(createdUser.status, 201);
+    const createdUserData = await createdUser.json();
 
     const apiAudit = await store.list('auditLogs', { limit: 1000 });
     const adminActorId = Number(loginData.user.id);
@@ -295,6 +296,18 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       Number(event.actor_user_id) === adminActorId &&
       event.action === 'create' && event.entity_type === 'user'
     ), true, 'criação de usuário não foi auditada na transação');
+    for (const [action, entityType, entityId] of [
+      ['create', 'class', apiClassId],
+      ['create', 'student', apiStudentId],
+      ['create', 'trip', apiTripId],
+      ['create', 'user', createdUserData.user.id]
+    ]) {
+      assert.equal(apiAudit.some(event =>
+        Number(event.actor_user_id) === adminActorId &&
+        event.action === action && event.entity_type === entityType &&
+        String(event.entity_id) === String(entityId)
+      ), true, 'auditoria sem identificador correto: ' + entityType);
+    }
 
     const loginAs = async (email) => {
       const response = await fetch(baseUrl + '/api/auth/login', {
