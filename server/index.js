@@ -207,6 +207,8 @@ app.post('/api/auth/login', async (req, res, next) => {
     if (!sameOrigin(req)) return res.status(403).json({ error: 'Origem não permitida.' });
     const email = String(req.body.email || '').trim().toLowerCase();
     const password = String(req.body.password || '');
+    const requestedRole = typeof req.body.role === 'string' ? req.body.role : '';
+    if (requestedRole && !ROLE_LABELS[requestedRole]) return res.status(400).json({ error: 'Perfil selecionado inválido.' });
     if (!email || !password || email.length > 254 || password.length > 200) return res.status(400).json({ error: 'Informe e-mail e senha válidos.' });
     const now = Date.now();
     const allowedIp = await consumeAttempts('login-ip', [String(req.ip || 'unknown')], LOGIN_WINDOW_MS, 60);
@@ -217,6 +219,7 @@ app.post('/api/auth/login', async (req, res, next) => {
       : db.prepare('SELECT id, display_name, email, password_hash, role, active FROM users WHERE email = ?').get(email);
     const valid = user && (firebaseConfigured ? user.active === true : Boolean(user.active)) && await verifyPassword(password, user.password_hash);
     if (!valid) return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
+    if (requestedRole && user.role !== requestedRole) return res.status(403).json({ error: 'O perfil selecionado não corresponde a esta conta.' });
     await resetAttempts('login-email', [email]);
     const token = randomToken(32);
     const csrfToken = randomToken(24);
@@ -249,6 +252,10 @@ app.post('/api/auth/google', async (req, res, next) => {
       return res.status(401).json({ error: 'A conta Google precisa ter e-mail verificado.' });
     }
     const user = await firestoreAuth.findUserByEmail(decoded.email);
+    const requestedRole = typeof req.body.role === 'string' ? req.body.role : '';
+    if (requestedRole && (!ROLE_LABELS[requestedRole] || user?.role !== requestedRole)) {
+      return res.status(403).json({ error: 'O perfil selecionado não corresponde a esta conta.' });
+    }
     if (!user || user.active !== true || !ROLE_LABELS[user.role]) {
       return res.status(403).json({ error: 'Esta conta ainda não foi autorizada pela administração do SGVE.' });
     }
