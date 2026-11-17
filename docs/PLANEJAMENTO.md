@@ -228,3 +228,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Aguardar CI do commit mais recente e corrigir qualquer falha antes de considerar esta etapa validada.
 - [ ] Antes de produção, aplicar a política TTL no Firebase real, validar custos/limites do Firestore e testar com tráfego controlado; a proteção Firestore depende da disponibilidade do banco.
 - [ ] O modo sem Firebase continua destinado apenas ao desenvolvimento local; o limitador em memória não é distribuído entre processos e não deve ser usado como proteção de produção.
+- [x] A rota de login Google também recebeu limite por IP, com teste estático para impedir regressão.
+- [ ] Aguardar a execução do CI que inclui a proteção adicional do login Google.
