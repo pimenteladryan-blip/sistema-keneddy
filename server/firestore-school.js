@@ -151,6 +151,8 @@ async function listTripsForUser(user) {
     error.code = 'forbidden';
     throw error;
   }
+  const vehicles = await store.list('vehicles', { limit: 500 });
+  const vehicleNames = new Map(vehicles.map(vehicle => [Number(vehicle.id), vehicle.name]));
   const result = await Promise.all(visible.map(async trip => {
     const members = await store.list('tripStudents', {
       filters: [{ field: 'trip_id', op: '==', value: Number(trip.id) }],
@@ -158,6 +160,7 @@ async function listTripsForUser(user) {
     });
     return {
       ...trip, id: Number(trip.id), participant_count: members.length,
+      vehicle_name: vehicleNames.get(Number(trip.vehicle_id)) || null,
       statusLabel: ({
         draft: 'Rascunho', pending_approval: 'Aguardando aprovação',
         approved: 'Aprovada', open: 'Inscrições abertas',
