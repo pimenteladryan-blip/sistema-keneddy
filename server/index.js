@@ -397,7 +397,7 @@ app.post('/api/registration-requests/:id/approve', requireAuth, requireCsrf, req
   if (firebaseConfigured) {
     try {
       const id = req.params.id;
-      if (!/^\\d+$/.test(id) || Number(id) < 1) return res.status(400).json({ error: 'Solicitação inválida.' });
+      if (!/^\d+$/.test(id) || Number(id) < 1) return res.status(400).json({ error: 'Solicitação inválida.' });
       const userId = await firestoreAuth.reviewRegistrationRequest(id, req.auth.user.id, 'approved');
       return res.json({ message: 'Cadastro aprovado. A pessoa já pode entrar com o e-mail e a senha cadastrados.', userId });
     } catch (error) {
@@ -428,7 +428,7 @@ app.post('/api/registration-requests/:id/reject', requireAuth, requireCsrf, requ
   if (firebaseConfigured) {
     try {
       const id = req.params.id;
-      if (!/^\\d+$/.test(id) || Number(id) < 1) return res.status(400).json({ error: 'Solicitação inválida.' });
+      if (!/^\d+$/.test(id) || Number(id) < 1) return res.status(400).json({ error: 'Solicitação inválida.' });
       await firestoreAuth.reviewRegistrationRequest(id, req.auth.user.id, 'rejected');
       return res.json({ message: 'Solicitação rejeitada.' });
     } catch (error) {
