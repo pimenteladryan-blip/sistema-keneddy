@@ -7,6 +7,7 @@ const { createServer } = require('node:net');
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
+const { DatabaseSync } = require('node:sqlite');
 
 const root = path.resolve(__dirname, '..');
 const adminEmail = 'admin-test@sgve.local';
@@ -62,6 +63,16 @@ after(async () => {
   if (child && child.exitCode === null) child.kill('SIGTERM');
   if (tempDir) await fs.rm(tempDir, { recursive: true, force: true });
 });
+
+
+function readRegistrationRecord(email) {
+  const db = new DatabaseSync(path.join(tempDir, 'sgve.sqlite'), { readOnly: true });
+  try {
+    return db.prepare('SELECT password_hash, verification_code FROM registration_requests WHERE email = ?').get(email);
+  } finally {
+    db.close();
+  }
+}
 
 async function submitRequest(email) {
   return fetch(baseUrl + '/api/registration-requests', {
@@ -119,6 +130,9 @@ test('cadastro público só libera acesso após aprovação do administrador', a
     method: 'POST', headers
   });
   assert.equal(approval.status, 200);
+  const approvedRecord = readRegistrationRecord(pendingEmail);
+  assert.equal(approvedRecord.password_hash, null);
+  assert.equal(approvedRecord.verification_code, '');
 
   const allowedLogin = await fetch(baseUrl + '/api/auth/login', {
     method: 'POST',
@@ -143,6 +157,9 @@ test('solicitação rejeitada não cria uma conta', async () => {
     method: 'POST', headers
   });
   assert.equal(rejection.status, 200);
+  const rejectedRecord = readRegistrationRecord(rejectedEmail);
+  assert.equal(rejectedRecord.password_hash, null);
+  assert.equal(rejectedRecord.verification_code, '');
 
   const resubmitted = await submitRequest(rejectedEmail);
   assert.equal(resubmitted.status, 201);
