@@ -113,10 +113,18 @@ O repositório mantém duas partes separadas:
 - Firebase Admin SDK no servidor, Firestore e sessões com cookies HttpOnly.
 - Login por e-mail/senha e login Google, com validação do token no servidor e exigência de conta previamente autorizada no SGVE.
 - Gestão de usuários, solicitações de cadastro, turmas, estudantes, responsáveis e viagens usando Firestore.
+- Autorização digital por responsáveis vinculados, registro administrativo de autorização em papel e presença na saída/retorno, com controle por perfil e auditoria.
+- Cadastro de veículos e condutores, atribuição às viagens em rascunho e bloqueio transacional de conflitos de horário.
+- Relatórios agregados restritos à equipe gestora, com exportação CSV e minimização de dados pessoais.
 - Transações para unicidade, geração de IDs, capacidade de viagens, vínculos e mudança de status.
 - Eventos de auditoria gravados na mesma transação das operações críticas.
 - Regras Firestore com negação de acesso direto para clientes web/mobile. O navegador deve acessar os dados pela API autenticada.
 - Testes automatizados e integração com Firestore Emulator no GitHub Actions, incluindo teste de leitura anônima bloqueada.
+
+### Planejamento técnico
+
+- [Planejamento do projeto](docs/PLANEJAMENTO.md)
+- [Plano de migração SQLite para Firestore](docs/MIGRACAO_FIRESTORE.md). O documento é um runbook futuro; nenhum dado real foi exportado ou importado.
 
 ### Estado e limites atuais
 
