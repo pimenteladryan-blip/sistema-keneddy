@@ -203,6 +203,46 @@ async function approveTrip(tripId, approverId) {
 }
 
 
+
+async function listVehicles() {
+  const vehicles = await store.list('vehicles', {
+    filters: [{ field: 'active', op: '==', value: true }],
+    limit: 500
+  });
+  return vehicles.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+}
+
+async function createVehicle(data, actorUserId) {
+  const name = String(data.name).trim();
+  const id = await store.createUnique('vehicles', 'name_key', name.toLocaleLowerCase('pt-BR'), {
+    name,
+    type: data.type,
+    capacity: Number(data.capacity),
+    active: true,
+    created_by: Number(actorUserId),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }, {
+    actor_user_id: Number(actorUserId),
+    action: 'create',
+    entity_type: 'vehicle'
+  });
+  return Number(id);
+}
+
+async function assignTripVehicle(tripId, vehicleId, actorUserId) {
+  return store.assignTripVehicle(
+    numericId(tripId, 'Viagem'),
+    numericId(vehicleId, 'Veículo'),
+    {
+      actor_user_id: Number(actorUserId),
+      action: 'assign_vehicle',
+      entity_type: 'trip',
+      entity_id: numericId(tripId, 'Viagem')
+    }
+  );
+}
+
 async function listTripParticipantsForUser(tripId, user) {
   const id = numericId(tripId, 'Viagem');
   const trip = await getTrip(id);
@@ -293,5 +333,6 @@ module.exports = {
   listStudentsForUser, linkGuardian, createTrip, getTrip,
   listTripsForUser, linkTripClass, linkTripStudent,
   assignTripTeacher, submitTrip, approveTrip,
-  listTripParticipantsForUser, setTripStudentAuthorization, setTripAttendance
+  listTripParticipantsForUser, setTripStudentAuthorization, setTripAttendance,
+  listVehicles, createVehicle, assignTripVehicle
 };
