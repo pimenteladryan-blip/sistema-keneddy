@@ -157,7 +157,19 @@
           </form>
           <p id="vehicle-message" class="message" role="status"></p>
           <div id="vehicles-list" class="data-list"><p class="muted">Carregando frota...</p></div>
-          <p class="privacy-note">Cadastre somente identificação, tipo e capacidade. A atribuição é permitida em rascunhos e bloqueia conflitos de horário e veículos menores que a capacidade da viagem.</p>
+          <form id="driver-form" class="inline-form compact-form">
+            <label>Nome do condutor<input name="name" maxlength="80" autocomplete="off" placeholder="Nome para identificação interna" required></label>
+            <button type="submit">Cadastrar condutor</button>
+          </form>
+          <p id="driver-message" class="message" role="status"></p>
+          <div id="drivers-list" class="data-list"><p class="muted">Carregando condutores...</p></div>
+          <form id="trip-driver-form" class="inline-form compact-form">
+            <label>Viagem<select name="trip_id" id="trip-driver-trip" required></select></label>
+            <label>Condutor<select name="driver_id" id="trip-driver-select" required><option value="">Cadastre um condutor</option></select></label>
+            <button type="submit">Atribuir condutor</button>
+          </form>
+          <p class="privacy-note">Cadastre somente o nome necessário à escala interna. Não armazene CPF, número de CNH ou contatos neste módulo. A atribuição é permitida em rascunhos e bloqueia conflitos de horário.</p>
+          <p class="privacy-note">Cadastre somente identificação, tipo e capacidade do veículo. A atribuição é permitida em rascunhos e bloqueia conflitos de horário e veículos menores que a capacidade da viagem.</p>
         </section>
         <section id="reports-panel" class="module-panel hidden">
           <div class="section-heading">
