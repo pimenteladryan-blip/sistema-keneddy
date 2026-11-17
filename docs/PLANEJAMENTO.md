@@ -367,4 +367,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] A interface oferece a ação somente para equipe gestora e somente quando a autorização está pendente; responsáveis não recebem ação administrativa.
 - [x] Testes SQLite e Firestore Emulator cobrem repetição, conflito entre decisões, perfis e auditoria.
 - [x] CI da implementação e dos testes passou em push e pull request no commit `a1d57a4aba5557b3822f2e3330024a3939320575`, execuções `44092485378` e `44092495455`; testes unitários, SQLite e Firestore Emulator concluídos com sucesso.
+- [x] CI da atualização final da interface (ocultação de ações incompatíveis com autorização em papel) passou em push e pull request no commit `e523f1ef3cbbbe206d4df66bb3cd8a12709718e1`, execuções `44092572065` e `44092584118`.
 - [ ] Validar visualmente o fluxo com contas fictícias; não anexar documentos reais nem dados pessoais nesta fase.
