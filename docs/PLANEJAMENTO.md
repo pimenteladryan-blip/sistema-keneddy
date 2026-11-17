@@ -194,3 +194,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] As regras estão preparadas no repositório, mas ainda NÃO foram publicadas no projeto Firebase real. A publicação será feita somente na etapa controlada de implantação, após revisão e autorização.
 - [x] Acrescentado teste de integração que consulta a API REST do Firestore Emulator sem autenticação; deve receber HTTP 403, confirmando que as regras negam leitura anônima direta e não apenas que o arquivo de regras existe.
 - [ ] Aguardar CI do teste de bloqueio anônimo antes de considerar esta etapa validada.
+- [x] CI do commit `cf5c2f04a56a5af999630726d2ceb58b9e441bc3` passou em push e pull request. A consulta REST anônima ao Firestore Emulator foi recusada com HTTP 403, enquanto os testes de servidor/Admin SDK continuaram passando.
+- [x] CI do commit de documentação `018a5b11377928b2bfb9fe41e5570022f26e5cf2` passou no evento push; verificação do pull request ainda estava em andamento durante esta atualização.
