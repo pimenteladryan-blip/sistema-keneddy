@@ -404,3 +404,15 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Executar somente com cópia sintética/controle autorizada; não abrir a base escolar ativa nem importar dados reais nesta fase.
 - [ ] O importador Firestore continua não implementado; nenhuma gravação ou migração real foi realizada.
 - [ ] A execução anterior do PR CI `44098667872` terminou antes das verificações por falha de rede do npm (`ECONNRESET` ao baixar dependência do registry); não foi falha de teste ou do código. Repetir CI nos commits desta etapa.
+
+
+## Atualização — 17/11/2026: identidade visual de produção
+
+- Criada a branch `feature/production-kennedy-ui` a partir da versão com migração Firestore.
+- Iniciada a adaptação da identidade visual do protótipo para a interface real servida pelo Render.
+- Preservados os formulários e identificadores usados pelo frontend de produção, que continuam ligados à API e à autenticação real do servidor.
+- Removida a referência demonstrativa `Ônibus DEMO-03` do placeholder do cadastro de veículos.
+- Ajustados os textos da tela de acesso para “Bem-vindo ao SGVE” e “Criar uma conta”.
+- Definido o tema escuro institucional como padrão inicial, mantendo a alternância de tema.
+- **Não foram copiadas** contas de demonstração, senhas fictícias, dados locais de alunos ou fluxos de autenticação do protótipo.
+- **Status:** alterações registradas na branch de trabalho; validação automatizada e revisão visual ainda pendentes. Nada foi mesclado na branch publicada e nenhum novo deploy foi iniciado.
