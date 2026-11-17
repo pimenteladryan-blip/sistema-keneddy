@@ -284,7 +284,7 @@ async function getReportSummary() {
   }).sort((a, b) => String(b.departure_at).localeCompare(String(a.departure_at))).slice(0, 100);
   return {
     generated_at: new Date().toISOString(),
-    partial: trips.length === 500 || students.length === 5000 ||
+    partial: trips.length > 100 || trips.length === 500 || students.length === 5000 ||
       vehicles.length === 500 || participants.length === 5000,
     totals,
     trips: rows
