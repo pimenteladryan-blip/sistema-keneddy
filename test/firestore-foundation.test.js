@@ -85,6 +85,23 @@ test('login Google também possui limitação de tentativas por IP', () => {
   assert.match(source, /consumeAttempts\('google-login-ip'/);
 });
 
+test('todas as rotas POST privadas exigem autenticação e proteção CSRF', () => {
+  const root = path.resolve(__dirname, '..');
+  const source = fs.readFileSync(path.join(root, 'server/index.js'), 'utf8');
+  const publicRoutes = [
+    "app.post('/api/registration-requests',",
+    "app.post('/api/auth/login',",
+    "app.post('/api/auth/google',"
+  ];
+  const postRoutes = source.split(/\\r?\\n/).filter(line => line.includes("app.post('/api/"));
+  assert.ok(postRoutes.length >= 10, 'o teste deve encontrar as rotas de mutação do SGVE');
+  for (const route of postRoutes) {
+    if (publicRoutes.some(prefix => route.includes(prefix))) continue;
+    assert.match(route, /requireAuth/, 'rota privada sem autenticação: ' + route.slice(0, 100));
+    assert.match(route, /requireCsrf/, 'rota privada sem CSRF: ' + route.slice(0, 100));
+  }
+});
+
 test('o armazenamento rejeita nomes de coleção desconhecidos', async () => {
   await assert.rejects(
     store.create('colecao_inexistente', { value: 1 }),
