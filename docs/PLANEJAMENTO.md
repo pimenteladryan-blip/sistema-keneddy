@@ -215,3 +215,16 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Incluir testes automatizados para limitação por IP/conta, expiração e comportamento em múltiplas instâncias quando o mecanismo compartilhado for escolhido.
 - [ ] Continuar revisão de autorização por endpoint, validação de entrada, concorrência e consultas Firestore; os testes existentes não substituem revisão independente de segurança e privacidade.
 - [ ] Não implantar nem expor o serviço publicamente até concluir os itens acima, a revisão LGPD/escolar e os testes controlados no Firebase real.
+
+
+### Controle de tentativas e inicialização segura (17/11/2026)
+- [x] Criado limitador local com limpeza por janela, limite máximo de 10.000 buckets e bloqueio preventivo quando a capacidade é atingida.
+- [x] No modo Firebase, tentativas de login e cadastro passam a usar transações Firestore compartilhadas entre instâncias; identificadores de IP/e-mail são armazenados somente como hashes.
+- [x] Login: limite por e-mail de 5 tentativas em 15 minutos e limite por IP de 60 tentativas em 15 minutos.
+- [x] Cadastro: limite por e-mail de 5 solicitações por hora e limite por IP de 20 solicitações por hora.
+- [x] Adicionada configuração TTL para `expires_at` na coleção `_sgve_rate_limits`; a configuração está versionada, mas ainda precisa ser aplicada ao Firebase real e verificada após implantação.
+- [x] Produção agora falha na inicialização se Firebase Admin não estiver configurado, impedindo que o backend de produção use acidentalmente o SQLite local.
+- [x] Adicionados testes unitários para janelas, bloqueio atômico e limite de memória, além de testes do Firestore Emulator para concorrência lógica, expiração e bloqueio HTTP após tentativas excessivas.
+- [ ] Aguardar CI do commit mais recente e corrigir qualquer falha antes de considerar esta etapa validada.
+- [ ] Antes de produção, aplicar a política TTL no Firebase real, validar custos/limites do Firestore e testar com tráfego controlado; a proteção Firestore depende da disponibilidade do banco.
+- [ ] O modo sem Firebase continua destinado apenas ao desenvolvimento local; o limitador em memória não é distribuído entre processos e não deve ser usado como proteção de produção.
