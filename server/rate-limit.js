@@ -22,7 +22,7 @@ function createMemoryRateLimiter({ maxBuckets = 10000, clock = Date.now } = {}) 
 
     const now = clock();
     for (const [id, bucket] of buckets) {
-      if (now < bucket.startedAt || now - bucket.startedAt >= windowMs) buckets.delete(id);
+      if (now < bucket.startedAt || now - bucket.startedAt >= bucket.windowMs) buckets.delete(id);
     }
 
     const ids = [...new Set(keys.map(key => keyDigest(scope, key)))];
@@ -35,7 +35,7 @@ function createMemoryRateLimiter({ maxBuckets = 10000, clock = Date.now } = {}) 
     ids.forEach((id, index) => {
       const bucket = current[index];
       if (bucket) bucket.count += 1;
-      else buckets.set(id, { startedAt: now, count: 1 });
+      else buckets.set(id, { startedAt: now, windowMs, count: 1 });
     });
     return true;
   }
