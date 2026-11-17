@@ -490,6 +490,13 @@ test('frota e atribuição de veículos validam capacidade, conflito de horário
     headers: { Origin: baseUrl, Cookie: teacherCookie }
   });
   assert.equal(teacherVehicles.status, 403);
+  const teacherTripsResponse = await fetch(baseUrl + '/api/trips', {
+    headers: { Origin: baseUrl, Cookie: teacherCookie }
+  });
+  assert.equal(teacherTripsResponse.status, 200);
+  const teacherTripRows = (await teacherTripsResponse.json()).trips;
+  assert.equal(Object.hasOwn(teacherTripRows[0] || {}, 'driver_name'), false,
+    'nome do condutor não deve ser exposto a professores sem função de gestão');
   assert.equal((await fetch(baseUrl + '/api/drivers', {
     headers: { Origin: baseUrl, Cookie: teacherCookie }
   })).status, 403, 'professores não podem consultar cadastro de condutores');
