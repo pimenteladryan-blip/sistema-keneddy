@@ -10,6 +10,7 @@ const COLLECTIONS = Object.freeze({
   students: 'students',
   studentGuardians: 'student_guardians',
   trips: 'trips',
+  vehicles: 'vehicles',
   tripClasses: 'trip_classes',
   tripStudents: 'trip_students',
   tripStaff: 'trip_staff',
@@ -112,7 +113,8 @@ async function remove(name, id) {
 
 const UNIQUE_FIELDS = Object.freeze({
   users: ['email'],
-  registrationRequests: ['email']
+  registrationRequests: ['email'],
+  vehicles: ['name_key']
 });
 
 function uniqueIndexRef(name, field, value) {
@@ -547,6 +549,59 @@ async function setTripAttendance(tripId, studentId, actorUserId, actorRole, chec
   });
 }
 
+
+async function assignTripVehicle(tripId, vehicleId, auditEvent = null) {
+  const tripKey = normalizeId(tripId);
+  const vehicleKey = normalizeId(vehicleId);
+  const db = requireFirestore();
+  const tripRef = collection('trips').doc(tripKey);
+  const vehicleRef = collection('vehicles').doc(vehicleKey);
+  return db.runTransaction(async transaction => {
+    const [tripSnapshot, vehicleSnapshot] = await Promise.all([
+      transaction.get(tripRef), transaction.get(vehicleRef)
+    ]);
+    if (!tripSnapshot.exists) return { error: 'not-found' };
+    if (!vehicleSnapshot.exists || vehicleSnapshot.data().active !== true) {
+      return { error: 'vehicle-not-found' };
+    }
+    const trip = tripSnapshot.data();
+    const vehicle = vehicleSnapshot.data();
+    if (trip.status !== 'draft') return { error: 'not-draft' };
+    const tripCapacity = Number(trip.capacity);
+    const vehicleCapacity = Number(vehicle.capacity);
+    if (!Number.isSafeInteger(tripCapacity) || tripCapacity < 1 ||
+        !Number.isSafeInteger(vehicleCapacity) || vehicleCapacity < tripCapacity) {
+      return { error: 'insufficient-capacity' };
+    }
+    const departure = Date.parse(trip.departure_at);
+    const returning = Date.parse(trip.return_at);
+    if (!Number.isFinite(departure) || !Number.isFinite(returning) || departure >= returning) {
+      return { error: 'invalid-schedule' };
+    }
+    const assignments = await transaction.get(
+      collection('trips').where('vehicle_id', '==', Number(vehicleKey))
+    );
+    for (const assigned of assignments.docs) {
+      if (assigned.id === tripKey) continue;
+      const existing = assigned.data();
+      if (['cancelled', 'completed'].includes(existing.status)) continue;
+      const existingDeparture = Date.parse(existing.departure_at);
+      const existingReturn = Date.parse(existing.return_at);
+      if (!Number.isFinite(existingDeparture) || !Number.isFinite(existingReturn) ||
+          (departure < existingReturn && returning > existingDeparture)) {
+        return { error: 'schedule-conflict' };
+      }
+    }
+    if (Number(trip.vehicle_id) === Number(vehicleKey)) return { ok: true, changed: false };
+    transaction.update(tripRef, {
+      vehicle_id: Number(vehicleKey),
+      updated_at: new Date().toISOString()
+    });
+    addAuditWrite(transaction, db, auditEvent);
+    return { ok: true, changed: true };
+  });
+}
+
 module.exports = {
   COLLECTIONS,
   get,
@@ -568,5 +623,6 @@ module.exports = {
   createTripRelationIfDraft,
   transitionTripStatus,
   setTripStudentAuthorization,
-  setTripAttendance
+  setTripAttendance,
+  assignTripVehicle
 };
