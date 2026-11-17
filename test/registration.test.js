@@ -265,6 +265,9 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
       method: 'POST', body: JSON.stringify({})
     })).status, 200);
   }
+  assert.equal((await adminApi('/api/trips/' + tripId + '/participants/' + studentId + '/paper-authorization', {
+    method: 'POST', body: JSON.stringify({})
+  })).status, 409, 'registro em papel não deve substituir decisão digital');
 
   const loginRole = async email => {
     const response = await fetch(baseUrl + '/api/auth/login', {
