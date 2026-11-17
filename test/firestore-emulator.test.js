@@ -478,6 +478,35 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       'condutor não pode ser reservado em horários sobrepostos');
     assert.equal((await assignDriver(adjacentTripId)).status, 200,
       'viagens consecutivas sem sobreposição podem usar o mesmo condutor');
+    const concurrentDriverResponse = await api('/api/drivers', {
+      method: 'POST', body: JSON.stringify({ name: 'Condutor Emulator Concorrente' })
+    });
+    assert.equal(concurrentDriverResponse.status, 201);
+    const concurrentDriverId = (await concurrentDriverResponse.json()).id;
+    const createConcurrentTrip = async (title, departure, returning) => {
+      const response = await api('/api/trips', {
+        method: 'POST',
+        body: JSON.stringify({
+          title, destination: 'Destino fictício',
+          educational_purpose: 'Teste concorrente de agenda',
+          departure_at: departure, return_at: returning, capacity: 2
+        })
+      });
+      assert.equal(response.status, 201);
+      return (await response.json()).id;
+    };
+    const concurrentTripA = await createConcurrentTrip(
+      'Viagem concorrente A', '2026-12-12T08:00:00.000Z', '2026-12-12T10:00:00.000Z'
+    );
+    const concurrentTripB = await createConcurrentTrip(
+      'Viagem concorrente B', '2026-12-12T09:00:00.000Z', '2026-12-12T11:00:00.000Z'
+    );
+    const concurrentAssignments = await Promise.all([
+      assignDriver(concurrentTripA, concurrentDriverId),
+      assignDriver(concurrentTripB, concurrentDriverId)
+    ]);
+    assert.deepEqual(concurrentAssignments.map(response => response.status).sort(), [200, 409],
+      'transações concorrentes não podem reservar o mesmo condutor em horários sobrepostos');
 
     await school.linkGuardian(apiStudentId, 'guardian-api@emulator.sgve', 'Responsável');
     await school.linkGuardian(paperStudentId, 'guardian-api@emulator.sgve', 'Responsável');
@@ -555,7 +584,7 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const driverAudit = apiAudit.filter(event =>
       Number(event.actor_user_id) === adminActorId && event.action === 'assign_driver'
     );
-    assert.equal(driverAudit.length, 2,
+    assert.equal(driverAudit.length, 3,
       'somente as duas atribuições efetivas de condutor devem gerar auditoria');
     const paperAuthorizationAudit = apiAudit.filter(event =>
       Number(event.actor_user_id) === adminActorId && event.action === 'record_paper_authorization'
