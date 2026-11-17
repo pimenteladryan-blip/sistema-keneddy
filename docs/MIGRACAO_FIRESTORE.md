@@ -83,6 +83,25 @@ O importador ainda precisa ser criado e revisado. Ele deverá:
 
 Não executar um importador improvisado diretamente na base real. A camada Admin do Firebase ignora as regras de cliente do Firestore, então o script precisa validar todas as entradas por conta própria.
 
+### 5.1. Validador pré-migração somente leitura
+
+Foi criado `scripts/validate-firestore-migration.js`. Ele é uma etapa de pré-validação, não um importador:
+
+- Exige que o caminho do arquivo SQLite seja informado explicitamente.
+- Abre o arquivo com `readOnly: true` e ativa `query_only`; não executa comandos de escrita.
+- Não inicializa Firebase Admin, não conecta ao Firestore e não exporta linhas.
+- Confere integridade SQLite, chaves estrangeiras, tabelas/colunas esperadas, IDs numéricos, duplicidades normalizadas, estados, hashes scrypt, datas e capacidade das viagens.
+- Retorna somente contagens, maiores IDs e códigos agregados de erro. Não retorna nomes, e-mails, hashes, tokens ou identificadores de estudantes.
+- Informa `sessions` apenas como contagem excluída; tokens e CSRF não são migrados.
+
+Executar somente sobre uma **cópia controlada** do arquivo SQLite, nunca sobre a base ativa:
+
+```bash
+node scripts/validate-firestore-migration.js --db ./copia-controlada/sgve.sqlite
+```
+
+Códigos de saída: `0` = pré-validação aprovada; `1` = inconsistências encontradas; `2` = argumento ou arquivo inválido. A aprovação não autoriza importação e não substitui revisão independente, teste com base sintética ou Firestore Emulator.
+
 ## 6. Critérios de aceite
 
 - Contagem por tabela/coleção reconciliada.
