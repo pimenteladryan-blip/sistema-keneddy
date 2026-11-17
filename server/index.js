@@ -60,8 +60,12 @@ function clearSessionCookie(res) {
 }
 function sameOrigin(req) {
   const origin = req.get('origin');
-  if (!origin) return true;
-  try { return new URL(origin).host === req.get('host'); } catch { return false; }
+  if (!origin || !req.get('host')) return false;
+  try {
+    const parsed = new URL(origin);
+    return ['http:', 'https:'].includes(parsed.protocol) &&
+      parsed.host === req.get('host');
+  } catch { return false; }
 }
 app.use(async (req, res, next) => {
   try {
