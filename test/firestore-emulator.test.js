@@ -63,6 +63,15 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
   await auth.deleteSessionWithAudit(tokenHash, adminId);
   assert.equal(await auth.findSession(tokenHash), null);
 
+  const parallelAuditIds = await Promise.all(Array.from({ length: 12 }, (_, index) =>
+    store.createWithNumericId('auditLogs', {
+      actor_user_id: adminId, action: 'parallel_test_' + index,
+      entity_type: 'test', entity_id: String(index)
+    })
+  ));
+  assert.equal(new Set(parallelAuditIds).size, 12);
+  assert.equal(parallelAuditIds.every(id => Number.isSafeInteger(id) && id > 0), true);
+
   const classId = await school.createClass({
     level: 'medio', grade: '1º ano', course: 'regular',
     section: 'A', schoolYear: 2026
