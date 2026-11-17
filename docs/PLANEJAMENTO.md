@@ -391,3 +391,16 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] CI completo passou no commit `206199b3b89d8f83ad7387fff8308380f30e29ee`, execuções `44096325779` (push) e `44096336173` (pull request), incluindo sintaxe, testes automatizados, migração SQLite e Firestore Emulator.
 - [x] CI da cobertura concorrente, das permissões de cadastro/atribuição e da limpeza dos dados ao sair passou no commit `64d3338404567b827a3c4bf7ce9e8164c1aef1bd`, execuções `44097175469` (push) e `44097181098` (pull request), com testes SQLite e Firestore Emulator aprovados.
 - [ ] Validar visualmente o fluxo com contas fictícias e confirmar com a escola quais verificações operacionais dos condutores devem ocorrer fora do sistema.
+
+### Pré-validação da migração SQLite → Firestore (17/11/2026)
+- [x] Criado `scripts/validate-firestore-migration.js`: abre o SQLite em modo somente leitura, ativa `query_only`, não conecta ao Firebase e não grava dados.
+- [x] O relatório contém apenas contagens, maiores IDs e códigos agregados de inconsistência; não imprime nomes, e-mails, hashes, tokens ou dados de estudantes.
+- [x] Verifica tabelas/colunas, integridade SQLite, chaves estrangeiras, IDs, duplicidades normalizadas, estados, hashes scrypt, datas e capacidade das viagens.
+- [x] Sessões aparecem somente como contagem excluída; tokens e CSRF não entram na migração.
+- [x] Adicionados testes com base sintética para aprovação, conflito de e-mail, referência órfã, ausência de saída com dados pessoais e garantia de que o arquivo não é alterado.
+- [x] Atualizados `npm run check` e `npm test` para incluir o validador e seus testes.
+- [x] Runbook atualizado com comando, pré-condições e códigos de saída.
+- [ ] Aguardar CI do novo commit e corrigir qualquer falha de sintaxe ou teste.
+- [ ] Executar somente com cópia sintética/controle autorizada; não abrir a base escolar ativa nem importar dados reais nesta fase.
+- [ ] O importador Firestore continua não implementado; nenhuma gravação ou migração real foi realizada.
+- [ ] A execução anterior do PR CI `44098667872` terminou antes das verificações por falha de rede do npm (`ECONNRESET` ao baixar dependência do registry); não foi falha de teste ou do código. Repetir CI nos commits desta etapa.
