@@ -579,7 +579,7 @@ function applyTheme(mode) {
   button.setAttribute('aria-label', dark ? 'Mudar para tema claro' : 'Mudar para tema escuro');
   button.setAttribute('aria-pressed', String(dark));
 }
-let savedTheme = 'light';
+let savedTheme = 'dark';
 try {
   const storedTheme = localStorage.getItem('sgve-theme-mode');
   if (storedTheme === 'light' || storedTheme === 'dark') savedTheme = storedTheme;
