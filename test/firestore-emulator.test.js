@@ -259,6 +259,24 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       }
     });
 
+    await auth.createRegistrationRequest({
+      display_name: 'Solicitação para teste de privacidade',
+      email: 'solicitacao-privacidade@emulator.sgve',
+      password_hash: rolePasswordHash,
+      role: 'teacher',
+      verification_code: 'XYZ789'
+    });
+    const pendingRequestsResponse = await api('/api/registration-requests');
+    assert.equal(pendingRequestsResponse.status, 200);
+    const pendingRequests = await pendingRequestsResponse.json();
+    const pendingRequest = pendingRequests.requests.find(item => item.email === 'solicitacao-privacidade@emulator.sgve');
+    assert.ok(pendingRequest);
+    assert.equal(Object.hasOwn(pendingRequest, 'password_hash'), false,
+      'a lista administrativa de solicitações não pode expor o hash da senha');
+    assert.equal((await api('/api/registration-requests/' + pendingRequest.id + '/reject', {
+      method: 'POST', body: JSON.stringify({})
+    })).status, 200);
+
     const classResponse = await api('/api/classes', {
       method: 'POST',
       body: JSON.stringify({ level: 'medio', grade: '3º ano', course: 'regular', section: 'B', school_year: 2026 })
