@@ -46,6 +46,7 @@ before(async () => {
     env: {
       ...process.env,
       NODE_ENV: 'test',
+      FIREBASE_SERVICE_ACCOUNT_JSON: '',
       PORT: String(port),
       DATABASE_PATH: path.join(tempDir, 'sgve.sqlite'),
       ADMIN_EMAIL: adminEmail,
