@@ -170,7 +170,7 @@ function main() {
         'SELECT COUNT(*) AS count FROM (SELECT lower(trim(name)) FROM "' + table + '" GROUP BY lower(trim(name)) HAVING COUNT(*) > 1)'
       ));
       addIssue('invalid_' + label + '_record', scalar(
-        'SELECT COUNT(*) AS count FROM "' + table + '" WHERE trim(name) = \\'\\' OR active NOT IN (0,1)'
+        "SELECT COUNT(*) AS count FROM \"" + table + "\" WHERE trim(name) = '' OR active NOT IN (0,1)"
       ));
     }
 
