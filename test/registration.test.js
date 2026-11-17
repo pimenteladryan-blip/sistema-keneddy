@@ -208,6 +208,11 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
   });
   assert.equal(studentResponse.status, 201);
   const studentId = (await studentResponse.json()).id;
+  const paperStudentResponse = await adminApi('/api/students', {
+    method: 'POST', body: JSON.stringify({ full_name: 'Estudante com autorização em papel', class_id: classId })
+  });
+  assert.equal(paperStudentResponse.status, 201);
+  const paperStudentId = (await paperStudentResponse.json()).id;
   const guardianLink = await adminApi('/api/students/' + studentId + '/guardians', {
     method: 'POST',
     body: JSON.stringify({ email: 'responsavel-viagem@sgve.local', relationship: 'Responsável' })
@@ -236,6 +241,9 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
       method: 'POST', body: JSON.stringify({ student_id: studentId })
     })).status, 200);
   }
+  assert.equal((await adminApi('/api/trips/' + tripId + '/students', {
+    method: 'POST', body: JSON.stringify({ student_id: paperStudentId })
+  })).status, 200);
   const teacherUsersDb = new DatabaseSync(path.join(tempDir, 'sgve.sqlite'), { readOnly: true });
   let teacherId;
   try {
@@ -252,6 +260,11 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
   assert.equal((await adminApi('/api/trips/' + tripId + '/approve', {
     method: 'POST', body: JSON.stringify({})
   })).status, 200);
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    assert.equal((await adminApi('/api/trips/' + tripId + '/participants/' + paperStudentId + '/paper-authorization', {
+      method: 'POST', body: JSON.stringify({})
+    })).status, 200);
+  }
 
   const loginRole = async email => {
     const response = await fetch(baseUrl + '/api/auth/login', {
@@ -274,10 +287,13 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
   const teacherApi = await loginRole('professor-viagem@sgve.local');
   const teacherParticipants = await teacherApi('/api/trips/' + tripId + '/participants');
   assert.equal(teacherParticipants.status, 200);
-  assert.equal((await teacherParticipants.json()).participants.length, 1);
+  assert.equal((await teacherParticipants.json()).participants.length, 2);
   assert.equal((await teacherApi('/api/trips/' + tripId + '/participants/' + studentId + '/authorization', {
     method: 'POST', body: JSON.stringify({ status: 'authorized' })
   })).status, 403);
+  assert.equal((await teacherApi('/api/trips/' + tripId + '/participants/' + paperStudentId + '/paper-authorization', {
+    method: 'POST', body: JSON.stringify({})
+  })).status, 403, 'professor não pode registrar autorização em papel');
   const guardianApi = await loginRole('responsavel-viagem@sgve.local');
   const guardianParticipants = await guardianApi('/api/trips/' + tripId + '/participants');
   assert.equal(guardianParticipants.status, 200);
@@ -314,6 +330,8 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
     assert.equal(participant.authorization_status, 'authorized');
     assert.equal(participant.departure_present, 1);
     assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'authorize_trip_student'").get().total, 1);
+    assert.equal(verifyDb.prepare("SELECT authorization_status FROM trip_students WHERE trip_id = ? AND student_id = ?").get(tripId, paperStudentId).authorization_status, 'paper_recorded');
+    assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'record_paper_authorization'").get().total, 1);
     assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'mark_departure_present'").get().total, 1);
     for (const action of ['link_guardian', 'link_class', 'link_student', 'assign_teacher']) {
       assert.equal(verifyDb.prepare('SELECT COUNT(*) AS total FROM audit_logs WHERE action = ?').get(action).total, 1,
@@ -325,10 +343,12 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
   const report = await reportResponse.json();
   const tripReport = report.trips.find(item => item.id === tripId);
   assert.ok(tripReport);
-  assert.equal(tripReport.participants, 1);
+  assert.equal(tripReport.participants, 2);
   assert.equal(tripReport.authorized, 1);
+  assert.equal(tripReport.paper_recorded, 1);
   assert.equal(tripReport.departure_present, 1);
   assert.equal(report.totals.authorized, 1);
+  assert.equal(report.totals.paper_recorded, 1);
   assert.equal(report.totals.departure_present, 1);
 });
 
