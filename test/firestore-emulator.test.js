@@ -26,6 +26,10 @@ before(async () => {
     { method: 'DELETE' }
   );
   assert.equal(response.ok, true, 'não foi possível limpar o Firestore Emulator');
+  const publicRead = await fetch(
+    'http://127.0.0.1:8080/v1/projects/demo-sgve/databases/(default)/documents/users'
+  );
+  assert.equal(publicRead.status, 403, 'regras devem negar leitura anônima direta no Firestore');
 });
 
 test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firestore Emulator', async () => {
