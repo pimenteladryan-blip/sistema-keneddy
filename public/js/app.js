@@ -6,6 +6,8 @@ const loginButton = document.querySelector('#login-button');
 const loginMessage = document.querySelector('#login-message');
 const logoutButton = document.querySelector('#logout-button');
 const googleLoginButton = document.querySelector('#google-login-button');
+const installButton = document.querySelector('#pwa-install');
+let deferredInstallPrompt = null;
 let csrfToken = '';
 let currentUser = null;
 let lastReport = null;
@@ -606,7 +608,7 @@ loginForm.addEventListener('submit', async event => {
   try {
     const data = await api('/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email: form.get('email'), password: form.get('password') })
+      body: JSON.stringify({ email: form.get('email'), password: form.get('password'), role: form.get('role') })
     });
     csrfToken = data.csrfToken;
     loginForm.reset();
@@ -628,7 +630,7 @@ googleLoginButton.addEventListener('click', async () => {
     const idToken = await credential.user.getIdToken(true);
     const data = await api('/api/auth/google', {
       method: 'POST',
-      body: JSON.stringify({ idToken })
+      body: JSON.stringify({ idToken, role: document.querySelector('#login-role').value })
     });
     csrfToken = data.csrfToken;
     showDashboard(data.user);
@@ -641,6 +643,30 @@ googleLoginButton.addEventListener('click', async () => {
     googleLoginButton.textContent = 'Entrar com Google';
   }
 });
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  installButton.hidden = false;
+});
+installButton.addEventListener('click', async () => {
+  if (!deferredInstallPrompt) return;
+  installButton.disabled = true;
+  try {
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+  } finally {
+    deferredInstallPrompt = null;
+    installButton.hidden = true;
+    installButton.disabled = false;
+  }
+});
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  installButton.hidden = true;
+});
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+}
 logoutButton.addEventListener('click', async () => {
   logoutButton.disabled = true;
   try { await api('/api/auth/logout', { method: 'POST', body: '{}' }); if (window.firebase?.apps?.length) await firebase.auth().signOut(); showLogin(); }
