@@ -265,9 +265,7 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
       method: 'POST', body: JSON.stringify({})
     })).status, 200);
   }
-  assert.equal((await adminApi('/api/trips/' + tripId + '/participants/' + studentId + '/paper-authorization', {
-    method: 'POST', body: JSON.stringify({})
-  })).status, 409, 'registro em papel não deve substituir decisão digital');
+
 
   const loginRole = async email => {
     const response = await fetch(baseUrl + '/api/auth/login', {
@@ -306,6 +304,9 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
   });
   assert.equal((await authResult()).status, 200);
   assert.equal((await authResult()).status, 200);
+  assert.equal((await adminApi('/api/trips/' + tripId + '/participants/' + studentId + '/paper-authorization', {
+    method: 'POST', body: JSON.stringify({})
+  })).status, 409, 'registro em papel não deve substituir decisão digital');
   const unrelatedGuardian = await loginRole('responsavel-externo@sgve.local');
   assert.equal((await unrelatedGuardian('/api/trips/' + tripId + '/participants/' + studentId + '/authorization', {
     method: 'POST', body: JSON.stringify({ status: 'authorized' })
