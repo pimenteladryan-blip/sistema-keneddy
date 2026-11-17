@@ -414,7 +414,7 @@ app.post('/api/registration-requests/:id/approve', requireAuth, requireCsrf, req
   db.exec('BEGIN IMMEDIATE');
   try {
     const created = db.prepare('INSERT INTO users (display_name, email, password_hash, role) VALUES (?, ?, ?, ?)').run(request.display_name, request.email, request.password_hash, request.role);
-    db.prepare("UPDATE registration_requests SET status = 'approved', password_hash = NULL, reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'pending'").run(req.auth.user.id, id);
+    db.prepare("UPDATE registration_requests SET status = 'approved', password_hash = NULL, verification_code = '', reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'pending'").run(req.auth.user.id, id);
     audit(req.auth.user.id, 'approve_registration', 'registration_request', id);
     db.exec('COMMIT');
     res.json({ message: 'Cadastro aprovado. A pessoa já pode entrar com o e-mail e a senha cadastrados.', userId: Number(created.lastInsertRowid) });
@@ -438,7 +438,7 @@ app.post('/api/registration-requests/:id/reject', requireAuth, requireCsrf, requ
   }
   const id = Number(req.params.id);
   if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: 'Solicitação inválida.' });
-  const result = db.prepare("UPDATE registration_requests SET status = 'rejected', password_hash = NULL, reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'pending'").run(req.auth.user.id, id);
+  const result = db.prepare("UPDATE registration_requests SET status = 'rejected', password_hash = NULL, verification_code = '', reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'pending'").run(req.auth.user.id, id);
   if (!result.changes) return res.status(404).json({ error: 'Solicitação não encontrada ou já analisada.' });
   audit(req.auth.user.id, 'reject_registration', 'registration_request', id);
   res.json({ message: 'Solicitação rejeitada.' });
