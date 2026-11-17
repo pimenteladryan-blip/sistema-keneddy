@@ -242,3 +242,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Confirmado que o código de solicitação é devolvido na resposta da API para o próprio solicitante e deve ser tratado como identificador para conferência manual, não como prova de posse do endereço de e-mail.
 - [ ] Antes da produção, definir com a escola o processo de confirmação de identidade/contato (por exemplo, conferência presencial pela secretaria ou integração de e-mail institucional). Não apresentar o e-mail como verificado enquanto esse processo não existir.
 - [ ] Revisar com a escola a necessidade de reduzir a exposição de dados pessoais na resposta e no fluxo de aprovação de cadastros.
+- [x] Adicionado teste de regressão que percorre todas as rotas POST privadas e exige `requireAuth` e `requireCsrf`; somente cadastro inicial e logins password/Google são exceções públicas explícitas, protegidas por validação de origem e controles próprios.
+- [ ] Aguardar CI do teste de cobertura CSRF para confirmar a nova verificação.
