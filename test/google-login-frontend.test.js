@@ -15,6 +15,8 @@ test('a instalação PWA usa arquivos estáticos e nunca armazena respostas da A
   const worker = fs.readFileSync(path.join(root, 'public', 'sw.js'), 'utf8');
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'public', 'manifest.webmanifest'), 'utf8'));
   assert.equal(manifest.start_url, '/');
+  assert.ok(manifest.icons.some(icon => icon.sizes === '192x192'));
+  assert.ok(manifest.icons.some(icon => icon.sizes === '512x512'));
   assert.match(html, /rel="manifest"/);
   assert.match(html, /id="pwa-install"/);
   assert.match(app, /beforeinstallprompt/);
