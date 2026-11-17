@@ -300,3 +300,9 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Adicionado teste de integração que dispara duas aprovações simultâneas para a mesma solicitação no Firestore Emulator.
 - [x] O comportamento esperado é exatamente uma resposta de sucesso (200) e uma resposta de solicitação já analisada (404), sem duplicar a conta.
 - [ ] Aguardar CI deste teste concorrente.
+
+### Validação defensiva de hashes de senha (17/11/2026)
+- [x] `verifyPassword` agora valida tipo, algoritmo, tamanho e caracteres hexadecimais do hash antes de chamar `scrypt`, evitando custo computacional desnecessário com valores malformados ou enormes.
+- [x] A derivação usa sempre o tamanho fixo esperado de 64 bytes e compara os resultados com `timingSafeEqual`.
+- [x] Criados testes para senha correta/incorreta, hash malformado, entrada excessivamente grande e senha de tipo inválido.
+- [ ] Aguardar CI dos testes de hash e da cobertura de aprovação concorrente.
