@@ -276,6 +276,10 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal((await api('/api/registration-requests/' + pendingRequest.id + '/reject', {
       method: 'POST', body: JSON.stringify({})
     })).status, 200);
+    const rejectedRequest = await store.get('registrationRequests', pendingRequest.id);
+    assert.equal(rejectedRequest.password_hash, null);
+    assert.equal(rejectedRequest.verification_code, null,
+      'código de solicitação deve ser apagado após rejeição');
 
     await auth.createRegistrationRequest({
       display_name: 'Solicitação para aprovação via API',
@@ -294,6 +298,10 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     });
     assert.equal(approvalResponse.status, 200, 'a rota administrativa deve aceitar IDs numéricos válidos');
     assert.equal((await auth.findUserByEmail('solicitacao-aprovacao-api@emulator.sgve')).active, true);
+    const approvedRequest = await store.get('registrationRequests', approvalRequest.id);
+    assert.equal(approvedRequest.password_hash, null);
+    assert.equal(approvedRequest.verification_code, null,
+      'código de solicitação deve ser apagado após aprovação');
 
     const classResponse = await api('/api/classes', {
       method: 'POST',
