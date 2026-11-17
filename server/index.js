@@ -475,6 +475,11 @@ function vehicleInput(body) {
       !Number.isSafeInteger(capacity) || capacity < 1 || capacity > 100) return null;
   return { name, type, capacity };
 }
+function driverInput(body) {
+  const name = cleanText(body.name, 80);
+  if (name.length < 3) return null;
+  return { name };
+}
 function getTripStatusLabel(status) {
   return ({ draft: 'Rascunho', pending_approval: 'Aguardando aprovação', approved: 'Aprovada',
     open: 'Inscrições abertas', completed: 'Concluída', cancelled: 'Cancelada' })[status] || status;
@@ -654,6 +659,100 @@ app.post('/api/vehicles', requireAuth, requireCsrf, requireRoles(...RECORD_MANAG
     if (error.code === 'already-exists' || /UNIQUE constraint failed: vehicles\.name/i.test(error.message)) {
       return res.status(409).json({ error: 'Já existe um veículo com essa identificação.' });
     }
+    next(error);
+  }
+});
+
+app.get('/api/drivers', requireAuth, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
+  try {
+    if (firebaseConfigured) return res.json({ drivers: await firestoreSchool.listDrivers() });
+    const drivers = db.prepare(
+      'SELECT id, name FROM drivers WHERE active = 1 ORDER BY name'
+    ).all();
+    return res.json({ drivers });
+  } catch (error) { next(error); }
+});
+
+app.post('/api/drivers', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
+  const data = driverInput(req.body);
+  if (!data) return res.status(400).json({ error: 'Informe um nome de condutor válido.' });
+  try {
+    if (firebaseConfigured) {
+      const id = await firestoreSchool.createDriver(data, req.auth.user.id);
+      return res.status(201).json({ id, message: 'Condutor cadastrado.' });
+    }
+    const result = db.prepare(
+      'INSERT INTO drivers (name, created_by) VALUES (?, ?)'
+    ).run(data.name, req.auth.user.id);
+    audit(req.auth.user.id, 'create', 'driver', result.lastInsertRowid);
+    return res.status(201).json({ id: Number(result.lastInsertRowid), message: 'Condutor cadastrado.' });
+  } catch (error) {
+    if (error.code === 'already-exists' || /UNIQUE constraint failed: drivers\\.name/i.test(error.message)) {
+      return res.status(409).json({ error: 'Já existe um condutor com esse nome.' });
+    }
+    next(error);
+  }
+});
+
+app.post('/api/trips/:id/driver', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
+  const tripId = Number(req.params.id);
+  const driverId = Number(req.body.driver_id);
+  if (!Number.isSafeInteger(tripId) || tripId < 1 ||
+      !Number.isSafeInteger(driverId) || driverId < 1) {
+    return res.status(400).json({ error: 'Informe uma viagem e um condutor válidos.' });
+  }
+  let transactionOpen = false;
+  try {
+    if (firebaseConfigured) {
+      const result = await firestoreSchool.assignTripDriver(tripId, driverId, req.auth.user.id);
+      if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem não encontrada.' });
+      if (result.error === 'driver-not-found') return res.status(404).json({ error: 'Condutor não encontrado ou inativo.' });
+      if (result.error === 'not-draft') return res.status(409).json({ error: 'O condutor só pode ser alterado enquanto a viagem estiver em rascunho.' });
+      if (result.error === 'invalid-schedule') return res.status(409).json({ error: 'Os horários da viagem são inválidos.' });
+      if (result.error === 'schedule-conflict') return res.status(409).json({ error: 'Este condutor já está atribuído a uma viagem com horário sobreposto.' });
+      return res.json({ message: 'Condutor vinculado à viagem.' });
+    }
+    const fail = (code, message) => {
+      if (transactionOpen) { db.exec('ROLLBACK'); transactionOpen = false; }
+      return res.status(code).json({ error: message });
+    };
+    db.exec('BEGIN IMMEDIATE');
+    transactionOpen = true;
+    const trip = db.prepare(
+      'SELECT id, status, departure_at, return_at, driver_id FROM trips WHERE id = ?'
+    ).get(tripId);
+    if (!trip) return fail(404, 'Viagem não encontrada.');
+    if (trip.status !== 'draft') return fail(409, 'O condutor só pode ser alterado enquanto a viagem estiver em rascunho.');
+    const driver = db.prepare(
+      'SELECT id FROM drivers WHERE id = ? AND active = 1'
+    ).get(driverId);
+    if (!driver) return fail(404, 'Condutor não encontrado ou inativo.');
+    const departure = Date.parse(trip.departure_at);
+    const returning = Date.parse(trip.return_at);
+    if (!Number.isFinite(departure) || !Number.isFinite(returning) || departure >= returning) {
+      return fail(409, 'Os horários da viagem são inválidos.');
+    }
+    const assignments = db.prepare(
+      "SELECT id, departure_at, return_at FROM trips WHERE driver_id = ? AND id <> ? AND status NOT IN ('cancelled','completed')"
+    ).all(driverId, tripId);
+    for (const assigned of assignments) {
+      const existingDeparture = Date.parse(assigned.departure_at);
+      const existingReturn = Date.parse(assigned.return_at);
+      if (!Number.isFinite(existingDeparture) || !Number.isFinite(existingReturn) ||
+          (departure < existingReturn && returning > existingDeparture)) {
+        return fail(409, 'Este condutor já está atribuído a uma viagem com horário sobreposto.');
+      }
+    }
+    if (Number(trip.driver_id) !== driverId) {
+      db.prepare('UPDATE trips SET driver_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?')
+        .run(driverId, tripId);
+      audit(req.auth.user.id, 'assign_driver', 'trip', tripId);
+    }
+    db.exec('COMMIT');
+    transactionOpen = false;
+    return res.json({ message: 'Condutor vinculado à viagem.' });
+  } catch (error) {
+    if (transactionOpen) { try { db.exec('ROLLBACK'); } catch {} }
     next(error);
   }
 });
