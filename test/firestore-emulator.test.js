@@ -524,6 +524,11 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     );
     assert.equal(vehicleAudit.length, 2,
       'somente as duas atribuições efetivas devem gerar auditoria');
+    const paperAuthorizationAudit = apiAudit.filter(event =>
+      Number(event.actor_user_id) === adminActorId && event.action === 'record_paper_authorization'
+    );
+    assert.equal(paperAuthorizationAudit.length, 1,
+      'repetir o registro em papel não deve duplicar auditoria');
     for (const [action, entityType, entityId] of [
       ['create', 'class', apiClassId],
       ['create', 'student', apiStudentId],
@@ -642,7 +647,13 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal((await guardianApi('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/attendance', {
       method: 'POST', body: JSON.stringify({ checkpoint: 'departure', present: true })
     })).status, 403, 'responsável não pode registrar presença');
+    assert.equal((await guardianApi('/api/trips/' + apiTripId + '/participants/' + paperStudentId + '/paper-authorization', {
+      method: 'POST', body: JSON.stringify({})
+    })).status, 403, 'responsável não pode registrar autorização em papel administrativamente');
 
+    assert.equal((await api('/api/trips/' + apiTripId + '/participants/' + apiStudentId + '/paper-authorization', {
+      method: 'POST', body: JSON.stringify({})
+    })).status, 409, 'registro em papel não deve substituir autorização digital');
     const reportResponse = await api('/api/reports/summary');
     assert.equal(reportResponse.status, 200);
     const report = await reportResponse.json();
