@@ -88,7 +88,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 
 ### Em andamento / próximos passos
 - [x] Adicionados testes isolados e de integração para autenticação/cadastros Firestore, duplicidade, conta inativa, aprovação/rejeição via API e permissões dos seis perfis.
-- [ ] Acrescentar teste específico de duas aprovações simultâneas da mesma solicitação; a revisão transacional já impede a segunda decisão, mas falta cobertura concorrente dedicada.
+- [x] Teste específico de duas aprovações simultâneas concluído no Firestore Emulator; CI passou nas execuções 44084612085 e 44084621629.
 - [x] Integração ponta a ponta com dados fictícios validada no Firestore Emulator, incluindo Express/API.
 - [ ] Executar teste controlado no projeto Firebase real, com contas fictícias e sem dados de estudantes.
 - [x] Arquitetura same-origin definida: Express serve `public/` e a API no mesmo host; `docs/` permanece demonstração separada. Cookies, Origin e CSRF mantidos.
@@ -232,7 +232,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Adicionados testes unitários para janelas, bloqueio atômico e limite de memória, além de testes do Firestore Emulator para concorrência lógica, expiração e bloqueio HTTP após tentativas excessivas.
 - [x] CI do commit `b48a2cb39be33d7b3182d9570bd75326cc7c430c` passou integralmente nas execuções 44078581719 e 44078590536, incluindo teste concorrente no Firestore Emulator.
 - [ ] Antes de produção, aplicar a política TTL no Firebase real, validar custos/limites do Firestore e testar com tráfego controlado; a proteção Firestore depende da disponibilidade do banco.
-- [ ] O modo sem Firebase continua destinado apenas ao desenvolvimento local; o limitador em memória não é distribuído entre processos e não deve ser usado como proteção de produção.
+- Nota de segurança: o modo sem Firebase continua destinado apenas ao desenvolvimento local; o limitador em memória não é distribuído entre processos e não deve ser usado como proteção de produção.
 - [x] A rota de login Google também recebeu limite por IP, com teste estático para impedir regressão.
 - [x] CI do commit `c1a3cab832d38978d145e4aa6eada5ce8db424d3` passou integralmente (execuções 44073140327 e 44073151728): sintaxe, testes unitários, frontend e Firestore Emulator.
 - [x] Revisado o uso de `trust proxy` em produção: Express confia em um salto de proxy para obter o IP do cliente no Render.
@@ -300,19 +300,19 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 ### Concorrência na aprovação de cadastros (17/11/2026)
 - [x] Adicionado teste de integração que dispara duas aprovações simultâneas para a mesma solicitação no Firestore Emulator.
 - [x] O comportamento esperado é exatamente uma resposta de sucesso (200) e uma resposta de solicitação já analisada (404), sem duplicar a conta.
-- [ ] Aguardar CI deste teste concorrente.
+- [x] CI do teste concorrente passou nas execuções 44084612085 e 44084621629.
 
 ### Validação defensiva de hashes de senha (17/11/2026)
 - [x] `verifyPassword` agora valida tipo, algoritmo, tamanho e caracteres hexadecimais do hash antes de chamar `scrypt`, evitando custo computacional desnecessário com valores malformados ou enormes.
 - [x] A derivação usa sempre o tamanho fixo esperado de 64 bytes e compara os resultados com `timingSafeEqual`.
 - [x] Criados testes para senha correta/incorreta, hash malformado, entrada excessivamente grande e senha de tipo inválido.
 - [x] Testes de hash e aprovação concorrente passaram em push e pull request nas execuções 44084612085 e 44084621629.
-- [!] O primeiro teste de aprovação concorrente falhou porque o dado fictício usava o código `TUV123`, mas o alfabeto de códigos do sistema exclui o dígito `1`; a validação da solicitação rejeitou o fixture e as duas chamadas retornaram HTTP 500. Não foi evidenciado conflito de transação.
+- Nota histórica resolvida: a primeira fixture de teste usava `TUV123`, com dígito fora do alfabeto permitido. Foi corrigida para `TUV234`; a falha era do dado fictício, não da transação.
 - [x] Instrumentado o teste de integração para capturar respostas e logs do servidor, identificando que a falha era do dado de teste, não da transação.
 - [x] Corrigido o código fictício para `TUV234`, respeitando o alfabeto de verificação.
 - [x] CI após a correção do fixture passou em push e pull request nas execuções 44084612085 e 44084621629; o teste confirmou uma única aprovação concorrente e uma resposta 404 para a tentativa duplicada.
 - [x] Validação final desta rodada: 37 testes unitários aprovados, sintaxe aprovada e Firestore Emulator aprovado, incluindo concorrência de aprovação de cadastro.
-- [ ] Aguardar CI desta atualização final do planejamento.
+- [x] CI da atualização final do planejamento passou nas execuções 44084841107 e 44084853000.
 
 - [x] CI final da rodada de segurança e cadastro aprovado em push e pull request; a suíte incluiu 37 testes unitários e integração Firestore Emulator com aprovação concorrente.
 
