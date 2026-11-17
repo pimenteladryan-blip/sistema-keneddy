@@ -8,6 +8,7 @@ const logoutButton = document.querySelector('#logout-button');
 const googleLoginButton = document.querySelector('#google-login-button');
 let csrfToken = '';
 let currentUser = null;
+let lastReport = null;
 
 function showDashboard(user) {
   currentUser = user;
@@ -22,12 +23,16 @@ function showDashboard(user) {
   document.querySelector('#trip-assignment').classList.toggle('hidden', !canManage);
   document.querySelector('#users-tab').classList.toggle('hidden', !canManage);
   document.querySelector('#vehicles-tab').classList.toggle('hidden', !canManage);
+  document.querySelector('#reports-tab').classList.toggle('hidden', !canManage);
   document.querySelector('#registration-requests-section').classList.toggle('hidden', user.role !== 'admin');
   document.querySelectorAll('[data-admin-only]').forEach(option => { option.hidden = user.role !== 'admin'; });
   loadClasses();
   loadStudents();
   loadTrips();
-  if (canManage) loadVehicles();
+  if (canManage) {
+    loadVehicles();
+    loadReports();
+  }
   if (user.role === 'admin') loadRegistrationRequests();
 }
 function showLogin() {
@@ -123,6 +128,87 @@ async function loadVehicles() {
   } catch (error) {
     list.textContent = error.message;
   }
+}
+
+
+function tripStatusLabel(status) {
+  return ({
+    draft: 'Rascunho', pending_approval: 'Aguardando aprovação',
+    approved: 'Aprovada', open: 'Inscrições abertas',
+    completed: 'Concluída', cancelled: 'Cancelada'
+  })[status] || status;
+}
+
+async function loadReports() {
+  if (!currentUser || !['admin', 'direction', 'secretariat'].includes(currentUser.role)) return;
+  const body = document.querySelector('#report-trips-body');
+  try {
+    const data = await api('/api/reports/summary');
+    lastReport = data;
+    const totals = data.totals || {};
+    const fields = [
+      ['report-trip-count', 'trips'],
+      ['report-student-count', 'students'],
+      ['report-vehicle-count', 'vehicles'],
+      ['report-participant-count', 'participants'],
+      ['report-authorized-count', 'authorized'],
+      ['report-pending-count', 'pending']
+    ];
+    for (const [elementId, field] of fields) {
+      document.querySelector('#' + elementId).textContent = String(Number(totals[field]) || 0);
+    }
+    document.querySelector('#report-note').textContent = data.partial
+      ? 'Relatório parcial: o limite de consulta foi atingido. Não use estes totais como fechamento oficial.'
+      : 'Dados agregados, sem nomes de estudantes. Atualizado em ' + dateLabel(data.generated_at) + '.';
+    body.innerHTML = data.trips.length ? data.trips.map(trip =>
+      '<tr><td>' + escapeHtml(trip.title) + '<small> · ' + escapeHtml(trip.destination) + '</small></td>' +
+      '<td>' + escapeHtml(dateLabel(trip.departure_at)) + '</td>' +
+      '<td>' + escapeHtml(tripStatusLabel(trip.status)) + '</td>' +
+      '<td>' + Number(trip.participants) + ' / ' + Number(trip.capacity) + '</td>' +
+      '<td>' + Number(trip.authorized) + '</td><td>' + Number(trip.pending) + '</td>' +
+      '<td>' + Number(trip.departure_present) + ' presentes · ' + Number(trip.departure_absent) + ' ausentes</td>' +
+      '<td>' + Number(trip.return_present) + ' presentes · ' + Number(trip.return_absent) + ' ausentes</td>' +
+      '<td>' + escapeHtml(trip.vehicle_name || 'Não atribuído') + '</td></tr>'
+    ).join('') : '<tr><td colspan="9">Nenhuma viagem cadastrada.</td></tr>';
+    document.querySelector('#export-report-csv').disabled = !data.trips.length;
+    showMessage('#report-message', 'Relatório atualizado.');
+  } catch (error) {
+    lastReport = null;
+    body.innerHTML = '<tr><td colspan="9">' + escapeHtml(error.message) + '</td></tr>';
+    document.querySelector('#export-report-csv').disabled = true;
+    showMessage('#report-message', error.message, true);
+  }
+}
+
+function csvCell(value) {
+  let text = String(value ?? '');
+  if (/^\\s*[=+\\-@]/.test(text)) text = "'" + text;
+  return '"' + text.replace(/"/g, '""') + '"';
+}
+
+function exportReportCsv() {
+  if (!lastReport || !Array.isArray(lastReport.trips) || !lastReport.trips.length) return;
+  const columns = [
+    ['Viagem', 'title'], ['Destino', 'destination'], ['Saída', 'departure_at'],
+    ['Situação', 'status'], ['Participantes', 'participants'], ['Capacidade', 'capacity'],
+    ['Autorizadas', 'authorized'], ['Pendentes', 'pending'], ['Não autorizadas', 'declined'],
+    ['Registradas em papel', 'paper_recorded'], ['Presentes na saída', 'departure_present'],
+    ['Ausentes na saída', 'departure_absent'], ['Presentes no retorno', 'return_present'],
+    ['Ausentes no retorno', 'return_absent'], ['Veículo', 'vehicle_name']
+  ];
+  const lines = [
+    columns.map(column => csvCell(column[0])).join(';'),
+    ...lastReport.trips.map(trip => columns.map(column => csvCell(
+      column[1] === 'status' ? tripStatusLabel(trip.status) : trip[column[1]]
+    )).join(';'))
+  ];
+  const blob = new Blob(['\\uFEFF' + lines.join('\\r\\n')], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'sgve-relatorio-agregado.csv';
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 function dateLabel(value) {
@@ -243,6 +329,10 @@ document.querySelector('#trip-class-form').addEventListener('submit', async even
     showMessage('#trip-message', result.message);
   } catch (error) { showMessage('#trip-message', error.message, true); }
 });
+
+
+document.querySelector('#refresh-reports').addEventListener('click', loadReports);
+document.querySelector('#export-report-csv').addEventListener('click', exportReportCsv);
 
 document.querySelector('#vehicle-form').addEventListener('submit', async event => {
   event.preventDefault();
