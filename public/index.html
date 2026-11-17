@@ -88,6 +88,7 @@
           <button type="button" class="tab active" data-tab="classes-panel">Turmas</button>
           <button type="button" class="tab" data-tab="students-panel">Estudantes</button>
           <button type="button" class="tab" data-tab="trips-panel">Viagens</button>
+          <button type="button" class="tab" data-tab="vehicles-panel" id="vehicles-tab">Transportes</button>
           <button type="button" class="tab" data-tab="users-panel" id="users-tab">Contas</button>
         </nav>
         <section id="classes-panel" class="module-panel">
@@ -136,9 +137,26 @@
               <label>Estudante<select name="student_id" id="trip-student-select" required></select></label>
               <button type="submit">Vincular estudante</button>
             </form>
+            <form id="trip-vehicle-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-vehicle-trip" required></select></label>
+              <label>Veículo<select name="vehicle_id" id="trip-vehicle-select" required><option value="">Cadastre um veículo</option></select></label>
+              <button type="submit">Vincular veículo</button>
+            </form>
           </div>
           <div id="trips-list" class="data-list"><p class="muted">Carregando viagens...</p></div>
           <p class="privacy-note">Após a aprovação, responsáveis vinculados podem autorizar ou não a participação. Professores vinculados e equipe gestora podem registrar presença na saída e no retorno. Cada decisão fica registrada no histórico do sistema.</p>
+        </section>
+        <section id="vehicles-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">LOGÍSTICA</p><h3>Transportes e frota</h3></div><span id="vehicles-count" class="count-pill">0</span></div>
+          <form id="vehicle-form" class="inline-form">
+            <label>Identificação<input name="name" maxlength="40" placeholder="Ex.: Ônibus DEMO-03" required></label>
+            <label>Tipo<select name="type" required><option value="Ônibus">Ônibus</option><option value="Micro-ônibus">Micro-ônibus</option><option value="Van">Van</option></select></label>
+            <label>Capacidade de passageiros<input name="capacity" type="number" min="1" max="100" value="40" required></label>
+            <button type="submit">Cadastrar veículo</button>
+          </form>
+          <p id="vehicle-message" class="message" role="status"></p>
+          <div id="vehicles-list" class="data-list"><p class="muted">Carregando frota...</p></div>
+          <p class="privacy-note">Cadastre somente identificação, tipo e capacidade. A atribuição é permitida em rascunhos e bloqueia conflitos de horário e veículos menores que a capacidade da viagem.</p>
         </section>
         <section id="users-panel" class="module-panel hidden">
           <div class="section-heading"><div><p class="eyebrow green">ACESSO AO SISTEMA</p><h3>Criar conta</h3></div></div>
