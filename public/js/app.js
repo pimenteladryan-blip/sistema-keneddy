@@ -235,7 +235,7 @@ async function loadTripParticipants(tripId, area) {
       ['approved', 'open'].includes(tripStatus);
     area.innerHTML = data.participants.length ? data.participants.map(item => {
       let controls = '';
-      if (canAuthorize) {
+      if (canAuthorize && item.authorization_status !== 'paper_recorded') {
         controls += '<div class="participant-actions">' +
           '<button type="button" class="small-action" data-participant-action="authorization" data-status="authorized" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Autorizar</button>' +
           '<button type="button" class="small-action reject-action" data-participant-action="authorization" data-status="declined" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Não autorizar</button></div>';
