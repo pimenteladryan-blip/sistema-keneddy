@@ -48,6 +48,11 @@ async function consumeAttempts(scope, keys, windowMs, maxAttempts) {
   }
   return memoryRateLimiter.consume(input);
 }
+
+async function resetAttempts(scope, keys) {
+  if (firebaseConfigured) return firestoreAuth.resetRateLimit({ scope, keys });
+  return memoryRateLimiter.reset({ scope, keys });
+}
 const VERIFICATION_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 function createVerificationCode() {
   return Array.from({ length: 6 }, () => VERIFICATION_CODE_ALPHABET[randomInt(VERIFICATION_CODE_ALPHABET.length)]).join('');
@@ -212,6 +217,7 @@ app.post('/api/auth/login', async (req, res, next) => {
       : db.prepare('SELECT id, display_name, email, password_hash, role, active FROM users WHERE email = ?').get(email);
     const valid = user && (firebaseConfigured ? user.active === true : Boolean(user.active)) && await verifyPassword(password, user.password_hash);
     if (!valid) return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
+    await resetAttempts('login-email', [email]);
     const token = randomToken(32);
     const csrfToken = randomToken(24);
     const expiresAt = new Date(now + SESSION_HOURS * 3600000).toISOString();
