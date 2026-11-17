@@ -443,3 +443,10 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Reexecutada a validação completa após os últimos ajustes do PWA: GitHub Actions run `44201221709` (run 899), commit `06709094d5a641c68b896647c4ce3b01a662247d`; sintaxe/estrutura, testes automatizados e integração Firestore Emulator concluídos com sucesso.
 - [ ] Confirmar visualmente a versão da branch em ambiente de prévia e testar os fluxos ponta a ponta com contas sintéticas; o CI não substitui esses testes de navegador.
 - [ ] Confirmar a configuração de branch/implantação do serviço Render e só então solicitar autorização explícita para mesclar/publicar. Nenhuma mesclagem ou implantação foi realizada nesta revisão.
+
+
+### Conferência visual estática da interface real (17/11/2026)
+- [x] Conferidos os elementos de login, seleção de perfil, cadastro, navegação, painel, módulos e regras responsivas em `public/index.html` e `public/css/styles.css`.
+- [x] Conferidos os seletores de ID usados em `public/js/app.js`: nenhuma referência estática aponta para elemento inexistente e não há IDs duplicados no HTML.
+- [x] Corrigida a inconsistência do tema claro: cartão de login, campos, botão de tema e banner do painel agora usam cores claras quando o tema claro está ativo; os estilos escuros ficam condicionados a `body.dark-mode`.
+- [ ] Ainda falta abrir a aplicação em navegador real em desktop e celular para validar o resultado renderizado, rolagem, contraste e comportamento dos módulos. A inspeção estática do código não substitui essa conferência visual em execução.
