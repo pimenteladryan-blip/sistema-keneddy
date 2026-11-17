@@ -411,7 +411,11 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal((await studentApi('/api/users')).status, 403);
 
     const directionApi = await loginAs('direction-api@emulator.sgve');
-    assert.equal((await directionApi('/api/users')).status, 200);
+    const directionUsersResponse = await directionApi('/api/users');
+    assert.equal(directionUsersResponse.status, 200);
+    const directionUsers = await directionUsersResponse.json();
+    assert.equal(directionUsers.users.every(user => !Object.hasOwn(user, 'password_hash')), true,
+      'a listagem de usuários não pode expor hashes de senha');
     assert.equal((await directionApi('/api/registration-requests')).status, 403);
     assert.equal((await directionApi('/api/trips/' + apiTripId + '/approve', {
       method: 'POST', body: JSON.stringify({})
