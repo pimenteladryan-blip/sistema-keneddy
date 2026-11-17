@@ -202,9 +202,96 @@ async function approveTrip(tripId, approverId) {
   }, false, { actor_user_id: approverId, action: 'approve', entity_type: 'trip', entity_id: tripId });
 }
 
+
+async function listTripParticipantsForUser(tripId, user) {
+  const id = numericId(tripId, 'Viagem');
+  const trip = await getTrip(id);
+  if (!trip) return null;
+  const participations = await store.list('tripStudents', {
+    filters: [{ field: 'trip_id', op: '==', value: id }],
+    limit: 5000
+  });
+  let allowedStudentIds = null;
+  if (['admin', 'direction', 'secretariat'].includes(user.role)) {
+    allowedStudentIds = new Set(participations.map(item => Number(item.student_id)));
+  } else if (user.role === 'teacher') {
+    const assignment = await store.get('tripStaff', id + '_' + numericId(user.id, 'Usuário'));
+    if (!assignment) {
+      const error = new Error('Você não está vinculado a esta viagem.');
+      error.code = 'forbidden';
+      throw error;
+    }
+    allowedStudentIds = new Set(participations.map(item => Number(item.student_id)));
+  } else if (user.role === 'guardian') {
+    const links = await store.list('studentGuardians', {
+      filters: [{ field: 'guardian_user_id', op: '==', value: Number(user.id) }],
+      limit: 1000
+    });
+    allowedStudentIds = new Set(links.map(item => Number(item.student_id)));
+  } else if (user.role === 'student') {
+    const ownStudents = await store.list('students', {
+      filters: [
+        { field: 'user_id', op: '==', value: Number(user.id) },
+        { field: 'active', op: '==', value: true }
+      ],
+      limit: 10
+    });
+    allowedStudentIds = new Set(ownStudents.map(item => Number(item.id)));
+  } else {
+    const error = new Error('Seu perfil não permite consultar participantes.');
+    error.code = 'forbidden';
+    throw error;
+  }
+
+  const visible = participations.filter(item => allowedStudentIds.has(Number(item.student_id)));
+  const result = await Promise.all(visible.map(async item => {
+    const student = await store.get('students', item.student_id);
+    if (!student || student.active !== true) return null;
+    return {
+      student_id: Number(item.student_id),
+      full_name: student.full_name,
+      authorization_status: item.authorization_status || 'pending',
+      departure_present: item.departure_present ?? null,
+      return_present: item.return_present ?? null
+    };
+  }));
+  return result.filter(Boolean).sort((a, b) => a.full_name.localeCompare(b.full_name));
+}
+
+async function setTripStudentAuthorization(tripId, studentId, guardianId, status) {
+  return store.setTripStudentAuthorization(
+    numericId(tripId, 'Viagem'),
+    numericId(studentId, 'Estudante'),
+    numericId(guardianId, 'Responsável'),
+    status,
+    {
+      actor_user_id: Number(guardianId),
+      action: status === 'authorized' ? 'authorize_trip_student' : 'decline_trip_student',
+      entity_type: 'trip_student',
+      entity_id: numericId(tripId, 'Viagem') + '_' + numericId(studentId, 'Estudante')
+    }
+  );
+}
+
+async function setTripAttendance(tripId, studentId, actorUser, checkpoint, present) {
+  const tripKey = numericId(tripId, 'Viagem');
+  const studentKey = numericId(studentId, 'Estudante');
+  return store.setTripAttendance(
+    tripKey, studentKey, numericId(actorUser.id, 'Usuário'),
+    actorUser.role, checkpoint, present,
+    {
+      actor_user_id: Number(actorUser.id),
+      action: 'mark_' + checkpoint + '_' + (present ? 'present' : 'absent'),
+      entity_type: 'trip_student',
+      entity_id: tripKey + '_' + studentKey
+    }
+  );
+}
+
 module.exports = {
   audit, listClasses, createClass, getClass, createStudent,
   listStudentsForUser, linkGuardian, createTrip, getTrip,
   listTripsForUser, linkTripClass, linkTripStudent,
-  assignTripTeacher, submitTrip, approveTrip
+  assignTripTeacher, submitTrip, approveTrip,
+  listTripParticipantsForUser, setTripStudentAuthorization, setTripAttendance
 };
