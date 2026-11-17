@@ -96,7 +96,6 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Implementar/migrar os módulos ainda previstos (autorização digital, presença, transporte e relatórios) e revisar dependências SQLite; os módulos de autenticação, usuários, turmas, estudantes, responsáveis e viagens já têm caminho Firestore.
 - [ ] Planejar migração/importação controlada dos dados existentes, preservando IDs e relações; não importar dados pessoais reais nesta fase.
 - [x] Gestão de ativação/desativação de contas e bootstrap administrativo implementados no Firestore; a validação real ainda depende de teste controlado no projeto Firebase.
-- [ ] Implementar autorização digital, presença, transporte, relatórios e demais módulos previstos.
 - [ ] Fazer revisão de segurança, privacidade/LGPD, acessibilidade, backup/restauração e validação institucional.
 - [ ] Só depois configurar segredo de conta de serviço no Render, testar leitura e escrita real, configurar persistência/infraestrutura adequada e preparar implantação. Não implantar antes de aprovação explícita.
 
@@ -284,4 +283,6 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 
 ### Consolidação do planejamento (17/11/2026)
 - [x] Reconciliadas pendências históricas com as etapas efetivamente concluídas, mantendo separados os testes no Emulator e os testes ainda necessários no Firebase real.
-- [ ] Aguardar CI desta consolidação.
+- [x] CI desta consolidação passou em push e pull request nas execuções 44081347027 e 44081354662.
+
+- [x] Consolidação final do planejamento validada no GitHub Actions; nenhuma pendência histórica de CI permanece aberta nesta seção.
