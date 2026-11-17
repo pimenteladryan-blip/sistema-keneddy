@@ -410,6 +410,18 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       method: 'POST',
       body: JSON.stringify({ name: 'Veículo Inválido', type: 'Carro', capacity: 0 })
     })).status, 400);
+    const driverResponse = await api('/api/drivers', {
+      method: 'POST', body: JSON.stringify({ name: 'Condutor Emulator 01' })
+    });
+    assert.equal(driverResponse.status, 201);
+    const driverId = (await driverResponse.json()).id;
+    assert.equal((await api('/api/drivers')).status, 200);
+    assert.equal((await api('/api/drivers', {
+      method: 'POST', body: JSON.stringify({ name: 'condutor emulator 01' })
+    })).status, 409);
+    assert.equal((await api('/api/drivers', {
+      method: 'POST', body: JSON.stringify({ name: 'X' })
+    })).status, 400);
     const assignVehicle = (tripId, id = vehicleId) => api('/api/trips/' + tripId + '/vehicle', {
       method: 'POST', body: JSON.stringify({ vehicle_id: id })
     });
@@ -452,6 +464,16 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal(oversizedTripResponse.status, 201);
     const oversizedTripId = (await oversizedTripResponse.json()).id;
     assert.equal((await assignVehicle(oversizedTripId)).status, 409);
+    const assignDriver = (tripId, id = driverId) => api('/api/trips/' + tripId + '/driver', {
+      method: 'POST', body: JSON.stringify({ driver_id: id })
+    });
+    assert.equal((await assignDriver(apiTripId)).status, 200);
+    assert.equal((await assignDriver(apiTripId)).status, 200,
+      'atribuição repetida de condutor deve ser idempotente');
+    assert.equal((await assignDriver(overlapTripId)).status, 409,
+      'condutor não pode ser reservado em horários sobrepostos');
+    assert.equal((await assignDriver(adjacentTripId)).status, 200,
+      'viagens consecutivas sem sobreposição podem usar o mesmo condutor');
 
     await school.linkGuardian(apiStudentId, 'guardian-api@emulator.sgve', 'Responsável');
     await school.linkGuardian(paperStudentId, 'guardian-api@emulator.sgve', 'Responsável');
@@ -494,6 +516,7 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const tripsData = await tripsResponse.json();
     assert.equal(tripsData.trips.find(item => item.id === apiTripId).status, 'approved');
     assert.equal(tripsData.trips.find(item => item.id === apiTripId).vehicle_name, 'Van Emulator 01');
+    assert.equal(tripsData.trips.find(item => item.id === apiTripId).driver_name, 'Condutor Emulator 01');
 
     const createdUser = await api('/api/users', {
       method: 'POST',
@@ -525,6 +548,11 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     );
     assert.equal(vehicleAudit.length, 2,
       'somente as duas atribuições efetivas devem gerar auditoria');
+    const driverAudit = apiAudit.filter(event =>
+      Number(event.actor_user_id) === adminActorId && event.action === 'assign_driver'
+    );
+    assert.equal(driverAudit.length, 2,
+      'somente as duas atribuições efetivas de condutor devem gerar auditoria');
     const paperAuthorizationAudit = apiAudit.filter(event =>
       Number(event.actor_user_id) === adminActorId && event.action === 'record_paper_authorization'
     );
@@ -579,6 +607,8 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     assert.equal((await teacherApi('/api/students')).status, 403);
     assert.equal((await teacherApi('/api/users')).status, 403);
     assert.equal((await teacherApi('/api/vehicles')).status, 403);
+    assert.equal((await teacherApi('/api/drivers')).status, 403,
+      'professor não pode consultar cadastro de condutores');
     assert.equal((await teacherApi('/api/classes', {
       method: 'POST', body: JSON.stringify({ level: 'medio', grade: '4º ano', course: 'regular', section: 'A', school_year: 2026 })
     })).status, 403);
