@@ -184,6 +184,13 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const healthResponse = await fetch(baseUrl + '/api/health');
     assert.equal((await healthResponse.json()).firebaseAdmin, 'initialized');
 
+    const originlessLogin = await fetch(baseUrl + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'api-admin@emulator.sgve', password: 'AdminTesteSenha2026!' })
+    });
+    assert.equal(originlessLogin.status, 403, 'requisições de autenticação sem Origin devem ser bloqueadas');
+
     const loginResponse = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: baseUrl },
