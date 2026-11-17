@@ -26,3 +26,12 @@ jobs:
           node --check /tmp/sgve-demo-inline.js
       - name: Executar testes
         run: npm test
+      - name: Configurar Java para Firestore Emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Testar integração com Firestore Emulator
+        env:
+          FIREBASE_PROJECT_ID: demo-sgve
+        run: npm run test:firestore
