@@ -236,3 +236,9 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] O teste concorrente confirmou que, entre três requisições simultâneas para as mesmas chaves, exatamente duas são aceitas quando o limite é dois.
 - [x] Padronizado o separador usado no hash dos identificadores do limitador Firestore.
 - [ ] Aguardar CI do ajuste final de hash no commit `e8c3456dcf9e433a3e07ad65a0fb8fda750a4eeb`.
+
+
+### Revisão do fluxo de solicitação de cadastro (17/11/2026)
+- [x] Confirmado que o código de solicitação é devolvido na resposta da API para o próprio solicitante e deve ser tratado como identificador para conferência manual, não como prova de posse do endereço de e-mail.
+- [ ] Antes da produção, definir com a escola o processo de confirmação de identidade/contato (por exemplo, conferência presencial pela secretaria ou integração de e-mail institucional). Não apresentar o e-mail como verificado enquanto esse processo não existir.
+- [ ] Revisar com a escola a necessidade de reduzir a exposição de dados pessoais na resposta e no fluxo de aprovação de cadastros.
