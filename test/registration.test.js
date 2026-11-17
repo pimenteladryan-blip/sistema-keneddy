@@ -473,6 +473,20 @@ test('frota e atribuição de veículos validam capacidade, conflito de horário
     assert.equal(verifyDb.prepare('SELECT vehicle_id FROM trips WHERE id = ?').get(overlappingTrip).vehicle_id, null);
   } finally { verifyDb.close(); }
 
+  const concurrentDriverResponse = await adminApi('/api/drivers', {
+    method: 'POST', body: JSON.stringify({ name: 'Condutor Concorrente' })
+  });
+  assert.equal(concurrentDriverResponse.status, 201);
+  const concurrentDriverId = (await concurrentDriverResponse.json()).id;
+  const concurrentTripA = await createTrip('Viagem concorrente A', '2099-12-13T08:00:00.000Z', '2099-12-13T10:00:00.000Z', 20);
+  const concurrentTripB = await createTrip('Viagem concorrente B', '2099-12-13T09:00:00.000Z', '2099-12-13T11:00:00.000Z', 20);
+  const concurrentAssignments = await Promise.all([
+    assignDriver(concurrentTripA, concurrentDriverId),
+    assignDriver(concurrentTripB, concurrentDriverId)
+  ]);
+  assert.deepEqual(concurrentAssignments.map(response => response.status).sort(), [200, 409],
+    'duas atribuições simultâneas não podem reservar o mesmo condutor em horários sobrepostos');
+
   const teacherCreated = await adminApi('/api/users', {
     method: 'POST',
     body: JSON.stringify({ name: 'Professor sem gestão', email: 'professor-frota@sgve.local', role: 'teacher', password: 'SenhaSegura123!ABC' })
