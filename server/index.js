@@ -232,6 +232,8 @@ app.post('/api/auth/google', async (req, res, next) => {
   try {
     if (!sameOrigin(req)) return res.status(403).json({ error: 'Origem não permitida.' });
     if (!firebaseConfigured) return res.status(503).json({ error: 'Login Google ainda não está configurado no servidor.' });
+    const allowedIp = await consumeAttempts('google-login-ip', [String(req.ip || 'unknown')], LOGIN_WINDOW_MS, 60);
+    if (!allowedIp) return res.status(429).json({ error: 'Muitas tentativas. Aguarde alguns minutos.' });
     const idToken = typeof req.body.idToken === 'string' ? req.body.idToken : '';
     if (!idToken || idToken.length > 12000) return res.status(400).json({ error: 'Token Google ausente ou inválido.' });
     const decoded = await getAuth(firebaseApp).verifyIdToken(idToken, true);
