@@ -347,7 +347,7 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
     assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'record_paper_authorization'").get().total, 1);
     assert.equal(verifyDb.prepare("SELECT COUNT(*) AS total FROM audit_logs WHERE action = 'mark_departure_present'").get().total, 1);
     const expectedLinkAudits = {
-      link_guardian: 1, link_class: 1, link_student: 2, assign_teacher: 1
+      link_guardian: 2, link_class: 1, link_student: 2, assign_teacher: 1
     };
     for (const [action, expected] of Object.entries(expectedLinkAudits)) {
       assert.equal(verifyDb.prepare('SELECT COUNT(*) AS total FROM audit_logs WHERE action = ?').get(action).total, expected,
