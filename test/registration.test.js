@@ -221,6 +221,9 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
   assert.equal((await adminApi('/api/students/' + studentId + '/guardians', {
     method: 'POST', body: JSON.stringify({ email: 'responsavel-viagem@sgve.local', relationship: 'Responsável' })
   })).status, 200);
+  assert.equal((await adminApi('/api/students/' + paperStudentId + '/guardians', {
+    method: 'POST', body: JSON.stringify({ email: 'responsavel-viagem@sgve.local', relationship: 'Responsável' })
+  })).status, 200);
 
   const tripResponse = await adminApi('/api/trips', {
     method: 'POST',
@@ -298,7 +301,7 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
   const guardianApi = await loginRole('responsavel-viagem@sgve.local');
   const guardianParticipants = await guardianApi('/api/trips/' + tripId + '/participants');
   assert.equal(guardianParticipants.status, 200);
-  assert.equal((await guardianParticipants.json()).participants.length, 1);
+  assert.equal((await guardianParticipants.json()).participants.length, 2);
   const authResult = () => guardianApi('/api/trips/' + tripId + '/participants/' + studentId + '/authorization', {
     method: 'POST', body: JSON.stringify({ status: 'authorized' })
   });
@@ -307,6 +310,12 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
   assert.equal((await adminApi('/api/trips/' + tripId + '/participants/' + studentId + '/paper-authorization', {
     method: 'POST', body: JSON.stringify({})
   })).status, 409, 'registro em papel não deve substituir decisão digital');
+  assert.equal((await guardianApi('/api/trips/' + tripId + '/participants/' + paperStudentId + '/authorization', {
+    method: 'POST', body: JSON.stringify({ status: 'authorized' })
+  })).status, 409, 'decisão digital não pode substituir autorização em papel');
+  assert.equal((await guardianApi('/api/trips/' + tripId + '/participants/' + paperStudentId + '/paper-authorization', {
+    method: 'POST', body: JSON.stringify({})
+  })).status, 403, 'responsável não pode registrar autorização em papel administrativamente');
   const unrelatedGuardian = await loginRole('responsavel-externo@sgve.local');
   assert.equal((await unrelatedGuardian('/api/trips/' + tripId + '/participants/' + studentId + '/authorization', {
     method: 'POST', body: JSON.stringify({ status: 'authorized' })
