@@ -101,5 +101,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - Branch de trabalho: `feature/firestore-auth-migration`.
 - PR de desenvolvimento: https://github.com/pimenteladryan-blip/sistema-keneddy/pull/1 (permanece aberto e não mesclado).
 - Commits da fundação Firestore/autenticação Google e integração parcial: `5bdf556`, `2bd0e77`, `0586741`, `9336f49`, `9beeca5`, `f8aef90`.
+- Commits desta etapa: `da371ba` (sessões com senha), `47f94f2` (rotas de contas e solicitações no Firestore), `88ce582` (registro do planejamento), `a844690` (correções de validação/compatibilidade) e `48d8b98` (teste de sessões por senha e Google).
+- GitHub Actions dos commits mais recentes está em execução; resultado será conferido antes de considerar esta etapa validada.
 - Cada nova etapa, alteração de código, teste e pendência deve ser registrada neste planejamento.
 - GitHub Actions verde confirma os testes automatizados existentes, não substitui teste real de leitura/escrita no Firestore.
