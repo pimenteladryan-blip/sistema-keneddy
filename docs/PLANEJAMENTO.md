@@ -22,7 +22,7 @@ As permissões são verificadas no servidor. Esconder opções na interface não
 1. **Fundação e acesso — implementado:** Node.js, Express, SQLite, login, sessões, CSRF, perfis e testes.
 2. **Cadastros iniciais — implementado:** turmas, estudantes com dados mínimos, contas e associação de responsáveis.
 3. **Gestão inicial de viagens — implementado:** criação de rascunho, vínculo de turmas/estudantes, envio para aprovação e aprovação pela direção/administração.
-4. **Autorizações — parcialmente implementado:** autorização digital pelo responsável vinculado, com histórico; registro administrativo de autorização em papel ainda pendente.
+4. **Autorizações — backend implementado:** decisão digital pelo responsável vinculado e registro administrativo de autorização em papel, com trilha de auditoria. O sistema registra o status, não recebe nem armazena fotografia/documento assinado.
 5. **Presença — backend e interface implementados:** listas de saída e retorno, com trilha de auditoria; validação visual final ainda pendente.
 6. **Equipe e transporte — parcialmente implementado:** atribuição de professores e cadastro/atribuição de veículos; gestão de condutores e validação operacional da frota ainda pendentes.
 7. **Relatórios — parcialmente implementado:** resumo agregado e exportação CSV restritos à gestão, sem nomes de estudantes; filtros, relatórios específicos e eventual módulo financeiro ainda pendentes.
@@ -56,7 +56,7 @@ As permissões são verificadas no servidor. Esconder opções na interface não
 GPS em tempo real, aplicativo nativo, integração automática com sistemas oficiais e processamento de pagamentos.
 
 ## Próxima entrega
-Concluir registro administrativo de autorização em papel, gestão de condutores e relatórios específicos necessários à escola; depois revisar segurança, privacidade e operação institucional.
+Concluir gestão de condutores, relatórios específicos necessários à escola e validação visual; depois revisar segurança, privacidade e operação institucional.
 
 ## Funcionalidades do protótipo estático (GitHub Pages)
 
@@ -359,3 +359,12 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Testes de integração validam contagens, vínculo de veículo e bloqueio de acesso por perfil no SQLite e Firestore Emulator.
 - [x] CI da implementação e dos testes passou em push e pull request nos commits `a3b9a447d32455c7767483bfc98d78fb1e62b51a` e `d4306b23176179db991f26851aa456c48b6671f9`, execuções `44091163168` e `44091199067`; sintaxe, testes SQLite e Firestore Emulator concluídos com sucesso.
 - [ ] Validar visualmente o painel com contas fictícias e confirmar quais relatórios a escola realmente precisa.
+### Registro administrativo de autorização em papel (17/11/2026)
+- [x] Criada rota protegida para administração, direção e secretaria registrarem que uma autorização em papel foi conferida para participante de viagem aprovada.
+- [x] Registro em papel só é aceito enquanto o prazo da autorização está aberto e quando ainda não existe decisão digital.
+- [x] Repetir o mesmo registro é idempotente; a primeira alteração gera um único evento de auditoria.
+- [x] Uma autorização em papel não pode ser sobrescrita por uma decisão digital posterior; o servidor retorna conflito e preserva o histórico.
+- [x] A interface oferece a ação somente para equipe gestora e somente quando a autorização está pendente; responsáveis não recebem ação administrativa.
+- [x] Testes SQLite e Firestore Emulator cobrem repetição, conflito entre decisões, perfis e auditoria.
+- [x] CI da implementação e dos testes passou em push e pull request no commit `a1d57a4aba5557b3822f2e3330024a3939320575`, execuções `44092485378` e `44092495455`; testes unitários, SQLite e Firestore Emulator concluídos com sucesso.
+- [ ] Validar visualmente o fluxo com contas fictícias; não anexar documentos reais nem dados pessoais nesta fase.
