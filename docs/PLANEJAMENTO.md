@@ -211,8 +211,8 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 ### Revisão adicional de segurança e CI (17/11/2026)
 - [x] CI do commit de documentação mais recente (`2df05c56972d4f5fef80bb4b76b63dd4f0632d99`, execução 44013326573) concluído com sucesso; testes gerais e Firestore Emulator passaram.
 - [x] Revisados os módulos de segurança, autorização, inicialização Firebase, autenticação Firestore e rotas centrais da API.
-- [ ] **Pendente antes de exposição pública:** substituir os limitadores de tentativas mantidos em memória (`loginAttempts` e `registrationAttempts`) por limitação compartilhada e com armazenamento/expiração controlados. No estado atual, os limites não são compartilhados entre instâncias do serviço e os mapas podem crescer com muitas chaves distintas; não tratar isso como proteção suficiente contra abuso em produção.
-- [ ] Incluir testes automatizados para limitação por IP/conta, expiração e comportamento em múltiplas instâncias quando o mecanismo compartilhado for escolhido.
+- [x] Substituídos os antigos limitadores de tentativas por transações Firestore compartilhadas em modo Firebase; o limitador em memória ficou limitado a 10.000 buckets e restrito ao desenvolvimento local.
+- [x] Incluídos testes automatizados para limites por IP/conta, expiração, bloqueio e concorrência de transações no Firestore Emulator.
 - [ ] Continuar revisão de autorização por endpoint, validação de entrada, concorrência e consultas Firestore; os testes existentes não substituem revisão independente de segurança e privacidade.
 - [ ] Não implantar nem expor o serviço publicamente até concluir os itens acima, a revisão LGPD/escolar e os testes controlados no Firebase real.
 
@@ -230,3 +230,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] O modo sem Firebase continua destinado apenas ao desenvolvimento local; o limitador em memória não é distribuído entre processos e não deve ser usado como proteção de produção.
 - [x] A rota de login Google também recebeu limite por IP, com teste estático para impedir regressão.
 - [x] CI do commit `c1a3cab832d38978d145e4aa6eada5ce8db424d3` passou integralmente (execuções 44073140327 e 44073151728): sintaxe, testes unitários, frontend e Firestore Emulator.
+- [x] Revisado o uso de `trust proxy` em produção: Express confia em um salto de proxy para obter o IP do cliente no Render.
+- [ ] Aguardar CI do teste de concorrência do Firestore Emulator antes de marcar esta última alteração como validada.
