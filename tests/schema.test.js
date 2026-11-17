@@ -18,6 +18,8 @@ test('schema creates school records and trip workflow tables', () => {
   const tripColumns = db.prepare('PRAGMA table_info(trips)').all().map(column => column.name);
   assert.ok(tripColumns.includes('vehicle_id'), 'trips must include the optional vehicle relation');
   assert.ok(tripColumns.includes('driver_id'), 'trips must include the optional driver relation');
+  const tripIndexes = db.prepare('PRAGMA index_list(trips)').all().map(index => index.name);
+  assert.ok(tripIndexes.includes('idx_trips_driver'), 'trip driver lookup must be indexed');
   db.close();
 });
 test('trip participants start with pending authorization', () => {
