@@ -147,7 +147,7 @@ async function createSessionWithAudit({ token_hash, csrf_token, user_id, expires
       typeof csrf_token !== 'string' || csrf_token.length < 32 ||
       !Number.isSafeInteger(userId) || userId < 1 ||
       !Number.isFinite(Date.parse(expires_at)) ||
-      !['login_google'].includes(action)) {
+      !['login_google', 'login_password'].includes(action)) {
     throw new TypeError('Dados de sessão inválidos.');
   }
   const db = require('./firebase').firestore;
