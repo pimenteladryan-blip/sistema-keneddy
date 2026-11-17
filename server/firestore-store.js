@@ -511,6 +511,44 @@ async function setTripStudentAuthorization(tripId, studentId, guardianId, status
   });
 }
 
+
+async function recordPaperAuthorization(tripId, studentId, actorUserId, actorRole, auditEvent = null) {
+  if (!['admin', 'direction', 'secretariat'].includes(actorRole)) {
+    return { error: 'forbidden' };
+  }
+  const tripKey = normalizeId(tripId);
+  const studentKey = normalizeId(studentId);
+  const actorKey = normalizeId(actorUserId);
+  const db = requireFirestore();
+  const tripRef = collection('trips').doc(tripKey);
+  const studentRef = collection('students').doc(studentKey);
+  const participantRef = collection('tripStudents').doc(tripKey + '_' + studentKey);
+  return db.runTransaction(async transaction => {
+    const [tripSnapshot, studentSnapshot, participantSnapshot] = await Promise.all([
+      transaction.get(tripRef), transaction.get(studentRef), transaction.get(participantRef)
+    ]);
+    if (!tripSnapshot.exists || !studentSnapshot.exists || studentSnapshot.data().active !== true) {
+      return { error: 'not-found' };
+    }
+    if (!participantSnapshot.exists) return { error: 'not-participant' };
+    const trip = tripSnapshot.data();
+    if (!['approved', 'open'].includes(trip.status)) return { error: 'not-approved' };
+    const departureAt = Date.parse(trip.departure_at);
+    if (!Number.isFinite(departureAt) || Date.now() >= departureAt) return { error: 'closed' };
+    const currentStatus = participantSnapshot.data().authorization_status || 'pending';
+    if (currentStatus === 'paper_recorded') return { ok: true, changed: false };
+    if (currentStatus !== 'pending') return { error: 'already-decided' };
+    transaction.update(participantRef, {
+      authorization_status: 'paper_recorded',
+      authorization_method: 'paper',
+      authorization_updated_at: new Date().toISOString(),
+      authorization_updated_by: Number(actorKey)
+    });
+    addAuditWrite(transaction, db, auditEvent);
+    return { ok: true, changed: true };
+  });
+}
+
 async function setTripAttendance(tripId, studentId, actorUserId, actorRole, checkpoint, present, auditEvent = null) {
   if (!['departure', 'return'].includes(checkpoint) || typeof present !== 'boolean') {
     throw new TypeError('Registro de presença inválido.');
@@ -623,6 +661,7 @@ module.exports = {
   createTripRelationIfDraft,
   transitionTripStatus,
   setTripStudentAuthorization,
+  recordPaperAuthorization,
   setTripAttendance,
   assignTripVehicle
 };
