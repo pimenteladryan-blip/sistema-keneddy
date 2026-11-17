@@ -5,6 +5,7 @@ const loginForm = document.querySelector('#login-form');
 const loginButton = document.querySelector('#login-button');
 const loginMessage = document.querySelector('#login-message');
 const logoutButton = document.querySelector('#logout-button');
+const googleLoginButton = document.querySelector('#google-login-button');
 let csrfToken = '';
 let currentUser = null;
 
@@ -323,9 +324,36 @@ loginForm.addEventListener('submit', async event => {
   } catch (error) { loginMessage.textContent = error.message; }
   finally { loginButton.disabled = false; loginButton.textContent = 'Entrar no sistema'; }
 });
+googleLoginButton.addEventListener('click', async () => {
+  loginMessage.textContent = '';
+  googleLoginButton.disabled = true;
+  googleLoginButton.textContent = 'Conectando ao Google...';
+  try {
+    if (!window.firebase || !window.SGVE_FIREBASE_CONFIG) {
+      throw new Error('O login Google não está configurado nesta página.');
+    }
+    if (!firebase.apps.length) firebase.initializeApp(window.SGVE_FIREBASE_CONFIG);
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const credential = await firebase.auth().signInWithPopup(provider);
+    const idToken = await credential.user.getIdToken(true);
+    const data = await api('/api/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ idToken })
+    });
+    csrfToken = data.csrfToken;
+    showDashboard(data.user);
+  } catch (error) {
+    loginMessage.textContent = error.code === 'auth/popup-closed-by-user'
+      ? 'A janela de login foi fechada antes da conclusão.'
+      : (error.message || 'Não foi possível entrar com Google.');
+  } finally {
+    googleLoginButton.disabled = false;
+    googleLoginButton.textContent = 'Entrar com Google';
+  }
+});
 logoutButton.addEventListener('click', async () => {
   logoutButton.disabled = true;
-  try { await api('/api/auth/logout', { method: 'POST', body: '{}' }); showLogin(); }
+  try { await api('/api/auth/logout', { method: 'POST', body: '{}' }); if (window.firebase?.apps?.length) await firebase.auth().signOut(); showLogin(); }
   catch (error) { window.alert(error.message); }
   finally { logoutButton.disabled = false; }
 });
