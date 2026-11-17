@@ -147,3 +147,10 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Confirmar índices compostos necessários no Firestore de produção e criar `firestore.indexes.json` quando a auditoria das consultas estiver concluída.
 - [ ] Revisar atomicidade da auditoria de eventos de negócio e consistência dos contadores/índices; não declarar o banco pronto para produção antes dessa revisão.
 - [ ] Preparar Render somente depois dos testes e da revisão de segurança. Não mesclar nem implantar sem autorização explícita.
+
+### Etapa de índices e matriz de permissões (17/11/2026)
+- [x] Criado `firestore.indexes.json` com índices compostos para consultas de estudantes por `user_id + active` e fila de solicitações por `status + created_at`.
+- [x] Referenciado o arquivo de índices em `firebase.json` e incluída validação JSON no comando `npm run check`.
+- [x] Ampliados os testes do emulador para iniciar o servidor Express no modo Firestore e percorrer a API HTTP, além dos testes diretos do repositório.
+- [ ] Validar a matriz completa de permissões dos seis perfis no CI após a última ampliação de testes. O teste cobre leitura permitida e operações negadas para professor, responsável e estudante, e permissões de direção/secretaria.
+- [ ] Depois da matriz, revisar atomicidade dos logs de auditoria e integridade de contadores/índices; confirmar se há outros índices necessários com consultas reais.
