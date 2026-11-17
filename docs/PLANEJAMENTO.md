@@ -118,3 +118,12 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Prioridade para reduzir retrabalho: usar o próprio servidor Express/Render para servir o frontend real de `public/` e a API em mesma origem, evitando depender do GitHub Pages para autenticação com cookies. Manter `docs/` como demonstração separada. Validar configuração de cookies, CSRF, domínio e HTTPS antes de publicar.
 - [ ] Próxima sequência curta: (1) revisar `public/index.html` e `public/js/app.js` para confirmar chamadas relativas à API e estado de login; (2) implementar/testar autenticação Google no frontend com o ID token; (3) criar testes Firestore/emulador para as operações críticas; (4) revisar endpoints restantes e só então preparar Render.
 - Não mesclar o PR nem implantar sem aprovação explícita. Nenhuma chave privada deve ser enviada ao chat ou commitada.
+
+### Integração inicial do login Google no frontend (17/11/2026)
+- [x] Criado `public/firebase-config.js` com apenas a configuração pública do Firebase Web; nenhuma chave privada foi adicionada.
+- [x] Adicionados SDKs Firebase compat via CDN e botão “Entrar com Google” em `public/index.html`.
+- [x] Integrado `public/js/app.js`: popup Google, obtenção do Firebase ID token, envio para `POST /api/auth/google`, criação da sessão do servidor e encerramento da sessão Firebase ao sair.
+- [x] Ajustada a Content Security Policy do Express para permitir somente os hosts necessários ao SDK/Auth do Firebase nesta implementação.
+- [ ] Aguardar e conferir GitHub Actions após os commits de frontend e CSP.
+- [ ] Testar login Google somente quando o frontend `public/` e a API estiverem servidos na mesma origem HTTPS; GitHub Pages `docs/` continua sendo demonstração separada e não deve ser usado para testar a sessão do backend.
+- [ ] Antes do teste real, revisar a CSP com o navegador, confirmar domínio autorizado do Firebase e configurar a credencial privada apenas no ambiente seguro do Render por um adulto responsável. Não usar dados reais de estudantes.
