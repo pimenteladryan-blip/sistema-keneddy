@@ -671,6 +671,8 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const tripReport = report.trips.find(item => item.id === apiTripId);
     assert.ok(tripReport, 'relatório deve incluir a viagem fictícia');
     assert.equal(tripReport.participants, 2);
+    assert.equal(Object.hasOwn(tripReport, 'student_id'), false);
+    assert.equal(Object.hasOwn(tripReport, 'full_name'), false);
     assert.equal(tripReport.authorized, 1);
     assert.equal(tripReport.paper_recorded, 1);
     assert.equal(tripReport.departure_present, 1);
