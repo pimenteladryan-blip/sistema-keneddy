@@ -333,6 +333,6 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Testes de integração Firestore Emulator cobrem acesso por perfil, vínculo familiar, professor sem vínculo, autorização e presença idempotentes.
 - [x] Teste de integração SQLite cobre autorização, presença, vínculos e bloqueios por perfil.
 - [x] Testes estáticos verificam que a interface contém as ações e que as rotas exigem autenticação, CSRF e perfil adequado.
-- [ ] Aguardar CI da implementação e dos novos testes de interface; não considerar concluído até o resultado final.
+- [x] CI da implementação e dos novos testes de interface passou em push e pull request nas execuções `44088725204` e `44088738354`; sintaxe, testes automatizados e Firestore Emulator concluídos com sucesso.
 - [ ] Validar fluxos visualmente com usuários de teste fictícios antes de qualquer uso escolar real.
 
