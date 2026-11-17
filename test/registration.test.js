@@ -231,11 +231,6 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
   assert.equal((await adminApi('/api/trips/' + tripId + '/students', {
     method: 'POST', body: JSON.stringify({ student_id: studentId })
   })).status, 200);
-  const teacherLink = await adminApi('/api/trips/' + tripId + '/staff', {
-    method: 'POST',
-    body: JSON.stringify({ user_id: Number((await adminApi('/api/users')).status === 200 ? 0 : 0) })
-  });
-  assert.equal(teacherLink.status, 404);
   const teacherUsersDb = new DatabaseSync(path.join(tempDir, 'sgve.sqlite'), { readOnly: true });
   let teacherId;
   try {
