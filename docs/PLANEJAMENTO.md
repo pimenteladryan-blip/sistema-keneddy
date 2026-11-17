@@ -315,3 +315,9 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Aguardar CI desta atualização final do planejamento.
 
 - [x] CI final da rodada de segurança e cadastro aprovado em push e pull request; a suíte incluiu 37 testes unitários e integração Firestore Emulator com aprovação concorrente.
+
+### Auditoria idempotente de vínculos (17/11/2026)
+- [x] Corrigido o registro de auditoria ao vincular turma à viagem, professor à viagem ou responsável ao estudante: uma tentativa repetida não cria novo evento quando a relação já existe.
+- [x] Mantida a resposta idempotente das operações: o vínculo já existente continua sendo considerado válido, sem duplicar a relação nem o evento de auditoria.
+- [x] Acrescentados testes no Firestore Emulator para repetir os três vínculos e confirmar que cada operação gera somente um evento de auditoria para a alteração efetiva.
+- [ ] Aguardar CI do GitHub Actions para validar a correção e os testes no Firestore Emulator.
