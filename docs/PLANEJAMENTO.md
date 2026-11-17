@@ -306,3 +306,6 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] A derivação usa sempre o tamanho fixo esperado de 64 bytes e compara os resultados com `timingSafeEqual`.
 - [x] Criados testes para senha correta/incorreta, hash malformado, entrada excessivamente grande e senha de tipo inválido.
 - [ ] Aguardar CI dos testes de hash e da cobertura de aprovação concorrente.
+- [!] O primeiro teste de aprovação concorrente falhou no Firestore Emulator: ambas as requisições retornaram HTTP 500, embora os testes unitários tenham passado. A implementação ainda não deve ser considerada validada para concorrência.
+- [x] Instrumentado o teste de integração para capturar as respostas e logs do servidor, permitindo identificar a causa antes de alterar a transação.
+- [ ] Diagnosticar e corrigir o conflito/erro de transação; repetir o teste até obter uma única aprovação e uma resposta de solicitação já analisada.
