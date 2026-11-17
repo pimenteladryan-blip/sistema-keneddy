@@ -328,6 +328,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Criada rota de presença: gestão e professores vinculados podem registrar presença/ausência na saída e no retorno; perfis sem permissão são bloqueados.
 - [x] Operações Firestore são transacionais e registram auditoria somente quando há mudança real; repetição da mesma decisão não duplica eventos.
 - [x] Implementado comportamento equivalente no SQLite com transação imediata e rollback em falhas.
+- [x] Corrigidas também as auditorias de vínculos no SQLite: responsáveis, turmas, estudantes e professores só geram evento quando a relação é realmente criada; testes repetem os quatro vínculos e verificam ausência de eventos duplicados.
 - [x] Interface de participantes adicionada ao painel de viagens, com ações exibidas conforme perfil e estado da viagem.
 - [x] Testes de integração Firestore Emulator cobrem acesso por perfil, vínculo familiar, professor sem vínculo, autorização e presença idempotentes.
 - [x] Teste de integração SQLite cobre autorização, presença, vínculos e bloqueios por perfil.
