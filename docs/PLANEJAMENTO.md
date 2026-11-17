@@ -200,3 +200,8 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 ### Manutenção de dependências (17/11/2026)
 - [x] Configurado Dependabot para verificar semanalmente dependências npm e GitHub Actions, abrindo atualizações com rótulos de dependência/segurança.
 - [ ] Revisar e aprovar individualmente cada atualização automática; não habilitar merge automático de dependências.
+
+### Documentação do estado atual (17/11/2026)
+- [x] README atualizado para separar claramente a demonstração estática do GitHub Pages e o backend Express/Firestore em desenvolvimento.
+- [x] Documentado que a integração Firestore está na branch de migração, não foi mesclada nem implantada, e que o emulador não equivale à validação do Firebase real.
+- [x] Documentados os limites de uso com dados fictícios e o tratamento obrigatório de credenciais privadas como segredos.
