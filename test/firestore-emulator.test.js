@@ -603,6 +603,11 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       role: 'guardian'
     });
     const teacherApi = await loginAs('teacher-api@emulator.sgve');
+    const teacherTripsResponse = await teacherApi('/api/trips');
+    assert.equal(teacherTripsResponse.status, 200);
+    const teacherTripRows = (await teacherTripsResponse.json()).trips;
+    assert.equal(teacherTripRows.some(item => Object.hasOwn(item, 'driver_name')), false,
+      'nome do condutor só pode ser retornado à equipe gestora');
     assert.equal((await teacherApi('/api/trips')).status, 200);
     assert.equal((await teacherApi('/api/students')).status, 403);
     assert.equal((await teacherApi('/api/users')).status, 403);
