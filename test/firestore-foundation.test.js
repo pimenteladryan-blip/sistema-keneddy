@@ -56,8 +56,8 @@ test('as regras do Firestore bloqueiam acesso direto de clientes e estão ligada
   const root = path.resolve(__dirname, '..');
   const firebaseConfig = JSON.parse(fs.readFileSync(path.join(root, 'firebase.json'), 'utf8'));
   const rules = fs.readFileSync(path.join(root, firebaseConfig.firestore.rules), 'utf8');
-  assert.match(rules, /allow read, write:\\s*if false;/);
-  assert.doesNotMatch(rules, /allow read, write:\\s*if true;/);
+  assert.match(rules, /allow read, write:\s*if false;/);
+  assert.doesNotMatch(rules, /allow read, write:\s*if true;/);
   assert.equal(firebaseConfig.firestore.indexes, 'firestore.indexes.json');
 });
 
