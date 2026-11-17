@@ -39,6 +39,19 @@ before(async () => {
     windowMs: 60000, maxAttempts: 2, nowMs: 160000
   }), { allowed: true }, 'janela expirada deve liberar novas tentativas');
 
+  const simultaneousAttempts = await Promise.all(Array.from({ length: 3 }, () =>
+    auth.consumeRateLimit({
+      scope: 'emulator-concurrency',
+      keys: ['shared-ip:concurrent', 'shared-email:concurrent@example.invalid'],
+      windowMs: 60000,
+      maxAttempts: 2,
+      nowMs: 200000
+    })
+  ));
+  assert.equal(simultaneousAttempts.filter(result => result.allowed).length, 2,
+    'transações concorrentes devem respeitar o limite compartilhado sem excedê-lo');
+  assert.equal(simultaneousAttempts.filter(result => !result.allowed).length, 1);
+
   const response = await fetch(
     'http://127.0.0.1:8080/emulator/v1/projects/demo-sgve/databases/(default)/documents',
     { method: 'DELETE' }
