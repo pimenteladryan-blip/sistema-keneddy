@@ -34,6 +34,7 @@ function showDashboard(user) {
   loadTrips();
   if (canManage) {
     loadVehicles();
+    loadDrivers();
     loadReports();
   }
   if (user.role === 'admin') loadRegistrationRequests();
@@ -141,6 +142,25 @@ function tripStatusLabel(status) {
     approved: 'Aprovada', open: 'Inscrições abertas',
     completed: 'Concluída', cancelled: 'Cancelada'
   })[status] || status;
+}
+
+async function loadDrivers() {
+  if (!currentUser || !['admin', 'direction', 'secretariat'].includes(currentUser.role)) return;
+  const list = document.querySelector('#drivers-list');
+  try {
+    const data = await api('/api/drivers');
+    list.innerHTML = data.drivers.length ? data.drivers.map(driver =>
+      '<article class="data-row"><strong>' + escapeHtml(driver.name) + '</strong><span>Condutor cadastrado</span></article>'
+    ).join('') : '<p class="muted">Nenhum condutor cadastrado.</p>';
+    const select = document.querySelector('#trip-driver-select');
+    const previous = select.value;
+    select.innerHTML = '<option value="">Selecione um condutor</option>' + data.drivers.map(driver =>
+      '<option value="' + Number(driver.id) + '">' + escapeHtml(driver.name) + '</option>'
+    ).join('');
+    if (previous) select.value = previous;
+  } catch (error) {
+    list.textContent = error.message;
+  }
 }
 
 async function loadReports() {
@@ -282,6 +302,7 @@ async function loadTrips() {
     document.querySelector('#trip-class-trip').innerHTML = options;
     document.querySelector('#trip-student-trip').innerHTML = options;
     document.querySelector('#trip-vehicle-trip').innerHTML = options;
+    document.querySelector('#trip-driver-trip').innerHTML = options;
   } catch (error) { list.textContent = error.message; }
 }
 async function loadRegistrationRequests() {
@@ -367,6 +388,35 @@ document.querySelector('#trip-vehicle-form').addEventListener('submit', async ev
   try {
     const result = await api('/api/trips/' + Number(payload.trip_id) + '/vehicle', {
       method: 'POST', body: JSON.stringify({ vehicle_id: Number(payload.vehicle_id) })
+    });
+    showMessage('#trip-message', result.message);
+    await loadTrips();
+  } catch (error) {
+    showMessage('#trip-message', error.message, true);
+  }
+});
+
+document.querySelector('#driver-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  try {
+    const result = await api('/api/drivers', {
+      method: 'POST', body: JSON.stringify(payload)
+    });
+    event.currentTarget.reset();
+    showMessage('#driver-message', result.message);
+    await loadDrivers();
+  } catch (error) {
+    showMessage('#driver-message', error.message, true);
+  }
+});
+
+document.querySelector('#trip-driver-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  try {
+    const result = await api('/api/trips/' + Number(payload.trip_id) + '/driver', {
+      method: 'POST', body: JSON.stringify({ driver_id: Number(payload.driver_id) })
     });
     showMessage('#trip-message', result.message);
     await loadTrips();
