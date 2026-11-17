@@ -209,7 +209,8 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] README atualizado para separar claramente a demonstração estática do GitHub Pages e o backend Express/Firestore em desenvolvimento.
 - [x] Documentado que a integração Firestore está na branch de migração, não foi mesclada nem implantada, e que o emulador não equivale à validação do Firebase real.
 - [x] Documentados os limites de uso com dados fictícios e o tratamento obrigatório de credenciais privadas como segredos.
-- [x] Reforçado `.gitignore` para ignorar arquivos locais de contas de serviço Firebase, chaves privadas `.pem/.key` e variações comuns de nomes de service account. Isso reduz risco de inclusão acidental de credenciais no Git.- [x] Descrição do PR #1 atualizada com escopo implementado, validações, pendências de produção e aviso explícito de que continua em rascunho, sem mesclagem ou implantação.
+- [x] Reforçado `.gitignore` para ignorar arquivos locais de contas de serviço Firebase, chaves privadas `.pem/.key` e variações comuns de nomes de service account. Isso reduz risco de inclusão acidental de credenciais no Git.
+- [x] Descrição do PR #1 atualizada com escopo implementado, validações, pendências de produção e aviso explícito de que continua em rascunho, sem mesclagem ou implantação.
 
 
 ### Revisão adicional de segurança e CI (17/11/2026)
@@ -293,7 +294,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Adicionados testes de integração no Firestore Emulator para rejeitar e aprovar solicitações pela API; o teste confirma que a conta aprovada fica ativa.
 - [x] CI da correção e dos novos testes passou integralmente nas execuções 44081669964 e 44081679667, incluindo testes unitários e Firestore Emulator.
 - [x] Confirmado no CI que aprovação e rejeição de solicitações funcionam pela API com IDs numéricos válidos; a conta aprovada fica ativa e as listagens não expõem hashes de senha.
-- [ ] Aguardar CI desta atualização final do planejamento.
+- [x] CI desta atualização final do planejamento passou em push e pull request nas execuções 44084841107 e 44084853000.
 
 
 ### Concorrência na aprovação de cadastros (17/11/2026)
@@ -312,3 +313,5 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] CI após a correção do fixture passou em push e pull request nas execuções 44084612085 e 44084621629; o teste confirmou uma única aprovação concorrente e uma resposta 404 para a tentativa duplicada.
 - [x] Validação final desta rodada: 37 testes unitários aprovados, sintaxe aprovada e Firestore Emulator aprovado, incluindo concorrência de aprovação de cadastro.
 - [ ] Aguardar CI desta atualização final do planejamento.
+
+- [x] CI final da rodada de segurança e cadastro aprovado em push e pull request; a suíte incluiu 37 testes unitários e integração Firestore Emulator com aprovação concorrente.
