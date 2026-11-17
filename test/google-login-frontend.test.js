@@ -69,3 +69,13 @@ test('o módulo de transporte possui frota, atribuição e validações no servi
   assert.match(server, /insufficient-capacity/);
 });
 
+test('relatórios exibem apenas agregados e exigem perfil de gestão', () => {
+  assert.match(html, /id="reports-panel"/);
+  assert.match(html, /id="report-trips-body"/);
+  assert.match(html, /id="export-report-csv"/);
+  assert.match(app, /api\('\/api\/reports\/summary'/);
+  assert.match(app, /function exportReportCsv\(\)/);
+  assert.match(app, /function csvCell\(value\)/);
+  assert.match(server, /app\.get\('\/api\/reports\/summary', requireAuth, requireRoles\(\.\.\.RECORD_MANAGERS\)/);
+});
+
