@@ -165,3 +165,10 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Execuções do CI para commit `5809d7ab03e585de957945b28031737169d2e9bd`: push e pull request concluídos com sucesso.
 - [ ] Revisar os eventos de auditoria de operações escolares para reduzir o risco de uma gravação de negócio concluir e o log separado falhar.
 - [ ] Revisar os contadores numéricos e o desempenho de listagens em coleções grandes.
+
+### Integridade de contadores numéricos (17/11/2026)
+- [x] Refatorado `createWithNumericId`: agora lê o contador, cria o documento e atualiza o contador dentro da mesma transação Firestore. Evita reservar um ID numa transação e falhar a gravação do documento numa segunda operação.
+- [x] Validação explícita de coleção, objeto de dados e contador numérico seguro.
+- [x] Adicionado teste concorrente com 12 gravações simultâneas para verificar que os IDs gerados não se repetem.
+- [x] CI passou para o commit `8422fd5c37ef5f58f488ecb91f89e608d6b902b2`: verificações gerais, testes HTTP por perfil e integração com Firestore Emulator concluídos com sucesso.
+- [ ] Próxima revisão: tornar as gravações de negócio e os respectivos eventos de auditoria atômicos nas operações escolares críticas; atualmente alguns logs são gravados após a operação principal.
