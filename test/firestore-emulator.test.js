@@ -265,10 +265,24 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     });
     assert.equal(originlessLogin.status, 403, 'requisições de autenticação sem Origin devem ser bloqueadas');
 
-    const loginResponse = await fetch(baseUrl + '/api/auth/login', {
+    const missingRoleLogin = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: baseUrl },
       body: JSON.stringify({ email: 'api-admin@emulator.sgve', password: 'AdminTesteSenha2026!' })
+    });
+    assert.equal(missingRoleLogin.status, 400, 'login sem perfil selecionado deve ser rejeitado');
+
+    const wrongRoleLogin = await fetch(baseUrl + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ email: 'api-admin@emulator.sgve', password: 'AdminTesteSenha2026!', role: 'teacher' })
+    });
+    assert.equal(wrongRoleLogin.status, 403, 'perfil diferente da conta deve ser rejeitado');
+
+    const loginResponse = await fetch(baseUrl + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ email: 'api-admin@emulator.sgve', password: 'AdminTesteSenha2026!', role: 'admin' })
     });
     assert.equal(loginResponse.status, 200);
     const cookie = loginResponse.headers.get('set-cookie').split(';')[0];
@@ -646,6 +660,12 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       password_hash: rolePasswordHash,
       role: 'guardian'
     });
+    const studentApi = await loginAs('student-api@emulator.sgve');
+    const ownStudentResponse = await studentApi('/api/students');
+    assert.equal(ownStudentResponse.status, 200);
+    assert.deepEqual((await ownStudentResponse.json()).students.map(item => item.id), [apiStudentId],
+      'conta de estudante só pode consultar o cadastro vinculado a ela');
+
     const teacherApi = await loginAs('teacher-api@emulator.sgve');
     assert.equal((await teacherApi('/api/students/' + apiStudentId + '/account', {
       method: 'POST', body: JSON.stringify({ email: 'student-api@emulator.sgve' })
