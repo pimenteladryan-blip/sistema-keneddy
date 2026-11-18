@@ -99,7 +99,7 @@
         </div>
         <nav class="tabs" aria-label="Módulos do sistema">
           <button type="button" class="tab active" data-tab="classes-panel">Turmas</button>
-          <button type="button" class="tab" data-tab="students-panel">Estudantes</button>
+          <button type="button" class="tab" data-tab="students-panel" id="students-tab">Estudantes</button>
           <button type="button" class="tab" data-tab="trips-panel">Viagens</button>
           <button type="button" class="tab" data-tab="vehicles-panel" id="vehicles-tab">Transportes</button>
           <button type="button" class="tab" data-tab="reports-panel" id="reports-tab">Relatórios</button>
@@ -124,7 +124,14 @@
             <label>Turma<select name="class_id" id="student-class" required><option value="">Selecione uma turma</option></select></label>
             <button type="submit">Cadastrar estudante</button>
           </form>
-          <p id="student-message" class="message" role="status"></p><div id="students-list" class="data-list"><p class="muted">Carregando estudantes...</p></div>
+          <p id="student-message" class="message" role="status"></p>
+          <form id="student-account-form" class="inline-form hidden">
+            <label>Cadastro do estudante<select name="student_id" id="student-account-select" required><option value="">Selecione um estudante</option></select></label>
+            <label>E-mail da conta de estudante<input name="email" type="email" maxlength="254" required></label>
+            <button type="submit">Vincular conta</button>
+          </form>
+          <p id="student-account-message" class="message" role="status"></p>
+          <div id="students-list" class="data-list"><p class="muted">Carregando estudantes...</p></div>
           <p class="privacy-note">Cadastro mínimo: nome e turma. Não informe documentos, endereço, telefone ou outros dados pessoais nesta versão.</p>
         </section>
         <section id="trips-panel" class="module-panel hidden">
