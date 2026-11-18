@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-labelledby="title desc">
+<title id="title">Entrada ilustrada do Colégio Estadual Presidente Kennedy</title>
+<desc id="desc">Ilustração institucional com muro verde, portão, placa do colégio, árvores e calçada.</desc>
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#163c2b"/><stop offset=".62" stop-color="#5b8761"/><stop offset="1" stop-color="#a4b989"/></linearGradient>
+ <linearGradient id="wall" x2="0" y2="1"><stop stop-color="#8fce45"/><stop offset="1" stop-color="#397b36"/></linearGradient>
+ <linearGradient id="shade" x2="1" y2="1"><stop stop-color="#071c12" stop-opacity=".1"/><stop offset="1" stop-color="#03150d" stop-opacity=".72"/></linearGradient>
+ <linearGradient id="road" x2="0" y2="1"><stop stop-color="#7e897d"/><stop offset="1" stop-color="#333d35"/></linearGradient>
+ <pattern id="brick" width="100" height="34" patternUnits="userSpaceOnUse"><path d="M0 0H100M0 17H100M50 0V17M0 17V34M100 17V34" fill="none" stroke="#d5e7ab" stroke-opacity=".16" stroke-width="2"/></pattern>
+ <filter id="soft"><feGaussianBlur stdDeviation="18"/></filter>
+</defs>
+<rect width="1600" height="1000" fill="url(#sky)"/>
+<circle cx="1230" cy="150" r="135" fill="#d9edac" opacity=".18" filter="url(#soft)"/>
+<!-- distant school roof and windows -->
+<path d="M150 420L320 290H1230L1435 430V690H150Z" fill="#203d2a" opacity=".95"/>
+<path d="M235 420L380 325H1190L1350 430Z" fill="#142a1d"/>
+<g fill="#9ab58e" opacity=".6"><rect x="390" y="435" width="125" height="135" rx="5"/><rect x="570" y="435" width="125" height="135" rx="5"/><rect x="750" y="435" width="125" height="135" rx="5"/><rect x="930" y="435" width="125" height="135" rx="5"/></g>
+<g fill="#203c2b"><path d="M410 435h85v135h-85zM590 435h85v135h-85zM770 435h85v135h-85zM950 435h85v135h-85z"/></g>
+<!-- trees -->
+<g fill="#142d1c" opacity=".9"><path d="M0 470Q40 300 160 305Q170 175 280 210Q325 75 405 185Q500 120 545 285Q620 250 650 440L650 640H0Z"/><path d="M1140 420Q1190 235 1310 250Q1345 100 1460 175Q1550 125 1600 260V650H1120Z"/></g>
+<g stroke="#5b4831" stroke-width="23" fill="none" opacity=".85"><path d="M210 420Q190 280 140 160M210 310Q280 235 340 155M1380 420Q1390 270 1480 150M1390 300Q1300 245 1260 165"/></g>
+<g fill="#315b32" opacity=".9"><circle cx="145" cy="185" r="130"/><circle cx="310" cy="175" r="135"/><circle cx="450" cy="270" r="110"/><circle cx="1300" cy="180" r="130"/><circle cx="1465" cy="210" r="155"/></g>
+<!-- green school perimeter wall -->
+<path d="M0 565H1600V825H0Z" fill="url(#wall)"/>
+<path d="M0 565H1600V825H0Z" fill="url(#brick)"/>
+<path d="M0 565H1600V590H0Z" fill="#b2e25a"/>
+<!-- main sign -->
+<g transform="translate(590 500)">
+ <rect x="0" y="0" width="445" height="135" rx="12" fill="#f0f0df" stroke="#243d2a" stroke-width="10"/>
+ <rect x="12" y="12" width="421" height="111" rx="7" fill="none" stroke="#4b8c3c" stroke-width="4"/>
+ <text x="222" y="48" text-anchor="middle" font-family="Arial,sans-serif" font-size="25" font-weight="800" fill="#26392c">COLÉGIO ESTADUAL</text>
+ <text x="222" y="82" text-anchor="middle" font-family="Arial,sans-serif" font-size="32" font-weight="900" fill="#245d32">PRESIDENTE KENNEDY</text>
+ <text x="222" y="107" text-anchor="middle" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#435849">CEPK · PONTA GROSSA / PR</text>
+</g>
+<!-- school letters on wall -->
+<text x="250" y="735" font-family="Arial Black,Arial,sans-serif" font-size="86" font-weight="900" letter-spacing="8" fill="#174a2d" opacity=".9">CEPK</text>
+<!-- gate opening -->
+<path d="M950 590H1275V825H950Z" fill="#0c2116"/>
+<path d="M970 602H1255V825H970Z" fill="#1b3827"/>
+<g stroke="#91a69a" stroke-width="9" opacity=".9"><path d="M982 605V825M1028 605V825M1074 605V825M1120 605V825M1166 605V825M1212 605V825M1248 605V825"/><path d="M970 645H1255M970 790H1255"/></g>
+<path d="M940 590H1285" stroke="#c4e27d" stroke-width="16"/>
+<!-- sidewalk and road -->
+<path d="M0 825H1600V910H0Z" fill="#bec5b6"/>
+<path d="M0 910H1600V1000H0Z" fill="url(#road)"/>
+<path d="M0 867H1600" stroke="#f1f0d7" stroke-width="9" stroke-dasharray="45 25" opacity=".8"/>
+<g stroke="#f0efe1" stroke-width="16" opacity=".8"><path d="M1100 910l-35 90M1180 910l-35 90M1260 910l-35 90M1340 910l-35 90"/></g>
+<rect width="1600" height="1000" fill="url(#shade)"/>
+</svg>

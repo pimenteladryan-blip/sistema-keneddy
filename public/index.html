@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#145c3b">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <meta name="description" content="Sistema de Gerenciamento de Viagens Escolares">
+  <title>SGVE | Colégio Presidente Kennedy</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
+  <script src="/firebase-config.js" defer></script>
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    <section class="brand-panel">
+      <div class="school-brand">
+        <div class="brand-mark" aria-label="CEPK">CEPK</div>
+        <div><strong>COLÉGIO ESTADUAL PRESIDENTE KENNEDY</strong><small>PONTA GROSSA · PARANÁ</small></div>
+      </div>
+      <div class="brand-message">
+        <p class="eyebrow">62 ANOS DE HISTÓRIA</p>
+        <h1>Organização e cuidado em cada viagem.</h1>
+        <p class="brand-copy">Viagens escolares com organização, cuidado e aprendizagem.</p>
+        <div class="mascot-stage" aria-label="Mascote oficial do CEPK">
+          <img class="mascot" src="/mascote_cepk_transparente_corrigido.png" alt="Mascote do Colégio Estadual Presidente Kennedy" width="180" height="254" loading="eager" decoding="async">
+          <span class="mascot-caption">Nosso mascote</span>
+        </div>
+      </div>
+      <div class="brand-footer">SGVE · Sistema de Gerenciamento de Viagens Escolares</div>
+    </section>
+    <section class="content-panel">
+      <div class="topline"><span class="status-dot"></span><span>PORTAL INSTITUCIONAL · CEPK</span><button type="button" class="theme-toggle" id="theme-toggle" aria-label="Mudar para tema escuro" aria-pressed="false">☾ <span>Tema escuro</span></button></div>
+      <section id="login-view" class="auth-card">
+        <div class="login-school-mark"><span class="login-mark">CEPK</span><span><strong>CEPK · 62 ANOS</strong><small>Colégio Estadual Presidente Kennedy</small></span></div>
+        <p class="eyebrow green">SISTEMA DE VIAGENS ESCOLARES</p><h2>Bem-vindo ao SGVE</h2>
+        <p class="muted">Entre com sua conta autorizada pela administração da escola.</p>
+        <form id="login-form">
+          <label for="login-role">Tipo de acesso</label>
+          <select id="login-role" name="role" required>
+            <option value="">Selecione seu perfil</option>
+            <option value="admin">Administrador</option>
+            <option value="direction">Direção</option>
+            <option value="secretariat">Secretaria</option>
+            <option value="teacher">Professor</option>
+            <option value="guardian">Responsável</option>
+            <option value="student">Estudante</option>
+          </select>
+          <label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="username" maxlength="254" required>
+          <label for="password">Senha</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" required>
+          <button type="submit" id="login-button">Entrar</button>
+          <button type="button" id="google-login-button" class="button-secondary">Entrar com Google</button>
+          <button type="button" id="pwa-install" class="button-secondary" hidden>Instalar SGVE</button>
+          <p id="login-message" class="message" role="alert" aria-live="polite"></p>
+        </form>
+        <button type="button" class="link-button" id="show-registration">Criar uma conta</button>
+        <form id="registration-form" class="registration-form hidden">
+          <p class="registration-intro">Preencha seus dados. Ao enviar, o sistema criará um código de conferência de 6 caracteres. Informe esse código ao administrador; sua conta só será liberada após a aprovação.</p>
+          <label for="registration-name">Nome completo</label><input id="registration-name" name="name" type="text" autocomplete="name" maxlength="100" required>
+          <label for="registration-email">E-mail</label><input id="registration-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+          <label for="registration-role">Tipo de acesso</label>
+          <select id="registration-role" name="role" required>
+            <option value="teacher">Professor</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
+          </select>
+          <label for="registration-password">Criar senha</label><input id="registration-password" name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required>
+          <small class="field-hint">Use pelo menos 14 caracteres. Sua senha será armazenada protegida e não ficará visível para o administrador.</small>
+          <label for="registration-password-confirm">Confirmar senha</label><input id="registration-password-confirm" name="password_confirm" type="password" minlength="14" maxlength="200" autocomplete="new-password" required>
+          <button type="submit" id="registration-submit">Enviar solicitação</button>
+          <p id="registration-message" class="message" role="status" aria-live="polite"></p>
+          <button type="button" class="link-button secondary-link" id="hide-registration">Voltar para entrar</button>
+        </form>
+        <p class="helper">O acesso é liberado pela administração do Colégio Estadual Presidente Kennedy.</p>
+      </section>
+      <section id="dashboard-view" class="dashboard hidden">
+        <header class="welcome-row">
+          <div><p class="eyebrow green">CEPK · PAINEL DE GESTÃO</p><h2 id="welcome-title">Olá!</h2><p id="user-role" class="muted"></p></div>
+          <div class="dashboard-brand"><span class="dashboard-mark">CEPK</span><button class="button-secondary" id="logout-button" type="button">Sair</button></div>
+        </header>
+        <div class="dashboard-welcome-banner">
+          <div><strong>Organização que aproxima conhecimento e experiências.</strong><span>Gestão de viagens escolares · Colégio Estadual Presidente Kennedy</span></div>
+          <span class="banner-years">62 <small>anos</small></span>
+        </div>
+        <nav class="tabs" aria-label="Módulos do sistema">
+          <button type="button" class="tab active" data-tab="classes-panel">Turmas</button>
+          <button type="button" class="tab" data-tab="students-panel" id="students-tab">Estudantes</button>
+          <button type="button" class="tab" data-tab="trips-panel">Viagens</button>
+          <button type="button" class="tab" data-tab="vehicles-panel" id="vehicles-tab">Transportes</button>
+          <button type="button" class="tab" data-tab="reports-panel" id="reports-tab">Relatórios</button>
+          <button type="button" class="tab" data-tab="guardians-panel" id="guardians-tab">Responsáveis</button>
+          <button type="button" class="tab" data-tab="users-panel" id="users-tab">Contas</button>
+        </nav>
+        <section id="classes-panel" class="module-panel">
+          <div class="section-heading"><div><p class="eyebrow green">ORGANIZAÇÃO ESCOLAR</p><h3>Turmas</h3></div><span id="classes-count" class="count-pill">0</span></div>
+          <form id="class-form" class="inline-form">
+            <label>Etapa<select name="level" required><option value="fundamental">Ensino Fundamental</option><option value="medio">Ensino Médio</option></select></label>
+            <label>Ano/série<input name="grade" maxlength="30" placeholder="Ex.: 6º ano ou 1ª série" required></label>
+            <label>Curso<select name="course"><option value="regular">Regular</option><option value="adm">Técnico ADM</option><option value="ds">Técnico DS</option></select></label>
+            <label>Turma<input name="section" maxlength="12" placeholder="Ex.: A" required></label>
+            <label>Ano letivo<input name="school_year" type="number" min="2020" max="2100" value="2026" required></label>
+            <button type="submit">Cadastrar turma</button>
+          </form>
+          <p id="class-message" class="message" role="status"></p><div id="classes-list" class="data-list"><p class="muted">Carregando turmas...</p></div>
+        </section>
+        <section id="students-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">CADASTRO ESCOLAR</p><h3>Estudantes</h3></div><span id="students-count" class="count-pill">0</span></div>
+          <form id="student-form" class="inline-form">
+            <label>Nome completo<input name="full_name" maxlength="120" required></label>
+            <label>Turma<select name="class_id" id="student-class" required><option value="">Selecione uma turma</option></select></label>
+            <button type="submit">Cadastrar estudante</button>
+          </form>
+          <p id="student-message" class="message" role="status"></p>
+          <form id="student-account-form" class="inline-form hidden">
+            <label>Cadastro do estudante<select name="student_id" id="student-account-select" required><option value="">Selecione um estudante</option></select></label>
+            <label>E-mail da conta de estudante<input name="email" type="email" maxlength="254" required></label>
+            <button type="submit">Vincular conta</button>
+          </form>
+          <p id="student-account-message" class="message" role="status"></p>
+          <form id="student-guardian-form" class="inline-form hidden">
+            <label>Estudante<select name="student_id" id="student-guardian-student" required><option value="">Selecione um estudante</option></select></label>
+            <label>Conta do responsável<select name="guardian_email" id="student-guardian-user" required><option value="">Carregando responsáveis...</option></select></label>
+            <label>Parentesco (opcional)<input name="relationship" maxlength="40" placeholder="Ex.: mãe, pai ou responsável"></label>
+            <button type="submit">Vincular responsável</button>
+          </form>
+          <p id="student-guardian-message" class="message" role="status"></p>
+          <div id="students-list" class="data-list"><p class="muted">Carregando estudantes...</p></div>
+          <p class="privacy-note">Cadastro mínimo: nome e turma. Não informe documentos, endereço, telefone ou outros dados pessoais nesta versão.</p>
+        </section>
+        <section id="trips-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">PLANEJAMENTO</p><h3>Viagens escolares</h3></div><span id="trips-count" class="count-pill">0</span></div>
+          <form id="trip-form" class="inline-form">
+            <label>Título<input name="title" maxlength="120" placeholder="Ex.: Visita ao museu" required></label>
+            <label>Destino<input name="destination" maxlength="160" required></label>
+            <label>Objetivo pedagógico<input name="educational_purpose" maxlength="500" required></label>
+            <label>Saída<input name="departure_at" type="datetime-local" required></label>
+            <label>Retorno<input name="return_at" type="datetime-local" required></label>
+            <label>Capacidade<input name="capacity" type="number" min="1" max="5000" value="40" required></label>
+            <button type="submit">Criar rascunho</button>
+          </form>
+          <p id="trip-message" class="message" role="status"></p>
+          <div id="trip-assignment" class="assignment-area">
+            <h4>Vincular turmas e participantes</h4>
+            <form id="trip-class-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-class-trip" required></select></label>
+              <label>Turma<select name="class_id" id="trip-class-select" required></select></label>
+              <button type="submit">Vincular turma</button>
+            </form>
+            <form id="trip-student-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-student-trip" required></select></label>
+              <label>Estudante<select name="student_id" id="trip-student-select" required></select></label>
+              <button type="submit">Vincular estudante</button>
+            </form>
+            <form id="trip-staff-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-staff-trip" required></select></label>
+              <label>Professor<select name="user_id" id="trip-staff-user" required><option value="">Carregando professores...</option></select></label>
+              <button type="submit">Vincular professor</button>
+            </form>
+            <p id="trip-staff-message" class="message" role="status"></p>
+            <form id="trip-vehicle-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-vehicle-trip" required></select></label>
+              <label>Veículo<select name="vehicle_id" id="trip-vehicle-select" required><option value="">Cadastre um veículo</option></select></label>
+              <button type="submit">Vincular veículo</button>
+            </form>
+          </div>
+          <div id="trips-list" class="data-list"><p class="muted">Carregando viagens...</p></div>
+          <p class="privacy-note">Após a aprovação, responsáveis vinculados podem autorizar ou não a participação. Professores vinculados e equipe gestora podem registrar presença na saída e no retorno. Cada decisão fica registrada no histórico do sistema.</p>
+        </section>
+        <section id="vehicles-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">LOGÍSTICA</p><h3>Transportes e frota</h3></div><span id="vehicles-count" class="count-pill">0</span></div>
+          <form id="vehicle-form" class="inline-form">
+            <label>Identificação<input name="name" maxlength="40" placeholder="Ex.: Ônibus 01" required></label>
+            <label>Tipo<select name="type" required><option value="Ônibus">Ônibus</option><option value="Micro-ônibus">Micro-ônibus</option><option value="Van">Van</option></select></label>
+            <label>Capacidade de passageiros<input name="capacity" type="number" min="1" max="100" value="40" required></label>
+            <button type="submit">Cadastrar veículo</button>
+          </form>
+          <p id="vehicle-message" class="message" role="status"></p>
+          <div id="vehicles-list" class="data-list"><p class="muted">Carregando frota...</p></div>
+          <form id="driver-form" class="inline-form compact-form">
+            <label>Nome do condutor<input name="name" maxlength="80" autocomplete="off" placeholder="Nome para identificação interna" required></label>
+            <button type="submit">Cadastrar condutor</button>
+          </form>
+          <p id="driver-message" class="message" role="status"></p>
+          <div id="drivers-list" class="data-list"><p class="muted">Carregando condutores...</p></div>
+          <form id="trip-driver-form" class="inline-form compact-form">
+            <label>Viagem<select name="trip_id" id="trip-driver-trip" required></select></label>
+            <label>Condutor<select name="driver_id" id="trip-driver-select" required><option value="">Cadastre um condutor</option></select></label>
+            <button type="submit">Atribuir condutor</button>
+          </form>
+          <p class="privacy-note">Cadastre somente o nome necessário à escala interna. Não armazene CPF, número de CNH ou contatos neste módulo. A atribuição é permitida em rascunhos e bloqueia conflitos de horário.</p>
+          <p class="privacy-note">Cadastre somente identificação, tipo e capacidade do veículo. A atribuição é permitida em rascunhos e bloqueia conflitos de horário e veículos menores que a capacidade da viagem.</p>
+        </section>
+        <section id="reports-panel" class="module-panel hidden">
+          <div class="section-heading">
+            <div><p class="eyebrow green">ACOMPANHAMENTO</p><h3>Relatórios agregados</h3></div>
+            <button type="button" class="button-secondary" id="refresh-reports">Atualizar</button>
+          </div>
+          <div class="report-stats">
+            <article class="report-stat"><span>Viagens</span><strong id="report-trip-count">0</strong></article>
+            <article class="report-stat"><span>Estudantes ativos</span><strong id="report-student-count">0</strong></article>
+            <article class="report-stat"><span>Veículos ativos</span><strong id="report-vehicle-count">0</strong></article>
+            <article class="report-stat"><span>Participações</span><strong id="report-participant-count">0</strong></article>
+            <article class="report-stat"><span>Autorizadas</span><strong id="report-authorized-count">0</strong></article>
+            <article class="report-stat"><span>Pendentes</span><strong id="report-pending-count">0</strong></article>
+          </div>
+          <p id="report-note" class="privacy-note">Relatórios sem nomes de estudantes.</p>
+          <div class="section-heading"><div><h4>Resumo por viagem</h4></div><button type="button" id="export-report-csv">Exportar CSV</button></div>
+          <div class="report-table-wrap">
+            <table class="report-table">
+              <thead><tr><th>Viagem</th><th>Saída</th><th>Situação</th><th>Participantes</th><th>Autorizadas</th><th>Pendentes</th><th>Presença na saída</th><th>Presença no retorno</th><th>Veículo</th></tr></thead>
+              <tbody id="report-trips-body"><tr><td colspan="9">Carregando relatório...</td></tr></tbody>
+            </table>
+          </div>
+          <p id="report-message" class="message" role="status"></p>
+          <p class="privacy-note">O relatório mostra apenas totais e dados operacionais da viagem. Não exporta nomes, contatos ou documentos de estudantes.</p>
+        </section>
+        <section id="guardians-panel" class="module-panel hidden">
+          <div class="section-heading">
+            <div><p class="eyebrow green">FAMÍLIA E COMUNIDADE</p><h3>Cadastro de responsáveis</h3><p class="section-subtitle">Crie o acesso da família e depois vincule-o ao estudante.</p></div>
+            <span id="guardians-count" class="count-pill">0</span>
+          </div>
+          <form id="guardian-form" class="inline-form guardian-create-form">
+            <label>Nome completo<input name="name" maxlength="100" autocomplete="name" placeholder="Nome do responsável" required></label>
+            <label>E-mail de acesso<input name="email" type="email" maxlength="254" autocomplete="email" placeholder="responsavel@email.com" required></label>
+            <label>Senha inicial<input name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
+            <label>Confirmar senha<input name="password_confirm" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
+            <button type="submit">Cadastrar responsável</button>
+          </form>
+          <p id="guardian-message" class="message" role="status" aria-live="polite"></p>
+          <p class="privacy-note">Depois de cadastrar, abra a aba Estudantes e use “Vincular responsável” para associar esta conta ao aluno e informar o parentesco. A senha inicial deve ser entregue de forma privada.</p>
+          <div class="section-heading guardian-list-heading"><div><h4>Responsáveis cadastrados</h4><p class="section-subtitle">Contas ativas que podem ser vinculadas aos estudantes.</p></div></div>
+          <div id="guardians-list" class="data-list"><p class="muted">Carregando responsáveis...</p></div>
+        </section>
+        <section id="users-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">ACESSO AO SISTEMA</p><h3>Criar conta</h3></div></div>
+          <form id="user-form" class="inline-form">
+            <label>Nome<input name="name" maxlength="100" required></label>
+            <label>E-mail<input name="email" type="email" maxlength="254" required></label>
+            <label>Perfil<select name="role" required>
+              <option value="teacher">Professor</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
+              <option value="secretariat" data-admin-only>Secretaria</option><option value="direction" data-admin-only>Direção</option><option value="admin" data-admin-only>Administrador</option>
+            </select></label>
+            <label>Senha inicial<input name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
+            <button type="submit">Criar conta</button>
+          </form>
+          <p id="user-message" class="message" role="status"></p>
+          <p class="privacy-note">A senha deve ter pelo menos 14 caracteres. Entregue as credenciais de forma privada e nunca as envie pelo repositório.</p>
+          <section id="registration-requests-section" class="registration-requests-section hidden">
+            <div class="section-heading"><div><p class="eyebrow green">ANÁLISE DE ACESSO</p><h3>Solicitações pendentes</h3><p class="section-subtitle">Somente o administrador pode aprovar ou rejeitar cadastros.</p></div><span id="registration-requests-count" class="count-pill">0</span></div>
+            <p id="registration-requests-message" class="message" role="status"></p>
+            <div id="registration-requests-list" class="data-list"><p class="muted">Carregando solicitações...</p></div>
+          </section>
+        </section>
+      </section>
+      <footer class="content-footer">Acesso restrito a usuários autorizados.</footer>
+    </section>
+  </main>
+</body>
+</html>

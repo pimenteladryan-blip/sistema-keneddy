@@ -1,0 +1,148 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  display_name TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  password_hash TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('admin','direction','secretariat','teacher','guardian','student')),
+  active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0,1)),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  token_hash TEXT NOT NULL UNIQUE,
+  csrf_token TEXT NOT NULL,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_sessions_expiry ON sessions(expires_at);
+CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+
+CREATE TABLE IF NOT EXISTS classes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  level TEXT NOT NULL CHECK (level IN ('fundamental','medio')),
+  grade TEXT NOT NULL,
+  course TEXT NOT NULL DEFAULT 'regular',
+  section TEXT NOT NULL,
+  school_year INTEGER NOT NULL,
+  active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0,1)),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(level, grade, course, section, school_year)
+);
+
+CREATE TABLE IF NOT EXISTS students (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  full_name TEXT NOT NULL,
+  class_id INTEGER NOT NULL REFERENCES classes(id),
+  user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE SET NULL,
+  active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0,1)),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_students_class ON students(class_id, active);
+
+CREATE TABLE IF NOT EXISTS student_guardians (
+  student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+  guardian_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  relationship_label TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY(student_id, guardian_user_id)
+);
+CREATE INDEX IF NOT EXISTS idx_student_guardians_guardian ON student_guardians(guardian_user_id);
+
+
+CREATE TABLE IF NOT EXISTS vehicles (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL COLLATE NOCASE UNIQUE,
+  type TEXT NOT NULL CHECK (type IN ('Ônibus','Micro-ônibus','Van')),
+  capacity INTEGER NOT NULL CHECK (capacity BETWEEN 1 AND 100),
+  active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0,1)),
+  created_by INTEGER NOT NULL REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_vehicles_active_name ON vehicles(active, name);
+
+CREATE TABLE IF NOT EXISTS drivers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL COLLATE NOCASE UNIQUE,
+  active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0,1)),
+  created_by INTEGER NOT NULL REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_drivers_active_name ON drivers(active, name);
+
+CREATE TABLE IF NOT EXISTS trips (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  destination TEXT NOT NULL,
+  educational_purpose TEXT NOT NULL,
+  departure_at TEXT NOT NULL,
+  return_at TEXT NOT NULL,
+  capacity INTEGER NOT NULL CHECK (capacity > 0),
+  vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE SET NULL,
+  driver_id INTEGER REFERENCES drivers(id) ON DELETE SET NULL,
+  status TEXT NOT NULL DEFAULT 'draft'
+    CHECK (status IN ('draft','pending_approval','approved','open','completed','cancelled')),
+  created_by INTEGER NOT NULL REFERENCES users(id),
+  approved_by INTEGER REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_trips_departure ON trips(departure_at);
+
+CREATE TABLE IF NOT EXISTS trip_classes (
+  trip_id INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+  class_id INTEGER NOT NULL REFERENCES classes(id),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (trip_id, class_id)
+);
+CREATE TABLE IF NOT EXISTS trip_students (
+  trip_id INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+  student_id INTEGER NOT NULL REFERENCES students(id),
+  authorization_status TEXT NOT NULL DEFAULT 'pending'
+    CHECK (authorization_status IN ('pending','authorized','declined','paper_recorded')),
+  departure_present INTEGER CHECK (departure_present IN (0,1)),
+  return_present INTEGER CHECK (return_present IN (0,1)),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (trip_id, student_id)
+);
+CREATE INDEX IF NOT EXISTS idx_trip_students_student ON trip_students(student_id);
+CREATE TABLE IF NOT EXISTS trip_staff (
+  trip_id INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  assignment_label TEXT NOT NULL DEFAULT 'Professor responsável',
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (trip_id, user_id)
+);
+
+
+CREATE TABLE IF NOT EXISTS audit_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  actor_user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  entity_type TEXT NOT NULL,
+  entity_id TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at);
+
+
+CREATE TABLE IF NOT EXISTS registration_requests (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  display_name TEXT NOT NULL,
+  email TEXT NOT NULL COLLATE NOCASE UNIQUE,
+  password_hash TEXT,
+  role TEXT NOT NULL CHECK (role IN ('teacher','guardian','student')),
+  verification_code TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','rejected')),
+  reviewed_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  reviewed_at TEXT,
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_registration_requests_status ON registration_requests(status, created_at);
