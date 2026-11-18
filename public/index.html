@@ -131,6 +131,13 @@
             <button type="submit">Vincular conta</button>
           </form>
           <p id="student-account-message" class="message" role="status"></p>
+          <form id="student-guardian-form" class="inline-form hidden">
+            <label>Estudante<select name="student_id" id="student-guardian-student" required><option value="">Selecione um estudante</option></select></label>
+            <label>Conta do responsável<select name="guardian_id" id="student-guardian-user" required><option value="">Carregando responsáveis...</option></select></label>
+            <label>Parentesco (opcional)<input name="relationship" maxlength="40" placeholder="Ex.: mãe, pai ou responsável"></label>
+            <button type="submit">Vincular responsável</button>
+          </form>
+          <p id="student-guardian-message" class="message" role="status"></p>
           <div id="students-list" class="data-list"><p class="muted">Carregando estudantes...</p></div>
           <p class="privacy-note">Cadastro mínimo: nome e turma. Não informe documentos, endereço, telefone ou outros dados pessoais nesta versão.</p>
         </section>
@@ -158,6 +165,12 @@
               <label>Estudante<select name="student_id" id="trip-student-select" required></select></label>
               <button type="submit">Vincular estudante</button>
             </form>
+            <form id="trip-staff-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-staff-trip" required></select></label>
+              <label>Professor<select name="user_id" id="trip-staff-user" required><option value="">Carregando professores...</option></select></label>
+              <button type="submit">Vincular professor</button>
+            </form>
+            <p id="trip-staff-message" class="message" role="status"></p>
             <form id="trip-vehicle-form" class="inline-form compact-form">
               <label>Viagem<select name="trip_id" id="trip-vehicle-trip" required></select></label>
               <label>Veículo<select name="vehicle_id" id="trip-vehicle-select" required><option value="">Cadastre um veículo</option></select></label>
