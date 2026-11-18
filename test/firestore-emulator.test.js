@@ -261,7 +261,7 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const originlessLogin = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'api-admin@emulator.sgve', password: 'AdminTesteSenha2026!' })
+      body: JSON.stringify({ email: 'api-admin@emulator.sgve', password: 'AdminTesteSenha2026!', role: 'admin' })
     });
     assert.equal(originlessLogin.status, 403, 'requisições de autenticação sem Origin devem ser bloqueadas');
 
@@ -616,7 +616,7 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       const response = await fetch(baseUrl + '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-        body: JSON.stringify({ email, password: rolePassword })
+        body: JSON.stringify({ email, password: rolePassword, role: ({ professor: 'teacher', responsavel: 'guardian' })[email.split('@')[0].split('-')[0]] || email.split('@')[0].split('-')[0] })
       });
       assert.equal(response.status, 200, 'login de perfil ' + email);
       const data = await response.json();
@@ -806,14 +806,14 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       const failedLogin = await fetch(baseUrl + '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-        body: JSON.stringify({ email: 'rate-limit-api@emulator.sgve', password: 'SenhaIncorreta2026!' })
+        body: JSON.stringify({ email: 'rate-limit-api@emulator.sgve', password: 'SenhaIncorreta2026!', role: 'teacher' })
       });
       assert.equal(failedLogin.status, 401);
     }
     const blockedLogin = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-      body: JSON.stringify({ email: 'rate-limit-api@emulator.sgve', password: rolePassword })
+      body: JSON.stringify({ email: 'rate-limit-api@emulator.sgve', password: rolePassword, role: 'teacher' })
     });
     assert.equal(blockedLogin.status, 429, 'API deve bloquear novas tentativas após o limite por conta');
 
@@ -827,14 +827,14 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       const failedLogin = await fetch(baseUrl + '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-        body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: 'SenhaIncorreta2026!' })
+        body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: 'SenhaIncorreta2026!', role: 'teacher' })
       });
       assert.equal(failedLogin.status, 401);
     }
     const validResetLogin = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-      body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: rolePassword })
+      body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: rolePassword, role: 'teacher' })
     });
     assert.equal(validResetLogin.status, 200, 'login correto ainda deve ser permitido no limite');
     const failedAfterSuccess = await fetch(baseUrl + '/api/auth/login', {
