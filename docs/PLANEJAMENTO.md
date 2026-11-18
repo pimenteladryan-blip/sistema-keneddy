@@ -519,7 +519,7 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Quando uma chamada autenticada recebe HTTP 401 durante a sessão, a interface volta à tela de login, aborta requisições pendentes e limpa os dados privados já renderizados.
 - [x] Teste de interface inclui verificação da limpeza em caso de expiração da sessão.
 - [x] A suíte SQLite do commit anterior passou com 53 testes (run 952); a falha do teste Firestore nesse commit foi localizada: um login administrativo de teste não enviava o novo campo obrigatório `role`. O teste foi corrigido.
-- [ ] CI completo das alterações mais recentes ainda está em execução; consultar as execuções mais recentes da branch antes de considerar a integração Firestore aprovada.
+- [x] CI completo das alterações mais recentes foi aprovado nas execuções 971 e 972, commit `a788024e1002aba7c495bdd0175bf527b99feda6`, incluindo sintaxe/estrutura, testes automatizados e Firestore Emulator.
 - [ ] Após CI verde, revisar o resultado completo e repetir inspeção do diff. Depois disso, ainda falta validação visual real no navegador e conferência de login Google/domínio Render.
 
 
@@ -528,6 +528,16 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Corrigida a falha de sintaxe do teste Firestore: havia uma segunda declaração de `studentApi` embora o teste de acesso individual já existisse mais adiante no mesmo arquivo.
 - [x] Mantido o teste existente de acesso do estudante e ampliado para conferir que a lista de viagens contém somente a viagem associada ao cadastro vinculado.
 - [x] Acrescentada verificação explícita de auditoria para o evento `link_student_account`.
-- [x] No CI da revisão, as etapas de sintaxe e testes SQLite/Node passaram novamente; a etapa Firestore Emulator está em execução nas runs 965/966 para o commit de testes mais recente.
+- [x] No CI da revisão, sintaxe, testes SQLite/Node e Firestore Emulator passaram nas execuções 969/970; a atualização documental subsequente também passou integralmente nas execuções 971/972.
 - [x] Corrigido também o último login inválido no teste de limite por conta, que não enviava o campo obrigatório `role` e causava HTTP 400 em vez do 401 esperado.
-- [ ] Aguardar resultado final da etapa Firestore Emulator nas execuções 969/970 para o commit `ab0f900a35b3d4759c63ffa713a5738902ac5ff1`. Se falhar, corrigir com base no log antes de considerar a etapa pronta.
+- [x] Execuções 969/970 concluídas com sucesso no commit `ab0f900a35b3d4759c63ffa713a5738902ac5ff1`; execuções 971/972 também concluídas com sucesso no commit documental `a788024e1002aba7c495bdd0175bf527b99feda6`.
+- [ ] Fazer revisão visual em navegador. O navegador de pesquisa não conseguiu abrir a URL do GitHub Pages nem o serviço Render nesta sessão, então não foi possível confirmar a interface visual ao vivo.
+
+
+### Revisão do PR e status atualizado (18/11/2026)
+
+- [x] Conferido o diff atual do PR #2: 20 arquivos alterados, incluindo interface real em `public/`, rotas de servidor, persistência Firestore, testes e remoção da demonstração estática fictícia.
+- [x] Confirmado que o PR #2 continua aberto, em rascunho e não mesclado; base `feature/firestore-auth-migration`, head `feature/production-kennedy-ui`.
+- [x] CI completo aprovado no commit de código `ab0f900a35b3d4759c63ffa713a5738902ac5ff1` (runs 969 e 970) e no commit documental `a788024e1002aba7c495bdd0175bf527b99feda6` (runs 971 e 972).
+- [ ] Não foi possível fazer inspeção visual ao vivo nesta sessão: as URLs GitHub Pages e Render não puderam ser abertas pelo navegador disponível. Isso não é uma falha do sistema; significa apenas que a aparência e os fluxos reais ainda não foram validados visualmente.
+- [ ] Antes de mesclar/publicar: validar visualmente em navegador, testar login Google com conta autorizada e confirmar configuração do serviço Render. Nenhum deploy foi iniciado.
