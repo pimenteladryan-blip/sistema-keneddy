@@ -508,3 +508,16 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Validar visualmente em navegador desktop e celular, incluindo criação de conta de estudante, vínculo, login do estudante e logout/troca de usuário.
 - [ ] Revisar os fluxos completos de responsável, professor, secretaria e direção com contas sintéticas.
 - [ ] Nenhuma alteração foi mesclada na branch de produção e nenhum deploy do Render foi iniciado.
+
+
+### Continuação da correção e análise de CI (18/11/2026)
+
+- [x] Reforçada a exclusividade do vínculo Firestore com documento determinístico por ID da conta, lido e criado na mesma transação. Isso evita que duas operações concorrentes associem a mesma conta a cadastros diferentes.
+- [x] Mantida verificação de vínculos antigos diretamente nos cadastros de estudantes, para não ignorar associações anteriores à criação do índice determinístico.
+- [x] Teste de integração Firestore agora verifica acesso do estudante somente ao cadastro vinculado.
+- [x] Testes de login Firestore agora enviam o perfil exigido e verificam rejeição de perfil ausente (HTTP 400) e divergente (HTTP 403).
+- [x] Quando uma chamada autenticada recebe HTTP 401 durante a sessão, a interface volta à tela de login, aborta requisições pendentes e limpa os dados privados já renderizados.
+- [x] Teste de interface inclui verificação da limpeza em caso de expiração da sessão.
+- [x] A suíte SQLite do commit anterior passou com 53 testes (run 952); a falha do teste Firestore nesse commit foi localizada: um login administrativo de teste não enviava o novo campo obrigatório `role`. O teste foi corrigido.
+- [ ] CI completo das alterações mais recentes ainda está em execução (runs 959 e 960 no momento do registro). Não considerar a integração Firestore aprovada até a conclusão verde.
+- [ ] Após CI verde, revisar o resultado completo e repetir inspeção do diff. Depois disso, ainda falta validação visual real no navegador e conferência de login Google/domínio Render.
