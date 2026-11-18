@@ -354,6 +354,7 @@ app.post('/api/students/:id/account', requireAuth, requireCsrf, requireRoles(...
   if (!Number.isSafeInteger(studentId) || studentId < 1 || !validEmail(email)) {
     return res.status(400).json({ error: 'Informe um estudante e e-mail de conta válidos.' });
   }
+  let transactionOpen = false;
   try {
     if (firebaseConfigured) {
       const result = await firestoreSchool.linkStudentAccount(studentId, email, req.auth.user.id);
@@ -364,7 +365,7 @@ app.post('/api/students/:id/account', requireAuth, requireCsrf, requireRoles(...
       return res.json({ message: result.changed ? 'Conta vinculada ao estudante.' : 'Esta conta já estava vinculada ao estudante.' });
     }
     db.exec('BEGIN IMMEDIATE');
-    let transactionOpen = true;
+    transactionOpen = true;
     const fail = (status, message) => {
       db.exec('ROLLBACK');
       transactionOpen = false;
@@ -388,7 +389,7 @@ app.post('/api/students/:id/account', requireAuth, requireCsrf, requireRoles(...
     transactionOpen = false;
     return res.json({ message: 'Conta vinculada ao estudante.' });
   } catch (error) {
-    if (typeof transactionOpen !== 'undefined' && transactionOpen) {
+    if (transactionOpen) {
       try { db.exec('ROLLBACK'); } catch {}
     }
     if (String(error.message).includes('UNIQUE constraint failed: students.user_id')) {
