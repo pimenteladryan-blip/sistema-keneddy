@@ -521,3 +521,12 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] A suíte SQLite do commit anterior passou com 53 testes (run 952); a falha do teste Firestore nesse commit foi localizada: um login administrativo de teste não enviava o novo campo obrigatório `role`. O teste foi corrigido.
 - [ ] CI completo das alterações mais recentes ainda está em execução (runs 959 e 960 no momento do registro). Não considerar a integração Firestore aprovada até a conclusão verde.
 - [ ] Após CI verde, revisar o resultado completo e repetir inspeção do diff. Depois disso, ainda falta validação visual real no navegador e conferência de login Google/domínio Render.
+
+
+### Ajuste final dos testes de integração (18/11/2026)
+
+- [x] Corrigida a falha de sintaxe do teste Firestore: havia uma segunda declaração de `studentApi` embora o teste de acesso individual já existisse mais adiante no mesmo arquivo.
+- [x] Mantido o teste existente de acesso do estudante e ampliado para conferir que a lista de viagens contém somente a viagem associada ao cadastro vinculado.
+- [x] Acrescentada verificação explícita de auditoria para o evento `link_student_account`.
+- [x] No CI da revisão, as etapas de sintaxe e testes SQLite/Node passaram novamente; a etapa Firestore Emulator está em execução nas runs 965/966 para o commit de testes mais recente.
+- [ ] Aguardar resultado final da etapa Firestore Emulator. Se falhar, corrigir com base no log antes de considerar a etapa pronta.
