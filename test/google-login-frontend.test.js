@@ -94,7 +94,8 @@ test('o módulo de transporte possui frota, atribuição e validações no servi
   assert.match(html, /id="trip-driver-form"/);
   assert.match(app, /api\('\/api\/vehicles'/);
   assert.match(app, /api\('\/api\/drivers'/);
-  assert.match(app, /document\.querySelector\('#drivers-list'\)\.textContent = ''/);
+  assert.match(app, /clearDashboardData\(\)/);
+  assert.match(app, /dashboardView\.querySelectorAll\('\.data-list, tbody'\)/);
   assert.match(server, /app\.post\('\/api\/drivers', requireAuth, requireCsrf, requireRoles\(\.\.\.RECORD_MANAGERS\)/);
   assert.match(server, /app\.post\('\/api\/trips\/:id\/driver', requireAuth, requireCsrf, requireRoles\(\.\.\.RECORD_MANAGERS\)/);
   assert.match(server, /assign_driver/);
