@@ -600,12 +600,13 @@ document.querySelectorAll('.tab').forEach(button => button.addEventListener('cli
 }));
 document.querySelector('#class-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
   payload.school_year = Number(payload.school_year);
   try {
     const result = await api('/api/classes', { method: 'POST', body: JSON.stringify(payload) });
-    event.currentTarget.reset();
-    event.currentTarget.elements.school_year.value = String(new Date().getFullYear());
+    form.reset();
+    form.elements.school_year.value = String(new Date().getFullYear());
     showMessage('#class-message', result.message);
     await loadClasses();
   } catch (error) { if (error.name === 'AbortError') return; showMessage('#class-message', error.message, true); }
