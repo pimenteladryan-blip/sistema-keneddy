@@ -23,6 +23,16 @@ test('a instalação PWA usa arquivos estáticos e nunca armazena respostas da A
   assert.match(worker, /if \(url\.pathname\.startsWith\('\/api\/'\)\) return/);
 });
 
+test('o vínculo de conta estudantil é restrito à gestão e a tela do professor não carrega a lista geral', () => {
+  assert.match(html, /id="student-account-form"/);
+  assert.match(html, /id="student-account-select"/);
+  assert.match(app, /api\('\/api\/students\/' \+ Number\(payload\.student_id\) \+ '\/account'/);
+  assert.match(app, /students-tab.*user\.role === 'teacher'/);
+  assert.match(app, /clearDashboardData\(\)/);
+  assert.match(app, /sessionController\.abort\(\)/);
+  assert.match(server, /\/api\/students\/\:id\/account', requireAuth, requireCsrf, requireRoles\(\.\.\.RECORD_MANAGERS\)/);
+});
+
 test('a página carrega os SDKs Firebase antes do aplicativo e oferece login Google', () => {
   const appSdk = html.indexOf('firebase-app-compat.js');
   const authSdk = html.indexOf('firebase-auth-compat.js');
