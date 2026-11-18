@@ -422,20 +422,22 @@ document.querySelector('#registration-requests-list').addEventListener('click', 
 });
 document.querySelector('#trip-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
   payload.capacity = Number(payload.capacity);
   payload.departure_at = new Date(payload.departure_at).toISOString();
   payload.return_at = new Date(payload.return_at).toISOString();
   try {
     const result = await api('/api/trips', { method: 'POST', body: JSON.stringify(payload) });
-    event.currentTarget.reset();
+    form.reset();
     showMessage('#trip-message', result.message);
     await loadTrips();
   } catch (error) { if (error.name === 'AbortError') return; showMessage('#trip-message', error.message, true); }
 });
 document.querySelector('#trip-class-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
   try {
     const result = await api('/api/trips/' + Number(payload.trip_id) + '/classes', {
       method: 'POST', body: JSON.stringify({ class_id: Number(payload.class_id) })
@@ -450,14 +452,15 @@ document.querySelector('#export-report-csv').addEventListener('click', exportRep
 
 document.querySelector('#vehicle-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
   payload.capacity = Number(payload.capacity);
   try {
     const result = await api('/api/vehicles', {
       method: 'POST', body: JSON.stringify(payload)
     });
-    event.currentTarget.reset();
-    event.currentTarget.elements.capacity.value = '40';
+    form.reset();
+    form.elements.capacity.value = '40';
     showMessage('#vehicle-message', result.message);
     await loadVehicles();
   } catch (error) { if (error.name === 'AbortError') return;
@@ -467,7 +470,8 @@ document.querySelector('#vehicle-form').addEventListener('submit', async event =
 
 document.querySelector('#trip-vehicle-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
   try {
     const result = await api('/api/trips/' + Number(payload.trip_id) + '/vehicle', {
       method: 'POST', body: JSON.stringify({ vehicle_id: Number(payload.vehicle_id) })
@@ -481,12 +485,13 @@ document.querySelector('#trip-vehicle-form').addEventListener('submit', async ev
 
 document.querySelector('#driver-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
   try {
     const result = await api('/api/drivers', {
       method: 'POST', body: JSON.stringify(payload)
     });
-    event.currentTarget.reset();
+    form.reset();
     showMessage('#driver-message', result.message);
     await loadDrivers();
   } catch (error) { if (error.name === 'AbortError') return;
@@ -496,7 +501,8 @@ document.querySelector('#driver-form').addEventListener('submit', async event =>
 
 document.querySelector('#trip-driver-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
   try {
     const result = await api('/api/trips/' + Number(payload.trip_id) + '/driver', {
       method: 'POST', body: JSON.stringify({ driver_id: Number(payload.driver_id) })
@@ -510,30 +516,33 @@ document.querySelector('#trip-driver-form').addEventListener('submit', async eve
 
 document.querySelector('#trip-staff-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
   try {
     const result = await api('/api/trips/' + Number(payload.trip_id) + '/staff', {
       method: 'POST', body: JSON.stringify({ user_id: Number(payload.user_id) })
     });
-    event.currentTarget.reset();
+    form.reset();
     showMessage('#trip-staff-message', result.message);
   } catch (error) { if (error.name === 'AbortError') return; showMessage('#trip-staff-message', error.message, true); }
 });
 document.querySelector('#student-guardian-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
   try {
     const result = await api('/api/students/' + Number(payload.student_id) + '/guardians', {
       method: 'POST',
       body: JSON.stringify({ email: payload.guardian_email, relationship: payload.relationship })
     });
-    event.currentTarget.reset();
+    form.reset();
     showMessage('#student-guardian-message', result.message);
   } catch (error) { if (error.name === 'AbortError') return; showMessage('#student-guardian-message', error.message, true); }
 });
 document.querySelector('#trip-student-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
   try {
     const result = await api('/api/trips/' + Number(payload.trip_id) + '/students', {
       method: 'POST', body: JSON.stringify({ student_id: Number(payload.student_id) })
@@ -613,12 +622,13 @@ document.querySelector('#class-form').addEventListener('submit', async event => 
 });
 document.querySelector('#student-account-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
   try {
     const result = await api('/api/students/' + Number(payload.student_id) + '/account', {
       method: 'POST', body: JSON.stringify({ email: payload.email })
     });
-    event.currentTarget.reset();
+    form.reset();
     showMessage('#student-account-message', result.message);
     await loadStudents();
   } catch (error) { if (error.name === 'AbortError') return; showMessage('#student-account-message', error.message, true); }
