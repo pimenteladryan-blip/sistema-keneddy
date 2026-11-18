@@ -86,6 +86,10 @@ async function api(url, options = {}) {
     if (error.name === 'AbortError') throw error;
     return {};
   });
+  if (response.status === 401 && currentUser) {
+    showLogin();
+    loginMessage.textContent = 'Sua sessão expirou. Entre novamente para continuar.';
+  }
   if (!response.ok) throw new Error(data.error || 'Não foi possível concluir a operação.');
   return data;
 }
