@@ -79,11 +79,13 @@ async function api(url, options = {}) {
       credentials: 'same-origin', ...options,
       signal: options.signal || sessionController.signal, headers
     });
-  } catch (error) {
-    if (error.name === 'AbortError') return new Promise(() => {});
+  } catch (error) { if (error.name === 'AbortError') return;
     throw error;
   }
-  const data = await response.json().catch(() => ({}));
+  const data = await response.json().catch(error => {
+    if (error.name === 'AbortError') throw error;
+    return {};
+  });
   if (!response.ok) throw new Error(data.error || 'Não foi possível concluir a operação.');
   return data;
 }
@@ -122,7 +124,7 @@ async function loadClasses() {
       ).join('');
       if (selectedClass) tripClassSelect.value = selectedClass;
     }
-  } catch (error) { list.textContent = error.message; }
+  } catch (error) { if (error.name === 'AbortError') return; list.textContent = error.message; }
 }
 async function loadStudents() {
   const list = document.querySelector('#students-list');
@@ -149,7 +151,7 @@ async function loadStudents() {
       ).join('');
       if (previousAccountStudent) accountStudentSelect.value = previousAccountStudent;
     }
-  } catch (error) { list.textContent = error.message; }
+  } catch (error) { if (error.name === 'AbortError') return; list.textContent = error.message; }
 }
 
 
@@ -171,7 +173,7 @@ async function loadVehicles() {
       '</option>'
     ).join('');
     if (previous) select.value = previous;
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     list.textContent = error.message;
   }
 }
@@ -199,7 +201,7 @@ async function loadDrivers() {
       '<option value="' + Number(driver.id) + '">' + escapeHtml(driver.name) + '</option>'
     ).join('');
     if (previous) select.value = previous;
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     list.textContent = error.message;
   }
 }
@@ -237,7 +239,7 @@ async function loadReports() {
     ).join('') : '<tr><td colspan="9">Nenhuma viagem cadastrada.</td></tr>';
     document.querySelector('#export-report-csv').disabled = !data.trips.length;
     showMessage('#report-message', 'Relatório atualizado.');
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     lastReport = null;
     body.innerHTML = '<tr><td colspan="9">' + escapeHtml(error.message) + '</td></tr>';
     document.querySelector('#export-report-csv').disabled = true;
@@ -319,7 +321,7 @@ async function loadTripParticipants(tripId, area) {
         controls + '</article>';
     }).join('') : '<p class="muted">Nenhum participante vinculado a esta viagem.</p>';
     area.dataset.loaded = 'true';
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     area.textContent = error.message;
     area.dataset.loaded = 'false';
   }
@@ -344,7 +346,7 @@ async function loadTrips() {
     document.querySelector('#trip-student-trip').innerHTML = options;
     document.querySelector('#trip-vehicle-trip').innerHTML = options;
     document.querySelector('#trip-driver-trip').innerHTML = options;
-  } catch (error) { list.textContent = error.message; }
+  } catch (error) { if (error.name === 'AbortError') return; list.textContent = error.message; }
 }
 async function loadRegistrationRequests() {
   if (!currentUser || currentUser.role !== 'admin') return;
@@ -359,7 +361,7 @@ async function loadRegistrationRequests() {
       '<div class="registration-actions"><button type="button" class="small-action" data-registration-action="approve" data-registration-id="' + item.id + '">Aprovar</button>' +
       '<button type="button" class="small-action reject-action" data-registration-action="reject" data-registration-id="' + item.id + '">Rejeitar</button></div></article>'
     ).join('') : '<p class="muted">Não há solicitações aguardando aprovação.</p>';
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     list.textContent = error.message;
   }
 }
@@ -373,7 +375,7 @@ document.querySelector('#registration-requests-list').addEventListener('click', 
     });
     showMessage('#registration-requests-message', result.message);
     await loadRegistrationRequests();
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#registration-requests-message', error.message, true);
     button.disabled = false;
   }
@@ -389,7 +391,7 @@ document.querySelector('#trip-form').addEventListener('submit', async event => {
     event.currentTarget.reset();
     showMessage('#trip-message', result.message);
     await loadTrips();
-  } catch (error) { showMessage('#trip-message', error.message, true); }
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#trip-message', error.message, true); }
 });
 document.querySelector('#trip-class-form').addEventListener('submit', async event => {
   event.preventDefault();
@@ -399,7 +401,7 @@ document.querySelector('#trip-class-form').addEventListener('submit', async even
       method: 'POST', body: JSON.stringify({ class_id: Number(payload.class_id) })
     });
     showMessage('#trip-message', result.message);
-  } catch (error) { showMessage('#trip-message', error.message, true); }
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#trip-message', error.message, true); }
 });
 
 
@@ -418,7 +420,7 @@ document.querySelector('#vehicle-form').addEventListener('submit', async event =
     event.currentTarget.elements.capacity.value = '40';
     showMessage('#vehicle-message', result.message);
     await loadVehicles();
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#vehicle-message', error.message, true);
   }
 });
@@ -432,7 +434,7 @@ document.querySelector('#trip-vehicle-form').addEventListener('submit', async ev
     });
     showMessage('#trip-message', result.message);
     await loadTrips();
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#trip-message', error.message, true);
   }
 });
@@ -447,7 +449,7 @@ document.querySelector('#driver-form').addEventListener('submit', async event =>
     event.currentTarget.reset();
     showMessage('#driver-message', result.message);
     await loadDrivers();
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#driver-message', error.message, true);
   }
 });
@@ -461,7 +463,7 @@ document.querySelector('#trip-driver-form').addEventListener('submit', async eve
     });
     showMessage('#trip-message', result.message);
     await loadTrips();
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#trip-message', error.message, true);
   }
 });
@@ -475,7 +477,7 @@ document.querySelector('#trip-student-form').addEventListener('submit', async ev
     });
     showMessage('#trip-message', result.message);
     await loadTrips();
-  } catch (error) { showMessage('#trip-message', error.message, true); }
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#trip-message', error.message, true); }
 });
 document.querySelector('#trips-list').addEventListener('click', async event => {
   const participantButton = event.target.closest('[data-participant-action]');
@@ -501,7 +503,7 @@ document.querySelector('#trips-list').addEventListener('click', async event => {
       showMessage('#trip-message', result.message);
       const area = participantButton.closest('.participants-area');
       await loadTripParticipants(tripId, area);
-    } catch (error) {
+    } catch (error) { if (error.name === 'AbortError') return;
       showMessage('#trip-message', error.message, true);
       participantButton.disabled = false;
     }
@@ -523,7 +525,7 @@ document.querySelector('#trips-list').addEventListener('click', async event => {
     const result = await api('/api/trips/' + button.dataset.tripId + '/' + button.dataset.tripAction, { method: 'POST', body: '{}' });
     showMessage('#trip-message', result.message);
     await loadTrips();
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#trip-message', error.message, true);
     button.disabled = false;
   }
@@ -543,7 +545,7 @@ document.querySelector('#class-form').addEventListener('submit', async event => 
     event.currentTarget.elements.school_year.value = String(new Date().getFullYear());
     showMessage('#class-message', result.message);
     await loadClasses();
-  } catch (error) { showMessage('#class-message', error.message, true); }
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#class-message', error.message, true); }
 });
 document.querySelector('#student-account-form').addEventListener('submit', async event => {
   event.preventDefault();
@@ -555,7 +557,7 @@ document.querySelector('#student-account-form').addEventListener('submit', async
     event.currentTarget.reset();
     showMessage('#student-account-message', result.message);
     await loadStudents();
-  } catch (error) { showMessage('#student-account-message', error.message, true); }
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#student-account-message', error.message, true); }
 });
 document.querySelector('#student-form').addEventListener('submit', async event => {
   event.preventDefault();
@@ -566,7 +568,7 @@ document.querySelector('#student-form').addEventListener('submit', async event =
     event.currentTarget.reset();
     showMessage('#student-message', result.message);
     await loadStudents();
-  } catch (error) { showMessage('#student-message', error.message, true); }
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#student-message', error.message, true); }
 });
 const registrationForm = document.querySelector('#registration-form');
 const registrationMessage = document.querySelector('#registration-message');
@@ -604,7 +606,7 @@ registrationForm.addEventListener('submit', async event => {
     });
     registrationForm.reset();
     showMessage('#registration-message', result.message + ' Código: ' + result.verificationCode);
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#registration-message', error.message, true);
   } finally {
     button.disabled = false;
@@ -618,7 +620,7 @@ document.querySelector('#user-form').addEventListener('submit', async event => {
     const result = await api('/api/users', { method: 'POST', body: JSON.stringify(payload) });
     event.currentTarget.reset();
     showMessage('#user-message', result.message + ' Perfil: ' + result.user.roleLabel);
-  } catch (error) { showMessage('#user-message', error.message, true); }
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#user-message', error.message, true); }
 });
 function applyTheme(mode) {
   const dark = mode === 'dark';
@@ -660,7 +662,7 @@ loginForm.addEventListener('submit', async event => {
     csrfToken = data.csrfToken;
     loginForm.reset();
     showDashboard(data.user);
-  } catch (error) { loginMessage.textContent = error.message; }
+  } catch (error) { if (error.name === 'AbortError') return; loginMessage.textContent = error.message; }
   finally { loginButton.disabled = false; loginButton.textContent = 'Entrar'; }
 });
 googleLoginButton.addEventListener('click', async () => {
@@ -685,7 +687,7 @@ googleLoginButton.addEventListener('click', async () => {
     });
     csrfToken = data.csrfToken;
     showDashboard(data.user);
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     loginMessage.textContent = error.code === 'auth/popup-closed-by-user'
       ? 'A janela de login foi fechada antes da conclusão.'
       : (error.message || 'Não foi possível entrar com Google.');
@@ -721,7 +723,7 @@ if ('serviceWorker' in navigator) {
 logoutButton.addEventListener('click', async () => {
   logoutButton.disabled = true;
   try { await api('/api/auth/logout', { method: 'POST', body: '{}' }); if (window.firebase?.apps?.length) await firebase.auth().signOut(); showLogin(); }
-  catch (error) { window.alert(error.message); }
+  catch (error) { if (error.name === 'AbortError') return; window.alert(error.message); }
   finally { logoutButton.disabled = false; }
 });
 restoreSession();
