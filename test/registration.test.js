@@ -163,7 +163,7 @@ test('cadastro público só libera acesso após aprovação do administrador', a
   const allowedLogin = await fetch(baseUrl + '/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-    body: JSON.stringify({ email: pendingEmail, password: applicantPassword })
+    body: JSON.stringify({ email: pendingEmail, password: applicantPassword, role: 'teacher' })
   });
   assert.equal(allowedLogin.status, 200);
 });
