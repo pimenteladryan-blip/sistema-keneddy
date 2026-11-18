@@ -2,9 +2,10 @@
   "name": "sistema-kennedy",
   "version": "1.0.0",
   "private": true,
-  "description": "Sistema Kennedy CEPK",
+  "description": "Sistema de Gerenciamento de Viagens Escolares do Colégio Estadual Presidente Kennedy",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server/index.js",
+    "check": "node --check server/index.js && node --check public/js/app.js"
   },
   "engines": {
     "node": ">=18"
