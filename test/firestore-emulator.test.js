@@ -510,7 +510,15 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
 
     await school.linkGuardian(apiStudentId, 'guardian-api@emulator.sgve', 'Responsável');
     await school.linkGuardian(paperStudentId, 'guardian-api@emulator.sgve', 'Responsável');
-    await store.update('students', apiStudentId, { user_id: roleAccounts.student });
+    const studentAccountLink = await api('/api/students/' + apiStudentId + '/account', {
+      method: 'POST', body: JSON.stringify({ email: 'student-api@emulator.sgve' })
+    });
+    assert.equal(studentAccountLink.status, 200);
+    const duplicateStudentAccountLink = await api('/api/students/' + paperStudentId + '/account', {
+      method: 'POST', body: JSON.stringify({ email: 'student-api@emulator.sgve' })
+    });
+    assert.equal(duplicateStudentAccountLink.status, 409,
+      'uma conta de estudante não pode ser vinculada a dois cadastros');
 
     const linkedClass = await api('/api/trips/' + apiTripId + '/classes', {
       method: 'POST', body: JSON.stringify({ class_id: apiClassId })
