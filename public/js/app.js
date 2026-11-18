@@ -26,6 +26,8 @@ function showDashboard(user) {
   document.querySelector('#class-form').classList.toggle('hidden', !canManage);
   document.querySelector('#student-form').classList.toggle('hidden', !canManage);
   document.querySelector('#student-account-form').classList.toggle('hidden', !canManage);
+  document.querySelector('#student-guardian-form').classList.toggle('hidden', !canManage);
+  document.querySelector('#trip-staff-form').classList.toggle('hidden', !canManage);
   document.querySelector('#students-tab').classList.toggle('hidden', user.role === 'teacher');
   document.querySelector('#trip-form').classList.toggle('hidden', !canManage);
   document.querySelector('#trip-assignment').classList.toggle('hidden', !canManage);
@@ -40,6 +42,7 @@ function showDashboard(user) {
   if (user.role !== 'teacher') loadStudents();
   loadTrips();
   if (canManage) {
+    loadLinkableUsers();
     loadVehicles();
     loadDrivers();
     loadReports();
@@ -147,6 +150,14 @@ async function loadStudents() {
       ).join('');
       if (previous) tripStudentSelect.value = previous;
     }
+    const guardianStudentSelect = document.querySelector('#student-guardian-student');
+    if (guardianStudentSelect && currentUser && ['admin', 'direction', 'secretariat'].includes(currentUser.role)) {
+      const previousGuardianStudent = guardianStudentSelect.value;
+      guardianStudentSelect.innerHTML = '<option value="">Selecione um estudante</option>' + data.students.map(item =>
+        '<option value="' + item.id + '">' + escapeHtml(item.full_name + ' · ' + classLabel(item)) + '</option>'
+      ).join('');
+      if (previousGuardianStudent) guardianStudentSelect.value = previousGuardianStudent;
+    }
     const accountStudentSelect = document.querySelector('#student-account-select');
     if (accountStudentSelect && currentUser && ['admin', 'direction', 'secretariat'].includes(currentUser.role)) {
       const previousAccountStudent = accountStudentSelect.value;
@@ -159,6 +170,30 @@ async function loadStudents() {
 }
 
 
+async function loadLinkableUsers() {
+  if (!currentUser || !['admin', 'direction', 'secretariat'].includes(currentUser.role)) return;
+  try {
+    const data = await api('/api/linkable-users');
+    const guardians = data.users.filter(user => user.role === 'guardian' && user.active);
+    const teachers = data.users.filter(user => user.role === 'teacher' && user.active);
+    const guardianSelect = document.querySelector('#student-guardian-user');
+    const previousGuardian = guardianSelect.value;
+    guardianSelect.innerHTML = '<option value="">Selecione um responsável</option>' + guardians.map(user =>
+      '<option value="' + user.id + '">' + escapeHtml(user.name + ' · ' + user.email) + '</option>'
+    ).join('');
+    if (previousGuardian) guardianSelect.value = previousGuardian;
+    const teacherSelect = document.querySelector('#trip-staff-user');
+    const previousTeacher = teacherSelect.value;
+    teacherSelect.innerHTML = '<option value="">Selecione um professor</option>' + teachers.map(user =>
+      '<option value="' + user.id + '">' + escapeHtml(user.name + ' · ' + user.email) + '</option>'
+    ).join('');
+    if (previousTeacher) teacherSelect.value = previousTeacher;
+  } catch (error) {
+    if (error.name === 'AbortError') return;
+    showMessage('#student-guardian-message', error.message, true);
+    showMessage('#trip-staff-message', error.message, true);
+  }
+}
 async function loadVehicles() {
   if (!currentUser || !['admin', 'direction', 'secretariat'].includes(currentUser.role)) return;
   const list = document.querySelector('#vehicles-list');
@@ -350,6 +385,7 @@ async function loadTrips() {
     document.querySelector('#trip-student-trip').innerHTML = options;
     document.querySelector('#trip-vehicle-trip').innerHTML = options;
     document.querySelector('#trip-driver-trip').innerHTML = options;
+    document.querySelector('#trip-staff-trip').innerHTML = options;
   } catch (error) { if (error.name === 'AbortError') return; list.textContent = error.message; }
 }
 async function loadRegistrationRequests() {
@@ -472,6 +508,29 @@ document.querySelector('#trip-driver-form').addEventListener('submit', async eve
   }
 });
 
+document.querySelector('#trip-staff-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  try {
+    const result = await api('/api/trips/' + Number(payload.trip_id) + '/staff', {
+      method: 'POST', body: JSON.stringify({ user_id: Number(payload.user_id) })
+    });
+    event.currentTarget.reset();
+    showMessage('#trip-staff-message', result.message);
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#trip-staff-message', error.message, true); }
+});
+document.querySelector('#student-guardian-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  try {
+    const result = await api('/api/students/' + Number(payload.student_id) + '/guardians', {
+      method: 'POST',
+      body: JSON.stringify({ email: document.querySelector('#student-guardian-user').selectedOptions[0]?.textContent.split(' · ').slice(-1)[0], relationship: payload.relationship })
+    });
+    event.currentTarget.reset();
+    showMessage('#student-guardian-message', result.message);
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#student-guardian-message', error.message, true); }
+});
 document.querySelector('#trip-student-form').addEventListener('submit', async event => {
   event.preventDefault();
   const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
