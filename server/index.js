@@ -208,7 +208,7 @@ app.post('/api/auth/login', async (req, res, next) => {
     const email = String(req.body.email || '').trim().toLowerCase();
     const password = String(req.body.password || '');
     const requestedRole = typeof req.body.role === 'string' ? req.body.role : '';
-    if (requestedRole && !ROLE_LABELS[requestedRole]) return res.status(400).json({ error: 'Perfil selecionado inválido.' });
+    if (!requestedRole || !ROLE_LABELS[requestedRole]) return res.status(400).json({ error: 'Selecione um perfil válido para entrar.' });
     if (!email || !password || email.length > 254 || password.length > 200) return res.status(400).json({ error: 'Informe e-mail e senha válidos.' });
     const now = Date.now();
     const allowedIp = await consumeAttempts('login-ip', [String(req.ip || 'unknown')], LOGIN_WINDOW_MS, 60);
@@ -253,7 +253,8 @@ app.post('/api/auth/google', async (req, res, next) => {
     }
     const user = await firestoreAuth.findUserByEmail(decoded.email);
     const requestedRole = typeof req.body.role === 'string' ? req.body.role : '';
-    if (requestedRole && (!ROLE_LABELS[requestedRole] || user?.role !== requestedRole)) {
+    if (!requestedRole || !ROLE_LABELS[requestedRole]) return res.status(400).json({ error: 'Selecione um perfil válido para entrar.' });
+    if (user?.role !== requestedRole) {
       return res.status(403).json({ error: 'O perfil selecionado não corresponde a esta conta.' });
     }
     if (!user || user.active !== true || !ROLE_LABELS[user.role]) {
