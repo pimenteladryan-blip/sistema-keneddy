@@ -205,7 +205,8 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
     ['Professor da viagem', 'professor-viagem@sgve.local', 'teacher'],
     ['Responsável da viagem', 'responsavel-viagem@sgve.local', 'guardian'],
     ['Responsável externo', 'responsavel-externo@sgve.local', 'guardian'],
-    ['Professor externo', 'professor-externo@sgve.local', 'teacher']
+    ['Professor externo', 'professor-externo@sgve.local', 'teacher'],
+    ['Estudante da viagem', 'estudante-conta@sgve.local', 'student']
   ]) {
     const created = await adminApi('/api/users', {
       method: 'POST', body: JSON.stringify({ name, email, role, password: rolePassword })
@@ -229,6 +230,23 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
   });
   assert.equal(paperStudentResponse.status, 201);
   const paperStudentId = (await paperStudentResponse.json()).id;
+  const accountLink = await adminApi('/api/students/' + studentId + '/account', {
+    method: 'POST', body: JSON.stringify({ email: 'estudante-conta@sgve.local' })
+  });
+  assert.equal(accountLink.status, 200);
+  assert.equal((await adminApi('/api/students/' + paperStudentId + '/account', {
+    method: 'POST', body: JSON.stringify({ email: 'estudante-conta@sgve.local' })
+  })).status, 409, 'uma conta não pode ser vinculada a dois estudantes');
+  const studentLogin = await fetch(baseUrl + '/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+    body: JSON.stringify({ email: 'estudante-conta@sgve.local', password: rolePassword, role: 'student' })
+  });
+  assert.equal(studentLogin.status, 200);
+  const studentCookie = studentLogin.headers.get('set-cookie').split(';')[0];
+  const ownStudents = await fetch(baseUrl + '/api/students', { headers: { Cookie: studentCookie } });
+  assert.equal(ownStudents.status, 200);
+  assert.deepEqual((await ownStudents.json()).students.map(item => item.id), [studentId]);
   const guardianLink = await adminApi('/api/students/' + studentId + '/guardians', {
     method: 'POST',
     body: JSON.stringify({ email: 'responsavel-viagem@sgve.local', relationship: 'Responsável' })
