@@ -625,11 +625,12 @@ document.querySelector('#student-account-form').addEventListener('submit', async
 });
 document.querySelector('#student-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
   payload.class_id = Number(payload.class_id);
   try {
     const result = await api('/api/students', { method: 'POST', body: JSON.stringify(payload) });
-    event.currentTarget.reset();
+    form.reset();
     showMessage('#student-message', result.message);
     await loadStudents();
   } catch (error) { if (error.name === 'AbortError') return; showMessage('#student-message', error.message, true); }
