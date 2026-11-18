@@ -644,6 +644,9 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       role: 'guardian'
     });
     const teacherApi = await loginAs('teacher-api@emulator.sgve');
+    assert.equal((await teacherApi('/api/students/' + apiStudentId + '/account', {
+      method: 'POST', body: JSON.stringify({ email: 'student-api@emulator.sgve' })
+    })).status, 403, 'professor não pode vincular conta estudantil');
     const teacherTripsResponse = await teacherApi('/api/trips');
     assert.equal(teacherTripsResponse.status, 200);
     const teacherTripRows = (await teacherTripsResponse.json()).trips;
