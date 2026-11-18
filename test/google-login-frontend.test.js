@@ -46,7 +46,8 @@ test('o login Google obtém ID token e cria sessão no backend', () => {
   assert.match(app, /getIdToken\(true\)/);
   assert.match(app, /role: document\.querySelector\('#login-role'\)\.value/);
   assert.match(html, /id="login-role"/);
-  assert.match(server, /requestedRole && user\.role !== requestedRole/);
+  assert.match(server, /!requestedRole \|\| !ROLE_LABELS\[requestedRole\]/);
+  assert.match(server, /user\.role !== requestedRole/);
   assert.match(app, /api\('\/api\/auth\/google'/);
   assert.match(app, /X-CSRF-Token/);
 });
