@@ -405,10 +405,11 @@ async function linkStudentAccount(studentId, userId, auditEvent = null) {
   // link the same account to different student records.
   const accountLinkRef = collection('studentAccountLinks').doc(userKey);
   return db.runTransaction(async transaction => {
-    const [studentSnapshot, userSnapshot, accountLinkSnapshot] = await Promise.all([
+    const [studentSnapshot, userSnapshot, accountLinkSnapshot, legacyLinksSnapshot] = await Promise.all([
       transaction.get(studentRef),
       transaction.get(userRef),
-      transaction.get(accountLinkRef)
+      transaction.get(accountLinkRef),
+      transaction.get(collection('students').where('user_id', '==', Number(userKey)).limit(2))
     ]);
     if (!studentSnapshot.exists || studentSnapshot.data().active !== true) return { error: 'student-not-found' };
     if (!userSnapshot.exists || userSnapshot.data().active !== true || userSnapshot.data().role !== 'student') {
@@ -416,7 +417,10 @@ async function linkStudentAccount(studentId, userId, auditEvent = null) {
     }
     const currentUserId = studentSnapshot.data().user_id == null ? null : Number(studentSnapshot.data().user_id);
     const linkedStudentId = accountLinkSnapshot.exists ? Number(accountLinkSnapshot.data().student_id) : null;
-    if (linkedStudentId !== null && linkedStudentId !== Number(studentKey)) return { error: 'account-already-linked' };
+    const legacyStudent = legacyLinksSnapshot.docs.find(doc => doc.id !== studentKey);
+    if (legacyStudent || (linkedStudentId !== null && linkedStudentId !== Number(studentKey))) {
+      return { error: 'account-already-linked' };
+    }
     if (currentUserId !== null && currentUserId !== Number(userKey)) return { error: 'student-already-linked' };
     if (currentUserId === Number(userKey)) {
       if (!accountLinkSnapshot.exists) {
