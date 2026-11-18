@@ -680,10 +680,11 @@ registrationForm.addEventListener('submit', async event => {
 });
 document.querySelector('#user-form').addEventListener('submit', async event => {
   event.preventDefault();
-  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
   try {
     const result = await api('/api/users', { method: 'POST', body: JSON.stringify(payload) });
-    event.currentTarget.reset();
+    form.reset();
     showMessage('#user-message', result.message + ' Perfil: ' + result.user.roleLabel);
   } catch (error) { if (error.name === 'AbortError') return; showMessage('#user-message', error.message, true); }
 });
