@@ -244,6 +244,9 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
     method: 'POST', body: JSON.stringify({ email: 'estudante-conta@sgve.local' })
   });
   assert.equal(accountLink.status, 200);
+  assert.equal((await adminApi('/api/students/' + studentId + '/account', {
+    method: 'POST', body: JSON.stringify({ email: 'estudante-conta@sgve.local' })
+  })).status, 200, 'repetir o mesmo vínculo deve ser idempotente');
   assert.equal((await adminApi('/api/students/' + paperStudentId + '/account', {
     method: 'POST', body: JSON.stringify({ email: 'estudante-conta@sgve.local' })
   })).status, 409, 'uma conta não pode ser vinculada a dois estudantes');
