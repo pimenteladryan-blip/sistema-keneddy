@@ -179,7 +179,7 @@ async function loadLinkableUsers() {
     const guardianSelect = document.querySelector('#student-guardian-user');
     const previousGuardian = guardianSelect.value;
     guardianSelect.innerHTML = '<option value="">Selecione um responsável</option>' + guardians.map(user =>
-      '<option value="' + user.id + '">' + escapeHtml(user.name + ' · ' + user.email) + '</option>'
+      '<option value="' + escapeHtml(user.email) + '">' + escapeHtml(user.name + ' · ' + user.email) + '</option>'
     ).join('');
     if (previousGuardian) guardianSelect.value = previousGuardian;
     const teacherSelect = document.querySelector('#trip-staff-user');
@@ -525,7 +525,7 @@ document.querySelector('#student-guardian-form').addEventListener('submit', asyn
   try {
     const result = await api('/api/students/' + Number(payload.student_id) + '/guardians', {
       method: 'POST',
-      body: JSON.stringify({ email: document.querySelector('#student-guardian-user').selectedOptions[0]?.textContent.split(' · ').slice(-1)[0], relationship: payload.relationship })
+      body: JSON.stringify({ email: payload.guardian_email, relationship: payload.relationship })
     });
     event.currentTarget.reset();
     showMessage('#student-guardian-message', result.message);
