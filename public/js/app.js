@@ -79,7 +79,7 @@ async function api(url, options = {}) {
       credentials: 'same-origin', ...options,
       signal: options.signal || sessionController.signal, headers
     });
-  } catch (error) { if (error.name === 'AbortError') return;
+  } catch (error) {
     throw error;
   }
   const data = await response.json().catch(error => {
