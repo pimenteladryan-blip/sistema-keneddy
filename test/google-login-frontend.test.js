@@ -23,6 +23,12 @@ test('a instalação PWA usa arquivos estáticos e nunca armazena respostas da A
   assert.match(worker, /if \(url\.pathname\.startsWith\('\/api\/'\)\) return/);
 });
 
+test('a interface limpa os dados privados quando a sessão expira', () => {
+  assert.match(app, /response\.status === 401 && currentUser/);
+  assert.match(app, /Sua sessão expirou/);
+  assert.match(app, /showLogin\(\)/);
+});
+
 test('o vínculo de conta estudantil é restrito à gestão e a tela do professor não carrega a lista geral', () => {
   assert.match(html, /id="student-account-form"/);
   assert.match(html, /id="student-account-select"/);
