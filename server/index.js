@@ -501,6 +501,17 @@ app.post('/api/registration-requests/:id/reject', requireAuth, requireCsrf, requ
   audit(req.auth.user.id, 'reject_registration', 'registration_request', id);
   res.json({ message: 'Solicitação rejeitada.' });
 });
+app.get('/api/linkable-users', requireAuth, requireRoles(...RECORD_MANAGERS), async (_req, res, next) => {
+  try {
+    if (firebaseConfigured) {
+      const users = await firestoreAuth.listUsers(300);
+      return res.json({ users: users.filter(user => user.active && ['teacher', 'guardian'].includes(user.role))
+        .map(user => ({ id: Number(user.id), name: user.display_name, email: user.email, role: user.role, active: true })) });
+    }
+    const rows = db.prepare("SELECT id, display_name, email, role, active FROM users WHERE active = 1 AND role IN ('teacher', 'guardian') ORDER BY display_name LIMIT 300").all();
+    return res.json({ users: rows.map(user => ({ id: Number(user.id), name: user.display_name, email: user.email, role: user.role, active: Boolean(user.active) })) });
+  } catch (error) { next(error); }
+});
 app.get('/api/users', requireAuth, requireRoles('admin', 'direction'), async (_req, res, next) => {
   try {
     if (firebaseConfigured) {
