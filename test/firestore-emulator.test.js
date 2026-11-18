@@ -514,6 +514,9 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       method: 'POST', body: JSON.stringify({ email: 'student-api@emulator.sgve' })
     });
     assert.equal(studentAccountLink.status, 200);
+    assert.equal((await api('/api/students/' + apiStudentId + '/account', {
+      method: 'POST', body: JSON.stringify({ email: 'student-api@emulator.sgve' })
+    })).status, 200, 'repetir o mesmo vínculo deve ser idempotente');
     const duplicateStudentAccountLink = await api('/api/students/' + paperStudentId + '/account', {
       method: 'POST', body: JSON.stringify({ email: 'student-api@emulator.sgve' })
     });
