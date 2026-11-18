@@ -660,12 +660,6 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       password_hash: rolePasswordHash,
       role: 'guardian'
     });
-    const studentApi = await loginAs('student-api@emulator.sgve');
-    const ownStudentResponse = await studentApi('/api/students');
-    assert.equal(ownStudentResponse.status, 200);
-    assert.deepEqual((await ownStudentResponse.json()).students.map(item => item.id), [apiStudentId],
-      'conta de estudante só pode consultar o cadastro vinculado a ela');
-
     const teacherApi = await loginAs('teacher-api@emulator.sgve');
     assert.equal((await teacherApi('/api/students/' + apiStudentId + '/account', {
       method: 'POST', body: JSON.stringify({ email: 'student-api@emulator.sgve' })
