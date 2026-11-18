@@ -599,6 +599,11 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     ]) assert.equal(adminActions.has(action), true, 'evento de auditoria ausente: ' + action);
     assert.equal(apiAudit.some(event =>
       Number(event.actor_user_id) === adminActorId &&
+      event.action === 'link_student_account' && event.entity_type === 'student' &&
+      String(event.entity_id) === String(apiStudentId)
+    ), true, 'vínculo de conta estudantil precisa ser auditado');
+    assert.equal(apiAudit.some(event =>
+      Number(event.actor_user_id) === adminActorId &&
       event.action === 'create' && event.entity_type === 'user'
     ), true, 'criação de usuário não foi auditada na transação');
     const vehicleAudit = apiAudit.filter(event =>
@@ -791,7 +796,10 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const ownStudents = await studentApi('/api/students');
     assert.equal(ownStudents.status, 200);
     assert.equal((await ownStudents.json()).students.length, 1);
-    assert.equal((await studentApi('/api/trips')).status, 200);
+    const studentTripsResponse = await studentApi('/api/trips');
+    assert.equal(studentTripsResponse.status, 200);
+    assert.deepEqual((await studentTripsResponse.json()).trips.map(item => item.id), [apiTripId],
+      'estudante só pode consultar viagens do próprio cadastro');
     const studentParticipantsResponse = await studentApi('/api/trips/' + apiTripId + '/participants');
     assert.equal(studentParticipantsResponse.status, 200);
     assert.equal((await studentParticipantsResponse.json()).participants.length, 1);
