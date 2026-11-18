@@ -91,13 +91,23 @@ async function adminSession() {
   const response = await fetch(baseUrl + '/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-    body: JSON.stringify({ email: adminEmail, password: adminPassword })
+    body: JSON.stringify({ email: adminEmail, password: adminPassword, role: 'admin' })
   });
   assert.equal(response.status, 200);
   const cookie = response.headers.get('set-cookie').split(';')[0];
   const data = await response.json();
   return { cookie, csrfToken: data.csrfToken };
 }
+
+test('login exige a seleção de um perfil válido', async () => {
+  const missing = await fetch(baseUrl + '/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+    body: JSON.stringify({ email: adminEmail, password: adminPassword })
+  });
+  assert.equal(missing.status, 400);
+  assert.equal(missing.headers.get('set-cookie'), null);
+});
 
 test('login rejeita perfil selecionado diferente do perfil cadastrado', async () => {
   const mismatch = await fetch(baseUrl + '/api/auth/login', {
@@ -128,7 +138,7 @@ test('cadastro público só libera acesso após aprovação do administrador', a
   const blockedLogin = await fetch(baseUrl + '/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-    body: JSON.stringify({ email: pendingEmail, password: applicantPassword })
+    body: JSON.stringify({ email: pendingEmail, password: applicantPassword, role: 'teacher' })
   });
   assert.equal(blockedLogin.status, 401);
 
@@ -183,7 +193,7 @@ test('solicitação rejeitada não cria uma conta', async () => {
   const login = await fetch(baseUrl + '/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-    body: JSON.stringify({ email: rejectedEmail, password: applicantPassword })
+    body: JSON.stringify({ email: rejectedEmail, password: applicantPassword, role: 'teacher' })
   });
   assert.equal(login.status, 401);
 });
@@ -308,7 +318,7 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
     const response = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-      body: JSON.stringify({ email, password: rolePassword })
+      body: JSON.stringify({ email, password: rolePassword, role: email.startsWith('professor-') ? 'teacher' : email.startsWith('responsavel-') ? 'guardian' : 'student' })
     });
     assert.equal(response.status, 200);
     const data = await response.json();
@@ -529,7 +539,7 @@ test('frota e atribuição de veículos validam capacidade, conflito de horário
   const teacherLogin = await fetch(baseUrl + '/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-    body: JSON.stringify({ email: 'professor-frota@sgve.local', password: 'SenhaSegura123!ABC' })
+    body: JSON.stringify({ email: 'professor-frota@sgve.local', password: 'SenhaSegura123!ABC', role: 'teacher' })
   });
   assert.equal(teacherLogin.status, 200);
   const teacherData = await teacherLogin.json();
