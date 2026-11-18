@@ -9,10 +9,13 @@ const googleLoginButton = document.querySelector('#google-login-button');
 const installButton = document.querySelector('#pwa-install');
 let deferredInstallPrompt = null;
 let csrfToken = '';
+let sessionController = new AbortController();
 let currentUser = null;
 let lastReport = null;
 
 function showDashboard(user) {
+  sessionController.abort();
+  sessionController = new AbortController();
   currentUser = user;
   loginView.classList.add('hidden');
   dashboardView.classList.remove('hidden');
@@ -22,6 +25,8 @@ function showDashboard(user) {
   if (!canManage) lastReport = null;
   document.querySelector('#class-form').classList.toggle('hidden', !canManage);
   document.querySelector('#student-form').classList.toggle('hidden', !canManage);
+  document.querySelector('#student-account-form').classList.toggle('hidden', !canManage);
+  document.querySelector('#students-tab').classList.toggle('hidden', user.role === 'teacher');
   document.querySelector('#trip-form').classList.toggle('hidden', !canManage);
   document.querySelector('#trip-assignment').classList.toggle('hidden', !canManage);
   document.querySelector('#users-tab').classList.toggle('hidden', !canManage);
@@ -32,7 +37,7 @@ function showDashboard(user) {
   document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tab === 'classes-panel'));
   document.querySelectorAll('.module-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== 'classes-panel'));
   loadClasses();
-  loadStudents();
+  if (user.role !== 'teacher') loadStudents();
   loadTrips();
   if (canManage) {
     loadVehicles();
@@ -41,21 +46,43 @@ function showDashboard(user) {
   }
   if (user.role === 'admin') loadRegistrationRequests();
 }
+function clearDashboardData() {
+  dashboardView.querySelectorAll('form').forEach(form => form.reset());
+  dashboardView.querySelectorAll('.data-list, tbody').forEach(element => element.replaceChildren());
+  dashboardView.querySelectorAll('.count-pill').forEach(element => { element.textContent = '0'; });
+  dashboardView.querySelectorAll('.message').forEach(element => { element.textContent = ''; });
+  dashboardView.querySelectorAll('select').forEach(select => {
+    if (select.options.length) {
+      const firstOption = select.options[0].cloneNode(true);
+      select.replaceChildren(firstOption);
+    }
+  });
+  document.querySelector('#welcome-title').textContent = 'Olá!';
+  document.querySelector('#user-role').textContent = '';
+}
 function showLogin() {
+  sessionController.abort();
+  sessionController = new AbortController();
+  clearDashboardData();
   currentUser = null;
   lastReport = null;
   dashboardView.classList.add('hidden');
   loginView.classList.remove('hidden');
   csrfToken = '';
-  document.querySelector('#drivers-list').textContent = '';
-  document.querySelector('#vehicles-list').textContent = '';
-  document.querySelector('#trip-driver-select').innerHTML = '<option value="">Cadastre um condutor</option>';
-  document.querySelector('#trip-vehicle-select').innerHTML = '<option value="">Cadastre um veículo</option>';
 }
 async function api(url, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
-  const response = await fetch(url, { credentials: 'same-origin', ...options, headers });
+  let response;
+  try {
+    response = await fetch(url, {
+      credentials: 'same-origin', ...options,
+      signal: options.signal || sessionController.signal, headers
+    });
+  } catch (error) {
+    if (error.name === 'AbortError') return new Promise(() => {});
+    throw error;
+  }
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error || 'Não foi possível concluir a operação.');
   return data;
@@ -113,6 +140,14 @@ async function loadStudents() {
         '<option value="' + item.id + '">' + escapeHtml(item.full_name + ' · ' + classLabel(item)) + '</option>'
       ).join('');
       if (previous) tripStudentSelect.value = previous;
+    }
+    const accountStudentSelect = document.querySelector('#student-account-select');
+    if (accountStudentSelect && currentUser && ['admin', 'direction', 'secretariat'].includes(currentUser.role)) {
+      const previousAccountStudent = accountStudentSelect.value;
+      accountStudentSelect.innerHTML = '<option value="">Selecione um estudante</option>' + data.students.map(item =>
+        '<option value="' + item.id + '">' + escapeHtml(item.full_name + ' · ' + classLabel(item)) + '</option>'
+      ).join('');
+      if (previousAccountStudent) accountStudentSelect.value = previousAccountStudent;
     }
   } catch (error) { list.textContent = error.message; }
 }
@@ -509,6 +544,18 @@ document.querySelector('#class-form').addEventListener('submit', async event => 
     showMessage('#class-message', result.message);
     await loadClasses();
   } catch (error) { showMessage('#class-message', error.message, true); }
+});
+document.querySelector('#student-account-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  try {
+    const result = await api('/api/students/' + Number(payload.student_id) + '/account', {
+      method: 'POST', body: JSON.stringify({ email: payload.email })
+    });
+    event.currentTarget.reset();
+    showMessage('#student-account-message', result.message);
+    await loadStudents();
+  } catch (error) { showMessage('#student-account-message', error.message, true); }
 });
 document.querySelector('#student-form').addEventListener('submit', async event => {
   event.preventDefault();
