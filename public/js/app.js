@@ -32,6 +32,7 @@ function showDashboard(user) {
   document.querySelector('#trip-form').classList.toggle('hidden', !canManage);
   document.querySelector('#trip-assignment').classList.toggle('hidden', !canManage);
   document.querySelector('#users-tab').classList.toggle('hidden', !canManage);
+  document.querySelector('#guardians-tab').classList.toggle('hidden', !canManage);
   document.querySelector('#vehicles-tab').classList.toggle('hidden', !canManage);
   document.querySelector('#reports-tab').classList.toggle('hidden', !canManage);
   document.querySelector('#registration-requests-section').classList.toggle('hidden', user.role !== 'admin');
@@ -176,6 +177,14 @@ async function loadLinkableUsers() {
     const data = await api('/api/linkable-users');
     const guardians = data.users.filter(user => user.role === 'guardian' && user.active);
     const teachers = data.users.filter(user => user.role === 'teacher' && user.active);
+    const guardianList = document.querySelector('#guardians-list');
+    const guardianCount = document.querySelector('#guardians-count');
+    if (guardianList && guardianCount) {
+      guardianCount.textContent = String(guardians.length);
+      guardianList.innerHTML = guardians.length ? guardians.map(user =>
+        '<article class="data-row guardian-row"><div><strong>' + escapeHtml(user.name) + '</strong><small>' + escapeHtml(user.email) + '</small></div><span>Conta ativa</span></article>'
+      ).join('') : '<p class="muted">Nenhum responsável cadastrado ainda.</p>';
+    }
     const guardianSelect = document.querySelector('#student-guardian-user');
     const previousGuardian = guardianSelect.value;
     guardianSelect.innerHTML = '<option value="">Selecione um responsável</option>' + guardians.map(user =>
@@ -686,6 +695,26 @@ registrationForm.addEventListener('submit', async event => {
   } finally {
     button.disabled = false;
     button.textContent = 'Enviar solicitação';
+  }
+});
+document.querySelector('#guardian-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
+  if (payload.password !== payload.password_confirm) {
+    showMessage('#guardian-message', 'As senhas não coincidem.', true);
+    return;
+  }
+  delete payload.password_confirm;
+  payload.role = 'guardian';
+  try {
+    const result = await api('/api/users', { method: 'POST', body: JSON.stringify(payload) });
+    form.reset();
+    showMessage('#guardian-message', result.message + ' O responsável já pode ser vinculado a um estudante.');
+    await loadLinkableUsers();
+  } catch (error) {
+    if (error.name === 'AbortError') return;
+    showMessage('#guardian-message', error.message, true);
   }
 });
 document.querySelector('#user-form').addEventListener('submit', async event => {
