@@ -541,3 +541,12 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] CI completo aprovado no commit de código `ab0f900a35b3d4759c63ffa713a5738902ac5ff1` (runs 969 e 970) e no commit documental `a788024e1002aba7c495bdd0175bf527b99feda6` (runs 971 e 972).
 - [ ] Não foi possível fazer inspeção visual ao vivo nesta sessão: as URLs GitHub Pages e Render não puderam ser abertas pelo navegador disponível. Isso não é uma falha do sistema; significa apenas que a aparência e os fluxos reais ainda não foram validados visualmente.
 - [ ] Antes de mesclar/publicar: validar visualmente em navegador, testar login Google com conta autorizada e confirmar configuração do serviço Render. Nenhum deploy foi iniciado.
+
+### Verificação posterior do commit atual (18/11/2026)
+
+- [x] Verificado o HEAD atual da branch `feature/production-kennedy-ui`: `edcb34298ce04212b324477a31e9d50599718d58`.
+- [x] Confirmado que o CI desse HEAD executou a workflow `SGVE - verificações`, run 974 (`44209591603`), com job `checks` concluído em sucesso.
+- [x] Conferidas como aprovadas no run 974 as etapas de instalação de dependências, sintaxe/estrutura, testes automatizados e integração com Firestore Emulator.
+- [x] Feita nova leitura do diff das rotas de vínculo de conta estudantil, transação Firestore/SQLite, login por senha/Google e limpeza de sessão no frontend.
+- [ ] Ainda falta teste visual em navegador desktop/celular e validação controlada dos fluxos reais Google/Render; CI verde não substitui essas verificações.
+- [ ] PR #2 permanece aberto, em rascunho e não mesclado. Nenhuma publicação ou alteração no serviço Render foi feita.
