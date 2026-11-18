@@ -333,6 +333,9 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
     });
   };
   const teacherApi = await loginRole('professor-viagem@sgve.local');
+  assert.equal((await teacherApi('/api/students/' + studentId + '/account', {
+    method: 'POST', body: JSON.stringify({ email: 'estudante-conta@sgve.local' })
+  })).status, 403, 'professor não pode vincular contas de estudante');
   const teacherParticipants = await teacherApi('/api/trips/' + tripId + '/participants');
   assert.equal(teacherParticipants.status, 200);
   assert.equal((await teacherParticipants.json()).participants.length, 2);
