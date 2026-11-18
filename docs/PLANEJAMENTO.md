@@ -460,3 +460,31 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] Confirmado que a branch de trabalho está no commit `9bd19a7103a5709d8b3427badc27b7bdc96f2f05` e que o GitHub Actions run `44201723576` (run 906) terminou com sucesso.
 - [ ] A aprovação do CI não substitui a validação visual e funcional em navegador real; ainda falta testar os fluxos na versão de prévia com contas sintéticas.
 - [ ] Ainda não foi mesclada a PR #2 nem alterado o Render de produção. A publicação continua condicionada à revisão final e autorização explícita.
+
+
+### Revisão técnica completa da interface e backend (17/11/2026)
+
+**Escopo conferido:** PR #2, interface HTML/CSS/JavaScript, rotas Express, autenticação, sessões, CSRF, rate limit, serviços Firestore, regras e índices Firestore, Service Worker/PWA, testes e workflow CI.
+
+**Validação automatizada**
+- [x] PR #2 permanece aberto e em rascunho, com branch de origem `feature/production-kennedy-ui` e destino `feature/firestore-auth-migration` (branch atualmente associada à implantação existente, conforme configuração previamente informada).
+- [x] Commit revisado: `1392b3d8a0b2a81d08f42078c9f3dea0f909e37b`.
+- [x] GitHub Actions run `44202542613` (run 908) concluído com sucesso: instalação de dependências, `npm run check`, `npm test` e integração Firestore Emulator.
+- [x] Regras Firestore revisadas: leitura e escrita diretas por clientes web/mobile negadas; o backend utiliza Firebase Admin.
+- [x] Revisados os controles de sessão (cookie HttpOnly, SameSite Strict e Secure em produção), validação de origem/CSRF nas operações autenticadas, rate limit e verificações de perfil nas rotas sensíveis.
+- [x] Revisado o Service Worker: somente CSS, JavaScript, manifest e ícone entram no cache; rotas `/api/` não são interceptadas.
+- [x] Conferidos os índices declarados para consultas compostas identificadas no código.
+- [ ] Não foi possível validar a interface renderizada em navegador real nem executar login Google no domínio Render durante esta revisão. O CI e a inspeção estática não substituem essa etapa.
+
+**Pendências encontradas; não corrigidas nesta revisão**
+- [ ] **Alta — vínculo de contas de estudantes:** o cadastro de estudante cria o registro sem `user_id`, e não foi encontrada rota/interface para vincular uma conta com perfil `student` a um registro de estudante. As consultas desse perfil dependem desse vínculo; portanto, contas de estudante aprovadas podem ficar sem acesso aos próprios dados e viagens. Projetar e testar um fluxo administrativo seguro de vínculo antes de habilitar esse perfil.
+- [ ] **Alta — limpeza de dados no logout/expiração:** `showLogin()` limpa apenas alguns elementos e variáveis, mas não apaga todos os nomes/listas/participantes/linhas de relatório já renderizados no DOM oculto. Limpar os dados pessoais da interface ao sair, quando a sessão expirar e antes de trocar de usuário; avaliar também respostas assíncronas antigas que possam terminar após a troca de sessão.
+- [ ] **Média — tela de estudantes para professor:** a interface carrega `/api/students` para todos os perfis, mas o backend nega essa consulta ao perfil professor. A aba/lista pode exibir erro de permissão; ocultar a aba para professor ou implementar consulta limitada aos estudantes de viagens em que esteja vinculado.
+- [ ] **Média — seleção de perfil no servidor:** a interface exige a seleção de perfil, mas os endpoints de login por senha e Google aceitam requisições sem o campo `role`. A autenticação continua usando o perfil armazenado na conta, então isso não permite elevar privilégios; ainda assim, exigir e validar o campo no backend para manter o comportamento consistente com a interface.
+- [ ] **Média — validação externa:** confirmar no projeto Firebase real os domínios autorizados do Authentication, o login Google, os índices implantados, as quotas e a conexão do Render. Esses itens não podem ser comprovados pelo Firestore Emulator.
+- [ ] **Antes de uso institucional:** obter aprovação formal da escola e do responsável institucional, revisar privacidade/LGPD, definir acessos e retenção, e testar backup/restauração. Não inserir dados reais de estudantes antes desses requisitos.
+
+**Conclusão da revisão**
+- [x] A suíte automatizada está verde no commit revisado e não foi identificada, nesta inspeção estática, exposição de credenciais de conta de serviço no frontend.
+- [ ] A PR #2 **não está liberada para publicação escolar** enquanto as pendências altas não forem corrigidas e testadas.
+- [ ] Nenhum código funcional foi alterado nesta revisão; nenhuma mesclagem, configuração do Render ou implantação foi realizada.
