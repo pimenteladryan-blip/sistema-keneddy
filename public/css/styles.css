@@ -711,3 +711,60 @@ body.dark-mode .banner-years{color:#a8d8b7}
   .dashboard .welcome-row .eyebrow { font-size: 8px; }
   .dashboard .dashboard-mark { display: none; }
 }
+
+
+/* Área dedicada aos responsáveis: cadastro e lista com hierarquia visual */
+#guardians-panel .guardian-create-form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px 18px;
+  padding: 22px;
+  border: 1px solid #dceade;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f8fcf8, #f1f8f2);
+}
+#guardians-panel .guardian-create-form label { gap: 8px; color: #3e5748; }
+#guardians-panel .guardian-create-form input {
+  min-height: 46px;
+  border-radius: 9px;
+  background: #fff;
+}
+#guardians-panel .guardian-create-form button {
+  align-self: end;
+  min-height: 46px;
+  padding: 0 20px;
+}
+#guardians-panel .guardian-list-heading { margin: 26px 0 4px; }
+#guardians-panel .guardian-list-heading h4 { margin: 0; color: var(--ink); font-size: 14px; }
+#guardians-panel .guardian-row { align-items: center; padding: 14px 16px; }
+#guardians-panel .guardian-row > div { display: grid; gap: 5px; }
+#guardians-panel .guardian-row small { color: var(--muted); font-size: 11px; }
+#guardians-panel .guardian-row > span {
+  padding: 5px 9px;
+  border-radius: 20px;
+  background: #e8f4ed;
+  color: #17613e;
+  font-size: 10px;
+  font-weight: 800;
+}
+.dashboard .tab:nth-child(6)::before { content: "♧"; }
+.dashboard .tab:nth-child(7)::before { content: "⚙"; }
+body.dark-mode #guardians-panel .guardian-create-form {
+  border-color: #304238;
+  background: linear-gradient(135deg, #17291e, #14231a);
+}
+body.dark-mode #guardians-panel .guardian-create-form label,
+body.dark-mode #guardians-panel .guardian-list-heading h4 { color: #d5e1d8; }
+body.dark-mode #guardians-panel .guardian-create-form input {
+  border-color: #405b49;
+  background: #101c15;
+  color: #edf5ef;
+}
+body.dark-mode #guardians-panel .guardian-row > span {
+  background: #1b3826;
+  color: #c9efd3;
+}
+@media (max-width: 520px) {
+  #guardians-panel .guardian-create-form { grid-template-columns: 1fr; padding: 14px; }
+  #guardians-panel .guardian-create-form button { width: 100%; }
+  #guardians-panel .guardian-row { align-items: flex-start; }
+}
