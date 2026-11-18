@@ -488,3 +488,23 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [x] A suíte automatizada está verde no commit revisado e não foi identificada, nesta inspeção estática, exposição de credenciais de conta de serviço no frontend.
 - [ ] A PR #2 **não está liberada para publicação escolar** enquanto as pendências altas não forem corrigidas e testadas.
 - [ ] Nenhum código funcional foi alterado nesta revisão; nenhuma mesclagem, configuração do Render ou implantação foi realizada.
+
+
+### Correções após revisão técnica (17/11/2026)
+
+**Implementado na branch `feature/production-kennedy-ui`; validação automatizada pendente**
+- [x] Criada rota `POST /api/students/:id/account`, protegida por sessão, CSRF e perfil de gestão.
+- [x] Implementado vínculo de cadastro escolar com conta ativa de perfil `student` no Firestore usando transação; impede associar uma conta a dois estudantes e impede substituir vínculo existente.
+- [x] Implementado o mesmo fluxo no SQLite usando `BEGIN IMMEDIATE`, validação de conta ativa/perfil e restrição única de `students.user_id`.
+- [x] O vínculo registra evento de auditoria e a repetição do mesmo vínculo é idempotente.
+- [x] Adicionado formulário na aba Estudantes para selecionar o cadastro e informar o e-mail da conta de estudante.
+- [x] Adicionados testes SQLite e Firestore Emulator para vínculo, acesso do estudante aos próprios dados, rejeição de conta já vinculada a outro cadastro e bloqueio para professor.
+- [x] A aba geral de estudantes deixa de aparecer para professor; a interface também deixa de fazer a chamada geral `GET /api/students` nesse perfil.
+- [x] Logout, retorno à tela de login e troca de sessão agora abortam requisições pendentes, limpam listas/tabelas, seletores, contadores, mensagens e formulários da área autenticada.
+- [x] Tratamento de cancelamento evita que respostas de requisições antigas voltem a preencher a interface depois da saída.
+- [x] Login por senha e Google agora exigem perfil explícito da lista permitida no backend; perfil ausente/inválido retorna HTTP 400 e perfil diferente da conta retorna HTTP 403.
+- [x] Atualizados testes de autenticação para enviar o perfil e adicionada regressão para tentativa de login sem perfil.
+- [ ] Executar e aguardar CI completo após estas alterações; não marcar os testes como aprovados antes do resultado.
+- [ ] Validar visualmente em navegador desktop e celular, incluindo criação de conta de estudante, vínculo, login do estudante e logout/troca de usuário.
+- [ ] Revisar os fluxos completos de responsável, professor, secretaria e direção com contas sintéticas.
+- [ ] Nenhuma alteração foi mesclada na branch de produção e nenhum deploy do Render foi iniciado.
