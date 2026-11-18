@@ -208,7 +208,7 @@ app.post('/api/auth/login', async (req, res, next) => {
     const email = String(req.body.email || '').trim().toLowerCase();
     const password = String(req.body.password || '');
     const requestedRole = typeof req.body.role === 'string' ? req.body.role : '';
-    if (!requestedRole || !ROLE_LABELS[requestedRole]) return res.status(400).json({ error: 'Selecione um perfil válido para entrar.' });
+    if (!VALID_ROLES.includes(requestedRole)) return res.status(400).json({ error: 'Selecione um perfil válido para entrar.' });
     if (!email || !password || email.length > 254 || password.length > 200) return res.status(400).json({ error: 'Informe e-mail e senha válidos.' });
     const now = Date.now();
     const allowedIp = await consumeAttempts('login-ip', [String(req.ip || 'unknown')], LOGIN_WINDOW_MS, 60);
