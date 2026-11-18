@@ -868,7 +868,7 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const failedAfterSuccess = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-      body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: 'SenhaIncorreta2026!' })
+      body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: 'SenhaIncorreta2026!', role: 'teacher' })
     });
     assert.equal(failedAfterSuccess.status, 401,
       'login válido deve limpar o contador por conta para evitar bloqueio de usuário legítimo');
