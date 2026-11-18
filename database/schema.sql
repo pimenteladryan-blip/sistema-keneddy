@@ -54,6 +54,29 @@ CREATE TABLE IF NOT EXISTS student_guardians (
 );
 CREATE INDEX IF NOT EXISTS idx_student_guardians_guardian ON student_guardians(guardian_user_id);
 
+
+CREATE TABLE IF NOT EXISTS vehicles (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL COLLATE NOCASE UNIQUE,
+  type TEXT NOT NULL CHECK (type IN ('Ônibus','Micro-ônibus','Van')),
+  capacity INTEGER NOT NULL CHECK (capacity BETWEEN 1 AND 100),
+  active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0,1)),
+  created_by INTEGER NOT NULL REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_vehicles_active_name ON vehicles(active, name);
+
+CREATE TABLE IF NOT EXISTS drivers (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL COLLATE NOCASE UNIQUE,
+  active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0,1)),
+  created_by INTEGER NOT NULL REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_drivers_active_name ON drivers(active, name);
+
 CREATE TABLE IF NOT EXISTS trips (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   title TEXT NOT NULL,
@@ -62,6 +85,8 @@ CREATE TABLE IF NOT EXISTS trips (
   departure_at TEXT NOT NULL,
   return_at TEXT NOT NULL,
   capacity INTEGER NOT NULL CHECK (capacity > 0),
+  vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE SET NULL,
+  driver_id INTEGER REFERENCES drivers(id) ON DELETE SET NULL,
   status TEXT NOT NULL DEFAULT 'draft'
     CHECK (status IN ('draft','pending_approval','approved','open','completed','cancelled')),
   created_by INTEGER NOT NULL REFERENCES users(id),

@@ -13,13 +13,17 @@ async function hashPassword(password) {
 }
 
 async function verifyPassword(password, stored) {
-  if (typeof stored !== 'string') return false;
-  const [algorithm, saltHex, hashHex] = stored.split(':');
-  if (algorithm !== 'scrypt' || !saltHex || !hashHex) return false;
+  // Reject malformed or oversized hashes before invoking the expensive scrypt operation.
+  if (typeof password !== 'string' ||
+      typeof stored !== 'string' ||
+      !/^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(stored)) return false;
+  const [, saltHex, hashHex] = stored.split(':');
   try {
     const expected = Buffer.from(hashHex, 'hex');
-    const actual = Buffer.from(await scrypt(password, Buffer.from(saltHex, 'hex'), expected.length));
-    return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+    const actual = Buffer.from(await scrypt(password, Buffer.from(saltHex, 'hex'), KEY_LENGTH));
+    return expected.length === KEY_LENGTH &&
+      actual.length === expected.length &&
+      crypto.timingSafeEqual(expected, actual);
   } catch {
     return false;
   }

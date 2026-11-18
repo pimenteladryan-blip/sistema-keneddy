@@ -2,9 +2,9 @@ name: SGVE - verificações
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/firestore-auth-migration, feature/production-kennedy-ui]
   pull_request:
-    branches: [main]
+    branches: [main, feature/firestore-auth-migration]
 
 jobs:
   checks:
@@ -18,11 +18,18 @@ jobs:
           node-version: 24
       - name: Instalar dependências
         run: npm install
-      - name: Verificar sintaxe
-        run: npm run check
-      - name: Verificar JavaScript do protótipo
+      - name: Verificar sintaxe e estrutura
         run: |
-          node -e "const fs=require('node:fs'); const html=fs.readFileSync('docs/index.html','utf8'); const scripts=[...html.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)]; if (!scripts.length) throw new Error('Script do protótipo não encontrado'); fs.writeFileSync('/tmp/sgve-demo-inline.js', scripts[0][1]);"
-          node --check /tmp/sgve-demo-inline.js
+          npm run check
+          node -e "const fs=require('node:fs'); const html=fs.readFileSync('docs/index.html','utf8'); if (!html.includes('https://sistema-keneddy.onrender.com/')) throw new Error('Link do SGVE no Render ausente'); if (/admin@sgve\.demo|Kennedy2026|Aluno Exemplo/.test(html)) throw new Error('Credencial ou dado demonstrativo encontrado na página publicada');"
       - name: Executar testes
         run: npm test
+      - name: Configurar Java para Firestore Emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Testar integração com Firestore Emulator
+        env:
+          FIREBASE_PROJECT_ID: demo-sgve
+        run: npm run test:firestore

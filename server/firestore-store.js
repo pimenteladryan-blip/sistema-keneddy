@@ -8,14 +8,37 @@ const COLLECTIONS = Object.freeze({
   sessions: 'sessions',
   classes: 'classes',
   students: 'students',
+  studentAccountLinks: 'student_account_links',
   studentGuardians: 'student_guardians',
   trips: 'trips',
+  vehicles: 'vehicles',
+  drivers: 'drivers',
   tripClasses: 'trip_classes',
   tripStudents: 'trip_students',
   tripStaff: 'trip_staff',
   auditLogs: 'audit_logs',
   registrationRequests: 'registration_requests'
 });
+
+function addAuditWrite(transaction, db, event) {
+  if (!event) return;
+  const actor = event.actor_user_id == null ? null : Number(event.actor_user_id);
+  if (actor !== null && (!Number.isSafeInteger(actor) || actor < 1)) {
+    throw new TypeError('Responsável pelo evento de auditoria inválido.');
+  }
+  if (typeof event.action !== 'string' || !event.action.trim() || event.action.length > 80 ||
+      typeof event.entity_type !== 'string' || !event.entity_type.trim() || event.entity_type.length > 80) {
+    throw new TypeError('Evento de auditoria inválido.');
+  }
+  const ref = db.collection('audit_logs').doc();
+  transaction.create(ref, {
+    actor_user_id: actor,
+    action: event.action.trim(),
+    entity_type: event.entity_type.trim(),
+    entity_id: event.entity_id == null ? null : String(event.entity_id),
+    created_at: new Date().toISOString()
+  });
+}
 
 function requireFirestore() {
   if (!firestore) {
@@ -92,7 +115,9 @@ async function remove(name, id) {
 
 const UNIQUE_FIELDS = Object.freeze({
   users: ['email'],
-  registrationRequests: ['email']
+  registrationRequests: ['email'],
+  vehicles: ['name_key'],
+  drivers: ['name_key']
 });
 
 function uniqueIndexRef(name, field, value) {
@@ -111,7 +136,7 @@ async function getByUnique(name, field, value) {
   return get(name, index.data().documentId);
 }
 
-async function createUnique(name, field, value, data) {
+async function createUnique(name, field, value, data, auditEvent = null) {
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
     throw new TypeError('Os dados do documento devem ser um objeto.');
   }
@@ -132,7 +157,52 @@ async function createUnique(name, field, value, data) {
     transaction.create(documentRef, { ...data, [field]: normalized });
     transaction.set(counterRef, { value: id, updated_at: new Date().toISOString() });
     transaction.create(indexRef, { documentId: String(id), value: normalized });
+    addAuditWrite(transaction, db, auditEvent ? { ...auditEvent, entity_id: id } : null);
     return id;
+  });
+}
+
+async function createUniqueWithId(name, field, value, id, data) {
+  if (!Number.isSafeInteger(Number(id)) || Number(id) < 1 ||
+      !data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new TypeError('Identificador ou dados de importação inválidos.');
+  }
+  const db = requireFirestore();
+  const documentId = String(Number(id));
+  const indexRef = uniqueIndexRef(name, field, value);
+  const documentRef = collection(name).doc(documentId);
+  const counterRef = db.collection('_sgve_counters').doc(name);
+  const normalized = String(value ?? '').trim().toLowerCase();
+  return db.runTransaction(async transaction => {
+    const [indexSnapshot, documentSnapshot, counterSnapshot] = await Promise.all([
+      transaction.get(indexRef), transaction.get(documentRef), transaction.get(counterRef)
+    ]);
+    if (indexSnapshot.exists || documentSnapshot.exists) {
+      const indexedId = indexSnapshot.exists
+        ? String(indexSnapshot.data().documentId)
+        : null;
+      const existingData = documentSnapshot.exists ? documentSnapshot.data() : null;
+      const existingEmail = existingData
+        ? String(existingData.email || '').trim().toLowerCase()
+        : null;
+      const sameAccount = existingData &&
+        existingData.display_name === data.display_name &&
+        existingData.password_hash === data.password_hash &&
+        existingData.role === data.role &&
+        existingData.active === data.active;
+      if (indexedId === documentId && existingEmail === normalized && sameAccount) {
+        return documentId;
+      }
+      const error = new Error('Conflito de ID ou e-mail durante a importação.');
+      error.code = 'already-exists';
+      throw error;
+    }
+    const current = counterSnapshot.exists ? Number(counterSnapshot.data().value) : 0;
+    const next = Math.max(Number.isSafeInteger(current) ? current : 0, Number(documentId));
+    transaction.create(documentRef, { ...data, [field]: normalized });
+    transaction.create(indexRef, { documentId, value: normalized });
+    transaction.set(counterRef, { value: next, updated_at: new Date().toISOString() });
+    return documentId;
   });
 }
 
@@ -148,10 +218,30 @@ async function nextNumericId(name) {
   });
 }
 
-async function createWithNumericId(name, data) {
-  const id = await nextNumericId(name);
-  await create(name, data, id);
-  return id;
+async function createWithNumericId(name, data, auditEvent = null) {
+  if (!COLLECTIONS[name]) throw new Error('Coleção SGVE desconhecida: ' + name);
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new TypeError('Os dados do documento devem ser um objeto.');
+  }
+  const db = requireFirestore();
+  const counterRef = db.collection('_sgve_counters').doc(name);
+  return db.runTransaction(async transaction => {
+    const counterSnapshot = await transaction.get(counterRef);
+    const current = counterSnapshot.exists ? Number(counterSnapshot.data().value) : 0;
+    if (!Number.isSafeInteger(current) || current < 0 || current >= Number.MAX_SAFE_INTEGER) {
+      throw new Error('Contador numérico inválido para a coleção: ' + name);
+    }
+    const id = current + 1;
+    const now = new Date().toISOString();
+    const documentRef = collection(name).doc(String(id));
+    transaction.create(documentRef, {
+      ...data,
+      created_at: data.created_at || now
+    });
+    transaction.set(counterRef, { value: id, updated_at: now });
+    addAuditWrite(transaction, db, auditEvent ? { ...auditEvent, entity_id: id } : null);
+    return id;
+  });
 }
 
 
@@ -192,7 +282,7 @@ async function upsertUnique(name, field, value, createData, updateData, allowedE
 }
 
 
-async function createUniqueComposite(name, fields, data) {
+async function createUniqueComposite(name, fields, data, auditEvent = null) {
   if (!['classes'].includes(name) || !Array.isArray(fields) || fields.length !== 5 ||
       fields.some(field => typeof field !== 'string' || !field)) {
     throw new TypeError('Chave composta não permitida.');
@@ -221,12 +311,13 @@ async function createUniqueComposite(name, fields, data) {
     transaction.create(documentRef, { ...data, id, created_at: data.created_at || new Date().toISOString() });
     transaction.set(counterRef, { value: id, updated_at: new Date().toISOString() });
     transaction.create(indexRef, { documentId: String(id), fields: normalized });
+    addAuditWrite(transaction, db, auditEvent ? { ...auditEvent, entity_id: id } : null);
     return id;
   });
 }
 
 
-async function createTripRelationIfDraft(name, tripId, relatedId, data) {
+async function createTripRelationIfDraft(name, tripId, relatedId, data, auditEvent = null) {
   if (!['tripClasses', 'tripStaff'].includes(name)) {
     throw new TypeError('Relação de viagem não permitida.');
   }
@@ -248,12 +339,15 @@ async function createTripRelationIfDraft(name, tripId, relatedId, data) {
     if (name === 'tripStaff' && targetSnapshot.data().role !== 'teacher') {
       return { error: 'target-not-found' };
     }
-    if (!relationSnapshot.exists) transaction.create(relationRef, data);
+    if (!relationSnapshot.exists) {
+      transaction.create(relationRef, data);
+      addAuditWrite(transaction, requireFirestore(), auditEvent);
+    }
     return { ok: true };
   });
 }
 
-async function transitionTripStatus(tripId, expectedStatus, nextStatus, extra = {}, requireLinkedClass = false) {
+async function transitionTripStatus(tripId, expectedStatus, nextStatus, extra = {}, requireLinkedClass = false, auditEvent = null) {
   const tripKey = normalizeId(tripId);
   const db = requireFirestore();
   const tripRef = collection('trips').doc(tripKey);
@@ -272,11 +366,12 @@ async function transitionTripStatus(tripId, expectedStatus, nextStatus, extra = 
     transaction.update(tripRef, {
       status: nextStatus, ...extra, updated_at: new Date().toISOString()
     });
+    addAuditWrite(transaction, db, auditEvent);
     return { ok: true };
   });
 }
 
-async function createStudentInActiveClass(fullName, classId) {
+async function createStudentInActiveClass(fullName, classId, auditEvent = null) {
   const classKey = normalizeId(classId);
   const db = requireFirestore();
   const classRef = collection('classes').doc(classKey);
@@ -295,11 +390,60 @@ async function createStudentInActiveClass(fullName, classId) {
       user_id: null, active: true, created_at: now, updated_at: now
     });
     transaction.set(counterRef, { value: id, updated_at: now });
+    addAuditWrite(transaction, db, auditEvent ? { ...auditEvent, entity_id: id } : null);
     return { id };
   });
 }
 
-async function linkGuardianIfActive(studentId, guardianId, relationship) {
+async function linkStudentAccount(studentId, userId, auditEvent = null) {
+  const studentKey = normalizeId(studentId);
+  const userKey = normalizeId(userId);
+  const db = requireFirestore();
+  const studentRef = collection('students').doc(studentKey);
+  const userRef = collection('users').doc(userKey);
+  // A deterministic per-account document serializes concurrent attempts to
+  // link the same account to different student records.
+  const accountLinkRef = collection('studentAccountLinks').doc(userKey);
+  return db.runTransaction(async transaction => {
+    const [studentSnapshot, userSnapshot, accountLinkSnapshot, legacyLinksSnapshot] = await Promise.all([
+      transaction.get(studentRef),
+      transaction.get(userRef),
+      transaction.get(accountLinkRef),
+      transaction.get(collection('students').where('user_id', '==', Number(userKey)).limit(2))
+    ]);
+    if (!studentSnapshot.exists || studentSnapshot.data().active !== true) return { error: 'student-not-found' };
+    if (!userSnapshot.exists || userSnapshot.data().active !== true || userSnapshot.data().role !== 'student') {
+      return { error: 'student-account-not-found' };
+    }
+    const currentUserId = studentSnapshot.data().user_id == null ? null : Number(studentSnapshot.data().user_id);
+    const linkedStudentId = accountLinkSnapshot.exists ? Number(accountLinkSnapshot.data().student_id) : null;
+    const legacyStudent = legacyLinksSnapshot.docs.find(doc => doc.id !== studentKey);
+    if (legacyStudent || (linkedStudentId !== null && linkedStudentId !== Number(studentKey))) {
+      return { error: 'account-already-linked' };
+    }
+    if (currentUserId !== null && currentUserId !== Number(userKey)) return { error: 'student-already-linked' };
+    if (currentUserId === Number(userKey)) {
+      if (!accountLinkSnapshot.exists) {
+        transaction.create(accountLinkRef, {
+          student_id: Number(studentKey), user_id: Number(userKey),
+          created_at: new Date().toISOString()
+        });
+      }
+      return { ok: true, changed: false };
+    }
+    transaction.update(studentRef, { user_id: Number(userKey), updated_at: new Date().toISOString() });
+    if (!accountLinkSnapshot.exists) {
+      transaction.create(accountLinkRef, {
+        student_id: Number(studentKey), user_id: Number(userKey),
+        created_at: new Date().toISOString()
+      });
+    }
+    addAuditWrite(transaction, db, auditEvent);
+    return { ok: true, changed: true };
+  });
+}
+
+async function linkGuardianIfActive(studentId, guardianId, relationship, auditEvent = null) {
   const studentKey = normalizeId(studentId);
   const guardianKey = normalizeId(guardianId);
   const studentRef = collection('students').doc(studentKey);
@@ -312,15 +456,18 @@ async function linkGuardianIfActive(studentId, guardianId, relationship) {
     if (!studentSnapshot.exists || studentSnapshot.data().active !== true ||
         !guardianSnapshot.exists || guardianSnapshot.data().active !== true ||
         guardianSnapshot.data().role !== 'guardian') return false;
-    if (!relationSnapshot.exists) transaction.create(relationRef, {
-      student_id: Number(studentKey), guardian_user_id: Number(guardianKey),
-      relationship_label: relationship || null, created_at: new Date().toISOString()
-    });
+    if (!relationSnapshot.exists) {
+      transaction.create(relationRef, {
+        student_id: Number(studentKey), guardian_user_id: Number(guardianKey),
+        relationship_label: relationship || null, created_at: new Date().toISOString()
+      });
+      addAuditWrite(transaction, requireFirestore(), auditEvent);
+    }
     return true;
   });
 }
 
-async function createTripStudentWithinCapacity(tripId, studentId) {
+async function createTripStudentWithinCapacity(tripId, studentId, auditEvent = null) {
   const tripKey = normalizeId(tripId);
   const studentKey = normalizeId(studentId);
   const tripRef = collection('trips').doc(tripKey);
@@ -364,7 +511,233 @@ async function createTripStudentWithinCapacity(tripId, studentId) {
     transaction.update(tripRef, {
       participant_count: count + 1, updated_at: new Date().toISOString()
     });
+    addAuditWrite(transaction, requireFirestore(), auditEvent);
     return { ok: true };
+  });
+}
+
+
+async function setTripStudentAuthorization(tripId, studentId, guardianId, status, auditEvent = null) {
+  if (!['authorized', 'declined'].includes(status)) {
+    throw new TypeError('Status de autorização inválido.');
+  }
+  const tripKey = normalizeId(tripId);
+  const studentKey = normalizeId(studentId);
+  const guardianKey = normalizeId(guardianId);
+  const db = requireFirestore();
+  const tripRef = collection('trips').doc(tripKey);
+  const studentRef = collection('students').doc(studentKey);
+  const guardianRef = collection('users').doc(guardianKey);
+  const guardianLinkRef = collection('studentGuardians').doc(studentKey + '_' + guardianKey);
+  const participantRef = collection('tripStudents').doc(tripKey + '_' + studentKey);
+  return db.runTransaction(async transaction => {
+    const [tripSnapshot, studentSnapshot, guardianSnapshot, guardianLinkSnapshot, participantSnapshot] =
+      await Promise.all([
+        transaction.get(tripRef), transaction.get(studentRef), transaction.get(guardianRef),
+        transaction.get(guardianLinkRef), transaction.get(participantRef)
+      ]);
+    if (!tripSnapshot.exists || !studentSnapshot.exists || studentSnapshot.data().active !== true) {
+      return { error: 'not-found' };
+    }
+    if (!guardianSnapshot.exists || guardianSnapshot.data().active !== true ||
+        guardianSnapshot.data().role !== 'guardian' || !guardianLinkSnapshot.exists) {
+      return { error: 'forbidden' };
+    }
+    if (!participantSnapshot.exists) return { error: 'not-participant' };
+    const trip = tripSnapshot.data();
+    if (!['approved', 'open'].includes(trip.status)) return { error: 'not-approved' };
+    const departureAt = Date.parse(trip.departure_at);
+    if (!Number.isFinite(departureAt) || Date.now() >= departureAt) return { error: 'closed' };
+    const currentStatus = participantSnapshot.data().authorization_status || 'pending';
+    if (currentStatus === status) return { ok: true, changed: false };
+    if (currentStatus === 'paper_recorded') return { error: 'already-decided' };
+    const now = new Date().toISOString();
+    transaction.update(participantRef, {
+      authorization_status: status,
+      authorization_updated_at: now,
+      authorization_updated_by: Number(guardianKey)
+    });
+    addAuditWrite(transaction, db, auditEvent);
+    return { ok: true, changed: true };
+  });
+}
+
+
+async function recordPaperAuthorization(tripId, studentId, actorUserId, actorRole, auditEvent = null) {
+  if (!['admin', 'direction', 'secretariat'].includes(actorRole)) {
+    return { error: 'forbidden' };
+  }
+  const tripKey = normalizeId(tripId);
+  const studentKey = normalizeId(studentId);
+  const actorKey = normalizeId(actorUserId);
+  const db = requireFirestore();
+  const tripRef = collection('trips').doc(tripKey);
+  const studentRef = collection('students').doc(studentKey);
+  const participantRef = collection('tripStudents').doc(tripKey + '_' + studentKey);
+  return db.runTransaction(async transaction => {
+    const [tripSnapshot, studentSnapshot, participantSnapshot] = await Promise.all([
+      transaction.get(tripRef), transaction.get(studentRef), transaction.get(participantRef)
+    ]);
+    if (!tripSnapshot.exists || !studentSnapshot.exists || studentSnapshot.data().active !== true) {
+      return { error: 'not-found' };
+    }
+    if (!participantSnapshot.exists) return { error: 'not-participant' };
+    const trip = tripSnapshot.data();
+    if (!['approved', 'open'].includes(trip.status)) return { error: 'not-approved' };
+    const departureAt = Date.parse(trip.departure_at);
+    if (!Number.isFinite(departureAt) || Date.now() >= departureAt) return { error: 'closed' };
+    const currentStatus = participantSnapshot.data().authorization_status || 'pending';
+    if (currentStatus === 'paper_recorded') return { ok: true, changed: false };
+    if (currentStatus !== 'pending') return { error: 'already-decided' };
+    transaction.update(participantRef, {
+      authorization_status: 'paper_recorded',
+      authorization_method: 'paper',
+      authorization_updated_at: new Date().toISOString(),
+      authorization_updated_by: Number(actorKey)
+    });
+    addAuditWrite(transaction, db, auditEvent);
+    return { ok: true, changed: true };
+  });
+}
+
+async function setTripAttendance(tripId, studentId, actorUserId, actorRole, checkpoint, present, auditEvent = null) {
+  if (!['departure', 'return'].includes(checkpoint) || typeof present !== 'boolean') {
+    throw new TypeError('Registro de presença inválido.');
+  }
+  if (!['admin', 'direction', 'secretariat', 'teacher'].includes(actorRole)) {
+    return { error: 'forbidden' };
+  }
+  const tripKey = normalizeId(tripId);
+  const studentKey = normalizeId(studentId);
+  const actorKey = normalizeId(actorUserId);
+  const db = requireFirestore();
+  const tripRef = collection('trips').doc(tripKey);
+  const studentRef = collection('students').doc(studentKey);
+  const participantRef = collection('tripStudents').doc(tripKey + '_' + studentKey);
+  const staffRef = collection('tripStaff').doc(tripKey + '_' + actorKey);
+  return db.runTransaction(async transaction => {
+    const [tripSnapshot, studentSnapshot, participantSnapshot, staffSnapshot] = await Promise.all([
+      transaction.get(tripRef), transaction.get(studentRef), transaction.get(participantRef),
+      actorRole === 'teacher' ? transaction.get(staffRef) : Promise.resolve(null)
+    ]);
+    if (!tripSnapshot.exists || !studentSnapshot.exists || studentSnapshot.data().active !== true) {
+      return { error: 'not-found' };
+    }
+    if (!participantSnapshot.exists) return { error: 'not-participant' };
+    if (actorRole === 'teacher' && !staffSnapshot.exists) return { error: 'not-assigned' };
+    if (!['approved', 'open'].includes(tripSnapshot.data().status)) return { error: 'not-approved' };
+    const field = checkpoint === 'departure' ? 'departure_present' : 'return_present';
+    if (participantSnapshot.data()[field] === present) return { ok: true, changed: false };
+    transaction.update(participantRef, {
+      [field]: present,
+      [field + '_updated_at']: new Date().toISOString(),
+      [field + '_updated_by']: Number(actorKey)
+    });
+    addAuditWrite(transaction, db, auditEvent);
+    return { ok: true, changed: true };
+  });
+}
+
+
+async function assignTripDriver(tripId, driverId, auditEvent = null) {
+  const tripKey = normalizeId(tripId);
+  const driverKey = normalizeId(driverId);
+  const db = requireFirestore();
+  const tripRef = collection('trips').doc(tripKey);
+  const driverRef = collection('drivers').doc(driverKey);
+  return db.runTransaction(async transaction => {
+    const [tripSnapshot, driverSnapshot] = await Promise.all([
+      transaction.get(tripRef), transaction.get(driverRef)
+    ]);
+    if (!tripSnapshot.exists) return { error: 'not-found' };
+    if (!driverSnapshot.exists || driverSnapshot.data().active !== true) {
+      return { error: 'driver-not-found' };
+    }
+    const trip = tripSnapshot.data();
+    const driver = driverSnapshot.data();
+    if (trip.status !== 'draft') return { error: 'not-draft' };
+    const departure = Date.parse(trip.departure_at);
+    const returning = Date.parse(trip.return_at);
+    if (!Number.isFinite(departure) || !Number.isFinite(returning) || departure >= returning) {
+      return { error: 'invalid-schedule' };
+    }
+    const assignments = await transaction.get(
+      collection('trips').where('driver_id', '==', Number(driverKey))
+    );
+    for (const assigned of assignments.docs) {
+      if (assigned.id === tripKey) continue;
+      const existing = assigned.data();
+      if (['cancelled', 'completed'].includes(existing.status)) continue;
+      const existingDeparture = Date.parse(existing.departure_at);
+      const existingReturn = Date.parse(existing.return_at);
+      if (!Number.isFinite(existingDeparture) || !Number.isFinite(existingReturn) ||
+          (departure < existingReturn && returning > existingDeparture)) {
+        return { error: 'schedule-conflict' };
+      }
+    }
+    if (Number(trip.driver_id) === Number(driverKey)) return { ok: true, changed: false };
+    transaction.update(driverRef, {
+      schedule_version: Number(driver.schedule_version || 0) + 1,
+      updated_at: new Date().toISOString()
+    });
+    transaction.update(tripRef, {
+      driver_id: Number(driverKey),
+      updated_at: new Date().toISOString()
+    });
+    addAuditWrite(transaction, db, auditEvent);
+    return { ok: true, changed: true };
+  });
+}
+
+async function assignTripVehicle(tripId, vehicleId, auditEvent = null) {
+  const tripKey = normalizeId(tripId);
+  const vehicleKey = normalizeId(vehicleId);
+  const db = requireFirestore();
+  const tripRef = collection('trips').doc(tripKey);
+  const vehicleRef = collection('vehicles').doc(vehicleKey);
+  return db.runTransaction(async transaction => {
+    const [tripSnapshot, vehicleSnapshot] = await Promise.all([
+      transaction.get(tripRef), transaction.get(vehicleRef)
+    ]);
+    if (!tripSnapshot.exists) return { error: 'not-found' };
+    if (!vehicleSnapshot.exists || vehicleSnapshot.data().active !== true) {
+      return { error: 'vehicle-not-found' };
+    }
+    const trip = tripSnapshot.data();
+    const vehicle = vehicleSnapshot.data();
+    if (trip.status !== 'draft') return { error: 'not-draft' };
+    const tripCapacity = Number(trip.capacity);
+    const vehicleCapacity = Number(vehicle.capacity);
+    if (!Number.isSafeInteger(tripCapacity) || tripCapacity < 1 ||
+        !Number.isSafeInteger(vehicleCapacity) || vehicleCapacity < tripCapacity) {
+      return { error: 'insufficient-capacity' };
+    }
+    const departure = Date.parse(trip.departure_at);
+    const returning = Date.parse(trip.return_at);
+    if (!Number.isFinite(departure) || !Number.isFinite(returning) || departure >= returning) {
+      return { error: 'invalid-schedule' };
+    }
+    const assignments = await transaction.get(
+      collection('trips').where('vehicle_id', '==', Number(vehicleKey))
+    );
+    for (const assigned of assignments.docs) {
+      if (assigned.id === tripKey) continue;
+      const existing = assigned.data();
+      if (['cancelled', 'completed'].includes(existing.status)) continue;
+      const existingDeparture = Date.parse(existing.departure_at);
+      const existingReturn = Date.parse(existing.return_at);
+      if (!Number.isFinite(existingDeparture) || !Number.isFinite(existingReturn) ||
+          (departure < existingReturn && returning > existingDeparture)) {
+        return { error: 'schedule-conflict' };
+      }
+    }
+    if (Number(trip.vehicle_id) === Number(vehicleKey)) return { ok: true, changed: false };
+    transaction.update(tripRef, {
+      vehicle_id: Number(vehicleKey),
+      updated_at: new Date().toISOString()
+    });
+    addAuditWrite(transaction, db, auditEvent);
+    return { ok: true, changed: true };
   });
 }
 
@@ -380,11 +753,18 @@ module.exports = {
   createWithNumericId,
   getByUnique,
   createUnique,
+  createUniqueWithId,
   upsertUnique,
   createUniqueComposite,
   createTripStudentWithinCapacity,
   createStudentInActiveClass,
   linkGuardianIfActive,
+  linkStudentAccount,
   createTripRelationIfDraft,
-  transitionTripStatus
+  transitionTripStatus,
+  setTripStudentAuthorization,
+  recordPaperAuthorization,
+  setTripAttendance,
+  assignTripVehicle,
+  assignTripDriver
 };

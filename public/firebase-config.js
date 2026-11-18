@@ -1,8 +1,8 @@
 'use strict';
 
 /*
- * Configuração pública do Firebase Web para o SGVE.
- * Nunca coloque credenciais de conta de serviço ou chaves privadas neste arquivo.
+ * Configuração pública do Firebase Web.
+ * Não inserir credenciais de conta de serviço ou chaves privadas neste arquivo.
  */
 window.SGVE_FIREBASE_CONFIG = Object.freeze({
   apiKey: 'AIzaSyAjCY6nydEIs_v9vv8mDczk6ODRilPPy7c',

@@ -7,3 +7,10 @@ data/
 .DS_Store
 coverage/
 npm-debug.log*
+# Credenciais privadas e chaves locais nunca devem ser versionadas.
+*service-account*.json
+*service_account*.json
+*-firebase-adminsdk-*.json
+firebase-admin-key*.json
+*.pem
+*.key

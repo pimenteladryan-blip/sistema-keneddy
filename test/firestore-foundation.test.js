@@ -2,6 +2,8 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const auth = require('../server/firestore-auth');
 const store = require('../server/firestore-store');
 
@@ -47,7 +49,64 @@ test('o mapa de coleções Firestore é fixo e contém as relações do SGVE', (
   assert.equal(store.COLLECTIONS.users, 'users');
   assert.equal(store.COLLECTIONS.registrationRequests, 'registration_requests');
   assert.equal(store.COLLECTIONS.tripStudents, 'trip_students');
+  assert.equal(store.COLLECTIONS.vehicles, 'vehicles');
+  assert.equal(store.COLLECTIONS.drivers, 'drivers');
   assert.equal(Object.isFrozen(store.COLLECTIONS), true);
+});
+
+test('as regras do Firestore bloqueiam acesso direto de clientes e estão ligadas à configuração', () => {
+  const root = path.resolve(__dirname, '..');
+  const firebaseConfig = JSON.parse(fs.readFileSync(path.join(root, 'firebase.json'), 'utf8'));
+  const rules = fs.readFileSync(path.join(root, firebaseConfig.firestore.rules), 'utf8');
+  assert.match(rules, /allow read, write:\s*if false;/);
+  assert.doesNotMatch(rules, /allow read, write:\s*if true;/);
+  assert.equal(firebaseConfig.firestore.indexes, 'firestore.indexes.json');
+});
+
+test('o Firestore configura expiração TTL para os documentos de limite', () => {
+  const root = path.resolve(__dirname, '..');
+  const config = JSON.parse(fs.readFileSync(path.join(root, 'firestore.indexes.json'), 'utf8'));
+  assert.equal(config.fieldOverrides.some(item =>
+    item.collectionGroup === '_sgve_rate_limits' &&
+    item.fieldPath === 'expires_at' && item.ttl === true &&
+    Array.isArray(item.indexes) && item.indexes.length === 0
+  ), true);
+});
+
+test('produção exige Firebase antes de inicializar o banco SQLite local', () => {
+  const root = path.resolve(__dirname, '..');
+  const source = fs.readFileSync(path.join(root, 'server/index.js'), 'utf8');
+  const guard = source.indexOf("if (isProduction && !firebaseConfigured)");
+  const sqlite = source.indexOf("require('./db')");
+  assert.ok(guard >= 0 && guard < sqlite);
+});
+
+test('login Google também possui limitação de tentativas por IP', () => {
+  const root = path.resolve(__dirname, '..');
+  const source = fs.readFileSync(path.join(root, 'server/index.js'), 'utf8');
+  assert.match(source, /consumeAttempts\('google-login-ip'/);
+});
+
+test('todas as rotas POST privadas exigem autenticação e proteção CSRF', () => {
+  const root = path.resolve(__dirname, '..');
+  const source = fs.readFileSync(path.join(root, 'server/index.js'), 'utf8');
+  const publicRoutes = [
+    "app.post('/api/registration-requests',",
+    "app.post('/api/auth/login',",
+    "app.post('/api/auth/google',"
+  ];
+  const sourceLines = source.split(/\r?\n/);
+  const postRoutes = sourceLines
+    .map((line, index) => line.includes("app.post('/api/")
+      ? sourceLines.slice(index, index + 4).join(' ')
+      : null)
+    .filter(Boolean);
+  assert.ok(postRoutes.length >= 10, 'o teste deve encontrar as rotas de mutação do SGVE');
+  for (const route of postRoutes) {
+    if (publicRoutes.some(prefix => route.includes(prefix))) continue;
+    assert.match(route, /requireAuth/, 'rota privada sem autenticação: ' + route.slice(0, 100));
+    assert.match(route, /requireCsrf/, 'rota privada sem CSRF: ' + route.slice(0, 100));
+  }
 });
 
 test('o armazenamento rejeita nomes de coleção desconhecidos', async () => {
@@ -150,4 +209,144 @@ test('validação de cadastro rejeita e-mail, hash e código malformados', () =>
     assert.throws(() => auth.validateRegistrationRequest({ ...base, ...patch }),
       error => error.code === 'invalid-request');
   }
+});
+
+
+test('criação de usuário Firestore rejeita dados inválidos antes de acessar o banco', async () => {
+  const valid = {
+    display_name: 'Pessoa de Teste',
+    email: 'PESSOA@EXEMPLO.COM',
+    password_hash: 'scrypt:' + 'a'.repeat(32) + ':' + 'b'.repeat(128),
+    role: 'teacher'
+  };
+
+  await assert.rejects(
+    auth.createUser({ ...valid, email: 'email-invalido' }),
+    error => error.code === 'invalid-user'
+  );
+  await assert.rejects(
+    auth.createUser({ ...valid, role: 'owner' }),
+    error => error.code === 'invalid-user'
+  );
+  await assert.rejects(
+    auth.createUser({ ...valid, password_hash: 'senha-em-texto' }),
+    error => error.code === 'invalid-user'
+  );
+  await assert.rejects(
+    auth.createUser({ ...valid, display_name: ' x ' }),
+    error => error.code === 'invalid-user'
+  );
+});
+
+test('importação de usuário exige ID numérico positivo e preserva papéis válidos', async () => {
+  const valid = {
+    id: 15,
+    display_name: 'Pessoa de Teste',
+    email: 'pessoa@exemplo.com',
+    password_hash: 'scrypt:' + 'a'.repeat(32) + ':' + 'b'.repeat(128),
+    role: 'guardian',
+    active: true
+  };
+
+  for (const patch of [
+    { id: 0 },
+    { id: '1.5' },
+    { id: 'abc' },
+    { role: 'owner' },
+    { active: 'true' },
+    { email: 'invalido' },
+    { password_hash: 'texto' }
+  ]) {
+    await assert.rejects(
+      auth.importUserWithId({ ...valid, ...patch }),
+      error => error.code === 'invalid-user'
+    );
+  }
+});
+
+
+test('auditoria Firestore rejeita eventos incompletos antes de acessar o banco', async () => {
+  await assert.rejects(
+    auth.createAuditLog({ action: '', entity_type: 'user' }),
+    /Evento de auditoria inválido/
+  );
+  await assert.rejects(
+    auth.createAuditLog({ action: 'login', entity_type: '' }),
+    /Evento de auditoria inválido/
+  );
+  await assert.rejects(
+    auth.createAuditLog({ actor_user_id: 0, action: 'login', entity_type: 'user' }),
+    /Evento de auditoria inválido/
+  );
+  await assert.rejects(
+    auth.createAuditLog({ actor_user_id: 'abc', action: 'login', entity_type: 'user' }),
+    /Evento de auditoria inválido/
+  );
+});
+
+
+test('operações atômicas de sessão validam entradas antes de acessar o Firestore', async () => {
+  await assert.rejects(
+    auth.createSessionWithAudit({
+      token_hash: 'curto', csrf_token: 'x'.repeat(32),
+      user_id: 3, expires_at: new Date(Date.now() + 60000).toISOString()
+    }),
+    /Dados de sessão inválidos/
+  );
+  await assert.rejects(
+    auth.createSessionWithAudit({
+      token_hash: 'a'.repeat(64), csrf_token: 'x'.repeat(32),
+      user_id: 0, expires_at: new Date(Date.now() + 60000).toISOString()
+    }),
+    /Dados de sessão inválidos/
+  );
+  await assert.rejects(
+    auth.deleteSessionWithAudit('token-inválido', 3),
+    /Dados de encerramento de sessão inválidos/
+  );
+  await assert.rejects(
+    auth.deleteSessionWithAudit('a'.repeat(64), 'usuário'),
+    /Dados de encerramento de sessão inválidos/
+  );
+});
+
+
+test('sessões Firestore aceitam login por senha e por Google', async () => {
+  const session = {
+    token_hash: 'a'.repeat(64),
+    csrf_token: 'x'.repeat(32),
+    user_id: 3,
+    expires_at: new Date(Date.now() + 60000).toISOString()
+  };
+  await assert.rejects(
+    auth.createSessionWithAudit({ ...session, action: 'login_password' }),
+    /Firestore não configurado/
+  );
+  await assert.rejects(
+    auth.createSessionWithAudit({ ...session, action: 'login_google' }),
+    /Firestore não configurado/
+  );
+  await assert.rejects(
+    auth.createSessionWithAudit({ ...session, action: 'login_unknown' }),
+    /Dados de sessão inválidos/
+  );
+});
+
+test('importação com ID fixo valida identificador e campo único antes do Firestore', async () => {
+  const data = {
+    display_name: 'Pessoa de Teste',
+    email: 'pessoa@exemplo.com',
+    password_hash: 'scrypt:' + 'a'.repeat(32) + ':' + 'b'.repeat(128),
+    role: 'teacher',
+    active: true
+  };
+
+  await assert.rejects(
+    store.createUniqueWithId('users', 'email', data.email, 0, data),
+    /Identificador ou dados de importação inválidos/
+  );
+});
+
+test('o mapa do Firestore mantém a coleção de auditoria no nome canônico', () => {
+  assert.equal(store.COLLECTIONS.auditLogs, 'audit_logs');
 });

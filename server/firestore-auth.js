@@ -1,5 +1,6 @@
 'use strict';
 
+const crypto = require('node:crypto');
 const store = require('./firestore-store');
 
 function validateRegistrationRequest(request) {
@@ -44,18 +45,149 @@ function publicUser(user) {
 }
 
 async function findUserByEmail(email) {
-  return store.getByUnique('users', 'email', String(email).trim().toLowerCase());
+  if (typeof email !== 'string') return null;
+  return store.getByUnique('users', 'email', email.trim().toLowerCase());
 }
 
-async function createUser({ display_name, email, password_hash, role, active = true }) {
-  const id = await store.createUnique('users', 'email', email, {
-    display_name: String(display_name).trim(),
+async function findUserById(id) {
+  const userId = Number(id);
+  if (!Number.isSafeInteger(userId) || userId < 1) return null;
+  return store.get('users', userId);
+}
+
+async function listUsers(limit = 300) {
+  const safeLimit = Number.isInteger(limit) ? Math.max(1, Math.min(limit, 300)) : 300;
+  const users = await store.list('users', {
+    orderBy: { field: 'display_name', direction: 'asc' },
+    limit: safeLimit
+  });
+  return users.map(publicUser);
+}
+
+async function createUser({ display_name, email, password_hash, role, active = true, actor_user_id = null }) {
+  const name = typeof display_name === 'string' ? display_name.trim() : '';
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  const validEmail = normalizedEmail.length <= 254 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+  const validPasswordHash = typeof password_hash === 'string' &&
+    /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(password_hash);
+  if (name.length < 3 || name.length > 100 || !validEmail ||
+      !validPasswordHash || !['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'].includes(role) ||
+      typeof active !== 'boolean') {
+    const error = new Error('Os dados da conta são inválidos.');
+    error.code = 'invalid-user';
+    throw error;
+  }
+  const now = new Date().toISOString();
+  return store.createUnique('users', 'email', normalizedEmail, {
+    display_name: name,
     password_hash,
     role,
-    active: Boolean(active),
+    active,
+    created_at: now,
+    updated_at: now
+  }, actor_user_id == null ? null : { actor_user_id, action: 'create', entity_type: 'user' });
+}
+
+async function importUserWithId({ id, display_name, email, password_hash, role, active = true }) {
+  const userId = Number(id);
+  const name = typeof display_name === 'string' ? display_name.trim() : '';
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  const validEmail = normalizedEmail.length <= 254 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+  const validPasswordHash = typeof password_hash === 'string' &&
+    /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(password_hash);
+  if (!Number.isSafeInteger(userId) || userId < 1 || name.length < 3 ||
+      name.length > 100 || !validEmail || !validPasswordHash ||
+      !['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'].includes(role) ||
+      typeof active !== 'boolean') {
+    const error = new Error('Os dados da conta para importação são inválidos.');
+    error.code = 'invalid-user';
+    throw error;
+  }
+  const now = new Date().toISOString();
+  return store.createUniqueWithId('users', 'email', normalizedEmail, userId, {
+    display_name: name,
+    password_hash,
+    role,
+    active,
+    created_at: now,
+    updated_at: now
+  });
+}
+
+async function setUserActive(id, active) {
+  if (typeof active !== 'boolean') throw new TypeError('Estado da conta inválido.');
+  const user = await findUserById(id);
+  if (!user) return false;
+  await store.update('users', user.id, {
+    active,
     updated_at: new Date().toISOString()
   });
-  return id;
+  return true;
+}
+
+async function createAuditLog({ actor_user_id = null, action, entity_type, entity_id = null }) {
+  if (typeof action !== 'string' || !action.trim() || action.length > 80 ||
+      typeof entity_type !== 'string' || !entity_type.trim() || entity_type.length > 80 ||
+      (actor_user_id !== null && (!Number.isSafeInteger(Number(actor_user_id)) || Number(actor_user_id) < 1))) {
+    throw new TypeError('Evento de auditoria inválido.');
+  }
+  return store.create('auditLogs', {
+    actor_user_id: actor_user_id === null ? null : Number(actor_user_id),
+    action: action.trim(),
+    entity_type: entity_type.trim(),
+    entity_id: entity_id === null ? null : String(entity_id),
+    created_at: new Date().toISOString()
+  });
+}
+
+async function createSessionWithAudit({ token_hash, csrf_token, user_id, expires_at, action = 'login_google' }) {
+  const userId = Number(user_id);
+  if (typeof token_hash !== 'string' || !/^[a-f0-9]{64}$/.test(token_hash) ||
+      typeof csrf_token !== 'string' || csrf_token.length < 32 ||
+      !Number.isSafeInteger(userId) || userId < 1 ||
+      !Number.isFinite(Date.parse(expires_at)) ||
+      !['login_google', 'login_password'].includes(action)) {
+    throw new TypeError('Dados de sessão inválidos.');
+  }
+  const db = require('./firebase').firestore;
+  if (!db) throw new Error('Firestore não configurado.');
+  const sessionRef = db.collection('sessions').doc(token_hash);
+  const auditRef = db.collection('audit_logs').doc();
+  const now = new Date().toISOString();
+  await db.runTransaction(async transaction => {
+    transaction.create(sessionRef, {
+      csrf_token, user_id: userId, expires_at,
+      created_at: now
+    });
+    transaction.create(auditRef, {
+      actor_user_id: userId, action, entity_type: 'user',
+      entity_id: String(userId), created_at: now
+    });
+  });
+  return token_hash;
+}
+
+async function deleteSessionWithAudit(tokenHash, userId) {
+  const actorId = Number(userId);
+  if (typeof tokenHash !== 'string' || !/^[a-f0-9]{64}$/.test(tokenHash) ||
+      !Number.isSafeInteger(actorId) || actorId < 1) {
+    throw new TypeError('Dados de encerramento de sessão inválidos.');
+  }
+  const db = require('./firebase').firestore;
+  if (!db) throw new Error('Firestore não configurado.');
+  const sessionRef = db.collection('sessions').doc(tokenHash);
+  const auditRef = db.collection('audit_logs').doc();
+  const now = new Date().toISOString();
+  await db.runTransaction(async transaction => {
+    const sessionSnapshot = await transaction.get(sessionRef);
+    if (sessionSnapshot.exists) transaction.delete(sessionRef);
+    transaction.create(auditRef, {
+      actor_user_id: actorId, action: 'logout', entity_type: 'user',
+      entity_id: String(actorId), created_at: now
+    });
+  });
 }
 
 async function createSession({ token_hash, csrf_token, user_id, expires_at }) {
@@ -97,6 +229,71 @@ async function deleteExpiredSessions(now = new Date().toISOString()) {
   });
   await Promise.all(expired.map(session => store.remove('sessions', session.id)));
   return expired.length;
+}
+
+
+async function consumeRateLimit({ scope, keys, windowMs, maxAttempts, nowMs = Date.now() }) {
+  if (typeof scope !== 'string' || !/^[a-z0-9_-]{1,60}$/i.test(scope) ||
+      !Array.isArray(keys) || !keys.length || keys.length > 10 ||
+      keys.some(key => typeof key !== 'string' || !key || key.length > 512) ||
+      !Number.isSafeInteger(windowMs) || windowMs < 1000 ||
+      !Number.isSafeInteger(maxAttempts) || maxAttempts < 1 ||
+      !Number.isSafeInteger(nowMs) || nowMs < 0) {
+    throw new TypeError('Parâmetros de limitação de tentativas inválidos.');
+  }
+  const db = require('./firebase').firestore;
+  if (!db) throw new Error('Firestore não configurado para limitar tentativas.');
+  const uniqueKeys = [...new Set(keys)];
+  const refs = uniqueKeys.map(key => {
+    const digest = crypto.createHash('sha256').update(scope + '\0' + key).digest('hex');
+    return db.collection('_sgve_rate_limits').doc(digest);
+  });
+
+  return db.runTransaction(async transaction => {
+    const snapshots = [];
+    for (const ref of refs) snapshots.push(await transaction.get(ref));
+
+    const now = nowMs;
+    const states = snapshots.map(snapshot => {
+      const data = snapshot.exists ? snapshot.data() : {};
+      const startedAt = Number(data.started_at_ms);
+      const activeWindow = Number.isSafeInteger(startedAt) &&
+        now >= startedAt && now - startedAt < windowMs;
+      const count = activeWindow && Number.isSafeInteger(Number(data.count))
+        ? Number(data.count) : 0;
+      return { startedAt: activeWindow ? startedAt : now, count };
+    });
+
+    if (states.some(state => state.count >= maxAttempts)) {
+      return { allowed: false };
+    }
+
+    refs.forEach((ref, index) => {
+      const state = states[index];
+      transaction.set(ref, {
+        scope,
+        count: state.count + 1,
+        started_at_ms: state.startedAt,
+        expires_at: new Date(state.startedAt + windowMs)
+      });
+    });
+    return { allowed: true };
+  });
+}
+
+async function resetRateLimit({ scope, keys }) {
+  if (typeof scope !== 'string' || !/^[a-z0-9_-]{1,60}$/i.test(scope) ||
+      !Array.isArray(keys) || !keys.length || keys.length > 10 ||
+      keys.some(key => typeof key !== 'string' || !key || key.length > 512)) {
+    throw new TypeError('Parâmetros de limpeza do limitador inválidos.');
+  }
+  const db = require('./firebase').firestore;
+  if (!db) throw new Error('Firestore não configurado para limpar tentativas.');
+  const refs = [...new Set(keys)].map(key => {
+    const digest = crypto.createHash('sha256').update(scope + '\0' + key).digest('hex');
+    return db.collection('_sgve_rate_limits').doc(digest);
+  });
+  await Promise.all(refs.map(ref => ref.delete()));
 }
 
 async function createRegistrationRequest({ display_name, email, password_hash, role, verification_code }) {
@@ -141,6 +338,7 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
   const db = require('./firebase').firestore;
   if (!db) throw new Error('Firestore não configurado.');
   const requestRef = db.collection('registration_requests').doc(String(id));
+  const auditRef = db.collection('audit_logs').doc();
   const counterRef = db.collection('_sgve_counters').doc('users');
   const userIndexRef = email => {
     const { createHash } = require('node:crypto');
@@ -157,11 +355,14 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
     }
     const request = validateRegistrationRequest(requestSnapshot.data());
     if (decision === 'rejected') {
+      const now = new Date().toISOString();
       transaction.update(requestRef, {
-        status: 'rejected',
-        password_hash: null,
-        reviewed_by: reviewer,
-        reviewed_at: new Date().toISOString()
+        status: 'rejected', password_hash: null, verification_code: null,
+        reviewed_by: reviewer, reviewed_at: now
+      });
+      transaction.create(auditRef, {
+        actor_user_id: reviewer, action: 'reject_registration',
+        entity_type: 'registration_request', entity_id: String(id), created_at: now
       });
       return null;
     }
@@ -180,10 +381,12 @@ async function reviewRegistrationRequest(id, reviewerId, decision) {
     transaction.set(counterRef, { value: userId, updated_at: now });
     transaction.create(indexRef, { documentId: String(userId), value: request.email });
     transaction.update(requestRef, {
-      status: 'approved',
-      password_hash: null,
-      reviewed_by: reviewer,
-      reviewed_at: now
+      status: 'approved', password_hash: null, verification_code: null,
+      reviewed_by: reviewer, reviewed_at: now
+    });
+    transaction.create(auditRef, {
+      actor_user_id: reviewer, action: 'approve_registration',
+      entity_type: 'registration_request', entity_id: String(id), created_at: now
     });
     return userId;
   });
@@ -194,11 +397,20 @@ module.exports = {
   approvedUserData,
   validateRegistrationRequest,
   findUserByEmail,
+  findUserById,
+  listUsers,
   createUser,
+  importUserWithId,
+  setUserActive,
+  createAuditLog,
+  createSessionWithAudit,
+  deleteSessionWithAudit,
   createSession,
   findSession,
   deleteSession,
   deleteExpiredSessions,
+  consumeRateLimit,
+  resetRateLimit,
   createRegistrationRequest,
   listPendingRegistrationRequests,
   reviewRegistrationRequest
