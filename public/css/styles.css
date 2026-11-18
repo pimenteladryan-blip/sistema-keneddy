@@ -169,7 +169,7 @@ button:hover{background:var(--green-dark);box-shadow:0 5px 14px #06452f20;transf
 .brand-message{position:relative;z-index:1}
 .brand-message .eyebrow{color:#b5e68a}
 .mascot-stage{display:flex;align-items:center;gap:12px;margin-top:20px}
-.mascot{width:min(220px,65%);height:auto;filter:drop-shadow(0 14px 18px #00180f66)}
+.mascot{width:min(180px,55%);height:auto;object-fit:contain;filter:drop-shadow(0 14px 18px #00180f66)}
 .mascot-caption{align-self:flex-end;margin-bottom:22px;color:#d5f1dc;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .brand-footer{position:relative;z-index:1}
 .login-school-mark{display:flex;align-items:center;gap:12px;margin-bottom:28px}
@@ -396,7 +396,7 @@ body.dark-mode .verification-code-badge{border-color:#42694e;background:#1b3826;
  .brand-panel h1{font-size:clamp(27px,7vw,38px)}
  .brand-copy{font-size:12px;line-height:1.55;margin-top:9px}
  .mascot-stage{position:absolute;right:-36%;bottom:0;width:58%;justify-content:center;margin:0}
- .mascot{width:min(155px,100%)}
+ .mascot{width:min(125px,100%)}
  .mascot-caption{display:none}
  .brand-footer{margin-top:8px;font-size:9px}
  .content-panel{background:#0c1711;padding:22px 17px 32px}
@@ -411,7 +411,7 @@ body.dark-mode .verification-code-badge{border-color:#42694e;background:#1b3826;
  .brand-message{max-width:70%;margin:22px 0 8px}
  .brand-panel h1{font-size:27px}
  .mascot-stage{right:-39%;width:62%}
- .mascot{width:132px}
+ .mascot{width:110px}
  .content-panel{padding:18px 13px 28px}
  .auth-card{padding:22px 18px;border-radius:17px}
 }
