@@ -207,6 +207,8 @@ app.post('/api/auth/login', async (req, res, next) => {
     if (!sameOrigin(req)) return res.status(403).json({ error: 'Origem não permitida.' });
     const email = String(req.body.email || '').trim().toLowerCase();
     const password = String(req.body.password || '');
+    const requestedRole = typeof req.body.role === 'string' ? req.body.role : '';
+    if (!VALID_ROLES.includes(requestedRole)) return res.status(400).json({ error: 'Selecione um perfil válido para entrar.' });
     if (!email || !password || email.length > 254 || password.length > 200) return res.status(400).json({ error: 'Informe e-mail e senha válidos.' });
     const now = Date.now();
     const allowedIp = await consumeAttempts('login-ip', [String(req.ip || 'unknown')], LOGIN_WINDOW_MS, 60);
@@ -217,6 +219,7 @@ app.post('/api/auth/login', async (req, res, next) => {
       : db.prepare('SELECT id, display_name, email, password_hash, role, active FROM users WHERE email = ?').get(email);
     const valid = user && (firebaseConfigured ? user.active === true : Boolean(user.active)) && await verifyPassword(password, user.password_hash);
     if (!valid) return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
+    if (requestedRole && user.role !== requestedRole) return res.status(403).json({ error: 'O perfil selecionado não corresponde a esta conta.' });
     await resetAttempts('login-email', [email]);
     const token = randomToken(32);
     const csrfToken = randomToken(24);
@@ -249,6 +252,11 @@ app.post('/api/auth/google', async (req, res, next) => {
       return res.status(401).json({ error: 'A conta Google precisa ter e-mail verificado.' });
     }
     const user = await firestoreAuth.findUserByEmail(decoded.email);
+    const requestedRole = typeof req.body.role === 'string' ? req.body.role : '';
+    if (!requestedRole || !ROLE_LABELS[requestedRole]) return res.status(400).json({ error: 'Selecione um perfil válido para entrar.' });
+    if (user?.role !== requestedRole) {
+      return res.status(403).json({ error: 'O perfil selecionado não corresponde a esta conta.' });
+    }
     if (!user || user.active !== true || !ROLE_LABELS[user.role]) {
       return res.status(403).json({ error: 'Esta conta ainda não foi autorizada pela administração do SGVE.' });
     }
@@ -340,6 +348,56 @@ app.post('/api/students', requireAuth, requireCsrf, requireRoles(...RECORD_MANAG
     audit(req.auth.user.id, 'create', 'student', result.lastInsertRowid);
     res.status(201).json({ id: Number(result.lastInsertRowid), message: 'Estudante cadastrado.' });
   } catch (error) { next(error); }
+});
+app.post('/api/students/:id/account', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
+  const studentId = Number(req.params.id);
+  const email = String(req.body.email || '').trim().toLowerCase();
+  if (!Number.isSafeInteger(studentId) || studentId < 1 || !validEmail(email)) {
+    return res.status(400).json({ error: 'Informe um estudante e e-mail de conta válidos.' });
+  }
+  let transactionOpen = false;
+  try {
+    if (firebaseConfigured) {
+      const result = await firestoreSchool.linkStudentAccount(studentId, email, req.auth.user.id);
+      if (result.error === 'student-account-not-found') return res.status(404).json({ error: 'Conta ativa de estudante não encontrada.' });
+      if (result.error === 'student-not-found') return res.status(404).json({ error: 'Estudante não encontrado ou inativo.' });
+      if (result.error === 'student-already-linked') return res.status(409).json({ error: 'Este cadastro já está vinculado a outra conta.' });
+      if (result.error === 'account-already-linked') return res.status(409).json({ error: 'Esta conta já está vinculada a outro estudante.' });
+      return res.json({ message: result.changed ? 'Conta vinculada ao estudante.' : 'Esta conta já estava vinculada ao estudante.' });
+    }
+    db.exec('BEGIN IMMEDIATE');
+    transactionOpen = true;
+    const fail = (status, message) => {
+      db.exec('ROLLBACK');
+      transactionOpen = false;
+      return res.status(status).json({ error: message });
+    };
+    const student = db.prepare('SELECT id, user_id FROM students WHERE id = ? AND active = 1').get(studentId);
+    const account = db.prepare("SELECT id FROM users WHERE email = ? AND role = 'student' AND active = 1").get(email);
+    if (!student) return fail(404, 'Estudante não encontrado ou inativo.');
+    if (!account) return fail(404, 'Conta ativa de estudante não encontrada.');
+    if (Number(student.user_id) === Number(account.id)) {
+      db.exec('COMMIT');
+      transactionOpen = false;
+      return res.json({ message: 'Esta conta já estava vinculada ao estudante.' });
+    }
+    if (student.user_id != null) return fail(409, 'Este cadastro já está vinculado a outra conta.');
+    const other = db.prepare('SELECT id FROM students WHERE user_id = ? AND id <> ?').get(account.id, studentId);
+    if (other) return fail(409, 'Esta conta já está vinculada a outro estudante.');
+    db.prepare('UPDATE students SET user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id IS NULL').run(account.id, studentId);
+    audit(req.auth.user.id, 'link_student_account', 'student', studentId);
+    db.exec('COMMIT');
+    transactionOpen = false;
+    return res.json({ message: 'Conta vinculada ao estudante.' });
+  } catch (error) {
+    if (transactionOpen) {
+      try { db.exec('ROLLBACK'); } catch {}
+    }
+    if (String(error.message).includes('UNIQUE constraint failed: students.user_id')) {
+      return res.status(409).json({ error: 'Esta conta já está vinculada a outro estudante.' });
+    }
+    next(error);
+  }
 });
 app.post('/api/students/:id/guardians', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
   const studentId = Number(req.params.id);

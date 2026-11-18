@@ -94,6 +94,17 @@ async function listStudentsForUser(user) {
   return result.filter(Boolean).sort((a, b) => a.full_name.localeCompare(b.full_name));
 }
 
+async function linkStudentAccount(studentId, studentEmail, actorUserId = null) {
+  const account = await store.getByUnique('users', 'email', studentEmail);
+  if (!account || account.role !== 'student' || account.active !== true) {
+    return { error: 'student-account-not-found' };
+  }
+  return store.linkStudentAccount(
+    numericId(studentId, 'Estudante'), numericId(account.id, 'Conta'),
+    { actor_user_id: Number(actorUserId), action: 'link_student_account', entity_type: 'student', entity_id: studentId }
+  );
+}
+
 async function linkGuardian(studentId, guardianEmail, relationship, actorUserId = null) {
   const guardian = await store.getByUnique('users', 'email', guardianEmail);
   if (!guardian) return false;
@@ -469,7 +480,7 @@ async function setTripAttendance(tripId, studentId, actorUser, checkpoint, prese
 
 module.exports = {
   audit, listClasses, createClass, getClass, createStudent,
-  listStudentsForUser, linkGuardian, createTrip, getTrip,
+  listStudentsForUser, linkGuardian, linkStudentAccount, createTrip, getTrip,
   listTripsForUser, linkTripClass, linkTripStudent,
   assignTripTeacher, submitTrip, approveTrip,
   listTripParticipantsForUser, setTripStudentAuthorization, setTripAttendance,

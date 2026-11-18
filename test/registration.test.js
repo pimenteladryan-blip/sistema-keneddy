@@ -91,13 +91,39 @@ async function adminSession() {
   const response = await fetch(baseUrl + '/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-    body: JSON.stringify({ email: adminEmail, password: adminPassword })
+    body: JSON.stringify({ email: adminEmail, password: adminPassword, role: 'admin' })
   });
   assert.equal(response.status, 200);
   const cookie = response.headers.get('set-cookie').split(';')[0];
   const data = await response.json();
   return { cookie, csrfToken: data.csrfToken };
 }
+
+test('login exige a seleção de um perfil válido', async () => {
+  const missing = await fetch(baseUrl + '/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+    body: JSON.stringify({ email: adminEmail, password: adminPassword })
+  });
+  assert.equal(missing.status, 400);
+  assert.equal(missing.headers.get('set-cookie'), null);
+});
+
+test('login rejeita perfil selecionado diferente do perfil cadastrado', async () => {
+  const mismatch = await fetch(baseUrl + '/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+    body: JSON.stringify({ email: adminEmail, password: adminPassword, role: 'teacher' })
+  });
+  assert.equal(mismatch.status, 403);
+  assert.equal(mismatch.headers.get('set-cookie'), null, 'perfil incorreto não deve criar sessão');
+  const matching = await fetch(baseUrl + '/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+    body: JSON.stringify({ email: adminEmail, password: adminPassword, role: 'admin' })
+  });
+  assert.equal(matching.status, 200);
+});
 
 test('cadastro público só libera acesso após aprovação do administrador', async () => {
   const pendingEmail = 'professor-pendente@sgve.local';
@@ -112,7 +138,7 @@ test('cadastro público só libera acesso após aprovação do administrador', a
   const blockedLogin = await fetch(baseUrl + '/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-    body: JSON.stringify({ email: pendingEmail, password: applicantPassword })
+    body: JSON.stringify({ email: pendingEmail, password: applicantPassword, role: 'teacher' })
   });
   assert.equal(blockedLogin.status, 401);
 
@@ -137,7 +163,7 @@ test('cadastro público só libera acesso após aprovação do administrador', a
   const allowedLogin = await fetch(baseUrl + '/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-    body: JSON.stringify({ email: pendingEmail, password: applicantPassword })
+    body: JSON.stringify({ email: pendingEmail, password: applicantPassword, role: 'teacher' })
   });
   assert.equal(allowedLogin.status, 200);
 });
@@ -167,7 +193,7 @@ test('solicitação rejeitada não cria uma conta', async () => {
   const login = await fetch(baseUrl + '/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-    body: JSON.stringify({ email: rejectedEmail, password: applicantPassword })
+    body: JSON.stringify({ email: rejectedEmail, password: applicantPassword, role: 'teacher' })
   });
   assert.equal(login.status, 401);
 });
@@ -189,7 +215,8 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
     ['Professor da viagem', 'professor-viagem@sgve.local', 'teacher'],
     ['Responsável da viagem', 'responsavel-viagem@sgve.local', 'guardian'],
     ['Responsável externo', 'responsavel-externo@sgve.local', 'guardian'],
-    ['Professor externo', 'professor-externo@sgve.local', 'teacher']
+    ['Professor externo', 'professor-externo@sgve.local', 'teacher'],
+    ['Estudante da viagem', 'estudante-conta@sgve.local', 'student']
   ]) {
     const created = await adminApi('/api/users', {
       method: 'POST', body: JSON.stringify({ name, email, role, password: rolePassword })
@@ -213,6 +240,26 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
   });
   assert.equal(paperStudentResponse.status, 201);
   const paperStudentId = (await paperStudentResponse.json()).id;
+  const accountLink = await adminApi('/api/students/' + studentId + '/account', {
+    method: 'POST', body: JSON.stringify({ email: 'estudante-conta@sgve.local' })
+  });
+  assert.equal(accountLink.status, 200);
+  assert.equal((await adminApi('/api/students/' + studentId + '/account', {
+    method: 'POST', body: JSON.stringify({ email: 'estudante-conta@sgve.local' })
+  })).status, 200, 'repetir o mesmo vínculo deve ser idempotente');
+  assert.equal((await adminApi('/api/students/' + paperStudentId + '/account', {
+    method: 'POST', body: JSON.stringify({ email: 'estudante-conta@sgve.local' })
+  })).status, 409, 'uma conta não pode ser vinculada a dois estudantes');
+  const studentLogin = await fetch(baseUrl + '/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+    body: JSON.stringify({ email: 'estudante-conta@sgve.local', password: rolePassword, role: 'student' })
+  });
+  assert.equal(studentLogin.status, 200);
+  const studentCookie = studentLogin.headers.get('set-cookie').split(';')[0];
+  const ownStudents = await fetch(baseUrl + '/api/students', { headers: { Cookie: studentCookie } });
+  assert.equal(ownStudents.status, 200);
+  assert.deepEqual((await ownStudents.json()).students.map(item => item.id), [studentId]);
   const guardianLink = await adminApi('/api/students/' + studentId + '/guardians', {
     method: 'POST',
     body: JSON.stringify({ email: 'responsavel-viagem@sgve.local', relationship: 'Responsável' })
@@ -274,7 +321,7 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
     const response = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-      body: JSON.stringify({ email, password: rolePassword })
+      body: JSON.stringify({ email, password: rolePassword, role: email.startsWith('professor-') ? 'teacher' : email.startsWith('responsavel-') ? 'guardian' : 'student' })
     });
     assert.equal(response.status, 200);
     const data = await response.json();
@@ -289,6 +336,9 @@ test('autorização familiar e presença respeitam vínculos e perfis no SQLite'
     });
   };
   const teacherApi = await loginRole('professor-viagem@sgve.local');
+  assert.equal((await teacherApi('/api/students/' + studentId + '/account', {
+    method: 'POST', body: JSON.stringify({ email: 'estudante-conta@sgve.local' })
+  })).status, 403, 'professor não pode vincular contas de estudante');
   const teacherParticipants = await teacherApi('/api/trips/' + tripId + '/participants');
   assert.equal(teacherParticipants.status, 200);
   assert.equal((await teacherParticipants.json()).participants.length, 2);
@@ -495,7 +545,7 @@ test('frota e atribuição de veículos validam capacidade, conflito de horário
   const teacherLogin = await fetch(baseUrl + '/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-    body: JSON.stringify({ email: 'professor-frota@sgve.local', password: 'SenhaSegura123!ABC' })
+    body: JSON.stringify({ email: 'professor-frota@sgve.local', password: 'SenhaSegura123!ABC', role: 'teacher' })
   });
   assert.equal(teacherLogin.status, 200);
   const teacherData = await teacherLogin.json();

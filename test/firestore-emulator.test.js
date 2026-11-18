@@ -261,14 +261,28 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const originlessLogin = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'api-admin@emulator.sgve', password: 'AdminTesteSenha2026!' })
+      body: JSON.stringify({ email: 'api-admin@emulator.sgve', password: 'AdminTesteSenha2026!', role: 'admin' })
     });
     assert.equal(originlessLogin.status, 403, 'requisições de autenticação sem Origin devem ser bloqueadas');
+
+    const missingRoleLogin = await fetch(baseUrl + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ email: 'api-admin@emulator.sgve', password: 'AdminTesteSenha2026!' })
+    });
+    assert.equal(missingRoleLogin.status, 400, 'login sem perfil selecionado deve ser rejeitado');
+
+    const wrongRoleLogin = await fetch(baseUrl + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Origin: baseUrl },
+      body: JSON.stringify({ email: 'api-admin@emulator.sgve', password: 'AdminTesteSenha2026!', role: 'teacher' })
+    });
+    assert.equal(wrongRoleLogin.status, 403, 'perfil diferente da conta deve ser rejeitado');
 
     const loginResponse = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-      body: JSON.stringify({ email: 'api-admin@emulator.sgve', password: 'AdminTesteSenha2026!' })
+      body: JSON.stringify({ email: 'api-admin@emulator.sgve', password: 'AdminTesteSenha2026!', role: 'admin' })
     });
     assert.equal(loginResponse.status, 200);
     const cookie = loginResponse.headers.get('set-cookie').split(';')[0];
@@ -510,7 +524,18 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
 
     await school.linkGuardian(apiStudentId, 'guardian-api@emulator.sgve', 'Responsável');
     await school.linkGuardian(paperStudentId, 'guardian-api@emulator.sgve', 'Responsável');
-    await store.update('students', apiStudentId, { user_id: roleAccounts.student });
+    const studentAccountLink = await api('/api/students/' + apiStudentId + '/account', {
+      method: 'POST', body: JSON.stringify({ email: 'student-api@emulator.sgve' })
+    });
+    assert.equal(studentAccountLink.status, 200);
+    assert.equal((await api('/api/students/' + apiStudentId + '/account', {
+      method: 'POST', body: JSON.stringify({ email: 'student-api@emulator.sgve' })
+    })).status, 200, 'repetir o mesmo vínculo deve ser idempotente');
+    const duplicateStudentAccountLink = await api('/api/students/' + paperStudentId + '/account', {
+      method: 'POST', body: JSON.stringify({ email: 'student-api@emulator.sgve' })
+    });
+    assert.equal(duplicateStudentAccountLink.status, 409,
+      'uma conta de estudante não pode ser vinculada a dois cadastros');
 
     const linkedClass = await api('/api/trips/' + apiTripId + '/classes', {
       method: 'POST', body: JSON.stringify({ class_id: apiClassId })
@@ -574,6 +599,11 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     ]) assert.equal(adminActions.has(action), true, 'evento de auditoria ausente: ' + action);
     assert.equal(apiAudit.some(event =>
       Number(event.actor_user_id) === adminActorId &&
+      event.action === 'link_student_account' && event.entity_type === 'student' &&
+      String(event.entity_id) === String(apiStudentId)
+    ), true, 'vínculo de conta estudantil precisa ser auditado');
+    assert.equal(apiAudit.some(event =>
+      Number(event.actor_user_id) === adminActorId &&
       event.action === 'create' && event.entity_type === 'user'
     ), true, 'criação de usuário não foi auditada na transação');
     const vehicleAudit = apiAudit.filter(event =>
@@ -608,7 +638,7 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       const response = await fetch(baseUrl + '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-        body: JSON.stringify({ email, password: rolePassword })
+        body: JSON.stringify({ email, password: rolePassword, role: ({ professor: 'teacher', responsavel: 'guardian' })[email.split('@')[0].split('-')[0]] || email.split('@')[0].split('-')[0] })
       });
       assert.equal(response.status, 200, 'login de perfil ' + email);
       const data = await response.json();
@@ -636,6 +666,9 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       role: 'guardian'
     });
     const teacherApi = await loginAs('teacher-api@emulator.sgve');
+    assert.equal((await teacherApi('/api/students/' + apiStudentId + '/account', {
+      method: 'POST', body: JSON.stringify({ email: 'student-api@emulator.sgve' })
+    })).status, 403, 'professor não pode vincular conta estudantil');
     const teacherTripsResponse = await teacherApi('/api/trips');
     assert.equal(teacherTripsResponse.status, 200);
     const teacherTripRows = (await teacherTripsResponse.json()).trips;
@@ -763,7 +796,10 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
     const ownStudents = await studentApi('/api/students');
     assert.equal(ownStudents.status, 200);
     assert.equal((await ownStudents.json()).students.length, 1);
-    assert.equal((await studentApi('/api/trips')).status, 200);
+    const studentTripsResponse = await studentApi('/api/trips');
+    assert.equal(studentTripsResponse.status, 200);
+    assert.deepEqual((await studentTripsResponse.json()).trips.map(item => item.id), [apiTripId],
+      'estudante só pode consultar viagens do próprio cadastro');
     const studentParticipantsResponse = await studentApi('/api/trips/' + apiTripId + '/participants');
     assert.equal(studentParticipantsResponse.status, 200);
     assert.equal((await studentParticipantsResponse.json()).participants.length, 1);
@@ -798,14 +834,14 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       const failedLogin = await fetch(baseUrl + '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-        body: JSON.stringify({ email: 'rate-limit-api@emulator.sgve', password: 'SenhaIncorreta2026!' })
+        body: JSON.stringify({ email: 'rate-limit-api@emulator.sgve', password: 'SenhaIncorreta2026!', role: 'teacher' })
       });
       assert.equal(failedLogin.status, 401);
     }
     const blockedLogin = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-      body: JSON.stringify({ email: 'rate-limit-api@emulator.sgve', password: rolePassword })
+      body: JSON.stringify({ email: 'rate-limit-api@emulator.sgve', password: rolePassword, role: 'teacher' })
     });
     assert.equal(blockedLogin.status, 429, 'API deve bloquear novas tentativas após o limite por conta');
 
@@ -819,20 +855,20 @@ test('fluxos críticos de autenticação, cadastro e viagens funcionam no Firest
       const failedLogin = await fetch(baseUrl + '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-        body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: 'SenhaIncorreta2026!' })
+        body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: 'SenhaIncorreta2026!', role: 'teacher' })
       });
       assert.equal(failedLogin.status, 401);
     }
     const validResetLogin = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-      body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: rolePassword })
+      body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: rolePassword, role: 'teacher' })
     });
     assert.equal(validResetLogin.status, 200, 'login correto ainda deve ser permitido no limite');
     const failedAfterSuccess = await fetch(baseUrl + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Origin: baseUrl },
-      body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: 'SenhaIncorreta2026!' })
+      body: JSON.stringify({ email: 'rate-limit-reset-api@emulator.sgve', password: 'SenhaIncorreta2026!', role: 'teacher' })
     });
     assert.equal(failedAfterSuccess.status, 401,
       'login válido deve limpar o contador por conta para evitar bloqueio de usuário legítimo');

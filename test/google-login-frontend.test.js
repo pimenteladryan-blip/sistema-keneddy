@@ -11,6 +11,34 @@ const app = fs.readFileSync(path.join(root, 'public', 'js', 'app.js'), 'utf8');
 const config = fs.readFileSync(path.join(root, 'public', 'firebase-config.js'), 'utf8');
 const server = fs.readFileSync(path.join(root, 'server', 'index.js'), 'utf8');
 
+test('a instalação PWA usa arquivos estáticos e nunca armazena respostas da API', () => {
+  const worker = fs.readFileSync(path.join(root, 'public', 'sw.js'), 'utf8');
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, 'public', 'manifest.webmanifest'), 'utf8'));
+  assert.equal(manifest.start_url, '/');
+  assert.ok(manifest.icons.some(icon => icon.sizes === '192x192'));
+  assert.ok(manifest.icons.some(icon => icon.sizes === '512x512'));
+  assert.match(html, /rel="manifest"/);
+  assert.match(html, /id="pwa-install"/);
+  assert.match(app, /beforeinstallprompt/);
+  assert.match(worker, /if \(url\.pathname\.startsWith\('\/api\/'\)\) return/);
+});
+
+test('a interface limpa os dados privados quando a sessão expira', () => {
+  assert.match(app, /response\.status === 401 && currentUser/);
+  assert.match(app, /Sua sessão expirou/);
+  assert.match(app, /showLogin\(\)/);
+});
+
+test('o vínculo de conta estudantil é restrito à gestão e a tela do professor não carrega a lista geral', () => {
+  assert.match(html, /id="student-account-form"/);
+  assert.match(html, /id="student-account-select"/);
+  assert.match(app, /api\('\/api\/students\/' \+ Number\(payload\.student_id\) \+ '\/account'/);
+  assert.match(app, /students-tab.*user\.role === 'teacher'/);
+  assert.match(app, /clearDashboardData\(\)/);
+  assert.match(app, /sessionController\.abort\(\)/);
+  assert.match(server, /\/api\/students\/\:id\/account', requireAuth, requireCsrf, requireRoles\(\.\.\.RECORD_MANAGERS\)/);
+});
+
 test('a página carrega os SDKs Firebase antes do aplicativo e oferece login Google', () => {
   const appSdk = html.indexOf('firebase-app-compat.js');
   const authSdk = html.indexOf('firebase-auth-compat.js');
@@ -22,6 +50,10 @@ test('a página carrega os SDKs Firebase antes do aplicativo e oferece login Goo
 test('o login Google obtém ID token e cria sessão no backend', () => {
   assert.match(app, /new firebase\.auth\.GoogleAuthProvider\(\)/);
   assert.match(app, /getIdToken\(true\)/);
+  assert.match(app, /role: document\.querySelector\('#login-role'\)\.value/);
+  assert.match(html, /id="login-role"/);
+  assert.match(server, /!VALID_ROLES\.includes\(requestedRole\)/);
+  assert.match(server, /user\.role !== requestedRole/);
   assert.match(app, /api\('\/api\/auth\/google'/);
   assert.match(app, /X-CSRF-Token/);
 });
@@ -68,7 +100,8 @@ test('o módulo de transporte possui frota, atribuição e validações no servi
   assert.match(html, /id="trip-driver-form"/);
   assert.match(app, /api\('\/api\/vehicles'/);
   assert.match(app, /api\('\/api\/drivers'/);
-  assert.match(app, /document\.querySelector\('#drivers-list'\)\.textContent = ''/);
+  assert.match(app, /clearDashboardData\(\)/);
+  assert.match(app, /dashboardView\.querySelectorAll\('\.data-list, tbody'\)/);
   assert.match(server, /app\.post\('\/api\/drivers', requireAuth, requireCsrf, requireRoles\(\.\.\.RECORD_MANAGERS\)/);
   assert.match(server, /app\.post\('\/api\/trips\/:id\/driver', requireAuth, requireCsrf, requireRoles\(\.\.\.RECORD_MANAGERS\)/);
   assert.match(server, /assign_driver/);

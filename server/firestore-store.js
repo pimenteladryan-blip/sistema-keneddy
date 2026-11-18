@@ -8,6 +8,7 @@ const COLLECTIONS = Object.freeze({
   sessions: 'sessions',
   classes: 'classes',
   students: 'students',
+  studentAccountLinks: 'student_account_links',
   studentGuardians: 'student_guardians',
   trips: 'trips',
   vehicles: 'vehicles',
@@ -394,6 +395,54 @@ async function createStudentInActiveClass(fullName, classId, auditEvent = null) 
   });
 }
 
+async function linkStudentAccount(studentId, userId, auditEvent = null) {
+  const studentKey = normalizeId(studentId);
+  const userKey = normalizeId(userId);
+  const db = requireFirestore();
+  const studentRef = collection('students').doc(studentKey);
+  const userRef = collection('users').doc(userKey);
+  // A deterministic per-account document serializes concurrent attempts to
+  // link the same account to different student records.
+  const accountLinkRef = collection('studentAccountLinks').doc(userKey);
+  return db.runTransaction(async transaction => {
+    const [studentSnapshot, userSnapshot, accountLinkSnapshot, legacyLinksSnapshot] = await Promise.all([
+      transaction.get(studentRef),
+      transaction.get(userRef),
+      transaction.get(accountLinkRef),
+      transaction.get(collection('students').where('user_id', '==', Number(userKey)).limit(2))
+    ]);
+    if (!studentSnapshot.exists || studentSnapshot.data().active !== true) return { error: 'student-not-found' };
+    if (!userSnapshot.exists || userSnapshot.data().active !== true || userSnapshot.data().role !== 'student') {
+      return { error: 'student-account-not-found' };
+    }
+    const currentUserId = studentSnapshot.data().user_id == null ? null : Number(studentSnapshot.data().user_id);
+    const linkedStudentId = accountLinkSnapshot.exists ? Number(accountLinkSnapshot.data().student_id) : null;
+    const legacyStudent = legacyLinksSnapshot.docs.find(doc => doc.id !== studentKey);
+    if (legacyStudent || (linkedStudentId !== null && linkedStudentId !== Number(studentKey))) {
+      return { error: 'account-already-linked' };
+    }
+    if (currentUserId !== null && currentUserId !== Number(userKey)) return { error: 'student-already-linked' };
+    if (currentUserId === Number(userKey)) {
+      if (!accountLinkSnapshot.exists) {
+        transaction.create(accountLinkRef, {
+          student_id: Number(studentKey), user_id: Number(userKey),
+          created_at: new Date().toISOString()
+        });
+      }
+      return { ok: true, changed: false };
+    }
+    transaction.update(studentRef, { user_id: Number(userKey), updated_at: new Date().toISOString() });
+    if (!accountLinkSnapshot.exists) {
+      transaction.create(accountLinkRef, {
+        student_id: Number(studentKey), user_id: Number(userKey),
+        created_at: new Date().toISOString()
+      });
+    }
+    addAuditWrite(transaction, db, auditEvent);
+    return { ok: true, changed: true };
+  });
+}
+
 async function linkGuardianIfActive(studentId, guardianId, relationship, auditEvent = null) {
   const studentKey = normalizeId(studentId);
   const guardianKey = normalizeId(guardianId);
@@ -710,6 +759,7 @@ module.exports = {
   createTripStudentWithinCapacity,
   createStudentInActiveClass,
   linkGuardianIfActive,
+  linkStudentAccount,
   createTripRelationIfDraft,
   transitionTripStatus,
   setTripStudentAuthorization,

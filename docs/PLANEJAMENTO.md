@@ -404,3 +404,149 @@ A demonstração em `docs/` permite testar, com dados exclusivamente fictícios:
 - [ ] Executar somente com cópia sintética/controle autorizada; não abrir a base escolar ativa nem importar dados reais nesta fase.
 - [ ] O importador Firestore continua não implementado; nenhuma gravação ou migração real foi realizada.
 - [ ] A execução anterior do PR CI `44098667872` terminou antes das verificações por falha de rede do npm (`ECONNRESET` ao baixar dependência do registry); não foi falha de teste ou do código. Repetir CI nos commits desta etapa.
+
+
+## Atualização — 17/11/2026: identidade visual de produção
+
+- Criada a branch `feature/production-kennedy-ui` a partir da versão com migração Firestore.
+- Iniciada a adaptação da identidade visual do protótipo para a interface real servida pelo Render.
+- Preservados os formulários e identificadores usados pelo frontend de produção, que continuam ligados à API e à autenticação real do servidor.
+- Removida a referência demonstrativa `Ônibus DEMO-03` do placeholder do cadastro de veículos.
+- Ajustados os textos da tela de acesso para “Bem-vindo ao SGVE” e “Criar uma conta”.
+- Definido o tema escuro institucional como padrão inicial, mantendo a alternância de tema.
+- **Não foram copiadas** contas de demonstração, senhas fictícias, dados locais de alunos ou fluxos de autenticação do protótipo.
+- **Status:** alterações registradas na branch de trabalho; validação automatizada e revisão visual ainda pendentes. Nada foi mesclado na branch publicada e nenhum novo deploy foi iniciado.
+
+
+### Retirada da demonstração fictícia da publicação estática (17/11/2026)
+- [x] Substituída a página GitHub Pages que simulava login e armazenava alunos/viagens de exemplo por uma página de encaminhamento para a aplicação no Render.
+- [x] Retirados da página pública os e-mails `@sgve.demo`, a senha compartilhada de demonstração e os registros de estudantes de exemplo.
+- [x] Atualizado o Service Worker para remover caches antigos da demonstração e deixar de armazenar páginas e dados localmente.
+- [x] Removido o teste de sintaxe do JavaScript demonstrativo e substituído por verificação do destino do redirecionamento e ausência de credenciais/dados fictícios na página publicada.
+- [x] README atualizado para documentar a aplicação no Render e explicar que dados sintéticos ficam restritos aos testes automatizados e ao Firestore Emulator.
+- [ ] Validar a publicação do redirecionamento no GitHub Pages após a integração da branch.
+- [ ] Revisar os fluxos de ponta a ponta na aplicação hospedada antes de qualquer uso institucional.
+
+
+### Remoção de dados fictícios e consolidação da aplicação real (17/11/2026)
+- [x] Retirada da publicação GitHub Pages a interface estática com contas de demonstração, senha compartilhada e cadastros locais de estudantes/viagens fictícios; a página agora encaminha para o SGVE hospedado no Render.
+- [x] Removidos os scripts e a configuração Firebase Web que pertenciam exclusivamente ao protótipo estático.
+- [x] Atualizado o Service Worker antigo para limpar o cache da demonstração; a nova aplicação não deve armazenar respostas de API, autenticação ou dados pessoais em cache.
+- [x] Login real ganhou seleção de perfil; o servidor compara o perfil selecionado com o perfil cadastrado antes de criar a sessão. O login Google também exige a seleção e valida o perfil no servidor.
+- [x] Adicionado suporte PWA à aplicação real, com manifest, ícone, botão de instalação e cache restrito a CSS/JavaScript/arquivos estáticos. Rotas `/api/` e páginas autenticadas não são armazenadas pelo Service Worker.
+- [x] Teste de integração SQLite verifica que perfil incorreto retorna HTTP 403 e não cria cookie de sessão.
+- [x] CI completo desta atualização aprovado no GitHub Actions, execução `44197960974` (run 888): sintaxe/estrutura, testes automatizados e integração Firestore Emulator concluídos com sucesso.
+- [ ] Validar visualmente login, seleção de perfil, instalação PWA e módulos com contas de teste, sem cadastrar dados pessoais reais.
+- [ ] Após revisão, solicitar autorização explícita antes de mesclar e publicar as alterações no Render.
+
+- [x] Revisado o PWA antes da publicação: arquivos estáticos usam rede primeiro e cache apenas como alternativa offline; respostas `/api/` nunca são interceptadas; atualização do Service Worker ignora cache HTTP; manifest declara ícones escaláveis nos tamanhos de instalação.
+- [x] Reexecutada a validação completa após os últimos ajustes do PWA: GitHub Actions run `44201221709` (run 899), commit `06709094d5a641c68b896647c4ce3b01a662247d`; sintaxe/estrutura, testes automatizados e integração Firestore Emulator concluídos com sucesso.
+- [ ] Confirmar visualmente a versão da branch em ambiente de prévia e testar os fluxos ponta a ponta com contas sintéticas; o CI não substitui esses testes de navegador.
+- [ ] Confirmar a configuração de branch/implantação do serviço Render e só então solicitar autorização explícita para mesclar/publicar. Nenhuma mesclagem ou implantação foi realizada nesta revisão.
+
+
+### Conferência visual estática da interface real (17/11/2026)
+- [x] Conferidos os elementos de login, seleção de perfil, cadastro, navegação, painel, módulos e regras responsivas em `public/index.html` e `public/css/styles.css`.
+- [x] Conferidos os seletores de ID usados em `public/js/app.js`: nenhuma referência estática aponta para elemento inexistente e não há IDs duplicados no HTML.
+- [x] Corrigida a inconsistência do tema claro: cartão de login, campos, botão de tema e banner do painel agora usam cores claras quando o tema claro está ativo; os estilos escuros ficam condicionados a `body.dark-mode`.
+- [ ] Ainda falta abrir a aplicação em navegador real em desktop e celular para validar o resultado renderizado, rolagem, contraste e comportamento dos módulos. A inspeção estática do código não substitui essa conferência visual em execução.
+
+
+
+### Revisão do backend Firestore e validação da branch (17/11/2026)
+- [x] Conferido o roteamento principal de autenticação e dos módulos escolares no servidor: quando o Firebase está configurado, as rotas usam os serviços Firestore; os comandos SQLite ficam nos caminhos alternativos de desenvolvimento.
+- [x] Conferidos os serviços Firestore para turmas, estudantes, responsáveis, viagens, participantes, autorizações, presença, veículos, condutores, relatórios e auditoria.
+- [x] Conferidos os testes de integração no Firestore Emulator, incluindo autenticação, aprovação de cadastro, permissões por perfil, vínculos, limite de participantes, agenda de veículos/condutores e registros de autorização/presença.
+- [x] Confirmado que a branch de trabalho está no commit `9bd19a7103a5709d8b3427badc27b7bdc96f2f05` e que o GitHub Actions run `44201723576` (run 906) terminou com sucesso.
+- [ ] A aprovação do CI não substitui a validação visual e funcional em navegador real; ainda falta testar os fluxos na versão de prévia com contas sintéticas.
+- [ ] Ainda não foi mesclada a PR #2 nem alterado o Render de produção. A publicação continua condicionada à revisão final e autorização explícita.
+
+
+### Revisão técnica completa da interface e backend (17/11/2026)
+
+**Escopo conferido:** PR #2, interface HTML/CSS/JavaScript, rotas Express, autenticação, sessões, CSRF, rate limit, serviços Firestore, regras e índices Firestore, Service Worker/PWA, testes e workflow CI.
+
+**Validação automatizada**
+- [x] PR #2 permanece aberto e em rascunho, com branch de origem `feature/production-kennedy-ui` e destino `feature/firestore-auth-migration` (branch atualmente associada à implantação existente, conforme configuração previamente informada).
+- [x] Commit revisado: `1392b3d8a0b2a81d08f42078c9f3dea0f909e37b`.
+- [x] GitHub Actions run `44202542613` (run 908) concluído com sucesso: instalação de dependências, `npm run check`, `npm test` e integração Firestore Emulator.
+- [x] Regras Firestore revisadas: leitura e escrita diretas por clientes web/mobile negadas; o backend utiliza Firebase Admin.
+- [x] Revisados os controles de sessão (cookie HttpOnly, SameSite Strict e Secure em produção), validação de origem/CSRF nas operações autenticadas, rate limit e verificações de perfil nas rotas sensíveis.
+- [x] Revisado o Service Worker: somente CSS, JavaScript, manifest e ícone entram no cache; rotas `/api/` não são interceptadas.
+- [x] Conferidos os índices declarados para consultas compostas identificadas no código.
+- [ ] Não foi possível validar a interface renderizada em navegador real nem executar login Google no domínio Render durante esta revisão. O CI e a inspeção estática não substituem essa etapa.
+
+**Pendências encontradas; não corrigidas nesta revisão**
+- [ ] **Alta — vínculo de contas de estudantes:** o cadastro de estudante cria o registro sem `user_id`, e não foi encontrada rota/interface para vincular uma conta com perfil `student` a um registro de estudante. As consultas desse perfil dependem desse vínculo; portanto, contas de estudante aprovadas podem ficar sem acesso aos próprios dados e viagens. Projetar e testar um fluxo administrativo seguro de vínculo antes de habilitar esse perfil.
+- [ ] **Alta — limpeza de dados no logout/expiração:** `showLogin()` limpa apenas alguns elementos e variáveis, mas não apaga todos os nomes/listas/participantes/linhas de relatório já renderizados no DOM oculto. Limpar os dados pessoais da interface ao sair, quando a sessão expirar e antes de trocar de usuário; avaliar também respostas assíncronas antigas que possam terminar após a troca de sessão.
+- [ ] **Média — tela de estudantes para professor:** a interface carrega `/api/students` para todos os perfis, mas o backend nega essa consulta ao perfil professor. A aba/lista pode exibir erro de permissão; ocultar a aba para professor ou implementar consulta limitada aos estudantes de viagens em que esteja vinculado.
+- [ ] **Média — seleção de perfil no servidor:** a interface exige a seleção de perfil, mas os endpoints de login por senha e Google aceitam requisições sem o campo `role`. A autenticação continua usando o perfil armazenado na conta, então isso não permite elevar privilégios; ainda assim, exigir e validar o campo no backend para manter o comportamento consistente com a interface.
+- [ ] **Média — validação externa:** confirmar no projeto Firebase real os domínios autorizados do Authentication, o login Google, os índices implantados, as quotas e a conexão do Render. Esses itens não podem ser comprovados pelo Firestore Emulator.
+- [ ] **Antes de uso institucional:** obter aprovação formal da escola e do responsável institucional, revisar privacidade/LGPD, definir acessos e retenção, e testar backup/restauração. Não inserir dados reais de estudantes antes desses requisitos.
+
+**Conclusão da revisão**
+- [x] A suíte automatizada está verde no commit revisado e não foi identificada, nesta inspeção estática, exposição de credenciais de conta de serviço no frontend.
+- [ ] A PR #2 **não está liberada para publicação escolar** enquanto as pendências altas não forem corrigidas e testadas.
+- [ ] Nenhum código funcional foi alterado nesta revisão; nenhuma mesclagem, configuração do Render ou implantação foi realizada.
+
+
+### Correções após revisão técnica (17/11/2026)
+
+**Implementado na branch `feature/production-kennedy-ui`; validação automatizada pendente**
+- [x] Criada rota `POST /api/students/:id/account`, protegida por sessão, CSRF e perfil de gestão.
+- [x] Implementado vínculo de cadastro escolar com conta ativa de perfil `student` no Firestore usando transação; impede associar uma conta a dois estudantes e impede substituir vínculo existente.
+- [x] Implementado o mesmo fluxo no SQLite usando `BEGIN IMMEDIATE`, validação de conta ativa/perfil e restrição única de `students.user_id`.
+- [x] O vínculo registra evento de auditoria e a repetição do mesmo vínculo é idempotente.
+- [x] Adicionado formulário na aba Estudantes para selecionar o cadastro e informar o e-mail da conta de estudante.
+- [x] Adicionados testes SQLite e Firestore Emulator para vínculo, acesso do estudante aos próprios dados, rejeição de conta já vinculada a outro cadastro e bloqueio para professor.
+- [x] A aba geral de estudantes deixa de aparecer para professor; a interface também deixa de fazer a chamada geral `GET /api/students` nesse perfil.
+- [x] Logout, retorno à tela de login e troca de sessão agora abortam requisições pendentes, limpam listas/tabelas, seletores, contadores, mensagens e formulários da área autenticada.
+- [x] Tratamento de cancelamento evita que respostas de requisições antigas voltem a preencher a interface depois da saída.
+- [x] Login por senha e Google agora exigem perfil explícito da lista permitida no backend; perfil ausente/inválido retorna HTTP 400 e perfil diferente da conta retorna HTTP 403.
+- [x] Atualizados testes de autenticação para enviar o perfil e adicionada regressão para tentativa de login sem perfil.
+- [ ] Executar e aguardar CI completo após estas alterações; não marcar os testes como aprovados antes do resultado.
+- [ ] Validar visualmente em navegador desktop e celular, incluindo criação de conta de estudante, vínculo, login do estudante e logout/troca de usuário.
+- [ ] Revisar os fluxos completos de responsável, professor, secretaria e direção com contas sintéticas.
+- [ ] Nenhuma alteração foi mesclada na branch de produção e nenhum deploy do Render foi iniciado.
+
+
+### Continuação da correção e análise de CI (18/11/2026)
+
+- [x] Reforçada a exclusividade do vínculo Firestore com documento determinístico por ID da conta, lido e criado na mesma transação. Isso evita que duas operações concorrentes associem a mesma conta a cadastros diferentes.
+- [x] Mantida verificação de vínculos antigos diretamente nos cadastros de estudantes, para não ignorar associações anteriores à criação do índice determinístico.
+- [x] Teste de integração Firestore agora verifica acesso do estudante somente ao cadastro vinculado.
+- [x] Testes de login Firestore agora enviam o perfil exigido e verificam rejeição de perfil ausente (HTTP 400) e divergente (HTTP 403).
+- [x] Quando uma chamada autenticada recebe HTTP 401 durante a sessão, a interface volta à tela de login, aborta requisições pendentes e limpa os dados privados já renderizados.
+- [x] Teste de interface inclui verificação da limpeza em caso de expiração da sessão.
+- [x] A suíte SQLite do commit anterior passou com 53 testes (run 952); a falha do teste Firestore nesse commit foi localizada: um login administrativo de teste não enviava o novo campo obrigatório `role`. O teste foi corrigido.
+- [x] CI completo das alterações mais recentes foi aprovado nas execuções 971 e 972, commit `a788024e1002aba7c495bdd0175bf527b99feda6`, incluindo sintaxe/estrutura, testes automatizados e Firestore Emulator.
+- [ ] Após CI verde, revisar o resultado completo e repetir inspeção do diff. Depois disso, ainda falta validação visual real no navegador e conferência de login Google/domínio Render.
+
+
+### Ajuste final dos testes de integração (18/11/2026)
+
+- [x] Corrigida a falha de sintaxe do teste Firestore: havia uma segunda declaração de `studentApi` embora o teste de acesso individual já existisse mais adiante no mesmo arquivo.
+- [x] Mantido o teste existente de acesso do estudante e ampliado para conferir que a lista de viagens contém somente a viagem associada ao cadastro vinculado.
+- [x] Acrescentada verificação explícita de auditoria para o evento `link_student_account`.
+- [x] No CI da revisão, sintaxe, testes SQLite/Node e Firestore Emulator passaram nas execuções 969/970; a atualização documental subsequente também passou integralmente nas execuções 971/972.
+- [x] Corrigido também o último login inválido no teste de limite por conta, que não enviava o campo obrigatório `role` e causava HTTP 400 em vez do 401 esperado.
+- [x] Execuções 969/970 concluídas com sucesso no commit `ab0f900a35b3d4759c63ffa713a5738902ac5ff1`; execuções 971/972 também concluídas com sucesso no commit documental `a788024e1002aba7c495bdd0175bf527b99feda6`.
+- [ ] Fazer revisão visual em navegador. O navegador de pesquisa não conseguiu abrir a URL do GitHub Pages nem o serviço Render nesta sessão, então não foi possível confirmar a interface visual ao vivo.
+
+
+### Revisão do PR e status atualizado (18/11/2026)
+
+- [x] Conferido o diff atual do PR #2: 20 arquivos alterados, incluindo interface real em `public/`, rotas de servidor, persistência Firestore, testes e remoção da demonstração estática fictícia.
+- [x] Confirmado que o PR #2 continua aberto, em rascunho e não mesclado; base `feature/firestore-auth-migration`, head `feature/production-kennedy-ui`.
+- [x] CI completo aprovado no commit de código `ab0f900a35b3d4759c63ffa713a5738902ac5ff1` (runs 969 e 970) e no commit documental `a788024e1002aba7c495bdd0175bf527b99feda6` (runs 971 e 972).
+- [ ] Não foi possível fazer inspeção visual ao vivo nesta sessão: as URLs GitHub Pages e Render não puderam ser abertas pelo navegador disponível. Isso não é uma falha do sistema; significa apenas que a aparência e os fluxos reais ainda não foram validados visualmente.
+- [ ] Antes de mesclar/publicar: validar visualmente em navegador, testar login Google com conta autorizada e confirmar configuração do serviço Render. Nenhum deploy foi iniciado.
+
+### Verificação posterior do commit atual (18/11/2026)
+
+- [x] Verificado o HEAD atual da branch `feature/production-kennedy-ui`: `edcb34298ce04212b324477a31e9d50599718d58`.
+- [x] Confirmado que o CI desse HEAD executou a workflow `SGVE - verificações`, run 974 (`44209591603`), com job `checks` concluído em sucesso.
+- [x] Conferidas como aprovadas no run 974 as etapas de instalação de dependências, sintaxe/estrutura, testes automatizados e integração com Firestore Emulator.
+- [x] Feita nova leitura do diff das rotas de vínculo de conta estudantil, transação Firestore/SQLite, login por senha/Google e limpeza de sessão no frontend.
+- [ ] Ainda falta teste visual em navegador desktop/celular e validação controlada dos fluxos reais Google/Render; CI verde não substitui essas verificações.
+- [ ] PR #2 permanece aberto, em rascunho e não mesclado. Nenhuma publicação ou alteração no serviço Render foi feita.

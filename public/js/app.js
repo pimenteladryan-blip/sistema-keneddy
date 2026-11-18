@@ -6,11 +6,16 @@ const loginButton = document.querySelector('#login-button');
 const loginMessage = document.querySelector('#login-message');
 const logoutButton = document.querySelector('#logout-button');
 const googleLoginButton = document.querySelector('#google-login-button');
+const installButton = document.querySelector('#pwa-install');
+let deferredInstallPrompt = null;
 let csrfToken = '';
+let sessionController = new AbortController();
 let currentUser = null;
 let lastReport = null;
 
 function showDashboard(user) {
+  sessionController.abort();
+  sessionController = new AbortController();
   currentUser = user;
   loginView.classList.add('hidden');
   dashboardView.classList.remove('hidden');
@@ -20,6 +25,8 @@ function showDashboard(user) {
   if (!canManage) lastReport = null;
   document.querySelector('#class-form').classList.toggle('hidden', !canManage);
   document.querySelector('#student-form').classList.toggle('hidden', !canManage);
+  document.querySelector('#student-account-form').classList.toggle('hidden', !canManage);
+  document.querySelector('#students-tab').classList.toggle('hidden', user.role === 'teacher');
   document.querySelector('#trip-form').classList.toggle('hidden', !canManage);
   document.querySelector('#trip-assignment').classList.toggle('hidden', !canManage);
   document.querySelector('#users-tab').classList.toggle('hidden', !canManage);
@@ -30,7 +37,7 @@ function showDashboard(user) {
   document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tab === 'classes-panel'));
   document.querySelectorAll('.module-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== 'classes-panel'));
   loadClasses();
-  loadStudents();
+  if (user.role !== 'teacher') loadStudents();
   loadTrips();
   if (canManage) {
     loadVehicles();
@@ -39,22 +46,50 @@ function showDashboard(user) {
   }
   if (user.role === 'admin') loadRegistrationRequests();
 }
+function clearDashboardData() {
+  dashboardView.querySelectorAll('form').forEach(form => form.reset());
+  dashboardView.querySelectorAll('.data-list, tbody').forEach(element => element.replaceChildren());
+  dashboardView.querySelectorAll('.count-pill').forEach(element => { element.textContent = '0'; });
+  dashboardView.querySelectorAll('.message').forEach(element => { element.textContent = ''; });
+  dashboardView.querySelectorAll('select').forEach(select => {
+    if (select.options.length) {
+      const firstOption = select.options[0].cloneNode(true);
+      select.replaceChildren(firstOption);
+    }
+  });
+  document.querySelector('#welcome-title').textContent = 'Olá!';
+  document.querySelector('#user-role').textContent = '';
+}
 function showLogin() {
+  sessionController.abort();
+  sessionController = new AbortController();
+  clearDashboardData();
   currentUser = null;
   lastReport = null;
   dashboardView.classList.add('hidden');
   loginView.classList.remove('hidden');
   csrfToken = '';
-  document.querySelector('#drivers-list').textContent = '';
-  document.querySelector('#vehicles-list').textContent = '';
-  document.querySelector('#trip-driver-select').innerHTML = '<option value="">Cadastre um condutor</option>';
-  document.querySelector('#trip-vehicle-select').innerHTML = '<option value="">Cadastre um veículo</option>';
 }
 async function api(url, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
-  const response = await fetch(url, { credentials: 'same-origin', ...options, headers });
-  const data = await response.json().catch(() => ({}));
+  let response;
+  try {
+    response = await fetch(url, {
+      credentials: 'same-origin', ...options,
+      signal: options.signal || sessionController.signal, headers
+    });
+  } catch (error) {
+    throw error;
+  }
+  const data = await response.json().catch(error => {
+    if (error.name === 'AbortError') throw error;
+    return {};
+  });
+  if (response.status === 401 && currentUser) {
+    showLogin();
+    loginMessage.textContent = 'Sua sessão expirou. Entre novamente para continuar.';
+  }
   if (!response.ok) throw new Error(data.error || 'Não foi possível concluir a operação.');
   return data;
 }
@@ -93,7 +128,7 @@ async function loadClasses() {
       ).join('');
       if (selectedClass) tripClassSelect.value = selectedClass;
     }
-  } catch (error) { list.textContent = error.message; }
+  } catch (error) { if (error.name === 'AbortError') return; list.textContent = error.message; }
 }
 async function loadStudents() {
   const list = document.querySelector('#students-list');
@@ -112,7 +147,15 @@ async function loadStudents() {
       ).join('');
       if (previous) tripStudentSelect.value = previous;
     }
-  } catch (error) { list.textContent = error.message; }
+    const accountStudentSelect = document.querySelector('#student-account-select');
+    if (accountStudentSelect && currentUser && ['admin', 'direction', 'secretariat'].includes(currentUser.role)) {
+      const previousAccountStudent = accountStudentSelect.value;
+      accountStudentSelect.innerHTML = '<option value="">Selecione um estudante</option>' + data.students.map(item =>
+        '<option value="' + item.id + '">' + escapeHtml(item.full_name + ' · ' + classLabel(item)) + '</option>'
+      ).join('');
+      if (previousAccountStudent) accountStudentSelect.value = previousAccountStudent;
+    }
+  } catch (error) { if (error.name === 'AbortError') return; list.textContent = error.message; }
 }
 
 
@@ -134,7 +177,7 @@ async function loadVehicles() {
       '</option>'
     ).join('');
     if (previous) select.value = previous;
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     list.textContent = error.message;
   }
 }
@@ -162,7 +205,7 @@ async function loadDrivers() {
       '<option value="' + Number(driver.id) + '">' + escapeHtml(driver.name) + '</option>'
     ).join('');
     if (previous) select.value = previous;
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     list.textContent = error.message;
   }
 }
@@ -200,7 +243,7 @@ async function loadReports() {
     ).join('') : '<tr><td colspan="9">Nenhuma viagem cadastrada.</td></tr>';
     document.querySelector('#export-report-csv').disabled = !data.trips.length;
     showMessage('#report-message', 'Relatório atualizado.');
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     lastReport = null;
     body.innerHTML = '<tr><td colspan="9">' + escapeHtml(error.message) + '</td></tr>';
     document.querySelector('#export-report-csv').disabled = true;
@@ -282,7 +325,7 @@ async function loadTripParticipants(tripId, area) {
         controls + '</article>';
     }).join('') : '<p class="muted">Nenhum participante vinculado a esta viagem.</p>';
     area.dataset.loaded = 'true';
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     area.textContent = error.message;
     area.dataset.loaded = 'false';
   }
@@ -307,7 +350,7 @@ async function loadTrips() {
     document.querySelector('#trip-student-trip').innerHTML = options;
     document.querySelector('#trip-vehicle-trip').innerHTML = options;
     document.querySelector('#trip-driver-trip').innerHTML = options;
-  } catch (error) { list.textContent = error.message; }
+  } catch (error) { if (error.name === 'AbortError') return; list.textContent = error.message; }
 }
 async function loadRegistrationRequests() {
   if (!currentUser || currentUser.role !== 'admin') return;
@@ -322,7 +365,7 @@ async function loadRegistrationRequests() {
       '<div class="registration-actions"><button type="button" class="small-action" data-registration-action="approve" data-registration-id="' + item.id + '">Aprovar</button>' +
       '<button type="button" class="small-action reject-action" data-registration-action="reject" data-registration-id="' + item.id + '">Rejeitar</button></div></article>'
     ).join('') : '<p class="muted">Não há solicitações aguardando aprovação.</p>';
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     list.textContent = error.message;
   }
 }
@@ -336,7 +379,7 @@ document.querySelector('#registration-requests-list').addEventListener('click', 
     });
     showMessage('#registration-requests-message', result.message);
     await loadRegistrationRequests();
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#registration-requests-message', error.message, true);
     button.disabled = false;
   }
@@ -352,7 +395,7 @@ document.querySelector('#trip-form').addEventListener('submit', async event => {
     event.currentTarget.reset();
     showMessage('#trip-message', result.message);
     await loadTrips();
-  } catch (error) { showMessage('#trip-message', error.message, true); }
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#trip-message', error.message, true); }
 });
 document.querySelector('#trip-class-form').addEventListener('submit', async event => {
   event.preventDefault();
@@ -362,7 +405,7 @@ document.querySelector('#trip-class-form').addEventListener('submit', async even
       method: 'POST', body: JSON.stringify({ class_id: Number(payload.class_id) })
     });
     showMessage('#trip-message', result.message);
-  } catch (error) { showMessage('#trip-message', error.message, true); }
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#trip-message', error.message, true); }
 });
 
 
@@ -381,7 +424,7 @@ document.querySelector('#vehicle-form').addEventListener('submit', async event =
     event.currentTarget.elements.capacity.value = '40';
     showMessage('#vehicle-message', result.message);
     await loadVehicles();
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#vehicle-message', error.message, true);
   }
 });
@@ -395,7 +438,7 @@ document.querySelector('#trip-vehicle-form').addEventListener('submit', async ev
     });
     showMessage('#trip-message', result.message);
     await loadTrips();
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#trip-message', error.message, true);
   }
 });
@@ -410,7 +453,7 @@ document.querySelector('#driver-form').addEventListener('submit', async event =>
     event.currentTarget.reset();
     showMessage('#driver-message', result.message);
     await loadDrivers();
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#driver-message', error.message, true);
   }
 });
@@ -424,7 +467,7 @@ document.querySelector('#trip-driver-form').addEventListener('submit', async eve
     });
     showMessage('#trip-message', result.message);
     await loadTrips();
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#trip-message', error.message, true);
   }
 });
@@ -438,7 +481,7 @@ document.querySelector('#trip-student-form').addEventListener('submit', async ev
     });
     showMessage('#trip-message', result.message);
     await loadTrips();
-  } catch (error) { showMessage('#trip-message', error.message, true); }
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#trip-message', error.message, true); }
 });
 document.querySelector('#trips-list').addEventListener('click', async event => {
   const participantButton = event.target.closest('[data-participant-action]');
@@ -464,7 +507,7 @@ document.querySelector('#trips-list').addEventListener('click', async event => {
       showMessage('#trip-message', result.message);
       const area = participantButton.closest('.participants-area');
       await loadTripParticipants(tripId, area);
-    } catch (error) {
+    } catch (error) { if (error.name === 'AbortError') return;
       showMessage('#trip-message', error.message, true);
       participantButton.disabled = false;
     }
@@ -486,7 +529,7 @@ document.querySelector('#trips-list').addEventListener('click', async event => {
     const result = await api('/api/trips/' + button.dataset.tripId + '/' + button.dataset.tripAction, { method: 'POST', body: '{}' });
     showMessage('#trip-message', result.message);
     await loadTrips();
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#trip-message', error.message, true);
     button.disabled = false;
   }
@@ -506,7 +549,19 @@ document.querySelector('#class-form').addEventListener('submit', async event => 
     event.currentTarget.elements.school_year.value = String(new Date().getFullYear());
     showMessage('#class-message', result.message);
     await loadClasses();
-  } catch (error) { showMessage('#class-message', error.message, true); }
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#class-message', error.message, true); }
+});
+document.querySelector('#student-account-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(event.currentTarget).entries());
+  try {
+    const result = await api('/api/students/' + Number(payload.student_id) + '/account', {
+      method: 'POST', body: JSON.stringify({ email: payload.email })
+    });
+    event.currentTarget.reset();
+    showMessage('#student-account-message', result.message);
+    await loadStudents();
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#student-account-message', error.message, true); }
 });
 document.querySelector('#student-form').addEventListener('submit', async event => {
   event.preventDefault();
@@ -517,7 +572,7 @@ document.querySelector('#student-form').addEventListener('submit', async event =
     event.currentTarget.reset();
     showMessage('#student-message', result.message);
     await loadStudents();
-  } catch (error) { showMessage('#student-message', error.message, true); }
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#student-message', error.message, true); }
 });
 const registrationForm = document.querySelector('#registration-form');
 const registrationMessage = document.querySelector('#registration-message');
@@ -555,7 +610,7 @@ registrationForm.addEventListener('submit', async event => {
     });
     registrationForm.reset();
     showMessage('#registration-message', result.message + ' Código: ' + result.verificationCode);
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     showMessage('#registration-message', error.message, true);
   } finally {
     button.disabled = false;
@@ -569,7 +624,7 @@ document.querySelector('#user-form').addEventListener('submit', async event => {
     const result = await api('/api/users', { method: 'POST', body: JSON.stringify(payload) });
     event.currentTarget.reset();
     showMessage('#user-message', result.message + ' Perfil: ' + result.user.roleLabel);
-  } catch (error) { showMessage('#user-message', error.message, true); }
+  } catch (error) { if (error.name === 'AbortError') return; showMessage('#user-message', error.message, true); }
 });
 function applyTheme(mode) {
   const dark = mode === 'dark';
@@ -579,7 +634,7 @@ function applyTheme(mode) {
   button.setAttribute('aria-label', dark ? 'Mudar para tema claro' : 'Mudar para tema escuro');
   button.setAttribute('aria-pressed', String(dark));
 }
-let savedTheme = 'light';
+let savedTheme = 'dark';
 try {
   const storedTheme = localStorage.getItem('sgve-theme-mode');
   if (storedTheme === 'light' || storedTheme === 'dark') savedTheme = storedTheme;
@@ -606,16 +661,20 @@ loginForm.addEventListener('submit', async event => {
   try {
     const data = await api('/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email: form.get('email'), password: form.get('password') })
+      body: JSON.stringify({ email: form.get('email'), password: form.get('password'), role: form.get('role') })
     });
     csrfToken = data.csrfToken;
     loginForm.reset();
     showDashboard(data.user);
-  } catch (error) { loginMessage.textContent = error.message; }
-  finally { loginButton.disabled = false; loginButton.textContent = 'Entrar no sistema'; }
+  } catch (error) { if (error.name === 'AbortError') return; loginMessage.textContent = error.message; }
+  finally { loginButton.disabled = false; loginButton.textContent = 'Entrar'; }
 });
 googleLoginButton.addEventListener('click', async () => {
   loginMessage.textContent = '';
+  if (!document.querySelector('#login-role').value) {
+    loginMessage.textContent = 'Selecione seu perfil antes de continuar.';
+    return;
+  }
   googleLoginButton.disabled = true;
   googleLoginButton.textContent = 'Conectando ao Google...';
   try {
@@ -628,11 +687,11 @@ googleLoginButton.addEventListener('click', async () => {
     const idToken = await credential.user.getIdToken(true);
     const data = await api('/api/auth/google', {
       method: 'POST',
-      body: JSON.stringify({ idToken })
+      body: JSON.stringify({ idToken, role: document.querySelector('#login-role').value })
     });
     csrfToken = data.csrfToken;
     showDashboard(data.user);
-  } catch (error) {
+  } catch (error) { if (error.name === 'AbortError') return;
     loginMessage.textContent = error.code === 'auth/popup-closed-by-user'
       ? 'A janela de login foi fechada antes da conclusão.'
       : (error.message || 'Não foi possível entrar com Google.');
@@ -641,10 +700,34 @@ googleLoginButton.addEventListener('click', async () => {
     googleLoginButton.textContent = 'Entrar com Google';
   }
 });
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  installButton.hidden = false;
+});
+installButton.addEventListener('click', async () => {
+  if (!deferredInstallPrompt) return;
+  installButton.disabled = true;
+  try {
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+  } finally {
+    deferredInstallPrompt = null;
+    installButton.hidden = true;
+    installButton.disabled = false;
+  }
+});
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  installButton.hidden = true;
+});
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(() => {}));
+}
 logoutButton.addEventListener('click', async () => {
   logoutButton.disabled = true;
   try { await api('/api/auth/logout', { method: 'POST', body: '{}' }); if (window.firebase?.apps?.length) await firebase.auth().signOut(); showLogin(); }
-  catch (error) { window.alert(error.message); }
+  catch (error) { if (error.name === 'AbortError') return; window.alert(error.message); }
   finally { logoutButton.disabled = false; }
 });
 restoreSession();
