@@ -103,6 +103,7 @@
           <button type="button" class="tab" data-tab="trips-panel">Viagens</button>
           <button type="button" class="tab" data-tab="vehicles-panel" id="vehicles-tab">Transportes</button>
           <button type="button" class="tab" data-tab="reports-panel" id="reports-tab">Relatórios</button>
+          <button type="button" class="tab" data-tab="guardians-panel" id="guardians-tab">Responsáveis</button>
           <button type="button" class="tab" data-tab="users-panel" id="users-tab">Contas</button>
         </nav>
         <section id="classes-panel" class="module-panel">
@@ -227,6 +228,23 @@
           </div>
           <p id="report-message" class="message" role="status"></p>
           <p class="privacy-note">O relatório mostra apenas totais e dados operacionais da viagem. Não exporta nomes, contatos ou documentos de estudantes.</p>
+        </section>
+        <section id="guardians-panel" class="module-panel hidden">
+          <div class="section-heading">
+            <div><p class="eyebrow green">FAMÍLIA E COMUNIDADE</p><h3>Cadastro de responsáveis</h3><p class="section-subtitle">Crie o acesso da família e depois vincule-o ao estudante.</p></div>
+            <span id="guardians-count" class="count-pill">0</span>
+          </div>
+          <form id="guardian-form" class="inline-form guardian-create-form">
+            <label>Nome completo<input name="name" maxlength="100" autocomplete="name" placeholder="Nome do responsável" required></label>
+            <label>E-mail de acesso<input name="email" type="email" maxlength="254" autocomplete="email" placeholder="responsavel@email.com" required></label>
+            <label>Senha inicial<input name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
+            <label>Confirmar senha<input name="password_confirm" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
+            <button type="submit">Cadastrar responsável</button>
+          </form>
+          <p id="guardian-message" class="message" role="status" aria-live="polite"></p>
+          <p class="privacy-note">Depois de cadastrar, abra a aba Estudantes e use “Vincular responsável” para associar esta conta ao aluno e informar o parentesco. A senha inicial deve ser entregue de forma privada.</p>
+          <div class="section-heading guardian-list-heading"><div><h4>Responsáveis cadastrados</h4><p class="section-subtitle">Contas ativas que podem ser vinculadas aos estudantes.</p></div></div>
+          <div id="guardians-list" class="data-list"><p class="muted">Carregando responsáveis...</p></div>
         </section>
         <section id="users-panel" class="module-panel hidden">
           <div class="section-heading"><div><p class="eyebrow green">ACESSO AO SISTEMA</p><h3>Criar conta</h3></div></div>
