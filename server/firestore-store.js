@@ -394,6 +394,32 @@ async function createStudentInActiveClass(fullName, classId, auditEvent = null) 
   });
 }
 
+async function linkStudentAccount(studentId, userId, auditEvent = null) {
+  const studentKey = normalizeId(studentId);
+  const userKey = normalizeId(userId);
+  const db = requireFirestore();
+  const studentRef = collection('students').doc(studentKey);
+  const userRef = collection('users').doc(userKey);
+  return db.runTransaction(async transaction => {
+    const [studentSnapshot, userSnapshot, linkedSnapshot] = await Promise.all([
+      transaction.get(studentRef),
+      transaction.get(userRef),
+      transaction.get(collection('students').where('user_id', '==', Number(userKey)).limit(2))
+    ]);
+    if (!studentSnapshot.exists || studentSnapshot.data().active !== true) return { error: 'student-not-found' };
+    if (!userSnapshot.exists || userSnapshot.data().active !== true || userSnapshot.data().role !== 'student') {
+      return { error: 'student-account-not-found' };
+    }
+    const currentUserId = studentSnapshot.data().user_id == null ? null : Number(studentSnapshot.data().user_id);
+    if (currentUserId === Number(userKey)) return { ok: true, changed: false };
+    if (currentUserId !== null) return { error: 'student-already-linked' };
+    if (linkedSnapshot.docs.some(doc => doc.id !== studentKey)) return { error: 'account-already-linked' };
+    transaction.update(studentRef, { user_id: Number(userKey), updated_at: new Date().toISOString() });
+    addAuditWrite(transaction, db, auditEvent);
+    return { ok: true, changed: true };
+  });
+}
+
 async function linkGuardianIfActive(studentId, guardianId, relationship, auditEvent = null) {
   const studentKey = normalizeId(studentId);
   const guardianKey = normalizeId(guardianId);
@@ -710,6 +736,7 @@ module.exports = {
   createTripStudentWithinCapacity,
   createStudentInActiveClass,
   linkGuardianIfActive,
+  linkStudentAccount,
   createTripRelationIfDraft,
   transitionTripStatus,
   setTripStudentAuthorization,
