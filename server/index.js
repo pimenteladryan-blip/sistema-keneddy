@@ -363,26 +363,34 @@ app.post('/api/students/:id/account', requireAuth, requireCsrf, requireRoles(...
       if (result.error === 'account-already-linked') return res.status(409).json({ error: 'Esta conta já está vinculada a outro estudante.' });
       return res.json({ message: result.changed ? 'Conta vinculada ao estudante.' : 'Esta conta já estava vinculada ao estudante.' });
     }
-    const link = db.transaction(() => {
-      const student = db.prepare('SELECT id, user_id FROM students WHERE id = ? AND active = 1').get(studentId);
-      const account = db.prepare("SELECT id FROM users WHERE email = ? AND role = 'student' AND active = 1").get(email);
-      if (!student) return { error: 'student-not-found' };
-      if (!account) return { error: 'student-account-not-found' };
-      if (Number(student.user_id) === Number(account.id)) return { ok: true, changed: false };
-      if (student.user_id != null) return { error: 'student-already-linked' };
-      const other = db.prepare('SELECT id FROM students WHERE user_id = ? AND id <> ?').get(account.id, studentId);
-      if (other) return { error: 'account-already-linked' };
-      db.prepare('UPDATE students SET user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id IS NULL').run(account.id, studentId);
-      audit(req.auth.user.id, 'link_student_account', 'student', studentId);
-      return { ok: true, changed: true };
-    });
-    const result = link();
-    if (result.error === 'student-account-not-found') return res.status(404).json({ error: 'Conta ativa de estudante não encontrada.' });
-    if (result.error === 'student-not-found') return res.status(404).json({ error: 'Estudante não encontrado ou inativo.' });
-    if (result.error === 'student-already-linked') return res.status(409).json({ error: 'Este cadastro já está vinculado a outra conta.' });
-    if (result.error === 'account-already-linked') return res.status(409).json({ error: 'Esta conta já está vinculada a outro estudante.' });
-    return res.json({ message: result.changed ? 'Conta vinculada ao estudante.' : 'Esta conta já estava vinculada ao estudante.' });
+    db.exec('BEGIN IMMEDIATE');
+    let transactionOpen = true;
+    const fail = (status, message) => {
+      db.exec('ROLLBACK');
+      transactionOpen = false;
+      return res.status(status).json({ error: message });
+    };
+    const student = db.prepare('SELECT id, user_id FROM students WHERE id = ? AND active = 1').get(studentId);
+    const account = db.prepare("SELECT id FROM users WHERE email = ? AND role = 'student' AND active = 1").get(email);
+    if (!student) return fail(404, 'Estudante não encontrado ou inativo.');
+    if (!account) return fail(404, 'Conta ativa de estudante não encontrada.');
+    if (Number(student.user_id) === Number(account.id)) {
+      db.exec('COMMIT');
+      transactionOpen = false;
+      return res.json({ message: 'Esta conta já estava vinculada ao estudante.' });
+    }
+    if (student.user_id != null) return fail(409, 'Este cadastro já está vinculado a outra conta.');
+    const other = db.prepare('SELECT id FROM students WHERE user_id = ? AND id <> ?').get(account.id, studentId);
+    if (other) return fail(409, 'Esta conta já está vinculada a outro estudante.');
+    db.prepare('UPDATE students SET user_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id IS NULL').run(account.id, studentId);
+    audit(req.auth.user.id, 'link_student_account', 'student', studentId);
+    db.exec('COMMIT');
+    transactionOpen = false;
+    return res.json({ message: 'Conta vinculada ao estudante.' });
   } catch (error) {
+    if (typeof transactionOpen !== 'undefined' && transactionOpen) {
+      try { db.exec('ROLLBACK'); } catch {}
+    }
     if (String(error.message).includes('UNIQUE constraint failed: students.user_id')) {
       return res.status(409).json({ error: 'Esta conta já está vinculada a outro estudante.' });
     }
