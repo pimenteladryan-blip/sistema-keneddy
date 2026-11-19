@@ -790,7 +790,7 @@ app.get('/api/trips', requireAuth, async (req, res, next) => {
       : 'SELECT DISTINCT t.id, t.title, t.destination, t.educational_purpose, t.departure_at, t.return_at, t.capacity, t.image_data, t.vehicle_id, v.name AS vehicle_name, t.status, (SELECT COUNT(*) FROM trip_students ts WHERE ts.trip_id = t.id) AS participant_count FROM trips t LEFT JOIN vehicles v ON v.id = t.vehicle_id';
     if (hasRole(user, RECORD_MANAGERS)) {
       rows = db.prepare(select + ' ORDER BY t.departure_at DESC LIMIT 100').all();
-    } else if (user.role === 'teacher') {
+    } else if (['teacher', 'pedagogue'].includes(user.role)) {
       rows = db.prepare(select + ' JOIN trip_staff tsf ON tsf.trip_id = t.id WHERE tsf.user_id = ? ORDER BY t.departure_at DESC').all(user.id);
     } else if (user.role === 'guardian') {
       rows = db.prepare(select + ' JOIN trip_students ts ON ts.trip_id = t.id JOIN students s ON s.id = ts.student_id JOIN student_guardians sg ON sg.student_id = s.id WHERE sg.guardian_user_id = ? ORDER BY t.departure_at DESC').all(user.id);
