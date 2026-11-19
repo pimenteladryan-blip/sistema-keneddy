@@ -146,10 +146,10 @@ async function loadStudents() {
   try {
     const data = await api('/api/students');
     document.querySelector('#students-count').textContent = String(data.students.length);
-    list.innerHTML = data.students.length ? data.students.map(item =>
-      '<article class="data-row"><strong>' + escapeHtml(item.full_name) + '</strong><span>' +
-      escapeHtml(classLabel(item)) + '</span></article>'
-    ).join('') : '<p class="muted">Nenhum estudante cadastrado ou vinculado a este perfil.</p>';
+    list.innerHTML = data.students.length ? data.students.map(item => {
+      const initials = String(item.full_name || 'E').trim().split(/\\s+/).slice(0, 2).map(part => part.charAt(0)).join('').toUpperCase();
+      return '<article class="data-row student-modern-card"><span class="student-avatar" aria-hidden="true">' + escapeHtml(initials) + '</span><div class="student-card-main"><strong>' + escapeHtml(item.full_name) + '</strong><span class="student-class-meta">' + escapeHtml(classLabel(item)) + '</span></div><span class="student-status-pill">Cadastrado</span></article>';
+    }).join('') : '<p class="muted">Nenhum estudante cadastrado ou vinculado a este perfil.</p>';
     const tripStudentSelect = document.querySelector('#trip-student-select');
     if (tripStudentSelect) {
       const previous = tripStudentSelect.value;
