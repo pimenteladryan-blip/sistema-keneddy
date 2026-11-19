@@ -93,7 +93,7 @@ async function createFirebaseUser({ display_name, email, firebase_uid, role, act
   const name = typeof display_name === 'string' ? display_name.trim() : '';
   const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
   if (name.length < 3 || name.length > 100 ||
-      !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(normalizedEmail) ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail) ||
       normalizedEmail.length > 254 ||
       typeof firebase_uid !== 'string' || !firebase_uid || firebase_uid.length > 128 ||
       !['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'].includes(role) ||
@@ -352,7 +352,7 @@ async function createFirebaseRegistrationRequest({ display_name, email, firebase
   const name = typeof display_name === 'string' ? display_name.trim() : '';
   const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
   if (name.length < 3 || name.length > 100 ||
-      !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(normalizedEmail) ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail) ||
       normalizedEmail.length > 254 ||
       typeof firebase_uid !== 'string' || !firebase_uid || firebase_uid.length > 128 ||
       !['teacher', 'guardian', 'student'].includes(role)) {
