@@ -356,7 +356,7 @@ async function sendPushToUserIds(userIds, notification) {
       notification: { title: notification.title, body: notification.body },
       webpush: { notification: {
         icon: '/icon.svg', badge: '/icon.svg',
-        requireInteraction: true, renotify: true, tag: 'sgve-aviso',
+        requireInteraction: true,
         vibrate: [180, 80, 180]
       }, fcmOptions: { link: notification.url || '/' } }
     });
