@@ -138,7 +138,7 @@ async function createTrip(data, createdBy) {
     title: data.title, destination: data.destination,
     educational_purpose: data.purpose,
     departure_at: data.departure, return_at: data.returning,
-    capacity: Number(data.capacity), participant_count: 0, status: 'draft',
+    capacity: Number(data.capacity), image_data: data.imageData || null, participant_count: 0, status: 'draft',
     created_by: Number(createdBy), approved_by: null,
     created_at: new Date().toISOString(), updated_at: new Date().toISOString()
   }, { actor_user_id: createdBy, action: 'create', entity_type: 'trip' });
@@ -147,6 +147,20 @@ async function createTrip(data, createdBy) {
 
 async function getTrip(id) {
   return store.get('trips', numericId(id, 'Viagem'));
+}
+
+async function updateTrip(id, data, actorUserId) {
+  await store.update('trips', numericId(id, 'Viagem'), {
+    title: data.title, destination: data.destination,
+    educational_purpose: data.purpose, departure_at: data.departure,
+    return_at: data.returning, capacity: Number(data.capacity),
+    image_data: data.imageData || null, updated_at: new Date().toISOString()
+  });
+  await audit(actorUserId, 'update', 'trip', Number(id));
+}
+async function deleteTrip(id, actorUserId) {
+  await store.remove('trips', numericId(id, 'Viagem'));
+  await audit(actorUserId, 'delete', 'trip', Number(id));
 }
 
 async function listTripsForUser(user) {
@@ -501,7 +515,7 @@ module.exports = {
   createTeacher,
   audit, listClasses, createClass, getClass, createStudent,
   listStudentsForUser, linkGuardian, linkStudentAccount, createTrip, getTrip,
-  listTripsForUser, linkTripClass, linkTripStudent,
+  listTripsForUser, updateTrip, deleteTrip, linkTripClass, linkTripStudent,
   assignTripTeacher, submitTrip, approveTrip,
   listTripParticipantsForUser, setTripStudentAuthorization, setTripAttendance,
   listVehicles, createVehicle, assignTripVehicle,
