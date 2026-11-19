@@ -64,7 +64,8 @@ self.addEventListener('fetch', event => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const target = new URL(event.notification.data?.url || '/', self.location.origin).href;
+  const messageLink = event.notification.data?.url || event.notification.data?.FCM_MSG?.fcmOptions?.link || '/';
+  const target = new URL(messageLink, self.location.origin).href;
   event.waitUntil((async () => {
     const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const client of windows) {
