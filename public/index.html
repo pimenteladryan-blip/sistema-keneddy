@@ -156,7 +156,13 @@
             <label>Saída<input name="departure_at" type="datetime-local" required></label>
             <label>Retorno<input name="return_at" type="datetime-local" required></label>
             <label>Capacidade<input name="capacity" type="number" min="1" max="5000" value="40" required></label>
-            <button type="submit">Criar rascunho</button>
+            <label class="trip-photo-upload">Foto da viagem (opcional)
+              <input id="trip-photo-input" type="file" accept="image/jpeg,image/png,image/webp">
+              <small>Escolha uma foto do destino ou da atividade. A imagem será otimizada automaticamente.</small>
+              <img id="trip-photo-preview" class="trip-photo-preview hidden" alt="Prévia da foto da viagem">
+            </label>
+            <input type="hidden" id="trip-image-data" value="">
+            <div class="trip-form-actions"><button id="trip-submit-button" type="submit">Criar rascunho</button><button id="trip-cancel-edit" type="button" class="button-secondary hidden">Cancelar edição</button></div>
           </form>
           <p id="trip-message" class="message" role="status"></p>
           <div id="trip-assignment" class="assignment-area">
