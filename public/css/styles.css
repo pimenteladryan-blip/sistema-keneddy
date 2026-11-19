@@ -532,3 +532,17 @@ body.dark-mode .module-panel .trip-card small{
   .module-panel .trip-card{padding:13px;border-radius:13px}
   .module-panel .privacy-note{font-size:10px}
 }
+
+
+/* Lista compacta de participantes dentro de cada viagem */
+.module-panel .trip-card-actions{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:5px}
+.module-panel .participants-toggle{display:inline-flex;align-items:center;justify-content:center;min-height:29px;width:auto;margin:0;padding:4px 10px;border:1px solid #cbdccf;border-radius:8px;background:#f3f8f4;color:#28633c;font-size:11px;font-weight:700}
+.module-panel .participants-toggle:hover{background:#e8f2ea}
+.module-panel .trip-participants{margin-top:7px;padding:8px 10px;border:1px solid #e1e9e2;border-radius:9px;background:#f8faf8}
+.module-panel .trip-participants strong{display:block;margin-bottom:5px;font-size:11px}
+.module-panel .trip-participants ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:3px 12px;margin:0;padding-left:17px}
+.module-panel .trip-participants li,.module-panel .trip-participants span{font-size:11px;line-height:1.35;color:var(--muted)}
+body.dark-mode .module-panel .participants-toggle{border-color:#3a5943;background:#1b3021;color:#b9e1c4}
+body.dark-mode .module-panel .participants-toggle:hover{background:#25412d}
+body.dark-mode .module-panel .trip-participants{border-color:#304238;background:#15231a}
+@media(max-width:520px){.module-panel .trip-participants ul{grid-template-columns:1fr}}
