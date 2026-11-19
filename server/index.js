@@ -354,8 +354,11 @@ async function sendPushToUserIds(userIds, notification) {
     const result = await getMessaging(firebaseApp).sendEachForMulticast({
       tokens,
       notification: { title: notification.title, body: notification.body },
-      webpush: { notification: { icon: '/icon.svg', badge: '/icon.svg' },
-        fcmOptions: { link: notification.url || '/' } }
+      webpush: { notification: {
+        icon: '/icon.svg', badge: '/icon.svg',
+        requireInteraction: true, renotify: true, tag: 'sgve-aviso',
+        vibrate: [180, 80, 180]
+      }, fcmOptions: { link: notification.url || '/' } }
     });
     sent += result.successCount;
     const invalid = new Set();
