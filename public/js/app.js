@@ -960,7 +960,8 @@ function updateProfileMenu(user) {
   document.querySelector('#profile-menu-name').textContent = user.name || 'Minha conta';
   document.querySelector('#profile-menu-role').textContent = user.roleLabel || user.role || '';
   const image = document.querySelector('#profile-avatar-image');
-  const savedPhoto = localStorage.getItem('sgve-profile-photo:' + String(user.email || user.id || user.name));
+  let savedPhoto = '';
+  try { savedPhoto = localStorage.getItem('sgve-profile-photo:' + String(user.email || user.id || user.name)) || ''; } catch {}
   image.hidden = !savedPhoto;
   image.src = savedPhoto || '';
   document.querySelector('#profile-avatar-initials').hidden = Boolean(savedPhoto);
