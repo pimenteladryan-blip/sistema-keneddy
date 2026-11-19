@@ -407,7 +407,7 @@ async function loadTripParticipants(tripId, area) {
         '<span class="participant-class">' + escapeHtml(item.class_label || 'Turma não informada') + '</span>' +
         '<small class="participant-guardian">Responsável: ' + escapeHtml(item.guardian_name || 'Responsável não cadastrado') + '</small>' +
         '<small class="participant-authorization">Autorização: ' + escapeHtml(authorizationLabel(item.authorization_status)) + '</small>' +
-        '</div>' + controls + '</article>';
+        '</div><div class="participant-controls">' + controls + '</div></article>';
     }).join('') : '<p class="muted">Nenhum participante vinculado a esta viagem.</p>') +
       '<section class="trip-staff-section"><div class="trip-staff-heading"><h3>Equipe da viagem</h3><span>' + (staffData.staff || []).length + ' integrante(s)</span></div>' +
       ((staffData.staff || []).length ? '<div class="trip-staff-list">' + staffData.staff.map(member =>
