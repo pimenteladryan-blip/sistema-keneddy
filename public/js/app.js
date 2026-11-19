@@ -1079,6 +1079,7 @@ window.addEventListener('appinstalled', () => {
 });
 
 let pushMessageHandlerReady = false;
+let pushVapidKey = '';
 async function enableDevicePush() {
   const button = document.querySelector('#enable-push-button');
   const status = document.querySelector('#push-status');
@@ -1092,6 +1093,7 @@ async function enableDevicePush() {
     if (!firebase.apps.length) firebase.initializeApp(window.SGVE_FIREBASE_CONFIG);
     const config = await api('/api/push/config');
     if (!config.enabled || !config.vapidKey) throw new Error('Falta configurar a chave Web Push do Firebase no Render.');
+    pushVapidKey = config.vapidKey;
     const permission = await Notification.requestPermission();
     if (permission !== 'granted') throw new Error('Permissão de notificações não concedida no navegador.');
     const registration = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
@@ -1110,6 +1112,8 @@ async function enableDevicePush() {
       pushMessageHandlerReady = true;
     }
     button.textContent = 'Notificações ativadas';
+    button.hidden = true;
+    document.querySelector('#disable-push-button').hidden = false;
     status.textContent = 'Este dispositivo está habilitado para receber avisos.';
   } catch (error) {
     button.textContent = 'Ativar notificações no celular';
@@ -1117,6 +1121,27 @@ async function enableDevicePush() {
   } finally { button.disabled = false; }
 }
 document.querySelector('#enable-push-button')?.addEventListener('click', enableDevicePush);
+document.querySelector('#disable-push-button')?.addEventListener('click', async () => {
+  const button = document.querySelector('#disable-push-button');
+  const enableButton = document.querySelector('#enable-push-button');
+  const status = document.querySelector('#push-status');
+  button.disabled = true;
+  try {
+    const config = await api('/api/push/config');
+    if (!config.enabled || !config.vapidKey) throw new Error('Não foi possível acessar a configuração do Firebase.');
+    if (!firebase.apps.length) firebase.initializeApp(window.SGVE_FIREBASE_CONFIG);
+    const registration = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
+    const messaging = firebase.messaging();
+    const token = await messaging.getToken({ vapidKey: config.vapidKey, serviceWorkerRegistration: registration });
+    if (token) await api('/api/push/unregister', { method: 'POST', body: JSON.stringify({ token }) });
+    await messaging.deleteToken();
+    button.hidden = true;
+    enableButton.hidden = false;
+    status.textContent = 'Notificações desativadas neste dispositivo.';
+  } catch (error) { status.textContent = error.message; }
+  finally { button.disabled = false; }
+});
+
 document.querySelector('#push-send-form')?.addEventListener('submit', async event => {
   event.preventDefault();
   const form = event.currentTarget;
