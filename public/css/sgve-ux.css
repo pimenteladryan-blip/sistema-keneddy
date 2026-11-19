@@ -593,3 +593,21 @@ body.dark-mode #dashboard-view .push-send-form input,body.dark-mode #dashboard-v
  #dashboard-view .attendance-section { padding:10px; }
  #dashboard-view .attendance-section .small-action { min-height:44px; }
 }
+
+
+/* Viagens: participantes e equipe embaixo, usando a largura inteira */
+#dashboard-view .trip-card { grid-template-columns: minmax(120px,190px) minmax(0,1fr); }
+#dashboard-view .trip-card-main { min-width:0; }
+#dashboard-view .trip-card-actions { grid-column:1/-1; display:flex; flex-wrap:wrap; gap:8px; }
+#dashboard-view .participants-area { grid-column:1/-1; width:100%; min-width:0; }
+#dashboard-view .trip-staff-section { width:100%; margin-top:8px; padding:15px; border:1px solid #cfe3d2; border-radius:14px; background:#f1f8f0; }
+#dashboard-view .trip-staff-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+#dashboard-view .trip-staff-heading h3 { margin:0; color:#174b32; font-size:14px; }
+#dashboard-view .trip-staff-heading span { color:#52715b; font-size:11px; }
+#dashboard-view .trip-staff-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:9px; }
+#dashboard-view .trip-staff-member { display:flex; align-items:center; gap:10px; padding:10px; border:1px solid #d7e8d8; border-radius:11px; background:#fff; }
+#dashboard-view .trip-staff-avatar { display:grid; place-items:center; flex:0 0 34px; width:34px; height:34px; border-radius:50%; background:#dcefe0; color:#17613d; font-size:11px; font-weight:800; }
+#dashboard-view .trip-staff-member strong,#dashboard-view .trip-staff-member small { display:block; overflow-wrap:anywhere; }
+#dashboard-view .trip-staff-member strong { color:#174b32; font-size:12px; }
+#dashboard-view .trip-staff-member small { margin-top:3px; color:#64806b; font-size:10px; }
+@media(max-width:650px) { #dashboard-view .trip-card { grid-template-columns:minmax(0,1fr); } #dashboard-view .trip-card-actions,#dashboard-view .participants-area { grid-column:1; } }
