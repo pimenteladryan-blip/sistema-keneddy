@@ -10,6 +10,13 @@ const db = new DatabaseSync(dbPath);
 db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
 const schema = fs.readFileSync(path.join(__dirname, '..', 'database', 'schema.sql'), 'utf8');
 db.exec(schema);
+const reminderColumns = db.prepare('PRAGMA table_info(trips)').all();
+if (!reminderColumns.some(column => column.name === 'departure_notified_at')) {
+  db.exec('ALTER TABLE trips ADD COLUMN departure_notified_at TEXT');
+}
+if (!reminderColumns.some(column => column.name === 'return_notified_at')) {
+  db.exec('ALTER TABLE trips ADD COLUMN return_notified_at TEXT');
+}
 const tripColumns = db.prepare('PRAGMA table_info(trips)').all();
 if (!tripColumns.some(column => column.name === 'vehicle_id')) {
   db.exec('ALTER TABLE trips ADD COLUMN vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE SET NULL');
