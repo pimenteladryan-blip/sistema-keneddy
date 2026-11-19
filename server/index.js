@@ -1260,7 +1260,7 @@ app.get('/api/trips/:id/participants', requireAuth, async (req, res, next) => {
       WHERE ts.trip_id = ? AND s.active = 1`;
     if (hasRole(user, RECORD_MANAGERS)) {
       rows = db.prepare(query + ' ORDER BY s.full_name').all(tripId);
-    } else if (user.role === 'teacher') {
+    } else if (['teacher', 'pedagogue'].includes(user.role)) {
       if (!db.prepare('SELECT 1 FROM trip_staff WHERE trip_id = ? AND user_id = ?').get(tripId, user.id)) {
         return res.status(403).json({ error: 'Você não está vinculado a esta viagem.' });
       }
@@ -1433,9 +1433,9 @@ app.post('/api/trips/:id/participants/:studentId/attendance', requireAuth, requi
       const trip = db.prepare('SELECT status FROM trips WHERE id = ?').get(tripId);
       if (!trip) return fail(404, 'Viagem não encontrada.');
       if (!['approved', 'open'].includes(trip.status)) return fail(409, 'A presença só pode ser registrada em viagens aprovadas.');
-      if (req.auth.user.role === 'teacher' &&
+      if (['teacher', 'pedagogue'].includes(req.auth.user.role) &&
           !db.prepare('SELECT 1 FROM trip_staff WHERE trip_id = ? AND user_id = ?').get(tripId, req.auth.user.id)) {
-        return fail(403, 'Professor não está vinculado a esta viagem.');
+        return fail(403, 'Integrante não está vinculado a esta viagem.');
       }
       const student = db.prepare('SELECT id FROM students WHERE id = ? AND active = 1').get(studentId);
       const participant = db.prepare('SELECT student_id, departure_present, return_present FROM trip_students WHERE trip_id = ? AND student_id = ?').get(tripId, studentId);
