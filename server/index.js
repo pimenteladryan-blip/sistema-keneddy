@@ -563,9 +563,10 @@ app.get('/api/registration-requests', requireAuth, requireRoles('admin'), async 
         if (!item.firebase_uid) continue;
         try {
           const identity = await getAuth(firebaseApp).getUser(item.firebase_uid);
-          if (identity.emailVerified === true && String(identity.email || '').toLowerCase() === item.email) {
+          if (String(identity.email || '').toLowerCase() === item.email) {
             verified.push({ id: item.id, name: item.display_name, email: item.email,
               role: item.role, status: item.status, created_at: item.created_at,
+              email_verified: identity.emailVerified === true,
               roleLabel: ROLE_LABELS[item.role] });
           }
         } catch {}
