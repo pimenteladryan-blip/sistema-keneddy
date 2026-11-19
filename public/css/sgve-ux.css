@@ -261,3 +261,101 @@ body.dark-mode #dashboard-view .trip-card-actions .reject-action{background:#472
   #dashboard-view .home-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"notices" "calendar" "notifications" "upcoming" "classes";gap:12px}
   #dashboard-view .home-card{border-radius:16px}
 }
+
+
+/* Light mode: calm, minimal palette with green reserved for emphasis. */
+html body:not(.dark-mode) #dashboard-view{
+  --sg:#315f46;--sg2:#477858;--bg:#f4f6f3;--surface:#ffffff;
+  --line:#e2e7e2;--ink:#26352b;--muted:#78837b;
+}
+html body:not(.dark-mode):has(#dashboard-view:not(.hidden)) .page-shell,
+html body:not(.dark-mode) .page-shell:has(#dashboard-view:not(.hidden)),
+html body:not(.dark-mode) .page-shell:has(#dashboard-view:not(.hidden))>.content-panel{
+  background:#f4f6f3!important;color:#26352b!important;
+}
+html body:not(.dark-mode) #dashboard-view .welcome-row,
+html body:not(.dark-mode) #dashboard-view .module-panel,
+html body:not(.dark-mode) #dashboard-view .home-card{
+  background:#fff!important;border-color:#e2e7e2!important;color:#26352b!important;
+  box-shadow:0 2px 10px rgba(30,50,35,.035)!important;
+}
+html body:not(.dark-mode) #dashboard-view .dashboard-welcome-banner{
+  background:#edf2ed!important;border-color:#e2e7e2!important;color:#304536!important;
+}
+html body:not(.dark-mode) #dashboard-view .tabs{background:#315f46!important}
+html body:not(.dark-mode) #dashboard-view .tab.active{
+  background:#e4ece5!important;color:#315f46!important;
+}
+html body:not(.dark-mode) #dashboard-view .home-icon{
+  background:#edf2ed!important;color:#477858!important;
+}
+html body:not(.dark-mode) #dashboard-view .home-counter{
+  background:#e9eeee!important;color:#53645a!important;
+}
+html body:not(.dark-mode) #dashboard-view .notice-dot,
+html body:not(.dark-mode) #dashboard-view .notice-dot.soft{
+  background:#8da996!important;box-shadow:none!important;
+}
+html body:not(.dark-mode) #dashboard-view .notice-item small,
+html body:not(.dark-mode) #dashboard-view .student-status-pill{
+  background:#edf2ed!important;color:#45634e!important;
+}
+html body:not(.dark-mode) #dashboard-view .calendar-controls button,
+html body:not(.dark-mode) #dashboard-view .calendar-selected,
+html body:not(.dark-mode) #dashboard-view .class-shortcut-grid button,
+html body:not(.dark-mode) #dashboard-view .data-row,
+html body:not(.dark-mode) #dashboard-view .notice-item,
+html body:not(.dark-mode) #dashboard-view .home-notification,
+html body:not(.dark-mode) #dashboard-view .upcoming-trip,
+html body:not(.dark-mode) #dashboard-view .upcoming-trip-body,
+html body:not(.dark-mode) #dashboard-view .inline-form,
+html body:not(.dark-mode) #dashboard-view .trip-photo-upload{
+  background:#f7f8f6!important;border-color:#e2e7e2!important;color:#34483a!important;
+}
+html body:not(.dark-mode) #dashboard-view .calendar-day{
+  background:#f1f3f0!important;color:#56645a!important;
+}
+html body:not(.dark-mode) #dashboard-view .calendar-day.has-trip{
+  background:#e3ebe4!important;color:#42644c!important;
+}
+html body:not(.dark-mode) #dashboard-view .calendar-day.selected{
+  background:#477858!important;color:#fff!important;
+}
+html body:not(.dark-mode) #dashboard-view .student-avatar,
+html body:not(.dark-mode) #dashboard-view .count-pill{
+  background:#edf2ed!important;border-color:#e2e7e2!important;color:#45634e!important;
+}
+html body:not(.dark-mode) #dashboard-view .trip-card-photo-empty,
+html body:not(.dark-mode) #dashboard-view .trip-photo-upload{
+  background:#f5f7f4!important;color:#45634e!important;
+}
+html body:not(.dark-mode) #dashboard-view .trip-photo-placeholder{
+  background:#edf2ed!important;color:#45634e!important;
+}
+html body:not(.dark-mode) #dashboard-view .trip-photo-placeholder small{
+  color:#617568!important;
+}
+html body:not(.dark-mode) #dashboard-view .inline-form input,
+html body:not(.dark-mode) #dashboard-view .inline-form select,
+html body:not(.dark-mode) #dashboard-view .inline-form textarea,
+html body:not(.dark-mode) #dashboard-view input,
+html body:not(.dark-mode) #dashboard-view select,
+html body:not(.dark-mode) #dashboard-view textarea{
+  background:#fff!important;border-color:#dfe5df!important;color:#26352b!important;
+}
+html body:not(.dark-mode) #dashboard-view .home-text-button,
+html body:not(.dark-mode) #dashboard-view .notification-bell{
+  color:#477858!important;
+}
+html body:not(.dark-mode) #dashboard-view .dashboard-theme-toggle{
+  background:#edf2ed!important;border-color:#dfe5df!important;
+}
+html body:not(.dark-mode) #dashboard-view .dashboard-theme-toggle .theme-sun{
+  background:#fff!important;color:#68766c!important;
+}
+html body:not(.dark-mode) #dashboard-view .dashboard-theme-toggle .theme-moon{
+  background:#315f46!important;color:#fff!important;
+}
+html body:not(.dark-mode) #dashboard-view .trip-card-actions .reject-action{
+  background:#f5f1f0!important;color:#865b55!important;border-color:#e9dfdc!important;
+}
