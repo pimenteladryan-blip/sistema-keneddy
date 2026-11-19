@@ -1767,3 +1767,100 @@ body.dark-mode #dashboard-view #classes-panel > .section-heading {
     padding:13px 15px!important;
   }
 }
+
+
+/* Padronização: todos os módulos usam o cabeçalho em retângulo do módulo Viagens. */
+#dashboard-view .module-panel > .section-heading,
+#dashboard-view .module-panel .section-heading {
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  width:100%!important;
+  min-height:82px!important;
+  margin:0 0 16px!important;
+  padding:15px 20px!important;
+  border:1px solid #d1e5d4!important;
+  border-radius:14px!important;
+  background:#e3f1e5!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+#dashboard-view .module-panel .section-heading > div {
+  display:grid!important;
+  align-content:center!important;
+  gap:4px!important;
+  min-width:0!important;
+}
+#dashboard-view .module-panel .section-heading .eyebrow {
+  display:block!important;
+  width:max-content!important;
+  max-width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  color:#43805a!important;
+  font-size:9px!important;
+  font-weight:850!important;
+  letter-spacing:.15em!important;
+  line-height:1.3!important;
+}
+#dashboard-view .module-panel .section-heading h3,
+#dashboard-view .module-panel .section-heading h4 {
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  color:#174b32!important;
+}
+#dashboard-view .module-panel .section-heading h3 {
+  font-size:25px!important;
+  line-height:1.2!important;
+}
+#dashboard-view .module-panel .section-heading .count-pill {
+  flex:0 0 auto!important;
+  background:#f7fbf7!important;
+  border-color:#cfe2d2!important;
+  color:#17613e!important;
+}
+body.dark-mode #dashboard-view .module-panel .section-heading {
+  background:#123b28!important;
+  border-color:#315f43!important;
+}
+body.dark-mode #dashboard-view .module-panel .section-heading .eyebrow {
+  color:#9ed7ad!important;
+}
+body.dark-mode #dashboard-view .module-panel .section-heading h3,
+body.dark-mode #dashboard-view .module-panel .section-heading h4 {
+  color:#edf7ef!important;
+}
+body.dark-mode #dashboard-view .module-panel .section-heading .count-pill {
+  background:#0b2b1d!important;
+  border-color:#315f43!important;
+  color:#c8ead0!important;
+}
+@media(max-width:900px) {
+  #dashboard-view .module-panel .section-heading {
+    min-height:72px!important;
+    padding:12px 14px!important;
+  }
+  #dashboard-view .module-panel .section-heading h3 {
+    font-size:21px!important;
+  }
+}
+@media(max-width:560px) {
+  #dashboard-view .module-panel .section-heading {
+    gap:10px!important;
+    padding:12px!important;
+  }
+  #dashboard-view .module-panel .section-heading h3 {
+    font-size:19px!important;
+  }
+}
