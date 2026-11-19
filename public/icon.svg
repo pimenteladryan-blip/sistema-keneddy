@@ -1,6 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#145c3b"/>
-  <path d="M100 154h312v204H100z" fill="none" stroke="#fff" stroke-width="22" rx="24"/>
-  <path d="M146 215h220M146 270h220M146 325h140" stroke="#fff" stroke-width="18" stroke-linecap="round"/>
-  <text x="256" y="130" text-anchor="middle" font-family="Arial,sans-serif" font-size="54" font-weight="800" fill="#d9f99d">SGVE</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="SGVE">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#176b49"/>
+      <stop offset="1" stop-color="#073b2b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <circle cx="256" cy="244" r="174" fill="#ffffff" opacity=".07"/>
+  <path d="M106 226 256 126l150 100" fill="none" stroke="#d9f99d" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M137 224v159h238V224" fill="#f7fff9" stroke="#ffffff" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M216 383v-92a40 40 0 0 1 80 0v92" fill="#176b49"/>
+  <path d="M166 260h42v42h-42zM304 260h42v42h-42z" fill="#a7e5bf"/>
+  <path d="M256 126v-25" stroke="#d9f99d" stroke-width="18" stroke-linecap="round"/>
+  <path d="M256 426c-48-28-75-55-75-86" fill="none" stroke="#d9f99d" stroke-width="14" stroke-linecap="round" stroke-dasharray="2 25"/>
+  <path d="M181 340c-36 0-58-19-58-48" fill="none" stroke="#d9f99d" stroke-width="14" stroke-linecap="round"/>
+  <path d="M123 292c0-24 19-43 43-43s43 19 43 43c0 31-43 70-43 70s-43-39-43-70Z" fill="#d9f99d" stroke="#073b2b" stroke-width="9"/>
+  <circle cx="166" cy="291" r="13" fill="#176b49"/>
 </svg>
