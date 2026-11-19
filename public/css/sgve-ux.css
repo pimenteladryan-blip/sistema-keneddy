@@ -1541,3 +1541,36 @@ body.dark-mode #dashboard-view .journey-track{border-color:#4f8d62!important}
     background:#153d2a!important;border-color:#326448!important;
   }
 }
+
+
+/* Aproxima as ilustrações e o selo de 62 anos do texto central. */
+@media(min-width:901px){
+  #dashboard-view .dashboard-welcome-banner{
+    grid-template-columns:140px minmax(0,1fr) 72px!important;
+    column-gap:10px!important;
+  }
+  #dashboard-view .dashboard-welcome-banner>.sgve-castle-illustration{
+    left:20px!important;
+  }
+  #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{
+    left:88px!important;
+  }
+  #dashboard-view .dashboard-welcome-banner>.banner-years{
+    padding-left:8px!important;
+  }
+}
+@media(min-width:561px) and (max-width:900px){
+  #dashboard-view .dashboard-welcome-banner{
+    grid-template-columns:96px minmax(0,1fr) 58px!important;
+    column-gap:8px!important;
+  }
+  #dashboard-view .dashboard-welcome-banner>.sgve-castle-illustration{
+    left:10px!important;
+  }
+  #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{
+    left:54px!important;
+  }
+  #dashboard-view .dashboard-welcome-banner>.banner-years{
+    padding-left:5px!important;
+  }
+}
