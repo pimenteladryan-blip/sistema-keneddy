@@ -740,7 +740,7 @@ document.querySelector('#guardian-form').addEventListener('submit', async event 
     showMessage('#guardian-message', error.message, true);
   }
 });
-const userRoleSelect = document.querySelector('#user-role');
+const userRoleSelect = document.querySelector('#user-form-role');
 const teacherSubjectsField = document.querySelector('#teacher-subjects-field');
 function toggleTeacherSubjects() {
   teacherSubjectsField.classList.toggle('hidden', userRoleSelect.value !== 'teacher');
