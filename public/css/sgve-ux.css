@@ -466,3 +466,15 @@ body.dark-mode #dashboard-view .notification-entry small,
 body.dark-mode #dashboard-view .notification-empty{color:#b3cbbb}
 body.dark-mode #dashboard-view .notification-entry-dot{background:#59d98a}
 @media(max-width:560px){#dashboard-view .notification-popover{right:42px;top:calc(100% + 8px)}}
+
+
+/* Mobile push controls and admin composer */
+#dashboard-view .push-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
+#dashboard-view .push-controls small{font-size:11px}
+#dashboard-view .push-send-form{display:grid;gap:10px;max-width:620px}
+#dashboard-view .push-send-form label{display:grid;gap:5px;color:#245238;font-size:12px;font-weight:700}
+#dashboard-view .push-send-form input,#dashboard-view .push-send-form textarea,#dashboard-view .push-send-form select{width:100%;border:1px solid #cbdccf;border-radius:10px;padding:10px;background:#fff;color:#234b31;font:inherit}
+#dashboard-view .push-send-form textarea{resize:vertical}
+#dashboard-view .push-send-form .message{font-size:12px;margin:0}
+body.dark-mode #dashboard-view .push-send-form label{color:#d9f0df}
+body.dark-mode #dashboard-view .push-send-form input,body.dark-mode #dashboard-view .push-send-form textarea,body.dark-mode #dashboard-view .push-send-form select{background:#10271b;border-color:#315640;color:#edf7ef}
