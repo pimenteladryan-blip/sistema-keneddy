@@ -1,145 +1,330 @@
-/* SGVE UX refresh: dashboard inspired by the approved reference */
-:root{
-  --ux-forest:#075b3b;--ux-forest-deep:#03452e;--ux-green:#168452;
-  --ux-pale:#e8f4e8;--ux-mint:#dcefdc;--ux-card:#f2f8f0;
-  --ux-line:#cfe5d2;--ux-ink:#102d20;--ux-muted:#617568;
-}
-@media (min-width:901px){
-  .page-shell:has(#dashboard-view:not(.hidden)){display:block!important;min-height:100vh;background:#edf6eb!important}
-  .page-shell:has(#dashboard-view:not(.hidden))>.brand-panel{display:none!important}
-  .page-shell:has(#dashboard-view:not(.hidden))>.content-panel{width:100%;max-width:none;margin:0;padding:24px clamp(22px,4vw,64px) 36px;background:#edf6eb!important}
-}
-#dashboard-view{width:100%;max-width:1440px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:16px;padding-bottom:18px}
-#dashboard-view .welcome-row{grid-column:1;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px!important;border:1px solid var(--ux-line);border-radius:22px;background:#dff0df!important}
-#dashboard-view .welcome-row .eyebrow{color:var(--ux-forest);letter-spacing:.1em}
-#dashboard-view .welcome-row h2{color:var(--ux-ink);font-size:clamp(25px,3vw,38px);font-weight:850}
-#dashboard-view .welcome-row .muted{color:var(--ux-muted)}
-#dashboard-view .dashboard-welcome-banner{grid-column:1;display:flex;align-items:center;min-height:92px;padding:20px 24px!important;border:1px solid var(--ux-line)!important;border-radius:20px!important;background:#cfe9d2!important}
-#dashboard-view .dashboard-welcome-banner strong{font-size:17px;color:var(--ux-forest-deep)}
-#dashboard-view .dashboard-welcome-banner div span{font-size:12px;color:#4d705b}
-#dashboard-view .banner-years{color:var(--ux-forest);font-size:32px}
-#dashboard-view .tabs{grid-column:1;grid-row:auto;display:flex;flex-direction:row;flex-wrap:wrap;gap:7px;margin:0;padding:10px;border:1px solid var(--ux-line);border-radius:17px;background:#075b3b!important;box-shadow:0 5px 18px #0a4b2c12}
-#dashboard-view .tab{display:flex;align-items:center;justify-content:center;flex:1 1 auto;width:auto;min-height:43px;padding:0 15px;border:0;border-radius:11px;background:transparent;color:#eff9f0;font-size:12px;white-space:nowrap}
-#dashboard-view .tab.active,#dashboard-view .tab:hover{background:#d8edd9!important;color:#075b3b!important;box-shadow:none;transform:none}
-#dashboard-view .module-panel{grid-column:1;grid-row:auto;min-width:0;padding:clamp(16px,2.2vw,26px);border:1px solid var(--ux-line);border-radius:20px;background:#edf6eb!important;box-shadow:0 5px 22px #174a2b0a}
-#dashboard-view .home-heading{align-items:center;margin-bottom:17px}
-#dashboard-view .home-heading h3{font-size:29px;color:var(--ux-ink)}
-#dashboard-view .home-heading .section-subtitle{color:var(--ux-muted)}
-#dashboard-view .home-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-#dashboard-view .home-card{min-width:0;padding:19px;border:1px solid var(--ux-line);border-radius:18px;box-shadow:0 4px 16px #174a2b08}
-#dashboard-view .home-card:nth-child(1){background:#e4f2e4!important}
-#dashboard-view .home-card:nth-child(2){background:#dcefdc!important}
-#dashboard-view .home-card:nth-child(3){background:#eaf3df!important}
-#dashboard-view .home-card:nth-child(4){background:#dff0e5!important}
-#dashboard-view .home-card-heading h4{font-size:16px;color:var(--ux-ink)}
-#dashboard-view .home-card-heading p{font-size:11px;color:var(--ux-muted)}
-#dashboard-view .home-icon{width:40px;height:40px;border-radius:13px;background:#cfe8d2;color:var(--ux-forest);font-size:20px}
-#dashboard-view .notice-item{padding:14px;margin-top:12px;border:0;border-radius:13px;background:#d4ead6}
-#dashboard-view .notice-item strong,#dashboard-view .home-notification strong{font-size:13px;color:var(--ux-ink)}
-#dashboard-view .notice-item p,#dashboard-view .home-notification p{font-size:11px;color:#4f6858}
-#dashboard-view .calendar-day{min-height:39px;border-radius:11px;background:#f2f8ef;color:#294b37;font-size:12px}
-#dashboard-view .calendar-day.has-trip{background:#c2e5c8;color:#075b3b}
-#dashboard-view .calendar-selected{background:#d8ebd9;color:#315b40;font-size:11px}
-#dashboard-view .upcoming-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-#dashboard-view .upcoming-trip{border:1px solid #cfe5d2;border-radius:15px;background:#f2f8f0;overflow:hidden}
-#dashboard-view .upcoming-trip-body{background:#f2f8f0!important;padding:13px}
-#dashboard-view .upcoming-trip-body strong{font-size:12px;color:var(--ux-ink)}
-#dashboard-view .upcoming-trip-body p{font-size:10px}
-#dashboard-view .inline-form{background:#e3f0e3!important;border:1px solid var(--ux-line);border-radius:15px}
-#dashboard-view input,#dashboard-view select{background:#f8fcf6!important;border-color:#c9dfcd}
-#dashboard-view .data-row,#dashboard-view .trip-card{background:#f5faf3!important;border-color:var(--ux-line)}
-#dashboard-view button:not(.tab){transition:background .16s,box-shadow .16s}
-#dashboard-view button:focus-visible,#dashboard-view a:focus-visible,#dashboard-view input:focus-visible,#dashboard-view select:focus-visible{outline:3px solid #5aa978;outline-offset:2px}
-#dashboard-view .notification-bell{background:#d4ead6!important;border-color:#c1dfc7!important}
-#dashboard-view .profile-dropdown{background:#f7fbf5!important;border-color:var(--ux-line)!important}
-@media(max-width:900px){
-  #dashboard-view{padding:0 0 92px;gap:12px}
-  #dashboard-view .welcome-row{padding:13px 15px!important;border-radius:16px}
-  #dashboard-view .dashboard-welcome-banner{min-height:76px;padding:14px 16px!important;border-radius:15px!important}
-  #dashboard-view .dashboard-welcome-banner strong{font-size:13px}
-  #dashboard-view .dashboard-welcome-banner div span{font-size:10px}
-  #dashboard-view .tabs{position:fixed!important;inset:auto 0 0 0!important;z-index:99999!important;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;gap:3px!important;width:100%!important;margin:0!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;border:0!important;border-radius:19px 19px 0 0!important;background:#075b3b!important;box-shadow:0 -6px 22px #073c2926!important;overflow-x:auto!important;scrollbar-width:none}
-  #dashboard-view .tabs::-webkit-scrollbar{display:none}
-  #dashboard-view .tabs .tab{flex:1 0 auto!important;min-width:72px!important;min-height:48px!important;padding:3px 9px!important;color:#eff9f0!important;background:transparent!important;font-size:10px!important}
-  #dashboard-view .tabs .tab.active{background:#d8edd9!important;color:#075b3b!important}
-  #dashboard-view .module-panel{padding:14px!important}
-}
-@media(max-width:560px){
-  #dashboard-view .home-grid{grid-template-columns:1fr;gap:11px}
-  #dashboard-view .home-card{padding:15px;border-radius:15px}
-  #dashboard-view .home-heading{align-items:flex-start;flex-direction:row}
-  #dashboard-view .home-heading h3{font-size:24px}
-  #dashboard-view .upcoming-grid{grid-template-columns:1fr}
-  #dashboard-view .welcome-row h2{font-size:23px}
-  #dashboard-view .welcome-row .eyebrow{font-size:8px}
-  #dashboard-view .dashboard-welcome-banner{gap:8px}
-  #dashboard-view .banner-years{font-size:25px}
-  #dashboard-view .tabs .tab{min-width:65px!important;padding:2px 7px!important;font-size:9px!important}
-  #dashboard-view .calendar-day{min-height:36px}
-}
-@media(prefers-reduced-motion:reduce){#dashboard-view *,#dashboard-view *:before,#dashboard-view *:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#145c3b">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <meta name="description" content="Sistema de Gerenciamento de Viagens Escolares">
+  <title>SGVE | Sistema de Gerenciamento de Viagens Escolares</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/sgve-modern.css?v=20261118-4">
+  <link rel="stylesheet" href="/css/sgve-ux.css?v=20261118-2">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
+  <script src="/firebase-config.js" defer></script>
+  <script src="/js/app.js?v=20261118-students1" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    <section class="brand-panel">
+      <div class="school-brand">
+        <div class="brand-mark" aria-label="SGVE">SGVE</div>
+        <div><strong>COLÉGIO ESTADUAL PRESIDENTE KENNEDY</strong><small>PONTA GROSSA · PARANÁ</small></div>
+      </div>
+      <div class="brand-message">
+        <p class="eyebrow">62 ANOS DE HISTÓRIA</p>
+        <h1>Organização e cuidado em cada viagem.</h1>
+        <p class="brand-copy">Viagens escolares com organização, cuidado e aprendizagem.</p>
+        <div class="mascot-stage" aria-label="Mascote oficial do CEPK">
+          <img class="mascot" src="/assets/mascote_cepk_transparente_corrigido.png" alt="Mascote do Colégio Estadual Presidente Kennedy" width="180" height="254" loading="eager" decoding="async">
+          <span class="mascot-caption">Nosso mascote</span>
+        </div>
+      </div>
+      <div class="brand-footer">SGVE · Sistema de Gerenciamento de Viagens Escolares</div>
+    </section>
+    <section class="content-panel">
+      <div class="topline"><span class="status-dot"></span><span>SGVE · SISTEMA DE GERENCIAMENTO DE VIAGENS ESCOLARES</span><button type="button" class="theme-toggle" id="theme-toggle" aria-label="Mudar para tema escuro" aria-pressed="false">☾ <span>Tema escuro</span></button></div>
+      <section id="login-view" class="auth-card">
+        <div class="login-school-mark"><span class="login-mark">SGVE</span><span><strong>SGVE · CEPK</strong><small>Sistema de Gerenciamento de Viagens Escolares</small></span></div>
+        <p class="eyebrow green">SISTEMA DE GERENCIAMENTO DE VIAGENS ESCOLARES</p><h2>Bem-vindo ao SGVE</h2>
+        <p class="muted">Entre com sua conta autorizada pela administração da escola.</p>
+        <form id="login-form">
+          <label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="username" maxlength="254" required>
+          <label for="password">Senha</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" required>
+          <label for="login-role">Tipo de acesso</label>
+          <select id="login-role" name="role" required>
+            <option value="">Selecione seu perfil</option>
+            <option value="admin">Administrador</option>
+            <option value="direction">Direção</option>
+            <option value="secretariat">Secretaria</option>
+            <option value="teacher">Professor</option>
+            <option value="guardian">Responsável</option>
+            <option value="student">Estudante</option>
+          </select>
+          <button type="submit" id="login-button">Entrar</button>
+          <button type="button" id="google-login-button" class="button-secondary">Entrar com Google</button>
+          <button type="button" id="pwa-install" class="button-secondary" hidden>Instalar SGVE</button>
+          <p id="login-message" class="message" role="alert" aria-live="polite"></p>
+        </form>
+        <button type="button" class="link-button" id="show-registration">Criar uma conta</button>
+        <form id="registration-form" class="registration-form hidden">
+          <p class="registration-intro">Preencha seus dados e confirme seu e-mail pelo link enviado pelo Firebase. Depois, o administrador poderá analisar sua solicitação.</p>
+          <label for="registration-name">Nome completo</label><input id="registration-name" name="name" type="text" autocomplete="name" maxlength="100" required>
+          <label for="registration-email">E-mail</label><input id="registration-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+          <label for="registration-role">Tipo de acesso</label>
+          <select id="registration-role" name="role" required>
+            <option value="teacher">Professor</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
+          </select>
+          <label for="registration-password">Criar senha</label><input id="registration-password" name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required>
+          <small class="field-hint">Use uma senha própria do sistema com pelo menos 14 caracteres. Ela será gerenciada pelo Firebase Authentication e nunca será mostrada ao administrador.</small>
+          <label for="registration-password-confirm">Confirmar senha</label><input id="registration-password-confirm" name="password_confirm" type="password" minlength="14" maxlength="200" autocomplete="new-password" required>
+          <button type="submit" id="registration-submit">Criar conta e enviar solicitação</button>
+          <p id="registration-message" class="message" role="status" aria-live="polite"></p>
+          <button type="button" class="link-button secondary-link" id="hide-registration">Voltar para entrar</button>
+        </form>
+        <p class="helper">O acesso é liberado pela administração do Colégio Estadual Presidente Kennedy.</p>
+      </section>
+      <section id="dashboard-view" class="dashboard hidden">
+        <header class="welcome-row">
+          <div><p class="eyebrow green">CEPK · PAINEL DE GESTÃO</p><h2 id="welcome-title">Olá!</h2><p id="user-role" class="muted"></p></div>
+          <div class="dashboard-brand"><div class="header-actions"><button type="button" class="notification-bell" id="header-notification-button" aria-label="Notificações"><svg class="bell-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 22a2.25 2.25 0 0 0 2.24-2h-4.48A2.25 2.25 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3a1.5 1.5 0 0 0-3 0v1.16A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/></svg><span id="header-notification-count" class="header-notification-count">0</span></button><div class="profile-menu-wrap"><button type="button" class="profile-avatar" id="profile-menu-button" aria-label="Menu da conta" aria-expanded="false"><span id="profile-avatar-initials">U</span><img id="profile-avatar-image" alt="" hidden></button><div class="profile-dropdown hidden" id="profile-dropdown"><div class="profile-dropdown-heading"><strong id="profile-menu-name">Minha conta</strong><small id="profile-menu-role">Perfil</small></div><button type="button" id="change-profile-button">⇄　Trocar perfil</button><button type="button" id="add-profile-photo-button">▧　Adicionar / alterar foto</button><button type="button" id="logout-button" class="profile-logout">↪　Sair</button></div><input type="file" id="profile-photo-input" accept="image/*" hidden></div></div></div>
+        </header>
+        <div class="dashboard-welcome-banner">
+          <div><strong>Organização que aproxima conhecimento e experiências.</strong><span>Gestão de viagens escolares · Colégio Estadual Presidente Kennedy</span></div>
+          <span class="banner-years">62 <small>anos</small></span>
+        </div>
+        <nav class="tabs" aria-label="Módulos do sistema">
+          <button type="button" class="tab active" data-tab="home-panel">⌂ Início</button>
+          <button type="button" class="tab" data-tab="classes-panel">Turmas</button>
+          <button type="button" class="tab" data-tab="students-panel" id="students-tab">Estudantes</button>
+          <button type="button" class="tab" data-tab="teachers-panel" id="teachers-tab">Professores</button>
+          <button type="button" class="tab" data-tab="trips-panel">Viagens</button>
+          <button type="button" class="tab" data-tab="vehicles-panel" id="vehicles-tab">Transportes</button>
+          <button type="button" class="tab" data-tab="reports-panel" id="reports-tab">Relatórios</button>
+          <button type="button" class="tab" data-tab="guardians-panel" id="guardians-tab">Responsáveis</button>
+          <button type="button" class="tab" data-tab="users-panel" id="users-tab">Contas</button>
+        </nav>
+        <section id="home-panel" class="module-panel home-panel">
+          <div class="home-heading"><div><p class="eyebrow green">SEU PAINEL ESCOLAR</p><h3>Início</h3><p class="section-subtitle">Avisos, atualizações e o calendário das próximas experiências.</p></div><span class="home-date" id="home-today"></span></div>
+          <div class="home-grid">
+            <section class="home-card notices-card"><div class="home-card-heading"><div><span class="home-icon">▤</span><div><h4>Mural de avisos</h4><p>Comunicados importantes</p></div></div><span class="home-tag">ESCOLA</span></div>
+              <article class="notice-item"><span class="notice-dot"></span><div><strong>Organize-se para as próximas viagens</strong><p>Consulte as datas no calendário e acompanhe os comunicados da equipe escolar.</p><small>Comunicado geral · SGVE</small></div></article>
+              <article class="notice-item"><span class="notice-dot soft"></span><div><strong>Autorizações e informações</strong><p>Responsáveis devem acompanhar as atualizações e orientações de cada viagem.</p><small>Orientação · SGVE</small></div></article>
+            </section>
+            <section class="home-card notifications-card"><div class="home-card-heading"><div><span class="home-icon">♧</span><div><h4>Notificações</h4><p>Movimentações das viagens</p></div></div><span class="home-counter" id="home-notification-count">0</span></div><div id="home-notifications" class="home-notifications"><p class="muted">Carregando atualizações...</p></div></section>
+            <section class="home-card calendar-card"><div class="home-card-heading"><div><span class="home-icon">▦</span><div><h4>Calendário de viagens</h4><p>Datas de saída programadas</p></div></div><div class="calendar-controls"><button type="button" id="calendar-prev" aria-label="Mês anterior">‹</button><button type="button" id="calendar-next" aria-label="Próximo mês">›</button></div></div><div class="calendar-month" id="calendar-month"></div><div class="calendar-grid" id="calendar-grid"></div><div class="calendar-selected" id="calendar-selected">Selecione uma data marcada para ver a viagem.</div></section>
+            <section class="home-card upcoming-card"><div class="home-card-heading"><div><span class="home-icon">⌁</span><div><h4>Próximas viagens</h4><p>Planejamento e destinos</p></div></div><button type="button" class="home-text-button" data-open-tab="trips-panel">Ver todas →</button></div><div id="home-upcoming" class="upcoming-grid"><p class="muted">Carregando viagens...</p></div></section>
+          </div>
+        </section>
+        <section id="classes-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">ORGANIZAÇÃO ESCOLAR</p><h3>Turmas</h3></div><span id="classes-count" class="count-pill">0</span></div>
+          <form id="class-form" class="inline-form">
+            <label>Etapa<select name="level" required><option value="fundamental">Ensino Fundamental</option><option value="medio">Ensino Médio</option></select></label>
+            <label>Ano/série<input name="grade" maxlength="30" placeholder="Ex.: 6º ano ou 1ª série" required></label>
+            <label>Curso<select name="course"><option value="regular">Regular</option><option value="adm">Técnico ADM</option><option value="ds">Técnico DS</option></select></label>
+            <label>Turma<input name="section" maxlength="12" placeholder="Ex.: A" required></label>
+            <label>Ano letivo<input name="school_year" type="number" min="2020" max="2100" value="2026" required></label>
+            <button type="submit">Cadastrar turma</button>
+          </form>
+          <p id="class-message" class="message" role="status"></p><div id="classes-list" class="data-list"><p class="muted">Carregando turmas...</p></div>
+        </section>
+        <section id="students-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">CADASTRO ESCOLAR</p><h3>Estudantes</h3></div><span id="students-count" class="count-pill">0</span></div>
+          <form id="student-form" class="inline-form">
+            <label>Nome completo<input name="full_name" maxlength="120" required></label>
+            <label>Turma<select name="class_id" id="student-class" required><option value="">Selecione uma turma</option></select></label>
+            <button type="submit">Cadastrar estudante</button>
+          </form>
+          <p id="student-message" class="message" role="status"></p>
+          <form id="student-account-form" class="inline-form hidden">
+            <label>Cadastro do estudante<select name="student_id" id="student-account-select" required><option value="">Selecione um estudante</option></select></label>
+            <label>E-mail da conta de estudante<input name="email" type="email" maxlength="254" required></label>
+            <button type="submit">Vincular conta</button>
+          </form>
+          <p id="student-account-message" class="message" role="status"></p>
+          <form id="student-guardian-form" class="inline-form hidden">
+            <label>Estudante<select name="student_id" id="student-guardian-student" required><option value="">Selecione um estudante</option></select></label>
+            <label>Conta do responsável<select name="guardian_email" id="student-guardian-user" required><option value="">Carregando responsáveis...</option></select></label>
+            <label>Parentesco (opcional)<input name="relationship" maxlength="40" placeholder="Ex.: mãe, pai ou responsável"></label>
+            <button type="submit">Vincular responsável</button>
+          </form>
+          <p id="student-guardian-message" class="message" role="status"></p>
+          <div id="students-list" class="data-list"><p class="muted">Carregando estudantes...</p></div>
+          <p class="privacy-note">Cadastro mínimo: nome e turma. Não informe documentos, endereço, telefone ou outros dados pessoais nesta versão.</p>
+        </section>
+        <section id="trips-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">PLANEJAMENTO</p><h3>Viagens escolares</h3></div><span id="trips-count" class="count-pill">0</span></div>
+          <form id="trip-form" class="inline-form">
+            <label>Título<input name="title" maxlength="120" placeholder="Ex.: Visita ao museu" required></label>
+            <label>Destino<input name="destination" maxlength="160" required></label>
+            <label>Objetivo pedagógico<input name="educational_purpose" maxlength="500" required></label>
+            <label>Saída<input name="departure_at" type="datetime-local" required></label>
+            <label>Retorno<input name="return_at" type="datetime-local" required></label>
+            <label>Capacidade<input name="capacity" type="number" min="1" max="5000" value="40" required></label>
+            <button type="submit">Criar rascunho</button>
+          </form>
+          <p id="trip-message" class="message" role="status"></p>
+          <div id="trip-assignment" class="assignment-area">
+            <h4>Vincular turmas e participantes</h4>
+            <form id="trip-class-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-class-trip" required></select></label>
+              <label>Turma<select name="class_id" id="trip-class-select" required></select></label>
+              <button type="submit">Vincular turma</button>
+            </form>
+            <form id="trip-student-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-student-trip" required></select></label>
+              <label>Estudante<select name="student_id" id="trip-student-select" required></select></label>
+              <button type="submit">Vincular estudante</button>
+            </form>
+            <form id="trip-staff-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-staff-trip" required></select></label>
+              <label>Professor<select name="user_id" id="trip-staff-user" required><option value="">Carregando professores...</option></select></label>
+              <button type="submit">Vincular professor</button>
+            </form>
+            <p id="trip-staff-message" class="message" role="status"></p>
+            <form id="trip-vehicle-form" class="inline-form compact-form">
+              <label>Viagem<select name="trip_id" id="trip-vehicle-trip" required></select></label>
+              <label>Veículo<select name="vehicle_id" id="trip-vehicle-select" required><option value="">Cadastre um veículo</option></select></label>
+              <button type="submit">Vincular veículo</button>
+            </form>
+          </div>
+          <div id="trips-list" class="data-list"><p class="muted">Carregando viagens...</p></div>
+          <p class="privacy-note">Após a aprovação, responsáveis vinculados podem autorizar ou não a participação. Professores vinculados e equipe gestora podem registrar presença na saída e no retorno. Cada decisão fica registrada no histórico do sistema.</p>
+        </section>
+        <section id="vehicles-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">LOGÍSTICA</p><h3>Transportes e frota</h3></div><span id="vehicles-count" class="count-pill">0</span></div>
+          <form id="vehicle-form" class="inline-form">
+            <label>Identificação<input name="name" maxlength="40" placeholder="Ex.: Ônibus 01" required></label>
+            <label>Tipo<select name="type" required><option value="Ônibus">Ônibus</option><option value="Micro-ônibus">Micro-ônibus</option><option value="Van">Van</option></select></label>
+            <label>Capacidade de passageiros<input name="capacity" type="number" min="1" max="100" value="40" required></label>
+            <button type="submit">Cadastrar veículo</button>
+          </form>
+          <p id="vehicle-message" class="message" role="status"></p>
+          <div id="vehicles-list" class="data-list"><p class="muted">Carregando frota...</p></div>
+          <form id="driver-form" class="inline-form compact-form">
+            <label>Nome do condutor<input name="name" maxlength="80" autocomplete="off" placeholder="Nome para identificação interna" required></label>
+            <button type="submit">Cadastrar condutor</button>
+          </form>
+          <p id="driver-message" class="message" role="status"></p>
+          <div id="drivers-list" class="data-list"><p class="muted">Carregando condutores...</p></div>
+          <form id="trip-driver-form" class="inline-form compact-form">
+            <label>Viagem<select name="trip_id" id="trip-driver-trip" required></select></label>
+            <label>Condutor<select name="driver_id" id="trip-driver-select" required><option value="">Cadastre um condutor</option></select></label>
+            <button type="submit">Atribuir condutor</button>
+          </form>
+          <p class="privacy-note">Cadastre somente o nome necessário à escala interna. Não armazene CPF, número de CNH ou contatos neste módulo. A atribuição é permitida em rascunhos e bloqueia conflitos de horário.</p>
+          <p class="privacy-note">Cadastre somente identificação, tipo e capacidade do veículo. A atribuição é permitida em rascunhos e bloqueia conflitos de horário e veículos menores que a capacidade da viagem.</p>
+        </section>
+        <section id="reports-panel" class="module-panel hidden">
+          <div class="section-heading">
+            <div><p class="eyebrow green">ACOMPANHAMENTO</p><h3>Relatórios agregados</h3></div>
+            <button type="button" class="button-secondary" id="refresh-reports">Atualizar</button>
+          </div>
+          <div class="report-stats">
+            <article class="report-stat"><span>Viagens</span><strong id="report-trip-count">0</strong></article>
+            <article class="report-stat"><span>Estudantes ativos</span><strong id="report-student-count">0</strong></article>
+            <article class="report-stat"><span>Veículos ativos</span><strong id="report-vehicle-count">0</strong></article>
+            <article class="report-stat"><span>Participações</span><strong id="report-participant-count">0</strong></article>
+            <article class="report-stat"><span>Autorizadas</span><strong id="report-authorized-count">0</strong></article>
+            <article class="report-stat"><span>Pendentes</span><strong id="report-pending-count">0</strong></article>
+          </div>
+          <p id="report-note" class="privacy-note">Relatórios sem nomes de estudantes.</p>
+          <div class="section-heading"><div><h4>Resumo por viagem</h4></div><button type="button" id="export-report-csv">Exportar CSV</button></div>
+          <div class="report-table-wrap">
+            <table class="report-table">
+              <thead><tr><th>Viagem</th><th>Saída</th><th>Situação</th><th>Participantes</th><th>Autorizadas</th><th>Pendentes</th><th>Presença na saída</th><th>Presença no retorno</th><th>Veículo</th></tr></thead>
+              <tbody id="report-trips-body"><tr><td colspan="9">Carregando relatório...</td></tr></tbody>
+            </table>
+          </div>
+          <p id="report-message" class="message" role="status"></p>
+          <p class="privacy-note">O relatório mostra apenas totais e dados operacionais da viagem. Não exporta nomes, contatos ou documentos de estudantes.</p>
+        </section>
+        <section id="teachers-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">EQUIPE ESCOLAR</p><h3>Professores</h3><p class="section-subtitle">Cadastre os professores e suas disciplinas. O acesso por e-mail é gerenciado separadamente em Contas.</p></div><span id="teachers-count" class="count-pill">0</span></div>
+          <form id="teacher-form" class="inline-form">
+            <label>Nome completo<input name="name" maxlength="100" autocomplete="name" placeholder="Nome do professor" required></label>
+            <label>Disciplinas (separe por vírgula)<input name="subjects" maxlength="1200" placeholder="Ex.: Matemática, Física, Ciências" required></label>
+            <button type="submit">Cadastrar professor</button>
+          </form>
+          <p id="teacher-message" class="message" role="status" aria-live="polite"></p>
+          <div id="teachers-list" class="data-list"><p class="muted">Carregando professores...</p></div>
+        </section>
+        <section id="guardians-panel" class="module-panel hidden">
+          <div class="section-heading">
+            <div><p class="eyebrow green">FAMÍLIA E COMUNIDADE</p><h3>Cadastro de responsáveis</h3><p class="section-subtitle">Crie o acesso da família e depois vincule-o ao estudante.</p></div>
+            <span id="guardians-count" class="count-pill">0</span>
+          </div>
+          <form id="guardian-form" class="inline-form guardian-create-form">
+            <label>Nome completo<input name="name" maxlength="100" autocomplete="name" placeholder="Nome do responsável" required></label>
+            <label>E-mail de acesso<input name="email" type="email" maxlength="254" autocomplete="email" placeholder="responsavel@email.com" required></label>
+            <label>Senha inicial<input name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
+            <label>Confirmar senha<input name="password_confirm" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
+            <button type="submit">Cadastrar responsável</button>
+          </form>
+          <p id="guardian-message" class="message" role="status" aria-live="polite"></p>
+          <p class="privacy-note">Depois de cadastrar, abra a aba Estudantes e use “Vincular responsável” para associar esta conta ao aluno e informar o parentesco. A senha inicial deve ser entregue de forma privada.</p>
+          <div class="section-heading guardian-list-heading"><div><h4>Responsáveis cadastrados</h4><p class="section-subtitle">Contas ativas que podem ser vinculadas aos estudantes.</p></div></div>
+          <div id="guardians-list" class="data-list"><p class="muted">Carregando responsáveis...</p></div>
+        </section>
+        <section id="users-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">ACESSO AO SISTEMA</p><h3>Criar conta</h3></div></div>
+          <form id="user-form" class="inline-form">
+            <label>Nome<input name="name" maxlength="100" required></label>
+            <label>E-mail<input name="email" type="email" maxlength="254" required></label>
+            <label>Perfil<select name="role" id="user-form-role" required>
+              <option value="teacher">Professor</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
+              <option value="secretariat" data-admin-only>Secretaria</option><option value="direction" data-admin-only>Direção</option><option value="admin" data-admin-only>Administrador</option>
+            </select></label>
+            <label>Senha inicial<input name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
+            <button type="submit">Criar conta</button>
+          </form>
+          <p id="user-message" class="message" role="status"></p>
+          <p class="privacy-note">Cadastre aqui o e-mail e o perfil de acesso de cada pessoa. A senha inicial deve ter pelo menos 14 caracteres e ser entregue de forma privada.</p>
+          <section id="registration-requests-section" class="registration-requests-section hidden">
+            <div class="section-heading"><div><p class="eyebrow green">ANÁLISE DE ACESSO</p><h3>Solicitações pendentes</h3><p class="section-subtitle">Somente o administrador pode aprovar ou rejeitar cadastros.</p></div><span id="registration-requests-count" class="count-pill">0</span></div>
+            <p id="registration-requests-message" class="message" role="status"></p>
+            <div id="registration-requests-list" class="data-list"><p class="muted">Carregando solicitações...</p></div>
+          </section>
+        </section>
+      </section>
+      <footer class="content-footer">Acesso restrito a usuários autorizados.</footer>
+    </section>
+  </main>
+</body>
+</html>
 
 
-/* SGVE login and student-list refinement */
-#login-view.auth-card{
-  width:min(100%,560px);margin:clamp(12px,3vh,34px) auto;padding:clamp(24px,4vw,38px);
-  border:1px solid #cfe5d2;border-radius:25px;background:#f8fcf7;
-  box-shadow:0 18px 55px rgba(13,73,43,.10)
+/* SGVE dashboard: single active module and visual structure matching approved reference */
+#dashboard-view .module-panel.hidden,
+#dashboard-view .module-panel[hidden],
+#dashboard-view .module-panel[aria-hidden="true"]{display:none!important}
+#dashboard-view .module-panel:not(.hidden){display:block!important}
+#dashboard-view .welcome-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:18px!important;padding:18px 28px!important;background:#d9efdc!important;border:0!important;border-radius:0 0 22px 22px!important}
+#dashboard-view .sgve-brand-lockup{display:flex;align-items:center;gap:14px;color:#075b3b;min-width:0}
+#dashboard-view .sgve-brand-bus{font-size:48px;line-height:1}
+#dashboard-view .sgve-brand-lockup strong{display:block;font-size:clamp(34px,4vw,52px);font-weight:950;line-height:.95;letter-spacing:-.06em}
+#dashboard-view .sgve-brand-lockup small{display:block;margin-top:5px;color:#174d35;font-size:13px;line-height:1.2}
+#dashboard-view .dashboard-welcome-banner{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(220px,auto)!important;align-items:center!important;gap:20px!important;margin:0 0 2px!important;padding:22px 30px!important;border:0!important;border-radius:22px!important;background:#cfead3!important}
+#dashboard-view .welcome-greeting h2{margin:0;color:#073d29;font-size:clamp(27px,3.2vw,42px);font-weight:900;letter-spacing:-.04em}
+#dashboard-view .welcome-greeting p{margin:6px 0 0;color:#234e38;font-size:14px}
+#dashboard-view .dashboard-welcome-banner>div:nth-child(2){padding-left:22px;border-left:2px solid #a9d5b3}
+#dashboard-view .dashboard-welcome-banner>div:nth-child(2) strong{font-size:15px}
+#dashboard-view .banner-years{display:none!important}
+#dashboard-view .home-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:18px!important}
+#dashboard-view .home-card{border:1px solid #c8e2ce!important;border-radius:18px!important;box-shadow:none!important}
+#dashboard-view .home-card-heading h4{font-size:clamp(17px,1.8vw,23px)!important;font-weight:850!important}
+#dashboard-view .home-card-heading .home-icon{color:#075b3b!important}
+#dashboard-view .notice-item{background:#d9efdc!important;border-radius:14px!important}
+#dashboard-view .upcoming-trip{border:1px solid #d5e8d9!important;border-radius:16px!important;background:#fff!important}
+#dashboard-view .tabs{background:#075b3b!important;border:0!important;border-radius:24px 24px 0 0!important;box-shadow:0 -4px 20px #073d2920!important}
+#dashboard-view .tabs .tab{color:#f2fff4!important}
+#dashboard-view .tabs .tab.active{background:#a9e8b7!important;color:#06452e!important;border-radius:18px!important}
+#dashboard-view .module-panel{background:#edf6eb!important}
+@media(max-width:760px){
+ #dashboard-view .welcome-row{padding:13px 16px!important;border-radius:0 0 18px 18px!important}
+ #dashboard-view .sgve-brand-bus{font-size:34px}
+ #dashboard-view .sgve-brand-lockup strong{font-size:36px}
+ #dashboard-view .sgve-brand-lockup small{font-size:10px}
+ #dashboard-view .dashboard-welcome-banner{grid-template-columns:1fr!important;padding:17px!important;gap:12px!important}
+ #dashboard-view .dashboard-welcome-banner>div:nth-child(2){padding:0;border:0}
+ #dashboard-view .dashboard-welcome-banner>div:nth-child(2) strong{font-size:13px}
+ #dashboard-view .home-grid{grid-template-columns:1fr!important}
+ #dashboard-view .tabs{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;z-index:1000!important;width:100%!important;height:auto!important;min-height:68px!important;margin:0!important;padding:8px 6px max(8px,env(safe-area-inset-bottom))!important;display:flex!important;flex-direction:row!important;overflow-x:auto!important;overflow-y:hidden!important;gap:4px!important;border-radius:22px 22px 0 0!important}
+ #dashboard-view .tabs .tab{flex:0 0 auto!important;min-width:76px!important;min-height:48px!important;padding:7px 10px!important;font-size:11px!important;white-space:nowrap!important}
+ #dashboard-view{padding-bottom:90px!important}
 }
-#login-view .login-school-mark{display:flex;align-items:center;gap:13px;margin-bottom:24px}
-#login-view .login-mark{display:grid;place-items:center;width:54px;height:54px;border:0;border-radius:17px;background:#075b3b;color:#fff;font-weight:900;letter-spacing:-.05em}
-#login-view .login-school-mark strong{display:block;color:#075b3b;font-size:14px}
-#login-view .login-school-mark small{display:block;max-width:250px;margin-top:4px;color:#65796b;font-size:11px;line-height:1.4}
-#login-view>.eyebrow{margin-bottom:8px;color:#168452;font-size:9px;font-weight:850;letter-spacing:.13em}
-#login-view h2{margin:0;color:#123b28;font-size:clamp(26px,4vw,34px);letter-spacing:-.045em}
-#login-view>.muted{margin:8px 0 24px;color:#64786b;font-size:13px;line-height:1.6}
-#login-view #login-form{display:grid;gap:9px}
-#login-view #login-form label{margin-top:6px;color:#315640;font-size:12px;font-weight:750}
-#login-view #login-form input,#login-view #login-form select,
-#login-view #registration-form input,#login-view #registration-form select{
-  width:100%;min-height:50px;padding:0 15px;border:1px solid #d2e5d5;border-radius:13px;
-  background:#fff;color:#193c29;font-size:14px;box-shadow:0 2px 7px #174a2b08
+@media(min-width:761px){
+ #dashboard-view .tabs{display:flex!important;flex-wrap:wrap!important}
 }
-#login-view #login-form input:focus,#login-view #login-form select:focus,
-#login-view #registration-form input:focus,#login-view #registration-form select:focus{
-  border-color:#399765;outline:0;box-shadow:0 0 0 4px #39976520
-}
-#login-view #login-button,#login-view #google-login-button,#login-view #pwa-install{
-  min-height:50px;margin-top:8px;border-radius:13px;font-size:14px;font-weight:800
-}
-#login-view #login-button{background:#075b3b;color:#fff;box-shadow:0 6px 15px #075b3b22}
-#login-view #login-button:hover{background:#064b32}
-#login-view #google-login-button,#login-view #pwa-install{border:1px solid #cfe3d2;background:#edf6eb;color:#155b3b}
-#login-view .link-button{margin-top:15px;color:#08764a;font-weight:750}
-#login-view .helper{margin-top:17px;padding-top:14px;border-top:1px solid #e3eee4;color:#78897e;font-size:11px;line-height:1.5}
-#login-view .registration-form{margin-top:18px;padding:17px;border:1px solid #d6e8d9;border-radius:16px;background:#eff7ee}
-#login-view .registration-form label{display:block;margin:12px 0 6px;color:#315640;font-size:12px;font-weight:700}
-#students-panel #students-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:20px}
-#students-panel #students-list .student-modern-card{
-  display:flex;align-items:center;gap:12px;min-width:0;min-height:84px;padding:15px;
-  border:1px solid #d4e7d7;border-radius:17px;background:#f8fcf7;
-  box-shadow:0 4px 13px rgba(17,74,43,.06);transition:transform .16s ease,box-shadow .16s ease
-}
-#students-panel #students-list .student-modern-card:hover{transform:translateY(-2px);box-shadow:0 8px 20px #174a2b12}
-#students-panel .student-avatar{display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px;border-radius:50%;background:#075b3b;color:#fff;font-size:13px;font-weight:850;letter-spacing:.03em}
-#students-panel .student-card-main{display:grid;gap:6px;min-width:0;flex:1}
-#students-panel .student-card-main strong{overflow-wrap:anywhere;color:#163d29;font-size:13px;line-height:1.3}
-#students-panel .student-class-meta{color:#6b7e70;font-size:10px;line-height:1.5}
-#students-panel .student-status-pill{flex:none;padding:5px 8px;border-radius:999px;background:#d9f2df;color:#087144;font-size:9px;font-weight:800}
-#students-panel .privacy-note{margin-top:18px;padding:13px 15px;border-radius:13px;background:#f7faf6;color:#748579;line-height:1.6}
-@media(max-width:700px){
-  #login-view.auth-card{margin:8px auto 22px;padding:23px 19px;border-radius:20px}
-  #login-view .login-school-mark{margin-bottom:20px}
-  #students-panel #students-list{grid-template-columns:1fr;gap:10px}
-  #students-panel #students-list .student-modern-card{min-height:76px;padding:13px}
-}
-body.dark-mode #login-view.auth-card{background:#14251b;border-color:#304d38}
-body.dark-mode #login-view h2,body.dark-mode #login-view .login-school-mark strong{color:#e8f5eb}
-body.dark-mode #login-view>.muted,body.dark-mode #login-view .helper{color:#b4c7b8}
-body.dark-mode #login-view #login-form label,body.dark-mode #login-view #registration-form label{color:#d0e0d3}
-body.dark-mode #login-view #login-form input,body.dark-mode #login-view #login-form select,
-body.dark-mode #login-view #registration-form input,body.dark-mode #login-view #registration-form select{background:#0f1d14;border-color:#385341;color:#eff8f0}
-body.dark-mode #students-panel #students-list .student-modern-card{background:#17291e;border-color:#355640}
-body.dark-mode #students-panel .student-card-main strong{color:#e4f1e7}
-body.dark-mode #students-panel .student-class-meta{color:#b4c7b8}
-body.dark-mode #students-panel .privacy-note{background:#1a3021;color:#b4c7b8}
