@@ -18,7 +18,7 @@ const firestoreStore = require('./firestore-store');
 const { hashPassword, verifyPassword, randomToken, sha256 } = require('./security');
 const { randomInt } = require('node:crypto');
 const { createMemoryRateLimiter } = require('./rate-limit');
-const { ROLE_LABELS, RECORD_MANAGERS, USER_MANAGERS, hasRole } = require('./access');
+const { ROLE_LABELS, RECORD_MANAGERS, USER_MANAGERS, hasRole, canEditTrip } = require('./access');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -919,7 +919,9 @@ app.get('/api/trips', requireAuth, async (req, res, next) => {
       : 'SELECT DISTINCT t.id, t.title, t.destination, t.educational_purpose, t.departure_at, t.return_at, t.capacity, t.image_data, t.vehicle_id, v.name AS vehicle_name, t.status, (SELECT COUNT(*) FROM trip_students ts WHERE ts.trip_id = t.id) AS participant_count FROM trips t LEFT JOIN vehicles v ON v.id = t.vehicle_id';
     if (hasRole(user, RECORD_MANAGERS)) {
       rows = db.prepare(select + ' ORDER BY t.departure_at DESC LIMIT 100').all();
-    } else if (['teacher', 'pedagogue'].includes(user.role)) {
+    } else if (user.role === 'teacher') {
+      rows = db.prepare(select + ' ORDER BY t.departure_at DESC LIMIT 100').all();
+    } else if (user.role === 'pedagogue') {
       rows = db.prepare(select + ' JOIN trip_staff tsf ON tsf.trip_id = t.id WHERE tsf.user_id = ? ORDER BY t.departure_at DESC').all(user.id);
     } else if (user.role === 'guardian') {
       rows = db.prepare(select + ' JOIN trip_students ts ON ts.trip_id = t.id JOIN students s ON s.id = ts.student_id JOIN student_guardians sg ON sg.student_id = s.id WHERE sg.guardian_user_id = ? ORDER BY t.departure_at DESC').all(user.id);
@@ -961,12 +963,19 @@ app.put('/api/trips/:id', requireAuth, requireCsrf, requireRoles(...RECORD_MANAG
     if (firebaseConfigured) {
       const trip = await firestoreSchool.getTrip(id);
       if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
-      if (trip.status !== 'draft') return res.status(409).json({ error: 'Somente rascunhos podem ser editados.' });
+      if (!canEditTrip(req.auth.user, trip.status)) {
+        return res.status(409).json({ error: 'Seu perfil não pode editar uma viagem neste status. Secretaria edita apenas rascunhos; direção e administração podem editar viagens em andamento.' });
+      }
       await firestoreSchool.updateTrip(id, data, req.auth.user.id);
     } else {
-      const result = db.prepare("UPDATE trips SET title=?, destination=?, educational_purpose=?, departure_at=?, return_at=?, capacity=?, image_data=?, updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='draft'")
-        .run(data.title, data.destination, data.purpose, data.departure, data.returning, data.capacity, data.imageData || null, id);
-      if (!result.changes) return res.status(404).json({ error: 'Rascunho não encontrado ou não pode mais ser editado.' });
+      const trip = db.prepare('SELECT status FROM trips WHERE id = ?').get(id);
+      if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
+      if (!canEditTrip(req.auth.user, trip.status)) {
+        return res.status(409).json({ error: 'Seu perfil não pode editar uma viagem neste status. Secretaria edita apenas rascunhos; direção e administração podem editar viagens em andamento.' });
+      }
+      const result = db.prepare('UPDATE trips SET title=?, destination=?, educational_purpose=?, departure_at=?, return_at=?, capacity=?, image_data=?, updated_at=CURRENT_TIMESTAMP WHERE id=? AND status=?')
+        .run(data.title, data.destination, data.purpose, data.departure, data.returning, data.capacity, data.imageData || null, id, trip.status);
+      if (!result.changes) return res.status(409).json({ error: 'A viagem mudou de status. Atualize a página e tente novamente.' });
       audit(req.auth.user.id, 'update', 'trip', id);
     }
     res.json({ message: 'Viagem atualizada.' });
@@ -1413,7 +1422,9 @@ app.get('/api/trips/:id/participants', requireAuth, async (req, res, next) => {
       WHERE ts.trip_id = ? AND s.active = 1`;
     if (hasRole(user, RECORD_MANAGERS)) {
       rows = db.prepare(query + ' ORDER BY s.full_name').all(tripId);
-    } else if (['teacher', 'pedagogue'].includes(user.role)) {
+    } else if (user.role === 'teacher') {
+      rows = db.prepare(query + ' ORDER BY s.full_name').all(tripId);
+    } else if (user.role === 'pedagogue') {
       if (!db.prepare('SELECT 1 FROM trip_staff WHERE trip_id = ? AND user_id = ?').get(tripId, user.id)) {
         return res.status(403).json({ error: 'Você não está vinculado a esta viagem.' });
       }
