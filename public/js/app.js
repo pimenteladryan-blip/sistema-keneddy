@@ -177,6 +177,15 @@ async function loadLinkableUsers() {
     const data = await api('/api/linkable-users');
     const guardians = data.users.filter(user => user.role === 'guardian' && user.active);
     const teachers = data.users.filter(user => user.role === 'teacher' && user.active);
+    const teachersList = document.querySelector('#teachers-list');
+    if (teachersList) {
+      teachersList.innerHTML = teachers.length ? teachers.map(user =>
+        '<article class="data-row"><div><strong>' + escapeHtml(user.name) + '</strong><small>' +
+        escapeHtml(user.email) + '</small><small>Disciplinas: ' +
+        escapeHtml(Array.isArray(user.subjects) && user.subjects.length ? user.subjects.join(', ') : 'Não informadas') +
+        '</small></div><span>Professor ativo</span></article>'
+      ).join('') : '<p class="muted">Nenhum professor cadastrado ainda.</p>';
+    }
     const guardianList = document.querySelector('#guardians-list');
     const guardianCount = document.querySelector('#guardians-count');
     if (guardianList && guardianCount) {
@@ -731,6 +740,13 @@ document.querySelector('#guardian-form').addEventListener('submit', async event 
     showMessage('#guardian-message', error.message, true);
   }
 });
+const userRoleSelect = document.querySelector('#user-role');
+const teacherSubjectsField = document.querySelector('#teacher-subjects-field');
+function toggleTeacherSubjects() {
+  teacherSubjectsField.classList.toggle('hidden', userRoleSelect.value !== 'teacher');
+}
+userRoleSelect.addEventListener('change', toggleTeacherSubjects);
+toggleTeacherSubjects();
 document.querySelector('#user-form').addEventListener('submit', async event => {
   event.preventDefault();
   const form = event.currentTarget;
@@ -738,7 +754,9 @@ document.querySelector('#user-form').addEventListener('submit', async event => {
   try {
     const result = await api('/api/users', { method: 'POST', body: JSON.stringify(payload) });
     form.reset();
+    toggleTeacherSubjects();
     showMessage('#user-message', result.message + ' Perfil: ' + result.user.roleLabel);
+    await loadLinkableUsers();
   } catch (error) { if (error.name === 'AbortError') return; showMessage('#user-message', error.message, true); }
 });
 function applyTheme(mode) {
