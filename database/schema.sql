@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash TEXT NOT NULL,
   role TEXT NOT NULL CHECK (role IN ('admin','direction','secretariat','teacher','guardian','student')),
   active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0,1)),
+  subjects TEXT NOT NULL DEFAULT '[]',
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
