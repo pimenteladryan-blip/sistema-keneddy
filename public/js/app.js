@@ -839,7 +839,9 @@ const loginHelper = document.querySelector('#login-view .helper');
 document.querySelector('#show-registration').addEventListener('click', () => {
   loginForm.classList.add('hidden');
   registrationForm.classList.remove('hidden');
+  registrationForm.setAttribute('aria-label', 'Formulário de criação de conta');
   document.querySelector('#show-registration').classList.add('hidden');
+  registrationForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
   loginHelper.classList.add('hidden');
   registrationMessage.textContent = '';
 });
@@ -892,7 +894,7 @@ registrationForm.addEventListener('submit', async event => {
     try { if (window.firebase?.apps?.length) await firebase.auth().signOut(); } catch {}
   } finally {
     button.disabled = false;
-    button.textContent = 'Enviar solicitação';
+    button.textContent = 'Criar conta e enviar solicitação';
   }
 });
 document.querySelector('#guardian-form').addEventListener('submit', async event => {
