@@ -978,6 +978,20 @@ app.put('/api/trips/:id', requireAuth, requireCsrf, requireRoles(...RECORD_MANAG
       if (!result.changes) return res.status(409).json({ error: 'A viagem mudou de status. Atualize a página e tente novamente.' });
       audit(req.auth.user.id, 'update', 'trip', id);
     }
+    if (trip.status !== 'draft') {
+      try {
+        const recipients = await tripReminderRecipients(id);
+        if (recipients.length) {
+          await sendPushToUserIds(recipients, {
+            title: 'Viagem escolar atualizada',
+            body: data.title + ' • ' + data.destination + '. Confira os novos detalhes no SGVE.',
+            url: '/'
+          });
+        }
+      } catch (notificationError) {
+        console.error('Falha ao notificar participantes sobre a atualização da viagem:', notificationError.message);
+      }
+    }
     res.json({ message: 'Viagem atualizada.' });
   } catch (error) { next(error); }
 });
