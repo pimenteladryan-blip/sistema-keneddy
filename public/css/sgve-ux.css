@@ -1202,3 +1202,24 @@ body.dark-mode #dashboard-view .calendar-controls button:hover{
   #dashboard-view .calendar-controls{gap:7px!important}
   #dashboard-view .calendar-controls button{width:32px!important;height:32px!important;border-radius:10px!important}
 }
+
+
+/* Aproxima a faixa institucional do painel lateral sem sobrepor a navegação. */
+@media(min-width:1151px){
+  #dashboard-view>.dashboard-welcome-banner{
+    margin-left:-18px!important;
+    width:calc(100% + 18px)!important;
+  }
+}
+@media(min-width:901px) and (max-width:1150px){
+  #dashboard-view>.dashboard-welcome-banner{
+    margin-left:-8px!important;
+    width:calc(100% + 8px)!important;
+  }
+}
+@media(max-width:900px){
+  #dashboard-view>.dashboard-welcome-banner{
+    margin-left:0!important;
+    width:100%!important;
+  }
+}
