@@ -112,7 +112,8 @@ async function loadTrips() {
       let action = '';
       if (canManage && trip.status === 'draft') action = '<button type="button" class="small-action" data-trip-action="submit" data-trip-id="' + trip.id + '">Enviar para aprovação</button>';
       if (currentUser && ['admin', 'direction'].includes(currentUser.role) && trip.status === 'pending_approval') action = '<button type="button" class="small-action" data-trip-action="approve" data-trip-id="' + trip.id + '">Aprovar viagem</button>';
-      return '<article class="trip-card"><div class="trip-card-main"><div class="trip-title-row"><strong>' + escapeHtml(trip.title) + '</strong><span class="status-pill status-' + escapeHtml(trip.status) + '">' + escapeHtml(trip.statusLabel) + '</span></div><p>' + escapeHtml(trip.destination) + '</p><small>Saída: ' + escapeHtml(dateLabel(trip.departure_at)) + '</small><small>Retorno: ' + escapeHtml(dateLabel(trip.return_at)) + '</small><small>Participantes: ' + trip.participant_count + ' / ' + trip.capacity + '</small></div>' + action + '</article>';
+      const participantAction = canManage ? '<button type="button" class="participants-toggle" data-trip-action="participants" data-trip-id="' + trip.id + '" aria-expanded="false">Ver participantes</button>' : '';
+      return '<article class="trip-card"><div class="trip-card-main"><div class="trip-title-row"><strong>' + escapeHtml(trip.title) + '</strong><span class="status-pill status-' + escapeHtml(trip.status) + '">' + escapeHtml(trip.statusLabel) + '</span></div><p>' + escapeHtml(trip.destination) + '</p><small>Saída: ' + escapeHtml(dateLabel(trip.departure_at)) + '</small><small>Retorno: ' + escapeHtml(dateLabel(trip.return_at)) + '</small><small>Participantes: ' + trip.participant_count + ' / ' + trip.capacity + '</small><div class="trip-card-actions">' + participantAction + action + '</div><div class="trip-participants hidden" id="trip-participants-' + trip.id + '"></div></div></article>';
     }).join('') : '<p class="muted">Nenhuma viagem cadastrada.</p>';
     const options = '<option value="">Selecione uma viagem</option>' + data.trips.filter(t => t.status === 'draft').map(t =>
       '<option value="' + t.id + '">' + escapeHtml(t.title + ' · ' + t.destination) + '</option>'
@@ -190,6 +191,31 @@ document.querySelector('#trip-student-form').addEventListener('submit', async ev
 document.querySelector('#trips-list').addEventListener('click', async event => {
   const button = event.target.closest('[data-trip-action]');
   if (!button) return;
+  if (button.dataset.tripAction === 'participants') {
+    const panel = document.querySelector('#trip-participants-' + button.dataset.tripId);
+    if (!panel) return;
+    if (!panel.classList.contains('hidden')) {
+      panel.classList.add('hidden');
+      button.setAttribute('aria-expanded', 'false');
+      button.textContent = 'Ver participantes';
+      return;
+    }
+    button.disabled = true;
+    try {
+      const data = await api('/api/trips/' + button.dataset.tripId + '/participants');
+      panel.innerHTML = data.participants.length
+        ? '<strong>Participantes</strong><ul>' + data.participants.map(person => '<li>' + escapeHtml(person.full_name) + '</li>').join('') + '</ul>'
+        : '<span>Nenhum participante vinculado.</span>';
+      panel.classList.remove('hidden');
+      button.setAttribute('aria-expanded', 'true');
+      button.textContent = 'Ocultar participantes';
+    } catch (error) {
+      showMessage('#trip-message', error.message, true);
+    } finally {
+      button.disabled = false;
+    }
+    return;
+  }
   button.disabled = true;
   try {
     const result = await api('/api/trips/' + button.dataset.tripId + '/' + button.dataset.tripAction, { method: 'POST', body: '{}' });
