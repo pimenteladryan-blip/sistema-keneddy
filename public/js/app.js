@@ -420,7 +420,15 @@ function renderHome() {
     return '<article class="home-notification"><span class="notification-mark">↗</span><div><strong>'+escapeHtml(t.title)+'</strong><p>'+escapeHtml(label)+' · '+escapeHtml(t.destination)+'</p><small>'+escapeHtml(dateLabel(t.departure_at))+'</small></div></article>';
   }).join('') : '<p class="home-empty">Nenhuma atualização de viagem no momento.</p>';
   const cards = document.querySelector('#home-upcoming');
-  cards.innerHTML = upcoming.length ? upcoming.slice(0,3).map((t,i) => '<article class="upcoming-trip"><div class="trip-photo-placeholder trip-photo-'+(i+1)+'"><span>SGVE</span><small>VIAGEM ESCOLAR</small></div><div class="upcoming-trip-body"><span class="trip-date-chip">'+escapeHtml(new Date(t.departure_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}))+'</span><strong>'+escapeHtml(t.title)+'</strong><p>'+escapeHtml(t.destination)+'</p><small>'+escapeHtml(tripStatusLabel(t.status))+'</small></div></article>').join('') : '<p class="home-empty">As próximas viagens aparecerão aqui quando forem cadastradas.</p>';
+  cards.innerHTML = upcoming.length ? upcoming.slice(0,3).map((t,i) => {
+    const destinationKey = String(t.destination || '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();
+    const isSaoPaulo = destinationKey.includes('sao paulo');
+    const photo = isSaoPaulo
+      ? '<img class="upcoming-trip-photo" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/NeoQuimicaArena_%282%29.jpg/1280px-NeoQuimicaArena_%282%29.jpg" alt="Neo Química Arena, em São Paulo" loading="lazy">'
+      : '<div class="trip-photo-placeholder trip-photo-'+(i+1)+'"><span>🚌</span><small>VIAGEM ESCOLAR</small></div>';
+    const photoCredit = isSaoPaulo ? '<small class="trip-photo-credit">Foto: FotografoWallacyFerrari · CC BY 4.0</small>' : '';
+    return '<article class="upcoming-trip">'+photo+'<div class="upcoming-trip-body"><span class="trip-date-chip">'+escapeHtml(new Date(t.departure_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}))+'</span><strong>'+escapeHtml(t.title)+'</strong><p>'+escapeHtml(t.destination)+'</p><small>'+escapeHtml(tripStatusLabel(t.status))+'</small>'+photoCredit+'</div></article>';
+  }).join('') : '<p class="home-empty">As próximas viagens aparecerão aqui quando forem cadastradas.</p>';
   renderCalendar();
 }
 function renderCalendar() {
