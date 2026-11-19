@@ -19,6 +19,10 @@ if (!tripColumnsAfterVehicle.some(column => column.name === 'driver_id')) {
   db.exec('ALTER TABLE trips ADD COLUMN driver_id INTEGER REFERENCES drivers(id) ON DELETE SET NULL');
 }
 db.exec('CREATE INDEX IF NOT EXISTS idx_trips_driver ON trips(driver_id)');
+const tripImageColumns = db.prepare('PRAGMA table_info(trips)').all();
+if (!tripImageColumns.some(column => column.name === 'image_data')) {
+  db.exec('ALTER TABLE trips ADD COLUMN image_data TEXT');
+}
 const userColumns = db.prepare('PRAGMA table_info(users)').all();
 if (!userColumns.some(column => column.name === 'subjects')) {
   db.exec("ALTER TABLE users ADD COLUMN subjects TEXT NOT NULL DEFAULT '[]'");
