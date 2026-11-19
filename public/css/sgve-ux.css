@@ -359,3 +359,79 @@ html body:not(.dark-mode) #dashboard-view .dashboard-theme-toggle .theme-moon{
 html body:not(.dark-mode) #dashboard-view .trip-card-actions .reject-action{
   background:#f5f1f0!important;color:#865b55!important;border-color:#e9dfdc!important;
 }
+
+
+/* Final light dashboard palette: only white and green. */
+html body:not(.dark-mode) #dashboard-view,
+html body:not(.dark-mode) #dashboard-view *{
+  color:#17633f!important;
+  box-shadow:none!important;
+  background-image:none!important;
+}
+html body:not(.dark-mode) #dashboard-view,
+html body:not(.dark-mode) #dashboard-view .page-shell,
+html body:not(.dark-mode) #dashboard-view .module-panel,
+html body:not(.dark-mode) #dashboard-view .welcome-row,
+html body:not(.dark-mode) #dashboard-view .home-card,
+html body:not(.dark-mode) #dashboard-view .data-row,
+html body:not(.dark-mode) #dashboard-view .notice-item,
+html body:not(.dark-mode) #dashboard-view .home-notification,
+html body:not(.dark-mode) #dashboard-view .calendar-day,
+html body:not(.dark-mode) #dashboard-view .calendar-selected,
+html body:not(.dark-mode) #dashboard-view .upcoming-trip,
+html body:not(.dark-mode) #dashboard-view .upcoming-trip-body,
+html body:not(.dark-mode) #dashboard-view .inline-form,
+html body:not(.dark-mode) #dashboard-view .trip-photo-upload,
+html body:not(.dark-mode) #dashboard-view .class-shortcut-grid button,
+html body:not(.dark-mode) #dashboard-view input,
+html body:not(.dark-mode) #dashboard-view select,
+html body:not(.dark-mode) #dashboard-view textarea,
+html body:not(.dark-mode) #dashboard-view .student-avatar,
+html body:not(.dark-mode) #dashboard-view .count-pill,
+html body:not(.dark-mode) #dashboard-view .home-icon{
+  background:#fff!important;
+  border-color:#27804f!important;
+}
+html body:not(.dark-mode) #dashboard-view .tabs,
+html body:not(.dark-mode) #dashboard-view .dashboard-theme-toggle .theme-moon,
+html body:not(.dark-mode) #dashboard-view .calendar-day.selected,
+html body:not(.dark-mode) #dashboard-view .inline-form button[type=submit],
+html body:not(.dark-mode) #dashboard-view .profile-avatar{
+  background:#17633f!important;
+  color:#fff!important;
+  border-color:#17633f!important;
+}
+html body:not(.dark-mode) #dashboard-view .tab,
+html body:not(.dark-mode) #dashboard-view .tab *,
+html body:not(.dark-mode) #dashboard-view .sgve-brand-lockup,
+html body:not(.dark-mode) #dashboard-view .sgve-brand-lockup *,
+html body:not(.dark-mode) #dashboard-view .tabs .tab:not(.active){
+  color:#fff!important;
+}
+html body:not(.dark-mode) #dashboard-view .tab.active{
+  background:#fff!important;
+  color:#17633f!important;
+  border:1px solid #17633f!important;
+}
+html body:not(.dark-mode) #dashboard-view .tab.active *{color:#17633f!important}
+html body:not(.dark-mode) #dashboard-view .dashboard-welcome-banner{
+  background:#fff!important;
+  border:1px solid #27804f!important;
+  color:#17633f!important;
+}
+html body:not(.dark-mode) #dashboard-view .calendar-day.has-trip,
+html body:not(.dark-mode) #dashboard-view .notice-item small,
+html body:not(.dark-mode) #dashboard-view .student-status-pill,
+html body:not(.dark-mode) #dashboard-view .trip-card-photo-empty,
+html body:not(.dark-mode) #dashboard-view .trip-photo-placeholder{
+  background:#fff!important;
+  color:#17633f!important;
+  border:1px solid #27804f!important;
+}
+html body:not(.dark-mode) #dashboard-view .home-counter{
+  background:#17633f!important;color:#fff!important;
+}
+html body:not(.dark-mode) #dashboard-view input::placeholder,
+html body:not(.dark-mode) #dashboard-view textarea::placeholder{
+  color:#17633f!important;opacity:.75;
+}
