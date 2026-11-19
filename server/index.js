@@ -3,7 +3,8 @@ require('dotenv').config();
 const path = require('node:path');
 const express = require('express');
 const helmet = require('helmet');
-const { firebaseConfigured, projectId, firebaseApp } = require('./firebase');
+const { firebaseConfigured, projectId, firebaseApp, firestore } = require('./firebase');
+const { getMessaging } = require('firebase-admin/messaging');
 const isProduction = process.env.NODE_ENV === 'production';
 if (isProduction && !firebaseConfigured) {
   throw new Error('Firebase Admin precisa estar configurado antes de iniciar o SGVE em produção.');
@@ -334,6 +335,94 @@ app.post('/api/auth/firebase', async (req, res, next) => {
     next(error);
   }
 });
+
+async function sendPushToUserIds(userIds, notification) {
+  if (!firebaseConfigured || !firestore || !process.env.FCM_WEB_PUSH_VAPID_KEY) {
+    return { sent: 0, disabled: true };
+  }
+  const ids = new Set(userIds.map(Number).filter(id => Number.isSafeInteger(id) && id > 0));
+  if (!ids.size) return { sent: 0, disabled: false };
+  const snapshot = await firestore.collection('push_tokens').limit(5000).get();
+  const docs = snapshot.docs.filter(doc => ids.has(Number(doc.data().user_id)));
+  let sent = 0;
+  for (let offset = 0; offset < docs.length; offset += 500) {
+    const batch = docs.slice(offset, offset + 500);
+    const tokens = batch.map(doc => doc.data().token).filter(token => typeof token === 'string' && token.length > 80);
+    if (!tokens.length) continue;
+    const result = await getMessaging(firebaseApp).sendEachForMulticast({
+      tokens,
+      notification: { title: notification.title, body: notification.body },
+      webpush: { notification: { icon: '/icon.svg', badge: '/icon.svg' },
+        fcmOptions: { link: notification.url || '/' } }
+    });
+    sent += result.successCount;
+    const invalid = new Set();
+    result.responses.forEach((response, index) => {
+      if (!response.success && ['messaging/registration-token-not-registered', 'messaging/invalid-registration-token'].includes(response.error?.code)) {
+        invalid.add(tokens[index]);
+      }
+    });
+    if (invalid.size) await Promise.all(batch.filter(doc => invalid.has(doc.data().token)).map(doc => doc.ref.delete()));
+  }
+  return { sent, disabled: false };
+}
+async function notifyRoles(roles, notification) {
+  try {
+    if (!firebaseConfigured || !firestore) return;
+    const users = await firestore.collection('users').where('active', '==', true).get();
+    const ids = users.docs.filter(doc => roles.includes(doc.data().role)).map(doc => Number(doc.id));
+    await sendPushToUserIds(ids, notification);
+  } catch (error) { console.error('Falha ao enviar push automático:', error.message); }
+}
+app.get('/api/push/config', requireAuth, (req, res) => {
+  const vapidKey = String(process.env.FCM_WEB_PUSH_VAPID_KEY || '').trim();
+  res.json({ enabled: Boolean(firebaseConfigured && vapidKey), vapidKey: vapidKey || null });
+});
+app.post('/api/push/register', requireAuth, requireCsrf, async (req, res, next) => {
+  const token = typeof req.body.token === 'string' ? req.body.token.trim() : '';
+  if (!firebaseConfigured || !firestore || !process.env.FCM_WEB_PUSH_VAPID_KEY) {
+    return res.status(503).json({ error: 'As notificações push ainda não foram configuradas no servidor.' });
+  }
+  if (token.length < 80 || token.length > 4096) return res.status(400).json({ error: 'Token de notificação inválido.' });
+  try {
+    const now = new Date().toISOString();
+    await firestore.collection('push_tokens').doc(sha256(token)).set({
+      user_id: Number(req.auth.user.id), token, updated_at: now, created_at: now
+    }, { merge: true });
+    res.json({ message: 'Este dispositivo foi habilitado para receber notificações.' });
+  } catch (error) { next(error); }
+});
+app.post('/api/push/unregister', requireAuth, requireCsrf, async (req, res, next) => {
+  const token = typeof req.body.token === 'string' ? req.body.token.trim() : '';
+  if (!firebaseConfigured || !firestore || token.length < 80 || token.length > 4096) {
+    return res.status(400).json({ error: 'Não foi possível identificar este dispositivo.' });
+  }
+  try {
+    const ref = firestore.collection('push_tokens').doc(sha256(token));
+    const saved = await ref.get();
+    if (saved.exists && Number(saved.data().user_id) === Number(req.auth.user.id)) await ref.delete();
+    res.json({ message: 'Notificações desativadas neste dispositivo.' });
+  } catch (error) { next(error); }
+});
+app.post('/api/push/send', requireAuth, requireCsrf, requireRoles('admin'), async (req, res, next) => {
+  const title = cleanText(req.body.title, 80);
+  const body = cleanText(req.body.body, 240);
+  const audience = cleanText(req.body.audience || 'all', 20);
+  const roles = ['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'];
+  if (title.length < 3 || body.length < 3 || !(audience === 'all' || roles.includes(audience))) {
+    return res.status(400).json({ error: 'Informe título, mensagem e público válidos.' });
+  }
+  if (!firebaseConfigured || !process.env.FCM_WEB_PUSH_VAPID_KEY) {
+    return res.status(503).json({ error: 'Configure a chave Web Push do Firebase no Render antes de enviar.' });
+  }
+  try {
+    const users = await firestore.collection('users').where('active', '==', true).get();
+    const ids = users.docs.filter(doc => audience === 'all' || doc.data().role === audience).map(doc => Number(doc.id));
+    const result = await sendPushToUserIds(ids, { title, body, url: '/' });
+    res.json({ message: 'Envio concluído.', sent: result.sent, recipients: ids.length });
+  } catch (error) { next(error); }
+});
+
 app.get('/api/auth/me', requireAuth, (req, res) => res.json({ user: { ...req.auth.user, roleLabel: ROLE_LABELS[req.auth.user.role] }, csrfToken: req.auth.csrfToken }));
 app.post('/api/auth/logout', requireAuth, requireCsrf, async (req, res, next) => {
   try {
@@ -840,6 +929,7 @@ app.post('/api/trips/:id/submit', requireAuth, requireCsrf, requireRoles(...RECO
       if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem não encontrada.' });
       if (result.error === 'no-classes') return res.status(400).json({ error: 'Vincule pelo menos uma turma antes de enviar para aprovação.' });
       if (result.error) return res.status(409).json({ error: 'Somente rascunhos podem ser enviados para aprovação.' });
+      await notifyRoles(['admin', 'direction'], { title: 'Viagem aguardando aprovação', body: 'Uma viagem foi enviada para análise no SGVE.' });
       return res.json({ message: 'Viagem enviada para aprovação da direção.' });
     }
     const trip = db.prepare('SELECT id, status FROM trips WHERE id = ?').get(tripId);
@@ -860,6 +950,7 @@ app.post('/api/trips/:id/approve', requireAuth, requireCsrf, requireRoles('admin
       const result = await firestoreSchool.approveTrip(tripId, req.auth.user.id);
       if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem não encontrada.' });
       if (result.error) return res.status(409).json({ error: 'A viagem não está aguardando aprovação.' });
+      await notifyRoles(['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'], { title: 'Viagem aprovada', body: 'Uma viagem escolar foi aprovada no SGVE.' });
       return res.json({ message: 'Viagem aprovada.' });
     }
     const trip = db.prepare("SELECT id, status FROM trips WHERE id = ?").get(tripId);
