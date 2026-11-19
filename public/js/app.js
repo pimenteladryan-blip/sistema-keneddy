@@ -496,7 +496,7 @@ async function loadRegistrationRequests() {
     list.innerHTML = data.requests.length ? data.requests.map(item =>
       '<article class="data-row registration-request-row"><div class="registration-request-details"><strong>' + escapeHtml(item.name) + '</strong><span>' +
       escapeHtml(item.email) + ' · ' + escapeHtml(item.roleLabel) + '</span><small>E-mail verificado</small><small>Recebida em ' + escapeHtml(dateLabel(item.created_at)) + '</small></div>' +
-      '<div class="registration-actions"><button type="button" class="small-action" data-registration-action="approve" data-registration-id="' + item.id + '">Aprovar</button>' +
+      '<div class="registration-actions"><button type="button" class="small-action" data-registration-action="approve" data-registration-id="' + item.id + '"' + (item.email_verified ? '' : ' disabled title="A pessoa precisa confirmar o e-mail primeiro"') + '>Aprovar</button>' +
       '<button type="button" class="small-action reject-action" data-registration-action="reject" data-registration-id="' + item.id + '">Rejeitar</button></div></article>'
     ).join('') : '<p class="muted">Não há solicitações aguardando aprovação.</p>';
   } catch (error) { if (error.name === 'AbortError') return;
