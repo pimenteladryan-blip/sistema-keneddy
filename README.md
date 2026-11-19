@@ -4,79 +4,64 @@ Sistema de Gerenciamento de Viagens Escolares do Colégio Estadual Presidente Ke
 
 ## Estrutura
 
-```text
-.
-├── public/
-│   ├── assets/          # Mascotes e imagens
-│   ├── css/             # Folhas de estilo
-│   ├── js/              # Código da interface
-│   ├── index.html
-│   ├── firebase-config.js
-│   ├── manifest.webmanifest
-│   ├── sw.js
-│   └── icon.svg
-├── server/
-│   └── index.js         # Servidor HTTP e entrega dos arquivos públicos
-├── package.json
-├── .gitignore
-└── README.md
-```
+- `public/`: interface, estilos, scripts, configuração web do Firebase e mascotes.
+- `server/`: API Express, autenticação administrativa do Firebase e acesso ao Firestore.
+- `database/schema.sql`: estrutura do banco local de desenvolvimento.
+- `firestore.rules`: bloqueia acesso direto do navegador ao Firestore. A aplicação acessa os dados pela API confiável do servidor.
 
-## Executar localmente
+## Requisitos e execução local
 
 Requer Node.js 22.5 ou superior.
 
+1. Copie `.env.example` para `.env`.
+2. Preencha as variáveis privadas do Firebase Admin e os dados do administrador inicial.
+3. Instale e inicie:
+
 ```bash
+npm install
 npm start
 ```
 
-O servidor usa a variável `PORT` fornecida pelo ambiente (Render) ou a porta 3000 localmente.
+O servidor usa a variável `PORT` fornecida pelo ambiente ou a porta 3000 localmente.
 
-Para verificar a sintaxe dos arquivos JavaScript:
+Para verificar a sintaxe JavaScript:
 
 ```bash
 npm run check
 ```
 
-## Publicação no Render
+## Configuração Firebase
 
-Criar/Manter como **Web Service**. Comandos:
+No Firebase Console do projeto `svge-14ec7`:
+
+1. Ative Authentication com **Email/Password** e **Google**.
+2. Confirme o modelo **Email address verification**.
+3. Em Authorized domains, autorize o domínio do serviço Render.
+4. Crie/ative o Firestore Database.
+5. Publique as regras de `firestore.rules`. O acesso direto do navegador fica bloqueado; o servidor usa Firebase Admin.
+
+No Render, mantenha o serviço como **Web Service**, nunca Static Site:
 
 - Build Command: `npm install`
 - Start Command: `npm start`
 
-Não configurar como Static Site.
-
-## Situação técnica importante
-
-Esta branch mantém a versão atual da interface e organiza os arquivos sem substituir a aplicação por outra branch. O servidor aqui entrega os arquivos estáticos; ele ainda não implementa as rotas `/api` chamadas pela interface. Portanto, esta reorganização, sozinha, não torna cadastro, login por senha, turmas, estudantes ou viagens funcionais. A implementação e os testes da API devem ser uma etapa separada antes de considerar a versão pronta para uso.
-
-A configuração web do Firebase é pública por natureza. Credenciais privadas do Firebase Admin nunca devem ser colocadas em arquivos públicos ou commitadas no repositório.
-
-## Firebase Authentication e Firestore
-
-Em produção, configure o Render como **Web Service** e adicione estas variáveis privadas:
+Configure em **Render → Environment**:
 
 - `NODE_ENV=production`
 - `FIREBASE_PROJECT_ID=svge-14ec7`
-- `FIREBASE_SERVICE_ACCOUNT_JSON`: JSON completo de uma conta de serviço do mesmo projeto Firebase
+- `FIREBASE_SERVICE_ACCOUNT_JSON`: JSON completo da conta de serviço do mesmo projeto
 - `ADMIN_EMAIL`: e-mail da conta administrativa inicial
-- `ADMIN_PASSWORD`: senha inicial forte, com pelo menos 14 caracteres
-- `ADMIN_NAME`: nome exibido do administrador (opcional)
+- `ADMIN_PASSWORD`: senha inicial com pelo menos 14 caracteres
+- `ADMIN_NAME`: nome do administrador (opcional)
 
-Nunca coloque o JSON da conta de serviço, a chave privada ou a senha administrativa no GitHub, no navegador ou em mensagens. Cadastre esses valores somente em **Render → Environment**. A conta de serviço deve ter acesso ao Firestore do projeto.
+Nunca coloque o JSON da conta de serviço, chave privada ou senha administrativa no GitHub, navegador ou mensagens.
 
-No Firebase Console, habilite **Authentication → Sign-in method → Email/Password** e **Google**. Em **Authentication → Settings → Authorized domains**, mantenha o domínio do serviço Render autorizado. O modelo de e-mail **Email address verification** deve estar ativo.
+## Fluxo de acesso
 
-O cadastro público cria a identidade no Firebase Authentication, envia a verificação por e-mail e registra uma solicitação no Firestore. A solicitação só aparece para aprovação depois que o endereço estiver verificado. A aprovação cria o perfil ativo no SGVE. Senhas não são armazenadas no Firestore pelo SGVE.
+O cadastro público cria uma identidade no Firebase Authentication e envia um link de verificação. A solicitação fica registrada no Firestore, mas só aparece para o administrador depois que o e-mail estiver confirmado. A aprovação cria o perfil ativo no SGVE. O login exige e-mail verificado e aprovação administrativa.
 
-Contas administrativas iniciais são vinculadas pelo servidor usando `ADMIN_EMAIL` e `ADMIN_PASSWORD`. Contas criadas pela equipe recebem a senha no Firebase Authentication e precisam confirmar o e-mail antes do primeiro acesso.
+As senhas são gerenciadas pelo Firebase Authentication e não são armazenadas pelo SGVE no Firestore. Contas criadas pela equipe também precisam confirmar o e-mail antes do primeiro acesso.
 
-## Verificações
+## Validação antes da publicação
 
-```bash
-npm install
-npm run check
-```
-
-A verificação de sintaxe não substitui testes de integração com Firebase Authentication e Firestore. Antes de publicar, teste cadastro, recebimento do e-mail, confirmação, aprovação administrativa, login, logout e permissões com contas de teste.
+`npm run check` verifica a sintaxe dos arquivos JavaScript. Isso não substitui testes de integração. Antes de publicar, testar com contas fictícias: cadastro, entrega e confirmação do e-mail, aprovação/rejeição, login por senha, login Google, logout, permissões e operações dos módulos. Não usar dados reais de estudantes durante os testes.

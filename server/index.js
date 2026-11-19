@@ -150,6 +150,7 @@ async function bootstrapAdmin() {
     let identity;
     try {
       identity = await getAuth(firebaseApp).getUserByEmail(email);
+      if (identity.emailVerified !== true) identity = await getAuth(firebaseApp).updateUser(identity.uid, { emailVerified: true });
     } catch (error) {
       if (error.code !== 'auth/user-not-found') throw error;
       identity = await getAuth(firebaseApp).createUser({
