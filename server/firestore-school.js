@@ -241,11 +241,28 @@ async function linkTripStudent(tripId, studentId, actorUserId = null) {
 }
 
 async function assignTripTeacher(tripId, userId, actorUserId = null) {
-  const id = numericId(userId, 'Professor');
+  const id = numericId(userId, 'Integrante da equipe');
+  const target = await store.get('users', id);
+  if (!target || target.active !== true || !['teacher', 'pedagogue', 'direction'].includes(target.role)) return { error: 'target-not-found' };
+  const label = target.role === 'teacher' ? 'Professor' : target.role === 'pedagogue' ? 'Pedagogo' : 'Direção';
   return store.createTripRelationIfDraft('tripStaff', tripId, id, {
     trip_id: numericId(tripId, 'Viagem'), user_id: id,
-    assignment_label: 'Professor responsável', created_at: new Date().toISOString()
-  }, actorUserId == null ? null : { actor_user_id: actorUserId, action: 'assign_teacher', entity_type: 'trip', entity_id: tripId });
+    assignment_label: label, created_at: new Date().toISOString()
+  }, actorUserId == null ? null : { actor_user_id: actorUserId, action: 'assign_trip_staff', entity_type: 'trip', entity_id: tripId });
+}
+
+async function listTripStaff(tripId) {
+  const id = numericId(tripId, 'Viagem');
+  const assignments = await store.list('tripStaff', { limit: 5000 });
+  const matching = assignments.filter(item => Number(item.trip_id) === id);
+  const members = await Promise.all(matching.map(async item => {
+    const user = await store.get('users', item.user_id);
+    if (!user || user.active !== true) return null;
+    const roleLabel = user.role === 'teacher' ? 'Professor' : user.role === 'pedagogue' ? 'Pedagogo' : user.role === 'direction' ? 'Direção' : null;
+    if (!roleLabel) return null;
+    return { id: Number(user.id), name: user.display_name || user.name || user.email, role: user.role, role_label: roleLabel };
+  }));
+  return members.filter(Boolean).sort((a, b) => a.role_label.localeCompare(b.role_label) || a.name.localeCompare(b.name));
 }
 
 async function submitTrip(tripId, actorUserId = null) {
@@ -545,7 +562,7 @@ module.exports = {
   audit, listClasses, createClass, getClass, createStudent,
   listStudentsForUser, linkGuardian, linkStudentAccount, createTrip, getTrip,
   listTripsForUser, updateTrip, deleteTrip, linkTripClass, linkTripStudent,
-  assignTripTeacher, submitTrip, approveTrip,
+  assignTripTeacher, listTripStaff, submitTrip, approveTrip,
   listTripParticipantsForUser, setTripStudentAuthorization, setTripAttendance,
   listVehicles, createVehicle, assignTripVehicle,
   listDrivers, createDriver, assignTripDriver, getReportSummary,
