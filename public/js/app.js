@@ -1091,11 +1091,11 @@ async function enableDevicePush() {
     }
     if (!window.firebase || !window.SGVE_FIREBASE_CONFIG) throw new Error('Firebase não está configurado nesta página.');
     if (!firebase.apps.length) firebase.initializeApp(window.SGVE_FIREBASE_CONFIG);
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') throw new Error('Permissão de notificações não concedida no navegador.');
     const config = await api('/api/push/config');
     if (!config.enabled || !config.vapidKey) throw new Error('Falta configurar a chave Web Push do Firebase no Render.');
     pushVapidKey = config.vapidKey;
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') throw new Error('Permissão de notificações não concedida no navegador.');
     const registration = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
     const messaging = firebase.messaging();
     const token = await messaging.getToken({ vapidKey: config.vapidKey, serviceWorkerRegistration: registration });
