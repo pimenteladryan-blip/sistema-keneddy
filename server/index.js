@@ -32,7 +32,7 @@ app.use(helmet({ contentSecurityPolicy: { directives: {
   frameSrc: ["'self'", 'https://svge-14ec7.firebaseapp.com'], objectSrc: ["'none'"],
   frameAncestors: ["'none'"], upgradeInsecureRequests: isProduction ? [] : null
 } } }));
-app.use(express.json({ limit: '20kb' }));
+app.use(express.json({ limit: '900kb' }));
 app.use(express.urlencoded({ extended: false, limit: '20kb' }));
 
 const LOGIN_WINDOW_MS = 15 * 60 * 1000;
@@ -667,7 +667,9 @@ function tripInput(body) {
   if (title.length < 3 || destination.length < 2 || purpose.length < 8 ||
       !Number.isFinite(departure.getTime()) || !Number.isFinite(returning.getTime()) ||
       returning <= departure || !Number.isInteger(capacity) || capacity < 1 || capacity > 5000) return null;
-  return { title, destination, purpose, departure: departure.toISOString(), returning: returning.toISOString(), capacity };
+  const imageData = typeof body.image_data === 'string' ? body.image_data : '';
+  if (imageData && (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(imageData) || imageData.length > 760000)) return null;
+  return { title, destination, purpose, departure: departure.toISOString(), returning: returning.toISOString(), capacity, imageData };
 }
 function vehicleInput(body) {
   const name = cleanText(body.name, 40);
@@ -723,6 +725,42 @@ app.post('/api/trips', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS
       run(data.title, data.destination, data.purpose, data.departure, data.returning, data.capacity, req.auth.user.id);
     audit(req.auth.user.id, 'create', 'trip', result.lastInsertRowid);
     res.status(201).json({ id: Number(result.lastInsertRowid), message: 'Viagem criada como rascunho.' });
+  } catch (error) { next(error); }
+});
+app.put('/api/trips/:id', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
+  const id = Number(req.params.id);
+  const data = tripInput(req.body);
+  if (!Number.isSafeInteger(id) || id < 1 || !data) return res.status(400).json({ error: 'Confira os dados e a foto da viagem (imagem até 550 KB).' });
+  try {
+    if (firebaseConfigured) {
+      const trip = await firestoreSchool.getTrip(id);
+      if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
+      if (trip.status !== 'draft') return res.status(409).json({ error: 'Somente rascunhos podem ser editados.' });
+      await firestoreSchool.updateTrip(id, data, req.auth.user.id);
+    } else {
+      const result = db.prepare("UPDATE trips SET title=?, destination=?, educational_purpose=?, departure_at=?, return_at=?, capacity=?, image_data=?, updated_at=CURRENT_TIMESTAMP WHERE id=? AND status='draft'")
+        .run(data.title, data.destination, data.purpose, data.departure, data.returning, data.capacity, data.imageData || null, id);
+      if (!result.changes) return res.status(404).json({ error: 'Rascunho não encontrado ou não pode mais ser editado.' });
+      audit(req.auth.user.id, 'update', 'trip', id);
+    }
+    res.json({ message: 'Viagem atualizada.' });
+  } catch (error) { next(error); }
+});
+app.delete('/api/trips/:id', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: 'Viagem inválida.' });
+  try {
+    if (firebaseConfigured) {
+      const trip = await firestoreSchool.getTrip(id);
+      if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
+      if (trip.status !== 'draft') return res.status(409).json({ error: 'Somente rascunhos podem ser excluídos.' });
+      await firestoreSchool.deleteTrip(id, req.auth.user.id);
+    } else {
+      const result = db.prepare("DELETE FROM trips WHERE id=? AND status='draft'").run(id);
+      if (!result.changes) return res.status(404).json({ error: 'Rascunho não encontrado ou não pode ser excluído.' });
+      audit(req.auth.user.id, 'delete', 'trip', id);
+    }
+    res.json({ message: 'Viagem excluída.' });
   } catch (error) { next(error); }
 });
 app.post('/api/trips/:id/classes', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
