@@ -31,7 +31,7 @@ function showDashboard(user) {
   document.querySelector('#student-account-form').classList.toggle('hidden', !canManage);
   document.querySelector('#student-guardian-form').classList.toggle('hidden', !canManage);
   document.querySelector('#trip-staff-form').classList.toggle('hidden', !canManage);
-  document.querySelector('#students-tab').classList.toggle('hidden', user.role === 'teacher');
+  document.querySelector('#students-tab').classList.toggle('hidden', ['teacher', 'pedagogue'].includes(user.role));
   document.querySelector('#trip-form').classList.toggle('hidden', !canManage);
   document.querySelector('#trip-assignment').classList.toggle('hidden', !canManage);
   document.querySelector('#users-tab').classList.toggle('hidden', !canManage);
@@ -45,7 +45,7 @@ function showDashboard(user) {
   document.querySelectorAll('.module-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== 'home-panel'));
   renderHome();
   loadClasses();
-  if (user.role !== 'teacher') loadStudents();
+  if (!['teacher', 'pedagogue'].includes(user.role)) loadStudents();
   loadTrips();
   if (canManage) {
     loadLinkableUsers();
