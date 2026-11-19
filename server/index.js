@@ -190,7 +190,7 @@ app.post('/api/registration-requests', async (req, res, next) => {
     const role = String(req.body.role || '');
     const idToken = typeof req.body.idToken === 'string' ? req.body.idToken : '';
     if (name.length < 3 || !validEmail(email) ||
-        !['teacher', 'guardian', 'student'].includes(role) ||
+        !['teacher', 'pedagogue', 'guardian', 'student'].includes(role) ||
         !idToken || idToken.length > 12000) {
       return res.status(400).json({ error: 'Confira nome, e-mail, perfil e autenticação da conta.' });
     }
@@ -900,6 +900,20 @@ app.post('/api/trips/:id/students', requireAuth, requireCsrf, requireRoles(...RE
     res.json({ message: 'Estudante vinculado à viagem.' });
   } catch (error) { next(error); }
 });
+app.get('/api/trips/:id/staff', requireAuth, async (req, res, next) => {
+  const tripId = Number(req.params.id);
+  if (!Number.isSafeInteger(tripId) || tripId < 1) return res.status(400).json({ error: 'Viagem inválida.' });
+  try {
+    if (firebaseConfigured) {
+      const trip = await firestoreSchool.getTrip(tripId);
+      if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
+      return res.json({ staff: await firestoreSchool.listTripStaff(tripId) });
+    }
+    if (!db.prepare('SELECT id FROM trips WHERE id = ?').get(tripId)) return res.status(404).json({ error: 'Viagem não encontrada.' });
+    const staff = db.prepare("SELECT u.id, u.display_name AS name, u.role, CASE u.role WHEN 'teacher' THEN 'Professor' WHEN 'pedagogue' THEN 'Pedagogo' ELSE 'Direção' END AS role_label FROM trip_staff ts JOIN users u ON u.id = ts.user_id WHERE ts.trip_id = ? AND u.active = 1 AND u.role IN ('teacher', 'pedagogue', 'direction') ORDER BY role_label, name").all(tripId);
+    return res.json({ staff });
+  } catch (error) { next(error); }
+});
 app.post('/api/trips/:id/staff', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
   const tripId = Number(req.params.id);
   const userId = Number(req.body.user_id);
@@ -909,15 +923,15 @@ app.post('/api/trips/:id/staff', requireAuth, requireCsrf, requireRoles(...RECOR
       const result = await firestoreSchool.assignTripTeacher(tripId, userId, req.auth.user.id);
       if (result.error === 'not-found' || result.error === 'target-not-found') return res.status(404).json({ error: 'Viagem ou professor não encontrado.' });
       if (result.error === 'not-draft') return res.status(409).json({ error: 'Equipe só pode ser alterada enquanto a viagem estiver em rascunho.' });
-      return res.json({ message: 'Professor vinculado à viagem.' });
+      return res.json({ message: 'Integrante vinculado à equipe da viagem.' });
     }
     const trip = db.prepare('SELECT id, status FROM trips WHERE id = ?').get(tripId);
-    const teacher = db.prepare("SELECT id FROM users WHERE id = ? AND role = 'teacher' AND active = 1").get(userId);
-    if (!trip || !teacher) return res.status(404).json({ error: 'Viagem ou professor não encontrado.' });
+    const member = db.prepare("SELECT id, role FROM users WHERE id = ? AND role IN ('teacher', 'pedagogue', 'direction') AND active = 1").get(userId);
+    if (!trip || !member) return res.status(404).json({ error: 'Viagem ou integrante da equipe não encontrado.' });
     if (trip.status !== 'draft') return res.status(409).json({ error: 'Equipe só pode ser alterada enquanto a viagem estiver em rascunho.' });
     const assignedTeacher = db.prepare('INSERT OR IGNORE INTO trip_staff (trip_id, user_id) VALUES (?, ?)').run(tripId, userId);
     if (assignedTeacher.changes) audit(req.auth.user.id, 'assign_teacher', 'trip', tripId);
-    res.json({ message: 'Professor vinculado à viagem.' });
+    res.json({ message: 'Integrante vinculado à equipe da viagem.' });
   } catch (error) { next(error); }
 });
 app.post('/api/trips/:id/submit', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
