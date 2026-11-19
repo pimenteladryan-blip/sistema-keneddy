@@ -1132,3 +1132,73 @@ body.dark-mode #dashboard-view .module-panel .section-heading .count-pill{
   #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{display:none!important}
   #dashboard-view .module-panel .section-heading h3{font-size:21px!important}
 }
+
+
+/* Castelo mais afastado do ônibus e controles renovados do calendário inicial. */
+#dashboard-view .dashboard-welcome-banner>.sgve-castle-illustration{
+  left:8px!important;
+  width:62px!important;
+  height:58px!important;
+}
+#dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{
+  left:112px!important;
+}
+@media(max-width:900px){
+  #dashboard-view .dashboard-welcome-banner>.sgve-castle-illustration{
+    left:6px!important;width:46px!important;height:46px!important;
+  }
+  #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{
+    left:76px!important;width:42px!important;height:42px!important;
+  }
+}
+@media(max-width:560px){
+  #dashboard-view .dashboard-welcome-banner>.sgve-castle-illustration,
+  #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{display:none!important}
+}
+#dashboard-view .calendar-controls{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+}
+#dashboard-view .calendar-controls button{
+  display:grid!important;
+  place-items:center!important;
+  width:34px!important;
+  height:34px!important;
+  padding:0!important;
+  border:1px solid #c9dfcf!important;
+  border-radius:11px!important;
+  background:#edf6ef!important;
+  color:#17613c!important;
+  font-family:Arial,sans-serif!important;
+  font-size:25px!important;
+  font-weight:500!important;
+  line-height:1!important;
+  box-shadow:0 2px 5px #174b3210!important;
+  cursor:pointer!important;
+  transition:background .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease!important;
+}
+#dashboard-view .calendar-controls button:hover{
+  background:#dcefe0!important;
+  border-color:#9fc9aa!important;
+  transform:translateY(-1px)!important;
+  box-shadow:0 4px 9px #174b3218!important;
+}
+#dashboard-view .calendar-controls button:active{transform:scale(.94)!important}
+#dashboard-view .calendar-controls button:focus-visible{
+  outline:3px solid #83bd91!important;
+  outline-offset:2px!important;
+}
+body.dark-mode #dashboard-view .calendar-controls button{
+  background:#153c2a!important;
+  border-color:#326448!important;
+  color:#d7f0dd!important;
+  box-shadow:none!important;
+}
+body.dark-mode #dashboard-view .calendar-controls button:hover{
+  background:#205338!important;border-color:#4d8a61!important;
+}
+@media(max-width:560px){
+  #dashboard-view .calendar-controls{gap:7px!important}
+  #dashboard-view .calendar-controls button{width:32px!important;height:32px!important;border-radius:10px!important}
+}
