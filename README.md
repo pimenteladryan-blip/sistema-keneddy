@@ -6,9 +6,9 @@ A proposta é reunir, em um só lugar, informações sobre viagens, estudantes, 
 
 ## Acesse o sistema
 
-**[ABRIR SGVE | Acessar a versão publicada](https://pimenteladryan-blip.github.io/sistema-keneddy/)**
+**[ABRIR SGVE | Sistema hospedado no Render](https://sistema-keneddy.onrender.com/)**
 
-Hospedagem: **GitHub Pages**. O projeto não depende do Render. A versão publicada é uma demonstração estática e pode ser instalada como PWA em dispositivos compatíveis.
+Hospedagem principal: **Render (Web Service)**. O endereço acima abre a versão do sistema hospedada no Render. A demonstração estática antiga do GitHub Pages pode continuar disponível separadamente em [GitHub Pages](https://pimenteladryan-blip.github.io/sistema-keneddy/).
 
 ## Funcionalidades
 
@@ -98,7 +98,7 @@ Não existe senha administrativa padrão. Não envie o arquivo `.env` ao GitHub.
 ---
 
 **SGVE | Colégio Estadual Presidente Kennedy**  
-Versão publicada: https://pimenteladryan-blip.github.io/sistema-keneddy/
+Sistema no Render: https://sistema-keneddy.onrender.com/
 
 
 ## Integração Firebase em preparação
