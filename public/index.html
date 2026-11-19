@@ -10,11 +10,12 @@
   <title>SGVE | Sistema de Gerenciamento de Viagens Escolares</title>
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/sgve-modern.css?v=20261119-2">
-  <link rel="stylesheet" href="/css/sgve-ux.css?v=20261118-white-green-final">
+  <link rel="stylesheet" href="/css/sgve-ux.css?v=20261118-push-notifications">
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js" defer></script>
   <script src="/firebase-config.js" defer></script>
-  <script src="/js/app.js?v=20261118-notification-center" defer></script>
+  <script src="/js/app.js?v=20261118-push-notifications" defer></script>
 </head>
 <body>
   <main class="page-shell">
@@ -105,7 +106,7 @@
               <article class="notice-item"><span class="notice-dot"></span><div><strong>Organize-se para as próximas viagens</strong><p>Consulte as datas no calendário e acompanhe os comunicados da equipe escolar.</p><small>Comunicado geral · SGVE</small></div></article>
               <article class="notice-item"><span class="notice-dot soft"></span><div><strong>Autorizações e informações</strong><p>Responsáveis devem acompanhar as atualizações e orientações de cada viagem.</p><small>Orientação · SGVE</small></div></article>
             </section>
-            <section class="home-card notifications-card"><div class="home-card-heading"><div><span class="home-icon">♧</span><div><h4>Notificações</h4><p>Movimentações das viagens</p></div></div><span class="home-counter" id="home-notification-count">0</span></div><div id="home-notifications" class="home-notifications"><p class="muted">Carregando atualizações...</p></div></section>
+            <section class="home-card notifications-card"><div class="home-card-heading"><div><span class="home-icon">♧</span><div><h4>Notificações</h4><p>Movimentações das viagens</p></div></div><span class="home-counter" id="home-notification-count">0</span></div><div class="push-controls"><button type="button" id="enable-push-button" class="small-action">Ativar notificações no celular</button><small id="push-status" class="muted">Receba avisos mesmo com o SGVE fechado.</small></div><div id="home-notifications" class="home-notifications"><p class="muted">Carregando atualizações...</p></div></section>
             <section class="home-card calendar-card"><div class="home-card-heading"><div><span class="home-icon">▦</span><div><h4>Calendário de viagens</h4><p>Datas de saída programadas</p></div></div><div class="calendar-controls"><button type="button" id="calendar-prev" aria-label="Mês anterior">‹</button><button type="button" id="calendar-next" aria-label="Próximo mês">›</button></div></div><div class="calendar-month" id="calendar-month"></div><div class="calendar-grid" id="calendar-grid"></div><div class="calendar-selected" id="calendar-selected">Selecione uma data marcada para ver a viagem.</div></section>
             <section class="home-card upcoming-card"><div class="home-card-heading"><div><span class="home-icon">⌁</span><div><h4>Próximas viagens</h4><p>Planejamento e destinos</p></div></div><button type="button" class="home-text-button" data-open-tab="trips-panel">Ver todas →</button></div><div id="home-upcoming" class="upcoming-grid"><p class="muted">Carregando viagens...</p></div></section>
           </div>
