@@ -568,3 +568,28 @@ body.dark-mode #dashboard-view .push-send-form input,body.dark-mode #dashboard-v
   #dashboard-view .participant-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   #dashboard-view .participant-actions .small-action { min-height: 42px; padding: 7px 6px; font-size: 10px; }
 }
+
+
+/* Lista de chamada: identificação do estudante e presença separada por etapa */
+#dashboard-view .participants-area { display:grid; gap:12px; width:100%; }
+#dashboard-view .participant-row {
+  display:grid; gap:14px; padding:15px; border:1px solid #cfe3d2;
+  border-radius:14px; background:#f7fbf6; box-shadow:0 3px 12px rgba(14,65,38,.05);
+}
+#dashboard-view .participant-details { display:grid; gap:6px; min-width:0; }
+#dashboard-view .participant-name { color:#124b30; font-size:14px; line-height:1.35; }
+#dashboard-view .participant-class { justify-self:start; padding:5px 9px; border-radius:8px; background:#e3f1e4; color:#23603d; font-size:11px; font-weight:750; }
+#dashboard-view .participant-guardian,#dashboard-view .participant-authorization { color:#65796b; font-size:11px; line-height:1.45; }
+#dashboard-view .attendance-section { display:grid; gap:7px; padding:11px; border:1px solid #dceade; border-radius:11px; background:#fff; }
+#dashboard-view .attendance-section h4 { margin:0; color:#18583a; font-size:12px; }
+#dashboard-view .attendance-section p { margin:0; color:#64796b; font-size:11px; }
+#dashboard-view .attendance-section p strong { color:#1d603e; }
+#dashboard-view .attendance-section .participant-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+#dashboard-view .attendance-section .small-action { width:100%; min-height:40px; border:1px solid #c9e2ce; border-radius:9px; background:#e8f4e9; color:#155b39; font-size:11px; font-weight:750; }
+#dashboard-view .attendance-section .small-action.reject-action { border-color:#ead7d3; background:#fbefed; color:#99463d; }
+#dashboard-view .attendance-section .small-action.is-selected { outline:2px solid #36895a; outline-offset:1px; font-weight:850; }
+@media(max-width:560px) {
+ #dashboard-view .participant-row { padding:12px; }
+ #dashboard-view .attendance-section { padding:10px; }
+ #dashboard-view .attendance-section .small-action { min-height:44px; }
+}
