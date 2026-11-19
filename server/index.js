@@ -600,11 +600,12 @@ app.get('/api/linkable-users', requireAuth, requireRoles(...USER_MANAGERS), asyn
   try {
     const users = firebaseConfigured
       ? await firestoreAuth.listUsers(300)
-      : db.prepare('SELECT id, display_name, email, role, active FROM users ORDER BY display_name LIMIT 300').all()
-        .map(user => ({ ...user, active: Boolean(user.active) }));
+      : db.prepare('SELECT id, display_name, email, role, active, subjects FROM users ORDER BY display_name LIMIT 300').all()
+        .map(user => ({ ...user, active: Boolean(user.active), subjects: (() => { try { return JSON.parse(user.subjects || '[]'); } catch { return []; } })() }));
     return res.json({ users: users.map(user => ({
       id: user.id, name: user.display_name, email: user.email, role: user.role,
-      roleLabel: ROLE_LABELS[user.role], active: Boolean(user.active)
+      roleLabel: ROLE_LABELS[user.role], active: Boolean(user.active),
+      subjects: Array.isArray(user.subjects) ? user.subjects : []
     })) });
   } catch (error) { next(error); }
 });
