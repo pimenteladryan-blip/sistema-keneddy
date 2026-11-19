@@ -840,7 +840,7 @@ function applyTheme(mode) {
   const dark = mode === 'dark';
   document.body.classList.toggle('dark-mode', dark);
   const button = document.querySelector('#theme-toggle');
-  button.innerHTML = (dark ? '☀ <span>Tema claro</span>' : '☾ <span>Tema escuro</span>');
+  button.innerHTML = '<span class="theme-sun" aria-hidden="true">☀</span><span class="theme-moon" aria-hidden="true">☾</span>';
   button.setAttribute('aria-label', dark ? 'Mudar para tema claro' : 'Mudar para tema escuro');
   button.setAttribute('aria-pressed', String(dark));
 }
