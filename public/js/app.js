@@ -506,7 +506,10 @@ async function loadTrips() {
     const canManage = currentUser && ['admin', 'direction', 'secretariat'].includes(currentUser.role);
     list.innerHTML = data.trips.length ? data.trips.map(trip => {
       let action = '';
-      if (canManage && trip.status === 'draft') action = '<button type="button" class="small-action" data-trip-action="submit" data-trip-id="' + trip.id + '">Enviar para aprovação</button>';
+      if (canManage && trip.status === 'draft') {
+        action = '<button type="button" class="small-action" data-trip-action="submit" data-trip-id="' + trip.id + '">Enviar para aprovação</button>';
+        if (currentUser.role === 'admin') action += '<button type="button" class="small-action" data-trip-action="approve" data-trip-id="' + trip.id + '">Aprovar viagem</button>';
+      }
       if (currentUser && ['admin', 'direction'].includes(currentUser.role) && trip.status === 'pending_approval') action = '<button type="button" class="small-action" data-trip-action="approve" data-trip-id="' + trip.id + '">Aprovar viagem</button>';
       const participantsButton = '<button type="button" class="small-action button-secondary" data-trip-action="participants" data-trip-id="' + trip.id + '" aria-expanded="false">Ver participantes</button>';
       const editActions = canManage && trip.status === 'draft'
