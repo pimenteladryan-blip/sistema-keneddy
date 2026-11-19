@@ -381,6 +381,14 @@ app.get('/api/trips', requireAuth, (req, res) => {
   } else return res.status(403).json({ error: 'Seu perfil não permite consultar viagens.' });
   res.json({ trips: rows.map(row => ({ ...row, statusLabel: getTripStatusLabel(row.status) })) });
 });
+app.get('/api/trips/:id/participants', requireAuth, requireRoles(...RECORD_MANAGERS), (req, res) => {
+  const tripId = Number(req.params.id);
+  if (!Number.isInteger(tripId) || tripId < 1) return res.status(400).json({ error: 'Viagem inválida.' });
+  const trip = db.prepare('SELECT id FROM trips WHERE id = ?').get(tripId);
+  if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
+  const participants = db.prepare('SELECT s.full_name FROM trip_students ts JOIN students s ON s.id = ts.student_id WHERE ts.trip_id = ? AND s.active = 1 ORDER BY s.full_name').all(tripId);
+  res.json({ participants });
+});
 app.post('/api/trips', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), (req, res) => {
   const data = tripInput(req.body);
   if (!data) return res.status(400).json({ error: 'Confira título, destino, objetivo, horários e capacidade da viagem.' });
