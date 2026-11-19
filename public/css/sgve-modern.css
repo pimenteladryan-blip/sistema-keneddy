@@ -82,3 +82,50 @@ body.dark-mode .calendar-selected{background:#1c3023;color:#c4d3c8}
 body.dark-mode .upcoming-trip{background:#17251c;border-color:#304238}
 @media(max-width:900px){.page-shell{grid-template-columns:1fr}.brand-panel{position:relative;height:auto;min-height:0;padding:22px}.brand-message{margin:24px 0 10px}.brand-panel h1{font-size:34px}.mascot{width:75px;height:auto}.dashboard{grid-template-columns:1fr}.dashboard .welcome-row,.dashboard .dashboard-welcome-banner,.dashboard .tabs,.dashboard .module-panel{grid-column:1;grid-row:auto}.dashboard .tabs{flex-direction:row;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}.dashboard .tab{width:auto;flex:none;white-space:nowrap;justify-content:center}.dashboard .module-panel{padding:16px}}
 @media(max-width:560px){.content-panel{padding:16px 12px 22px}.topline{font-size:8px;letter-spacing:.03em}.home-grid{grid-template-columns:1fr}.home-heading{align-items:flex-start;flex-direction:column}.home-date{align-self:flex-end}.upcoming-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.upcoming-trip:last-child:nth-child(odd){grid-column:1/-1}.dashboard .tabs{margin:0 -2px}.dashboard .tab{min-height:38px;padding:0 11px;font-size:10px}.auth-card{padding:22px 18px}.brand-panel{padding:18px}.brand-panel h1{font-size:29px}}
+
+
+/* SGVE: mobile bottom navigation + layered light-green theme */
+@media(max-width:900px){
+  .dashboard{padding-bottom:86px}
+  .dashboard .tabs{
+    position:fixed;left:0;right:0;bottom:0;z-index:1000;
+    display:flex;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;
+    gap:5px;margin:0;padding:9px 10px calc(9px + env(safe-area-inset-bottom));
+    border:1px solid #c8e3d0;border-bottom:0;border-radius:18px 18px 0 0;
+    background:linear-gradient(110deg,#e0f3e4 0%,#d1ebd9 35%,#eaf6df 70%,#d9f0e5 100%);
+    box-shadow:0 -8px 28px #174a2b18;scrollbar-width:thin;
+  }
+  .dashboard .tab{
+    flex:0 0 auto;width:auto;min-width:max-content;min-height:48px;
+    padding:0 13px;border-radius:12px;color:#35664a;
+    background:transparent;font-size:11px;
+  }
+  .dashboard .tab.active,.dashboard .tab:hover{
+    background:linear-gradient(135deg,#bce5c8,#d9efc8);color:#075b39;
+    box-shadow:inset 0 0 0 1px #a9d9b8;
+  }
+}
+body{background:linear-gradient(135deg,#e8f5e9 0%,#dcefe2 35%,#edf6df 68%,#dff1e9 100%)}
+.content-panel{background:linear-gradient(145deg,#f0f8ef 0%,#e5f3e8 48%,#eef6df 100%)}
+.dashboard .welcome-row{background:linear-gradient(100deg,#e7f4e9,#d9efdf 55%,#eaf4df);border-radius:16px;padding:16px}
+.dashboard .dashboard-welcome-banner{background:linear-gradient(110deg,#dff2e3 0%,#ccebd7 45%,#e8f3d8 100%);border-color:#c5e4ce}
+.dashboard .module-panel{background:linear-gradient(145deg,#f0f8ef 0%,#e5f3e8 55%,#edf5df 100%);border-color:#d1e7d6}
+.dashboard .tabs{background:linear-gradient(160deg,#e2f2e5,#d5ecd9 55%,#e9f3df);border-color:#cde4d2}
+.home-card:nth-child(1){background:linear-gradient(145deg,#f0f8ef,#e4f3e7);border-color:#d3e9d8}
+.home-card:nth-child(2){background:linear-gradient(145deg,#eaf6e8,#dff0e2);border-color:#cfe5d3}
+.home-card:nth-child(3){background:linear-gradient(145deg,#e9f5e9,#e1f0d9);border-color:#d2e6ce}
+.home-card:nth-child(4){background:linear-gradient(145deg,#e3f2e7,#d8eddf);border-color:#c9e3d1}
+.dashboard .inline-form{background:linear-gradient(135deg,#eaf5eb,#e1f0e4);border-color:#d1e6d5}
+.dashboard input,.dashboard select{background:#f2f8ef;border-color:#cfe3d2}
+.dashboard .data-row,.dashboard .trip-card{background:#eaf5eb;border-color:#d2e7d5}
+.home-card-heading .home-icon,.notification-mark{background:#d5edda;color:#086341}
+.upcoming-trip{background:#eaf5eb;border-color:#d0e5d4}
+.upcoming-trip-body{background:linear-gradient(135deg,#edf7eb,#e1f0df)}
+.calendar-day{background:#e5f2e6}
+.calendar-day.has-trip{background:#bfe5c9;color:#075e3c}
+.calendar-selected{background:#e0f0e2}
+@media(max-width:560px){
+  .dashboard .welcome-row{padding:13px;background:linear-gradient(100deg,#e4f3e6,#d7eddd)}
+  .dashboard .module-panel{background:linear-gradient(155deg,#eff8ed,#e3f2e5 60%,#edf5df)}
+  .home-card{box-shadow:0 5px 18px #174a2b0a}
+}
