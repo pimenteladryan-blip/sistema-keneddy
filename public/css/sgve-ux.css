@@ -745,3 +745,92 @@ body.dark-mode #dashboard-view .push-send-form input,body.dark-mode #dashboard-v
   #dashboard-view .school-banner-copy strong{font-size:14px!important}
   #dashboard-view .notice-highlight,#dashboard-view .notification-footer{margin-top:12px}
 }
+
+
+/* Correção final do banner: centro geométrico real, independente dos elementos laterais. */
+#dashboard-view .dashboard-welcome-banner{
+  position:relative!important;
+  display:flex!important;
+  justify-content:center!important;
+  align-items:center!important;
+  min-height:94px!important;
+  padding:14px 150px 14px 92px!important;
+}
+#dashboard-view .school-banner-copy{
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  transform:translate(-50%,-50%)!important;
+  width:min(620px,calc(100% - 270px))!important;
+  max-width:620px!important;
+  margin:0!important;
+  flex:none!important;
+  text-align:center!important;
+  justify-items:center!important;
+}
+#dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{
+  position:absolute!important;
+  left:22px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+}
+#dashboard-view .banner-years{
+  position:absolute!important;
+  right:22px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+}
+#dashboard-view .notice-highlight,
+#dashboard-view .notification-footer{
+  background:#e7f2e7!important;
+  border-color:#c9dfcc!important;
+  color:#244c32!important;
+}
+#dashboard-view .notice-highlight-icon,
+#dashboard-view .notification-footer-icon{
+  background:#d3e9d6!important;
+  color:#17633d!important;
+}
+#dashboard-view .notice-highlight strong,
+#dashboard-view .notification-footer strong{color:#174b32!important}
+#dashboard-view .notice-highlight p,
+#dashboard-view .notification-footer p{color:#5b7461!important}
+#dashboard-view .notice-topics span{
+  background:#f0f7ef!important;border-color:#cfe2d0!important;color:#426c4d!important;
+}
+#dashboard-view .notification-channels{color:#55725d!important}
+#dashboard-view .notification-channels i{background:#27965d!important;box-shadow:0 0 0 3px #d3ead7!important}
+
+/* Mesmos componentes adaptados ao tema escuro, sem cartões claros sobrando. */
+body.dark-mode #dashboard-view .notice-highlight,
+body.dark-mode #dashboard-view .notification-footer{
+  background:#103b29!important;
+  border-color:#236344!important;
+  color:#e5f3e8!important;
+}
+body.dark-mode #dashboard-view .notice-highlight-icon,
+body.dark-mode #dashboard-view .notification-footer-icon{
+  background:#18583a!important;
+  color:#aaf0bf!important;
+}
+body.dark-mode #dashboard-view .notice-highlight strong,
+body.dark-mode #dashboard-view .notification-footer strong{color:#e9f7ec!important}
+body.dark-mode #dashboard-view .notice-highlight p,
+body.dark-mode #dashboard-view .notification-footer p{color:#b6d1be!important}
+body.dark-mode #dashboard-view .notice-topics span{
+  background:#123f2c!important;border-color:#286747!important;color:#c7e8cf!important;
+}
+body.dark-mode #dashboard-view .notification-channels{color:#bad4c1!important}
+body.dark-mode #dashboard-view .notification-channels i{background:#65d990!important;box-shadow:0 0 0 3px #1b5438!important}
+@media(max-width:900px){
+  #dashboard-view .dashboard-welcome-banner{min-height:88px!important;padding:12px 112px 12px 12px!important}
+  #dashboard-view .school-banner-copy{width:calc(100% - 132px)!important;left:calc(50% - 10px)!important}
+  #dashboard-view .banner-years{right:12px!important}
+  #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{left:12px!important;width:42px!important;height:42px!important}
+}
+@media(max-width:560px){
+  #dashboard-view .dashboard-welcome-banner{min-height:104px!important;padding:12px!important}
+  #dashboard-view .school-banner-copy{position:relative!important;left:auto!important;top:auto!important;transform:none!important;width:100%!important;margin:0!important}
+  #dashboard-view .banner-years{position:relative!important;right:auto!important;top:auto!important;transform:none!important;border:0!important;padding:0!important;margin-top:4px!important}
+  #dashboard-view .dashboard-welcome-banner{display:flex!important;flex-direction:column!important;gap:4px!important}
+}
