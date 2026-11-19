@@ -258,3 +258,57 @@ html body #dashboard-view .home-card:nth-child(4) { background: #dff0e5 !importa
 
 #dashboard-view .notification-bell .bell-icon{display:block!important;width:23px!important;height:23px!important;min-width:23px!important;fill:#075b3b!important;stroke:none!important;opacity:1!important;visibility:visible!important}
 #dashboard-view .notification-bell{color:#075b3b!important}
+
+
+/* Login page refinement: richer school identity, clear access guidance and responsive details */
+.page-shell:not(:has(#dashboard-view:not(.hidden))) .brand-panel{
+  position:relative;isolation:isolate;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;
+  min-height:100vh;
+}
+.page-shell:not(:has(#dashboard-view:not(.hidden))) .brand-panel:before{
+  content:"";position:absolute;z-index:-1;width:390px;height:390px;right:-190px;top:27%;
+  border:1px solid #b8e66d35;border-radius:50%;
+  box-shadow:0 0 0 34px #b8e66d0b,0 0 0 72px #b8e66d08;
+}
+.login-highlights{display:grid;gap:11px;margin:26px 0 24px;max-width:440px}
+.login-highlight{display:flex;align-items:center;gap:13px;padding:12px 14px;border:1px solid #ffffff20;border-radius:14px;background:#ffffff0c;backdrop-filter:blur(8px)}
+.highlight-icon{display:grid;place-items:center;flex:none;width:37px;height:37px;border-radius:11px;background:#b8e66d20;color:#d7f6a4;font-size:19px;font-weight:800}
+.login-highlight strong,.login-highlight small,.login-support strong,.login-support small,.login-access-note strong,.login-access-note small{display:block}
+.login-highlight strong{color:#f3fff5;font-size:12px;letter-spacing:.01em}
+.login-highlight small{margin-top:4px;color:#c0d9c8;font-size:10px;line-height:1.45}
+.login-school-mark{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.login-school-mark>span:last-child strong{display:block;color:#17452f;font-size:13px}
+.login-school-mark>span:last-child small{display:block;margin-top:3px;color:#718579;font-size:10px;line-height:1.4}
+.login-mark{display:grid;place-items:center;width:48px;height:48px;flex:none;color:#fff;font-size:13px;font-weight:900;letter-spacing:.04em;background:#075b3b!important;border:1px solid #cfe5d3!important;box-shadow:0 5px 14px #075b3b20}
+.auth-card{position:relative;overflow:hidden}
+.auth-card:before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#075b3b,#24bd69,#b8e66d)}
+.auth-card .eyebrow.green{font-size:9px;font-weight:850;letter-spacing:.13em}
+.auth-card h2{margin-top:7px;margin-bottom:8px;font-size:clamp(25px,3vw,32px);color:#123b28}
+.login-access-note{display:flex;align-items:center;gap:11px;margin:18px 0 20px;padding:12px 13px;border:1px solid #dcebdd;border-radius:13px;background:#f2f8f1}
+.access-note-icon{display:grid;place-items:center;flex:none;width:35px;height:35px;border-radius:10px;background:#e0f0e2;font-size:17px}
+.login-access-note strong,.login-support strong{font-size:11px;color:#1c4b32}
+.login-access-note small,.login-support small{margin-top:3px;color:#718277;font-size:10px;line-height:1.45}
+.auth-card form label{display:block;margin:13px 0 6px;color:#315640;font-size:11px;font-weight:750}
+.auth-card input,.auth-card select{width:100%;box-sizing:border-box;padding:0 13px;background:#fbfdfb;color:#173b29}
+.auth-card input:focus,.auth-card select:focus{outline:3px solid #b8e66d55;border-color:#168052}
+.auth-card button[type=submit]{width:100%;font-weight:800;letter-spacing:.01em;box-shadow:0 7px 16px #075b3b20}
+.auth-card .button-secondary{width:100%;margin-top:9px;border:1px solid #d5e5d8;background:#f4f8f3;color:#24583b}
+.login-support{display:flex;gap:10px;align-items:flex-start;margin:19px 0 10px;padding:12px 13px;border-top:1px solid #e6eee7;border-bottom:1px solid #e6eee7}
+.support-check{display:grid;place-items:center;flex:none;width:24px;height:24px;border-radius:50%;background:#e4f3e5;color:#08794d;font-weight:900}
+.auth-card .helper{margin:10px 0 0;text-align:center;color:#849187;font-size:9px;line-height:1.5}
+@media(max-width:900px){
+ .page-shell:not(:has(#dashboard-view:not(.hidden))) .brand-panel{min-height:0}
+ .login-highlights{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:16px 0}
+ .login-highlight{align-items:flex-start;gap:8px;padding:9px}
+ .highlight-icon{width:30px;height:30px;font-size:15px}
+ .login-highlight strong{font-size:10px}
+ .login-highlight small{font-size:9px}
+}
+@media(max-width:560px){
+ .login-highlights{grid-template-columns:1fr;gap:7px}
+ .login-highlight{align-items:center;padding:9px 11px}
+ .login-highlight small{font-size:9px}
+ .login-access-note{margin:14px 0 17px}
+ .login-support{margin-top:15px}
+}
