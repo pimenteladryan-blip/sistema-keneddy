@@ -401,3 +401,134 @@ body.dark-mode .trip-list-heading{border-color:#304238}
   .trip-workflow-link strong{font-size:11px}
   .trip-workflow-link small{font-size:9px}
 }
+
+
+/* Acabamento unificado: cartões, formulários e listas em todos os módulos */
+.module-panel{
+  border-radius:18px;
+}
+.module-panel .inline-form{
+  gap:12px 14px;
+  padding:18px;
+  border:1px solid #e2ece4;
+  border-radius:16px;
+  background:#f7faf7;
+}
+.module-panel .inline-form label{
+  gap:8px;
+}
+.module-panel input,
+.module-panel select{
+  min-height:46px;
+  border:1px solid #d8e5da;
+  border-radius:12px;
+  background:#fff;
+}
+.module-panel input:hover,
+.module-panel select:hover{
+  border-color:#9bbda3;
+}
+.module-panel .inline-form button{
+  align-self:end;
+  border-radius:12px;
+}
+.module-panel .data-list{
+  gap:10px;
+}
+.module-panel .data-row,
+.module-panel .trip-card{
+  min-width:0;
+  padding:15px 16px;
+  border:1px solid #e0e9e2;
+  border-radius:15px;
+  background:#fbfdfb;
+  box-shadow:0 3px 12px #173c2807;
+}
+.module-panel .data-row strong,
+.module-panel .trip-card strong{
+  line-height:1.4;
+}
+.module-panel .assignment-area{
+  margin-top:18px;
+  padding:18px;
+  border:1px solid #e0e9e2;
+  border-radius:16px;
+  background:#fbfdfb;
+}
+.module-panel .assignment-area h4{
+  margin-bottom:14px;
+}
+.module-panel .assignment-area .inline-form{
+  margin-top:10px;
+  padding:14px;
+  border:1px solid #e8eee9;
+  border-radius:13px;
+  background:#f5f8f5;
+}
+.module-panel .trip-list-heading{
+  margin-top:18px;
+  padding:15px 16px;
+  border:1px solid #e0e9e2;
+  border-radius:14px;
+  background:#f7faf7;
+}
+.module-panel .trip-workflow{
+  gap:8px;
+  margin-bottom:16px;
+}
+.module-panel .trip-workflow-link{
+  min-height:64px;
+  padding:10px 12px;
+  border-radius:14px;
+  background:#f8fbf8;
+}
+.module-panel .trip-workflow-link small{
+  display:none;
+}
+.module-panel .privacy-note{
+  padding:10px 12px;
+  border-left:3px solid #b8d8bf;
+  border-radius:0 10px 10px 0;
+  background:#f7faf7;
+}
+body.dark-mode .module-panel .inline-form,
+body.dark-mode .module-panel .data-row,
+body.dark-mode .module-panel .trip-card,
+body.dark-mode .module-panel .assignment-area,
+body.dark-mode .module-panel .assignment-area .inline-form,
+body.dark-mode .module-panel .trip-list-heading,
+body.dark-mode .module-panel .trip-workflow-link,
+body.dark-mode .module-panel .privacy-note{
+  border-color:#304b38;
+  background:#17271d;
+  color:#e7eee9;
+}
+body.dark-mode .module-panel input,
+body.dark-mode .module-panel select{
+  border-color:#405b49;
+  border-radius:12px;
+  background:#101c15;
+  color:#edf5ef;
+}
+body.dark-mode .module-panel .data-row span,
+body.dark-mode .module-panel .trip-card p,
+body.dark-mode .module-panel .trip-card small{
+  color:#a5b3a9;
+}
+@media(max-width:760px){
+  .module-panel .inline-form{padding:13px;border-radius:14px}
+  .module-panel .assignment-area{padding:13px;border-radius:14px}
+  .module-panel .assignment-area .inline-form{padding:12px}
+  .module-panel .trip-workflow{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .module-panel .trip-workflow-link{justify-content:center;min-height:56px;padding:9px 6px}
+  .module-panel .trip-workflow-link>span:nth-child(2){flex:0 1 auto}
+  .module-panel .trip-workflow-link>b{display:none}
+}
+@media(max-width:520px){
+  .module-panel .trip-workflow{grid-template-columns:1fr}
+  .module-panel .trip-workflow-link{justify-content:flex-start;min-height:48px;padding:8px 12px}
+  .module-panel .trip-workflow-link>span:nth-child(2){flex:1}
+  .module-panel .data-row,
+  .module-panel .trip-card{padding:13px;border-radius:13px}
+  .module-panel .privacy-note{font-size:10px}
+}
