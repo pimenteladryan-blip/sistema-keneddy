@@ -612,3 +612,21 @@ body.dark-mode #dashboard-view .push-send-form input,body.dark-mode #dashboard-v
 #dashboard-view .trip-staff-member strong { color:#174b32; font-size:12px; }
 #dashboard-view .trip-staff-member small { margin-top:3px; color:#64806b; font-size:10px; }
 #media(max-width:650px) { #dashboard-view .trip-card { grid-template-columns:minmax(0,1fr); } #dashboard-view .trip-card-actions,#dashboard-view .participants-area { grid-column:1; } }
+
+/* Refinamento dos ícones do menu e do calendário */
+#dashboard-view .tab{gap:11px}
+#dashboard-view .tab-icon{display:inline-grid;place-items:center;width:27px;height:27px;flex:0 0 27px;border-radius:8px;background:#ffffff18;color:#d9f3df;font-size:16px;font-weight:800;line-height:1}
+#dashboard-view .tab.active .tab-icon{background:#ffffffb8;color:#075b39}
+#dashboard-view .calendar-grid{gap:5px}
+#dashboard-view .calendar-weekday{padding:7px 0;color:#82958a;font-size:10px;font-weight:800;letter-spacing:.02em}
+#dashboard-view .calendar-day{position:relative;min-height:38px;border:1px solid transparent;border-radius:11px;background:#f3f8f3;color:#355342;font-size:11px;font-weight:650;transition:background .18s ease,border-color .18s ease,transform .18s ease}
+#dashboard-view .calendar-day:not(.empty):hover{transform:translateY(-1px);border-color:#b7ddc2;background:#e8f5eb}
+#dashboard-view .calendar-day.empty{background:transparent}
+#dashboard-view .calendar-day.is-today{border-color:#168452;box-shadow:inset 0 0 0 1px #168452;color:#087448;font-weight:900}
+#dashboard-view .calendar-day.has-trip{background:#dff2e4;color:#08643f;font-weight:900}
+#dashboard-view .calendar-day.selected{border-color:#075c3a;background:#075c3a;color:#fff;box-shadow:0 3px 9px #075c3a26}
+#dashboard-view .calendar-day i{position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:#16a05b}
+#dashboard-view .calendar-day.selected i{background:#b9f0c7}
+#dashboard-view .calendar-day .calendar-count{position:absolute;top:2px;right:3px;min-width:12px;height:12px;padding:0 3px;border-radius:8px;background:#0b8050;color:white;font-size:8px;line-height:12px}
+#dashboard-view .calendar-day.selected .calendar-count{background:#c8f1d2;color:#075c3a}
+#dashboard-view .calendar-selected{min-height:42px;padding:11px 12px;border:1px solid #dcece0;border-radius:12px;background:#f4faf5;color:#597264;font-size:11px}
