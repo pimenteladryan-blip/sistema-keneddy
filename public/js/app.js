@@ -16,6 +16,57 @@ let dashboardTrips = [];
 let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let selectedCalendarDate = '';
 
+const HOME_ROLE_CONFIG = Object.freeze({
+  admin: {
+    eyebrow: 'CENTRAL DA ADMINISTRAÇÃO', title: 'Painel administrativo',
+    description: 'Acompanhe a operação escolar, as aprovações e as próximas viagens.',
+    stats: ['Viagens ativas', 'Aguardando aprovação', 'Próximas saídas'],
+    noticeTitle: 'Gestão escolar', noticeBody: 'Acompanhe os registros, mantenha os dados atualizados e consulte os indicadores da escola.',
+    upcomingTitle: 'Agenda geral de viagens', classesVisible: true
+  },
+  direction: {
+    eyebrow: 'PAINEL DA DIREÇÃO', title: 'Visão geral da escola',
+    description: 'Acompanhe solicitações, viagens aprovadas e a organização das atividades.',
+    stats: ['Viagens ativas', 'Aguardando aprovação', 'Próximas saídas'],
+    noticeTitle: 'Atenção às aprovações', noticeBody: 'Confira as viagens que aguardam análise e acompanhe as atualizações da equipe.',
+    upcomingTitle: 'Viagens da escola', classesVisible: true
+  },
+  secretariat: {
+    eyebrow: 'ROTINA DA SECRETARIA', title: 'Painel da secretaria',
+    description: 'Organize cadastros, prepare viagens e acompanhe os próximos compromissos.',
+    stats: ['Rascunhos', 'Viagens em organização', 'Próximas saídas'],
+    noticeTitle: 'Organização em dia', noticeBody: 'Mantenha turmas, estudantes e informações das viagens prontos para a próxima etapa.',
+    upcomingTitle: 'Viagens para organizar', classesVisible: true
+  },
+  teacher: {
+    eyebrow: 'ÁREA DO PROFESSOR', title: 'Painel do professor',
+    description: 'Consulte as viagens da escola, os participantes e os horários importantes.',
+    stats: ['Viagens da escola', 'Próximas saídas', 'Viagens aprovadas'],
+    noticeTitle: 'Informações da escola', noticeBody: 'Consulte os comunicados e acompanhe as mudanças nas viagens escolares.',
+    upcomingTitle: 'Próximas viagens da escola', classesVisible: true
+  },
+  pedagogue: {
+    eyebrow: 'ACOMPANHAMENTO PEDAGÓGICO', title: 'Painel pedagógico',
+    description: 'Acompanhe as viagens vinculadas à equipe e as atividades escolares.',
+    stats: ['Viagens vinculadas', 'Próximas saídas', 'Viagens abertas'],
+    noticeTitle: 'Acompanhamento escolar', noticeBody: 'Consulte as informações das viagens e acompanhe os comunicados da equipe.',
+    upcomingTitle: 'Viagens acompanhadas', classesVisible: true
+  },
+  guardian: {
+    eyebrow: 'ÁREA DA FAMÍLIA', title: 'Painel da família',
+    description: 'Acompanhe as viagens disponíveis para seus filhos e os avisos da escola.',
+    stats: ['Viagens dos seus filhos', 'Próximas saídas', 'Inscrições abertas'],
+    noticeTitle: 'Fique por dentro', noticeBody: 'Confira os avisos da escola e acompanhe as informações das viagens dos seus filhos.',
+    upcomingTitle: 'Viagens dos seus filhos', classesVisible: false
+  },
+  student: {
+    eyebrow: 'ÁREA DO ESTUDANTE', title: 'Meu painel',
+    description: 'Veja suas viagens escolares, datas importantes e comunicados.',
+    stats: ['Minhas viagens', 'Próximas saídas', 'Inscrições abertas'],
+    noticeTitle: 'Seus avisos', noticeBody: 'Acompanhe os comunicados e confira as informações das suas próximas experiências.',
+    upcomingTitle: 'Minhas próximas viagens', classesVisible: false
+  }
+});
 function showDashboard(user) {
   sessionController.abort();
   sessionController = new AbortController();
@@ -449,7 +500,36 @@ function renderNotificationCenter(items) {
 function renderHome() {
   const today = document.querySelector('#home-today');
   if (!today) return;
+  const role = currentUser?.role || 'student';
+  const config = HOME_ROLE_CONFIG[role] || HOME_ROLE_CONFIG.student;
   const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const activeTrips = dashboardTrips.filter(t => ['pending_approval', 'approved', 'open'].includes(t.status));
+  const upcomingTrips = dashboardTrips.filter(t => !['cancelled', 'completed'].includes(t.status) && new Date(t.departure_at) >= todayStart);
+  const pendingTrips = dashboardTrips.filter(t => t.status === 'pending_approval');
+  const draftTrips = dashboardTrips.filter(t => t.status === 'draft');
+  const openTrips = dashboardTrips.filter(t => t.status === 'open');
+  const statValues = role === 'secretariat'
+    ? [draftTrips.length, activeTrips.length, upcomingTrips.length]
+    : role === 'teacher'
+      ? [dashboardTrips.length, upcomingTrips.length, dashboardTrips.filter(t => ['approved', 'open'].includes(t.status)).length]
+      : role === 'pedagogue'
+        ? [dashboardTrips.length, upcomingTrips.length, openTrips.length]
+        : ['guardian', 'student'].includes(role)
+          ? [dashboardTrips.length, upcomingTrips.length, openTrips.length]
+          : [activeTrips.length, pendingTrips.length, upcomingTrips.length];
+  document.querySelector('#home-role-eyebrow').textContent = config.eyebrow;
+  document.querySelector('#home-role-title').textContent = config.title;
+  document.querySelector('#home-role-description').textContent = config.description;
+  document.querySelector('#home-role-stats').innerHTML = config.stats.map((label, index) =>
+    '<article class="home-stat-card"><span>' + escapeHtml(label) + '</span><strong>' + statValues[index] + '</strong></article>'
+  ).join('');
+  document.querySelector('.classes-shortcut-card')?.classList.toggle('hidden', !config.classesVisible);
+  document.querySelector('.notices-card .home-card-heading h4').textContent = config.noticeTitle;
+  document.querySelector('.notice-item strong').textContent = config.noticeTitle;
+  document.querySelector('.notice-item p').textContent = config.noticeBody;
+  document.querySelector('.upcoming-card .home-card-heading h4').textContent = config.upcomingTitle;
+  document.querySelector('.notifications-card .home-card-heading h4').textContent = 'Avisos para você';
   today.textContent = now.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
   const upcoming = dashboardTrips.filter(t => !['cancelled','completed'].includes(t.status) && new Date(t.departure_at) >= new Date(now.getFullYear(),now.getMonth(),now.getDate())).sort((a,b)=>new Date(a.departure_at)-new Date(b.departure_at));
   const notifications = dashboardTrips.filter(t => ['pending_approval','approved','open'].includes(t.status)).sort((a,b)=>new Date(a.departure_at)-new Date(b.departure_at)).slice(0,12);
