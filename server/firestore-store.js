@@ -606,7 +606,7 @@ async function setTripAttendance(tripId, studentId, actorUserId, actorRole, chec
   if (!['departure', 'return'].includes(checkpoint) || typeof present !== 'boolean') {
     throw new TypeError('Registro de presença inválido.');
   }
-  if (!['admin', 'direction', 'secretariat', 'teacher'].includes(actorRole)) {
+  if (!['admin', 'direction', 'secretariat', 'teacher', 'pedagogue'].includes(actorRole)) {
     return { error: 'forbidden' };
   }
   const tripKey = normalizeId(tripId);
@@ -620,13 +620,13 @@ async function setTripAttendance(tripId, studentId, actorUserId, actorRole, chec
   return db.runTransaction(async transaction => {
     const [tripSnapshot, studentSnapshot, participantSnapshot, staffSnapshot] = await Promise.all([
       transaction.get(tripRef), transaction.get(studentRef), transaction.get(participantRef),
-      actorRole === 'teacher' ? transaction.get(staffRef) : Promise.resolve(null)
+      ['teacher', 'pedagogue'].includes(actorRole) ? transaction.get(staffRef) : Promise.resolve(null)
     ]);
     if (!tripSnapshot.exists || !studentSnapshot.exists || studentSnapshot.data().active !== true) {
       return { error: 'not-found' };
     }
     if (!participantSnapshot.exists) return { error: 'not-participant' };
-    if (actorRole === 'teacher' && !staffSnapshot.exists) return { error: 'not-assigned' };
+    if (['teacher', 'pedagogue'].includes(actorRole) && !staffSnapshot.exists) return { error: 'not-assigned' };
     if (!['approved', 'open'].includes(tripSnapshot.data().status)) return { error: 'not-approved' };
     const field = checkpoint === 'departure' ? 'departure_present' : 'return_present';
     if (participantSnapshot.data()[field] === present) return { ok: true, changed: false };
