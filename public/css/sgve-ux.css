@@ -239,3 +239,25 @@ body.dark-mode #dashboard-view .trip-photo-upload small{color:#b8cbbd}
 body.dark-mode #dashboard-view .trip-photo-preview{border-color:#456b50}
 body.dark-mode #dashboard-view .trip-card-photo-empty{background:#1c5637;color:#d8f5df}
 body.dark-mode #dashboard-view .trip-card-actions .reject-action{background:#47221f;color:#ffd8d2;border-color:#79423b}
+
+
+/* Dashboard home: centered composition and consistent card borders */
+#dashboard-view .module-panel[data-tab="home"],
+#dashboard-view #home-view{width:100%;max-width:1480px;margin-left:auto;margin-right:auto}
+#dashboard-view .home-grid{width:100%;max-width:1440px;margin:0 auto;gap:16px;align-items:stretch}
+#dashboard-view .home-card{border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 2px 10px rgba(12,65,39,.055)}
+#dashboard-view .home-card-heading{padding-bottom:10px;border-bottom:1px solid var(--line)}
+#dashboard-view .home-card>*{min-width:0}
+#dashboard-view .home-card img{max-width:100%;object-fit:cover}
+#dashboard-view .welcome-row{width:100%;max-width:1480px;margin-left:auto;margin-right:auto}
+@media(min-width:1100px){
+  #dashboard-view .home-grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:"notices calendar notifications" "upcoming upcoming classes";gap:18px}
+  #dashboard-view .home-card{min-height:0}
+}
+@media(max-width:900px){
+  #dashboard-view .home-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"notices calendar" "notifications notifications" "upcoming upcoming" "classes classes"}
+}
+@media(max-width:620px){
+  #dashboard-view .home-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"notices" "calendar" "notifications" "upcoming" "classes";gap:12px}
+  #dashboard-view .home-card{border-radius:16px}
+}
