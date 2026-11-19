@@ -1717,3 +1717,53 @@ body {
     padding-left: max(9px, env(safe-area-inset-left));
   }
 }
+
+
+/* Turmas: cabeçalho integrado em uma única superfície verde, sem placas internas. */
+html body #dashboard-view #classes-panel > .section-heading {
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  min-height:76px!important;
+  margin:0 0 18px!important;
+  padding:16px 20px!important;
+  border:0!important;
+  border-radius:12px!important;
+  background:#075b3b!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+html body #dashboard-view #classes-panel > .section-heading > div,
+html body #dashboard-view #classes-panel > .section-heading .eyebrow,
+html body #dashboard-view #classes-panel > .section-heading h3 {
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+html body #dashboard-view #classes-panel > .section-heading .eyebrow {
+  margin-bottom:5px!important;
+  color:#b9e6c7!important;
+}
+html body #dashboard-view #classes-panel > .section-heading h3 {
+  color:#fff!important;
+}
+html body #dashboard-view #classes-panel > .section-heading .count-pill {
+  border:1px solid #ffffff35!important;
+  background:transparent!important;
+  color:#fff!important;
+  box-shadow:none!important;
+}
+body.dark-mode #dashboard-view #classes-panel > .section-heading {
+  background:#052d20!important;
+}
+@media(max-width:560px) {
+  html body #dashboard-view #classes-panel > .section-heading {
+    min-height:68px!important;
+    padding:13px 15px!important;
+  }
+}
