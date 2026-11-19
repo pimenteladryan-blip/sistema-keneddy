@@ -489,7 +489,7 @@ async function loadTrips() {
       let action = '';
       if (canManage && trip.status === 'draft') action = '<button type="button" class="small-action" data-trip-action="submit" data-trip-id="' + trip.id + '">Enviar para aprovação</button>';
       if (currentUser && ['admin', 'direction'].includes(currentUser.role) && trip.status === 'pending_approval') action = '<button type="button" class="small-action" data-trip-action="approve" data-trip-id="' + trip.id + '">Aprovar viagem</button>';
-      const participantsButton = '<button type="button" class="small-action button-secondary" data-trip-action="participants" data-trip-id="' + trip.id + '">Participantes</button>';
+      const participantsButton = '<button type="button" class="small-action button-secondary" data-trip-action="participants" data-trip-id="' + trip.id + '" aria-expanded="false">Ver participantes</button>';
       const editActions = canManage && trip.status === 'draft'
         ? '<button type="button" class="small-action" data-trip-action="edit" data-trip-id="' + trip.id + '">Editar</button><button type="button" class="small-action reject-action" data-trip-action="delete" data-trip-id="' + trip.id + '">Excluir</button>'
         : '';
@@ -790,11 +790,20 @@ document.querySelector('#trips-list').addEventListener('click', async event => {
     return;
   }
   if (button.dataset.tripAction === 'participants') {
-    const area = button.closest('.trip-card').querySelector('.participants-area');
-    area.classList.toggle('hidden');
-    if (!area.classList.contains('hidden') && area.dataset.loaded !== 'true') {
+    const card = button.closest('.trip-card');
+    const area = card?.querySelector('.participants-area');
+    if (!area) {
+      showMessage('#trip-message', 'Não foi possível abrir a área de participantes desta viagem. Atualize a página e tente novamente.', true);
+      return;
+    }
+    const opening = area.classList.contains('hidden');
+    area.classList.toggle('hidden', !opening);
+    button.setAttribute('aria-expanded', opening ? 'true' : 'false');
+    button.textContent = opening ? 'Ocultar participantes' : 'Ver participantes';
+    if (opening && area.dataset.loaded !== 'true') {
       await loadTripParticipants(button.dataset.tripId, area);
     }
+    if (opening) area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     return;
   }
   button.disabled = true;
