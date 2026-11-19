@@ -404,18 +404,38 @@ function localDateKey(value) {
   if (Number.isNaN(date.getTime())) return '';
   return [date.getFullYear(), String(date.getMonth()+1).padStart(2,'0'), String(date.getDate()).padStart(2,'0')].join('-');
 }
+function notificationStorageKey() {
+  return 'sgve-read-notifications:' + String(currentUser?.email || currentUser?.id || 'guest');
+}
+function getReadNotifications() {
+  try { return new Set(JSON.parse(localStorage.getItem(notificationStorageKey()) || '[]')); }
+  catch { return new Set(); }
+}
+function renderNotificationCenter(items) {
+  const list = document.querySelector('#notification-popover-list');
+  const badge = document.querySelector('#header-notification-count');
+  if (!list || !badge) return;
+  const read = getReadNotifications();
+  const unread = items.filter(item => !read.has(String(item.id) + ':' + item.status));
+  badge.textContent = String(unread.length);
+  badge.classList.toggle('is-empty', unread.length === 0);
+  list.innerHTML = items.length ? items.map(item => {
+    const key = String(item.id) + ':' + item.status;
+    const label = item.status === 'pending_approval' ? 'Aguardando aprovação' : item.status === 'approved' ? 'Viagem aprovada' : 'Inscrições abertas';
+    return '<article class="notification-entry '+(read.has(key) ? 'is-read' : 'is-unread')+'"><span class="notification-entry-dot"></span><div><strong>'+escapeHtml(item.title)+'</strong><p>'+escapeHtml(label)+' · '+escapeHtml(item.destination)+'</p><small>Saída: '+escapeHtml(dateLabel(item.departure_at))+'</small></div></article>';
+  }).join('') : '<p class="notification-empty">Nenhuma notificação por enquanto.</p>';
+}
 function renderHome() {
   const today = document.querySelector('#home-today');
   if (!today) return;
   const now = new Date();
   today.textContent = now.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
   const upcoming = dashboardTrips.filter(t => !['cancelled','completed'].includes(t.status) && new Date(t.departure_at) >= new Date(now.getFullYear(),now.getMonth(),now.getDate())).sort((a,b)=>new Date(a.departure_at)-new Date(b.departure_at));
-  const notifications = dashboardTrips.filter(t => ['pending_approval','approved','open'].includes(t.status)).sort((a,b)=>new Date(a.departure_at)-new Date(b.departure_at)).slice(0,4);
+  const notifications = dashboardTrips.filter(t => ['pending_approval','approved','open'].includes(t.status)).sort((a,b)=>new Date(a.departure_at)-new Date(b.departure_at)).slice(0,12);
+  renderNotificationCenter(notifications);
   const notif = document.querySelector('#home-notifications');
   document.querySelector('#home-notification-count').textContent = String(notifications.length);
-  const headerCount = document.querySelector('#header-notification-count');
-  if (headerCount) headerCount.textContent = String(notifications.length);
-  notif.innerHTML = notifications.length ? notifications.map(t => {
+  notif.innerHTML = notifications.slice(0,4).length ? notifications.slice(0,4).map(t => {
     const label = t.status === 'pending_approval' ? 'Aguardando aprovação' : (t.status === 'approved' ? 'Viagem aprovada' : 'Inscrições abertas');
     return '<article class="home-notification"><span class="notification-mark">↗</span><div><strong>'+escapeHtml(t.title)+'</strong><p>'+escapeHtml(label)+' · '+escapeHtml(t.destination)+'</p><small>'+escapeHtml(dateLabel(t.departure_at))+'</small></div></article>';
   }).join('') : '<p class="home-empty">Nenhuma atualização de viagem no momento.</p>';
@@ -1100,8 +1120,26 @@ document.querySelector('#profile-photo-input').addEventListener('change', event 
   reader.readAsDataURL(file);
   event.target.value = '';
 });
-document.querySelector('#header-notification-button').addEventListener('click', () => {
-  document.querySelector('#home-notifications')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+const notificationButton = document.querySelector('#header-notification-button');
+const notificationPopover = document.querySelector('#notification-popover');
+notificationButton.addEventListener('click', event => {
+  event.stopPropagation();
+  const opening = notificationPopover.classList.contains('hidden');
+  notificationPopover.classList.toggle('hidden', !opening);
+  notificationButton.setAttribute('aria-expanded', String(opening));
+});
+notificationPopover?.addEventListener('click', event => event.stopPropagation());
+document.addEventListener('click', event => {
+  if (!event.target.closest('#notification-popover') && !event.target.closest('#header-notification-button')) {
+    notificationPopover?.classList.add('hidden');
+    notificationButton.setAttribute('aria-expanded', 'false');
+  }
+});
+document.querySelector('#mark-notifications-read')?.addEventListener('click', () => {
+  const read = getReadNotifications();
+  dashboardTrips.filter(t => ['pending_approval','approved','open'].includes(t.status)).forEach(t => read.add(String(t.id) + ':' + t.status));
+  try { localStorage.setItem(notificationStorageKey(), JSON.stringify([...read])); } catch {}
+  renderHome();
 });
 document.querySelector('#change-profile-button').addEventListener('click', async () => {
   profileDropdown.classList.add('hidden');
