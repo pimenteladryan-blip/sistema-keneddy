@@ -12,19 +12,7 @@ firebase.initializeApp({
   measurementId: 'G-W78G9MW4VL'
 });
 const messaging = firebase.messaging();
-messaging.onBackgroundMessage(payload => {
-  const title = payload.notification?.title || 'SGVE';
-  const options = { body: payload.notification?.body || 'Você recebeu uma nova atualização.', icon: '/icon.svg', badge: '/icon.svg', data: { url: payload.fcmOptions?.link || '/' } };
-  return self.registration.showNotification(title, options);
-});
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  const target = new URL(event.notification.data?.url || '/', self.location.origin).href;
-  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
-    for (const client of clients) if (client.url === target && 'focus' in client) return client.focus();
-    return self.clients.openWindow(target);
-  }));
-});
+// O Firebase exibe automaticamente notificações recebidas em segundo plano.
 
 const CACHE_NAME = 'sgve-static-v3';
 const STATIC_ASSETS = [
