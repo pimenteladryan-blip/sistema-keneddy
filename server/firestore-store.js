@@ -8,6 +8,7 @@ const COLLECTIONS = Object.freeze({
   sessions: 'sessions',
   classes: 'classes',
   students: 'students',
+  teachers: 'teachers',
   studentAccountLinks: 'student_account_links',
   studentGuardians: 'student_guardians',
   trips: 'trips',
