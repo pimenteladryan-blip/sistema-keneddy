@@ -421,7 +421,7 @@ function renderHome() {
   }).join('') : '<p class="home-empty">Nenhuma atualização de viagem no momento.</p>';
   const cards = document.querySelector('#home-upcoming');
   cards.innerHTML = upcoming.length ? upcoming.slice(0,3).map((t,i) => {
-    const destinationKey = String(t.destination || '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();
+    const destinationKey = String(t.destination || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     const isSaoPaulo = destinationKey.includes('sao paulo');
     const photo = isSaoPaulo
       ? '<img class="upcoming-trip-photo" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/NeoQuimicaArena_%282%29.jpg/1280px-NeoQuimicaArena_%282%29.jpg" alt="Neo Química Arena, em São Paulo" loading="lazy">'
