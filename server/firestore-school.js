@@ -178,7 +178,11 @@ async function listTripsForUser(user) {
       ? store.list('students', { limit: 1000 }) : Promise.resolve([])
   ]);
   let visible = trips;
-  if (['teacher', 'pedagogue'].includes(user.role)) {
+  if (user.role === 'teacher') {
+    // Professores consultam todas as viagens da escola; a chamada continua restrita
+    // aos integrantes efetivamente vinculados à viagem.
+    visible = trips;
+  } else if (user.role === 'pedagogue') {
     const ids = new Set(staff.map(item => Number(item.trip_id)));
     visible = trips.filter(item => ids.has(Number(item.id)));
   } else if (user.role === 'guardian') {
@@ -450,7 +454,10 @@ async function listTripParticipantsForUser(tripId, user) {
   let allowedStudentIds = null;
   if (['admin', 'direction', 'secretariat'].includes(user.role)) {
     allowedStudentIds = new Set(participations.map(item => Number(item.student_id)));
-  } else if (['teacher', 'pedagogue'].includes(user.role)) {
+  } else if (user.role === 'teacher') {
+    // Professores podem consultar participantes de qualquer viagem da escola.
+    allowedStudentIds = new Set(participations.map(item => Number(item.student_id)));
+  } else if (user.role === 'pedagogue') {
     const assignment = await store.get('tripStaff', id + '_' + numericId(user.id, 'Usuário'));
     if (!assignment) {
       const error = new Error('Você não está vinculado a esta viagem.');
