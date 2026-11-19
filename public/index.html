@@ -72,7 +72,7 @@
           <label for="registration-email">E-mail</label><input id="registration-email" name="email" type="email" autocomplete="email" maxlength="254" required>
           <label for="registration-role">Tipo de acesso</label>
           <select id="registration-role" name="role" required>
-            <option value="teacher">Professor</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
+            <option value="teacher">Professor</option><option value="pedagogue">Pedagogo</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
           </select>
           <label for="registration-password">Criar senha</label><input id="registration-password" name="password" type="password" minlength="8" maxlength="14" autocomplete="new-password" required>
           <small class="field-hint">Use uma senha com no mínimo 8 e no máximo 14 caracteres. Ela será gerenciada pelo Firebase Authentication e nunca será mostrada ao administrador.</small>
@@ -197,8 +197,8 @@
             </form>
             <form id="trip-staff-form" class="inline-form compact-form">
               <label>Viagem<select name="trip_id" id="trip-staff-trip" required></select></label>
-              <label>Professor<select name="user_id" id="trip-staff-user" required><option value="">Carregando professores...</option></select></label>
-              <button type="submit">Vincular professor</button>
+              <label>Professor, pedagogo ou direção<select name="user_id" id="trip-staff-user" required><option value="">Carregando equipe...</option></select></label>
+              <button type="submit">Vincular à equipe</button>
             </form>
             <p id="trip-staff-message" class="message" role="status"></p>
             <form id="trip-vehicle-form" class="inline-form compact-form">
