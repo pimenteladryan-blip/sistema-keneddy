@@ -960,9 +960,11 @@ app.put('/api/trips/:id', requireAuth, requireCsrf, requireRoles(...RECORD_MANAG
   const data = tripInput(req.body);
   if (!Number.isSafeInteger(id) || id < 1 || !data) return res.status(400).json({ error: !data ? (tripInputError(req.body) || 'Confira os dados da viagem.') : 'Identificador da viagem inválido.' });
   try {
+    let tripStatus = null;
     if (firebaseConfigured) {
       const trip = await firestoreSchool.getTrip(id);
       if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
+      tripStatus = trip.status;
       if (!canEditTrip(req.auth.user, trip.status)) {
         return res.status(409).json({ error: 'Seu perfil não pode editar uma viagem neste status. Secretaria edita apenas rascunhos; direção e administração podem editar viagens em andamento.' });
       }
@@ -970,6 +972,7 @@ app.put('/api/trips/:id', requireAuth, requireCsrf, requireRoles(...RECORD_MANAG
     } else {
       const trip = db.prepare('SELECT status FROM trips WHERE id = ?').get(id);
       if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
+      tripStatus = trip.status;
       if (!canEditTrip(req.auth.user, trip.status)) {
         return res.status(409).json({ error: 'Seu perfil não pode editar uma viagem neste status. Secretaria edita apenas rascunhos; direção e administração podem editar viagens em andamento.' });
       }
@@ -978,7 +981,7 @@ app.put('/api/trips/:id', requireAuth, requireCsrf, requireRoles(...RECORD_MANAG
       if (!result.changes) return res.status(409).json({ error: 'A viagem mudou de status. Atualize a página e tente novamente.' });
       audit(req.auth.user.id, 'update', 'trip', id);
     }
-    if (trip.status !== 'draft') {
+    if (tripStatus !== 'draft') {
       try {
         const recipients = await tripReminderRecipients(id);
         if (recipients.length) {
