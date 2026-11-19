@@ -89,6 +89,35 @@ async function createUser({ display_name, email, password_hash, role, active = t
   }, actor_user_id == null ? null : { actor_user_id, action: 'create', entity_type: 'user' });
 }
 
+async function createFirebaseUser({ display_name, email, firebase_uid, role, active = true, actor_user_id = null }) {
+  const name = typeof display_name === 'string' ? display_name.trim() : '';
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  if (name.length < 3 || name.length > 100 ||
+      !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(normalizedEmail) ||
+      normalizedEmail.length > 254 ||
+      typeof firebase_uid !== 'string' || !firebase_uid || firebase_uid.length > 128 ||
+      !['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'].includes(role) ||
+      typeof active !== 'boolean') {
+    const error = new Error('Os dados da conta Firebase são inválidos.');
+    error.code = 'invalid-user';
+    throw error;
+  }
+  const now = new Date().toISOString();
+  return store.createUnique('users', 'email', normalizedEmail, {
+    display_name: name, firebase_uid, role, active,
+    created_at: now, updated_at: now
+  }, actor_user_id == null ? null : {
+    actor_user_id: Number(actor_user_id), action: 'create', entity_type: 'user'
+  });
+}
+
+async function setFirebaseUid(id, firebase_uid) {
+  const user = await findUserById(id);
+  if (!user || typeof firebase_uid !== 'string' || !firebase_uid) return false;
+  await store.update('users', user.id, { firebase_uid, updated_at: new Date().toISOString() });
+  return true;
+}
+
 async function importUserWithId({ id, display_name, email, password_hash, role, active = true }) {
   const userId = Number(id);
   const name = typeof display_name === 'string' ? display_name.trim() : '';

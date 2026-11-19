@@ -58,7 +58,7 @@
         </form>
         <button type="button" class="link-button" id="show-registration">Criar uma conta</button>
         <form id="registration-form" class="registration-form hidden">
-          <p class="registration-intro">Preencha seus dados. Ao enviar, o sistema criará um código de conferência de 6 caracteres. Informe esse código ao administrador; sua conta só será liberada após a aprovação.</p>
+          <p class="registration-intro">Preencha seus dados e confirme seu e-mail pelo link enviado pelo Firebase. Depois, o administrador poderá analisar sua solicitação.</p>
           <label for="registration-name">Nome completo</label><input id="registration-name" name="name" type="text" autocomplete="name" maxlength="100" required>
           <label for="registration-email">E-mail</label><input id="registration-email" name="email" type="email" autocomplete="email" maxlength="254" required>
           <label for="registration-role">Tipo de acesso</label>
@@ -66,9 +66,9 @@
             <option value="teacher">Professor</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
           </select>
           <label for="registration-password">Criar senha</label><input id="registration-password" name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required>
-          <small class="field-hint">Use pelo menos 14 caracteres. Sua senha será armazenada protegida e não ficará visível para o administrador.</small>
+          <small class="field-hint">Use uma senha própria do sistema com pelo menos 14 caracteres. Ela será gerenciada pelo Firebase Authentication e nunca será mostrada ao administrador.</small>
           <label for="registration-password-confirm">Confirmar senha</label><input id="registration-password-confirm" name="password_confirm" type="password" minlength="14" maxlength="200" autocomplete="new-password" required>
-          <button type="submit" id="registration-submit">Enviar solicitação</button>
+          <button type="submit" id="registration-submit">Criar conta e enviar solicitação</button>
           <p id="registration-message" class="message" role="status" aria-live="polite"></p>
           <button type="button" class="link-button secondary-link" id="hide-registration">Voltar para entrar</button>
         </form>

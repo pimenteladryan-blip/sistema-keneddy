@@ -680,18 +680,32 @@ registrationForm.addEventListener('submit', async event => {
     showMessage('#registration-message', 'As senhas não coincidem.', true);
     return;
   }
+  if (!window.firebase || !window.SGVE_FIREBASE_CONFIG) {
+    showMessage('#registration-message', 'O cadastro Firebase não está configurado nesta página.', true);
+    return;
+  }
   const button = document.querySelector('#registration-submit');
   button.disabled = true;
-  button.textContent = 'Enviando...';
+  button.textContent = 'Criando conta...';
   try {
+    if (!firebase.apps.length) firebase.initializeApp(window.SGVE_FIREBASE_CONFIG);
+    const credential = await firebase.auth().createUserWithEmailAndPassword(values.email.trim(), values.password);
+    await credential.user.updateProfile({ displayName: values.name.trim() });
+    await credential.user.sendEmailVerification();
+    const idToken = await credential.user.getIdToken(true);
     const result = await api('/api/registration-requests', {
       method: 'POST',
-      body: JSON.stringify({ name: values.name, email: values.email, role: values.role, password: values.password })
+      body: JSON.stringify({ name: values.name, email: values.email, role: values.role, idToken })
     });
+    await firebase.auth().signOut();
     registrationForm.reset();
-    showMessage('#registration-message', result.message + ' Código: ' + result.verificationCode);
-  } catch (error) { if (error.name === 'AbortError') return;
-    showMessage('#registration-message', error.message, true);
+    showMessage('#registration-message', result.message + ' Depois de confirmar, aguarde a aprovação do administrador.');
+  } catch (error) {
+    if (error.name === 'AbortError') return;
+    if (error.code === 'auth/email-already-in-use') error.message = 'Este e-mail já possui uma conta. Entre ou solicite ajuda à secretaria.';
+    if (error.code === 'auth/weak-password') error.message = 'Escolha uma senha mais forte.';
+    showMessage('#registration-message', error.message || 'Não foi possível criar a conta.', true);
+    try { if (window.firebase?.apps?.length) await firebase.auth().signOut(); } catch {}
   } finally {
     button.disabled = false;
     button.textContent = 'Enviar solicitação';
@@ -760,15 +774,34 @@ loginForm.addEventListener('submit', async event => {
   loginButton.textContent = 'Verificando...';
   const form = new FormData(loginForm);
   try {
-    const data = await api('/api/auth/login', {
+    if (!window.firebase || !window.SGVE_FIREBASE_CONFIG) throw new Error('O login Firebase não está configurado nesta página.');
+    if (!firebase.apps.length) firebase.initializeApp(window.SGVE_FIREBASE_CONFIG);
+    const credential = await firebase.auth().signInWithEmailAndPassword(String(form.get('email')).trim(), String(form.get('password')));
+    await credential.user.reload();
+    if (!credential.user.emailVerified) {
+      await credential.user.sendEmailVerification();
+      await firebase.auth().signOut();
+      throw new Error('Seu e-mail ainda não foi confirmado. Enviamos outro link de verificação. Confira sua caixa de entrada e o spam.');
+    }
+    const idToken = await credential.user.getIdToken(true);
+    const data = await api('/api/auth/firebase', {
       method: 'POST',
-      body: JSON.stringify({ email: form.get('email'), password: form.get('password'), role: form.get('role') })
+      body: JSON.stringify({ idToken, role: form.get('role') })
     });
+    await firebase.auth().signOut();
     csrfToken = data.csrfToken;
     loginForm.reset();
     showDashboard(data.user);
-  } catch (error) { if (error.name === 'AbortError') return; loginMessage.textContent = error.message; }
-  finally { loginButton.disabled = false; loginButton.textContent = 'Entrar'; }
+  } catch (error) {
+    if (error.name === 'AbortError') return;
+    try { if (window.firebase?.apps?.length) await firebase.auth().signOut(); } catch {}
+    loginMessage.textContent = error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password'
+      ? 'E-mail ou senha incorretos.'
+      : error.message;
+  } finally {
+    loginButton.disabled = false;
+    loginButton.textContent = 'Entrar';
+  }
 });
 googleLoginButton.addEventListener('click', async () => {
   loginMessage.textContent = '';
@@ -779,20 +812,21 @@ googleLoginButton.addEventListener('click', async () => {
   googleLoginButton.disabled = true;
   googleLoginButton.textContent = 'Conectando ao Google...';
   try {
-    if (!window.firebase || !window.SGVE_FIREBASE_CONFIG) {
-      throw new Error('O login Google não está configurado nesta página.');
-    }
+    if (!window.firebase || !window.SGVE_FIREBASE_CONFIG) throw new Error('O login Google não está configurado nesta página.');
     if (!firebase.apps.length) firebase.initializeApp(window.SGVE_FIREBASE_CONFIG);
     const provider = new firebase.auth.GoogleAuthProvider();
     const credential = await firebase.auth().signInWithPopup(provider);
     const idToken = await credential.user.getIdToken(true);
-    const data = await api('/api/auth/google', {
+    const data = await api('/api/auth/firebase', {
       method: 'POST',
       body: JSON.stringify({ idToken, role: document.querySelector('#login-role').value })
     });
+    await firebase.auth().signOut();
     csrfToken = data.csrfToken;
     showDashboard(data.user);
-  } catch (error) { if (error.name === 'AbortError') return;
+  } catch (error) {
+    if (error.name === 'AbortError') return;
+    try { if (window.firebase?.apps?.length) await firebase.auth().signOut(); } catch {}
     loginMessage.textContent = error.code === 'auth/popup-closed-by-user'
       ? 'A janela de login foi fechada antes da conclusão.'
       : (error.message || 'Não foi possível entrar com Google.');

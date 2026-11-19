@@ -204,6 +204,7 @@ app.post('/api/registration-requests', async (req, res, next) => {
 });
 app.post('/api/auth/login', async (req, res, next) => {
   try {
+    if (firebaseConfigured) return res.status(410).json({ error: 'Use o login pelo Firebase Authentication.' });
     if (!sameOrigin(req)) return res.status(403).json({ error: 'Origem não permitida.' });
     const email = String(req.body.email || '').trim().toLowerCase();
     const password = String(req.body.password || '');
