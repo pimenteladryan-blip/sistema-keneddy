@@ -12,6 +12,8 @@ let csrfToken = '';
 let sessionController = new AbortController();
 let currentUser = null;
 let lastReport = null;
+let dashboardTrips = [];
+let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
 function showDashboard(user) {
   sessionController.abort();
@@ -38,8 +40,9 @@ function showDashboard(user) {
   document.querySelector('#reports-tab').classList.toggle('hidden', !canManage);
   document.querySelector('#registration-requests-section').classList.toggle('hidden', user.role !== 'admin');
   document.querySelectorAll('[data-admin-only]').forEach(option => { option.hidden = user.role !== 'admin'; });
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tab === 'classes-panel'));
-  document.querySelectorAll('.module-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== 'classes-panel'));
+  document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tab === 'home-panel'));
+  document.querySelectorAll('.module-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== 'home-panel'));
+  renderHome();
   loadClasses();
   if (user.role !== 'teacher') loadStudents();
   loadTrips();
@@ -72,6 +75,7 @@ function showLogin() {
   clearDashboardData();
   currentUser = null;
   lastReport = null;
+  dashboardTrips = [];
   dashboardView.classList.add('hidden');
   loginView.classList.remove('hidden');
   csrfToken = '';
@@ -393,11 +397,65 @@ async function loadTripParticipants(tripId, area) {
     area.dataset.loaded = 'false';
   }
 }
+
+function localDateKey(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return [date.getFullYear(), String(date.getMonth()+1).padStart(2,'0'), String(date.getDate()).padStart(2,'0')].join('-');
+}
+function renderHome() {
+  const today = document.querySelector('#home-today');
+  if (!today) return;
+  const now = new Date();
+  today.textContent = now.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  const upcoming = dashboardTrips.filter(t => !['cancelled','completed'].includes(t.status) && new Date(t.departure_at) >= new Date(now.getFullYear(),now.getMonth(),now.getDate())).sort((a,b)=>new Date(a.departure_at)-new Date(b.departure_at));
+  const notifications = dashboardTrips.filter(t => ['pending_approval','approved','open'].includes(t.status)).sort((a,b)=>new Date(a.departure_at)-new Date(b.departure_at)).slice(0,4);
+  const notif = document.querySelector('#home-notifications');
+  document.querySelector('#home-notification-count').textContent = String(notifications.length);
+  notif.innerHTML = notifications.length ? notifications.map(t => {
+    const label = t.status === 'pending_approval' ? 'Aguardando aprovação' : (t.status === 'approved' ? 'Viagem aprovada' : 'Inscrições abertas');
+    return '<article class="home-notification"><span class="notification-mark">↗</span><div><strong>'+escapeHtml(t.title)+'</strong><p>'+escapeHtml(label)+' · '+escapeHtml(t.destination)+'</p><small>'+escapeHtml(dateLabel(t.departure_at))+'</small></div></article>';
+  }).join('') : '<p class="home-empty">Nenhuma atualização de viagem no momento.</p>';
+  const cards = document.querySelector('#home-upcoming');
+  cards.innerHTML = upcoming.length ? upcoming.slice(0,3).map((t,i) => '<article class="upcoming-trip"><div class="trip-photo-placeholder trip-photo-'+(i+1)+'"><span>SGVE</span><small>VIAGEM ESCOLAR</small></div><div class="upcoming-trip-body"><span class="trip-date-chip">'+escapeHtml(new Date(t.departure_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}))+'</span><strong>'+escapeHtml(t.title)+'</strong><p>'+escapeHtml(t.destination)+'</p><small>'+escapeHtml(tripStatusLabel(t.status))+'</small></div></article>').join('') : '<p class="home-empty">As próximas viagens aparecerão aqui quando forem cadastradas.</p>';
+  renderCalendar();
+}
+function renderCalendar() {
+  const title=document.querySelector('#calendar-month'), grid=document.querySelector('#calendar-grid');
+  if(!title || !grid) return;
+  title.textContent=calendarMonth.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  const year=calendarMonth.getFullYear(), month=calendarMonth.getMonth();
+  const first=new Date(year,month,1), offset=(first.getDay()+6)%7, days=new Date(year,month+1,0).getDate();
+  const labels=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  const tripDates=new Map();
+  dashboardTrips.forEach(t=>{const key=localDateKey(t.departure_at); if(key){if(!tripDates.has(key))tripDates.set(key,[]);tripDates.get(key).push(t);}});
+  let markup=labels.map(x=>'<span class="calendar-weekday">'+x+'</span>').join('');
+  for(let i=0;i<offset;i++) markup+='<span class="calendar-day empty"></span>';
+  for(let day=1;day<=days;day++){
+    const key=[year,String(month+1).padStart(2,'0'),String(day).padStart(2,'0')].join('-');
+    const trips=tripDates.get(key)||[];
+    markup+='<button type="button" class="calendar-day '+(trips.length?'has-trip':'')+'" data-calendar-date="'+key+'" aria-label="'+day+' de '+title.textContent+(trips.length?', '+trips.length+' viagem(ns)':'')+'">'+day+(trips.length?'<i></i>':'')+'</button>';
+  }
+  grid.innerHTML=markup;
+}
+function showCalendarDate(key) {
+  const matches=dashboardTrips.filter(t=>localDateKey(t.departure_at)===key);
+  const target=document.querySelector('#calendar-selected');
+  const date=new Date(key+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long'});
+  target.innerHTML=matches.length ? '<strong>'+escapeHtml(date)+'</strong>'+matches.map(t=>'<p>'+escapeHtml(t.title)+' · '+escapeHtml(t.destination)+'</p>').join('') : 'Nenhuma viagem cadastrada para '+escapeHtml(date)+'.';
+}
+document.querySelector('#calendar-prev').addEventListener('click',()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1);renderCalendar();});
+document.querySelector('#calendar-next').addEventListener('click',()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1);renderCalendar();});
+document.querySelector('#calendar-grid').addEventListener('click',event=>{const day=event.target.closest('[data-calendar-date]');if(day)showCalendarDate(day.dataset.calendarDate);});
+document.querySelector('#dashboard-view').addEventListener('click',event=>{const link=event.target.closest('[data-open-tab]');if(!link)return;const target=link.dataset.openTab;document.querySelector('.tab[data-tab="'+target+'"]')?.click();});
+
 async function loadTrips() {
   const list = document.querySelector('#trips-list');
   try {
     const data = await api('/api/trips');
+    dashboardTrips = data.trips || [];
     document.querySelector('#trips-count').textContent = String(data.trips.length);
+    renderHome();
     const canManage = currentUser && ['admin', 'direction', 'secretariat'].includes(currentUser.role);
     list.innerHTML = data.trips.length ? data.trips.map(trip => {
       let action = '';
