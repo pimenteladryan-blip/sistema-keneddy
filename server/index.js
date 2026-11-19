@@ -338,17 +338,19 @@ app.post('/api/auth/firebase', async (req, res, next) => {
 
 async function sendPushToUserIds(userIds, notification) {
   if (!firebaseConfigured || !firestore || !process.env.FCM_WEB_PUSH_VAPID_KEY) {
-    return { sent: 0, disabled: true };
+    return { sent: 0, devices: 0, disabled: true };
   }
   const ids = new Set(userIds.map(Number).filter(id => Number.isSafeInteger(id) && id > 0));
-  if (!ids.size) return { sent: 0, disabled: false };
+  if (!ids.size) return { sent: 0, devices: 0, disabled: false };
   const snapshot = await firestore.collection('push_tokens').limit(5000).get();
   const docs = snapshot.docs.filter(doc => ids.has(Number(doc.data().user_id)));
   let sent = 0;
+  let devices = 0;
   for (let offset = 0; offset < docs.length; offset += 500) {
     const batch = docs.slice(offset, offset + 500);
     const tokens = batch.map(doc => doc.data().token).filter(token => typeof token === 'string' && token.length > 80);
     if (!tokens.length) continue;
+    devices += tokens.length;
     const result = await getMessaging(firebaseApp).sendEachForMulticast({
       tokens,
       notification: { title: notification.title, body: notification.body },
@@ -364,16 +366,31 @@ async function sendPushToUserIds(userIds, notification) {
     });
     if (invalid.size) await Promise.all(batch.filter(doc => invalid.has(doc.data().token)).map(doc => doc.ref.delete()));
   }
-  return { sent, disabled: false };
+  return { sent, devices, disabled: false };
 }
 async function notifyRoles(roles, notification) {
   try {
-    if (!firebaseConfigured || !firestore) return;
+    if (!firebaseConfigured || !firestore) {
+      console.info('Notificação automática não enviada: Firebase indisponível.', notification.title);
+      return { users: 0, devices: 0, sent: 0, disabled: true };
+    }
     const users = await firestore.collection('users').where('active', '==', true).get();
     const ids = users.docs.filter(doc => roles.includes(doc.data().role)).map(doc => Number(doc.id));
     const result = await sendPushToUserIds(ids, notification);
-    console.info('Notificação automática:', notification.title, '| usuários:', ids.length, '| dispositivos aceitos:', result.sent, '| push desativado:', result.disabled);
-  } catch (error) { console.error('Falha ao enviar push automático:', error.message); }
+    console.info('Notificação automática:', notification.title, '| usuários:', ids.length, '| dispositivos encontrados:', result.devices, '| dispositivos aceitos:', result.sent, '| push desativado:', result.disabled);
+    return { users: ids.length, ...result };
+  } catch (error) {
+    console.error('Falha ao enviar push automático:', error.message);
+    return { users: 0, devices: 0, sent: 0, disabled: false, error: error.message };
+  }
+}
+function pushDeliveryMessage(result) {
+  if (result?.sent > 0) return ' Notificação aceita pelo Firebase em ' + result.sent + ' dispositivo(s).';
+  if (result?.disabled) return ' Porém, o envio push está desativado na configuração do servidor.';
+  if (result?.error) return ' Porém, houve uma falha no envio da notificação: ' + result.error;
+  if (result?.devices > 0) return ' Porém, o Firebase recusou o envio para os ' + result.devices + ' dispositivo(s) cadastrados.';
+  if (result?.users > 0) return ' Porém, nenhum desses usuários tem um dispositivo habilitado para receber notificações.';
+  return ' Porém, não foram encontrados usuários ativos para receber a notificação.';
 }
 app.get('/api/push/config', requireAuth, (req, res) => {
   const vapidKey = String(process.env.FCM_WEB_PUSH_VAPID_KEY || '').trim();
