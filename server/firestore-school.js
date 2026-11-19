@@ -466,9 +466,26 @@ async function listTripParticipantsForUser(tripId, user) {
   const result = await Promise.all(visible.map(async item => {
     const student = await store.get('students', item.student_id);
     if (!student || student.active !== true) return null;
+    const [schoolClass, guardianLinks] = await Promise.all([
+      getClass(student.class_id),
+      store.list('studentGuardians', {
+        filters: [{ field: 'student_id', op: '==', value: Number(item.student_id) }],
+        limit: 100
+      })
+    ]);
+    const guardians = await Promise.all(guardianLinks.map(async link => {
+      const account = await store.get('users', link.guardian_user_id);
+      return account ? account.display_name || account.name || account.email : null;
+    }));
+    const classLabel = schoolClass
+      ? [schoolClass.grade, schoolClass.course === 'adm' ? 'Técnico ADM' : schoolClass.course === 'ds' ? 'Técnico DS' : 'Regular',
+          'Turma ' + schoolClass.section, schoolClass.school_year].join(' · ')
+      : 'Turma não informada';
     return {
       student_id: Number(item.student_id),
       full_name: student.full_name,
+      class_label: classLabel,
+      guardian_name: guardians.filter(Boolean).join(', ') || 'Responsável não cadastrado',
       authorization_status: item.authorization_status || 'pending',
       departure_present: item.departure_present ?? null,
       return_present: item.return_present ?? null
