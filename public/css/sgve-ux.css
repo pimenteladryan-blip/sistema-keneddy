@@ -220,3 +220,22 @@ body.dark-mode #dashboard-view .trip-photo-placeholder small{color:#d8f5df}
   #dashboard-view .upcoming-trip-photo{min-height:112px}
   #dashboard-view .trip-photo-placeholder{min-height:112px}
 }
+
+
+/* Trip photo upload, preview and CRUD controls */
+#dashboard-view .trip-photo-upload{display:flex;flex-direction:column;gap:8px;grid-column:1/-1;padding:14px;border:1px dashed #9bc8a6;border-radius:14px;background:#f3faf2}
+#dashboard-view .trip-photo-upload input[type=file]{padding:10px;background:transparent;border:0}
+#dashboard-view .trip-photo-upload small{font-size:12px;color:#587363}
+#dashboard-view .trip-photo-preview{display:block;width:min(100%,420px);max-height:220px;object-fit:cover;border-radius:14px;border:1px solid #d1e5d4}
+#dashboard-view .trip-form-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#dashboard-view .trip-card{overflow:hidden}
+#dashboard-view .trip-card-photo{display:block;width:100%;max-height:210px;object-fit:cover}
+#dashboard-view .trip-card-photo-empty{min-height:105px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:#e4f3e6;color:#17633f;font-size:26px}
+#dashboard-view .trip-card-photo-empty small{font-size:11px;font-weight:700}
+#dashboard-view .trip-card-actions{display:flex;gap:8px;flex-wrap:wrap}
+#dashboard-view .trip-card-actions .reject-action{background:#fff0ee;color:#a83227;border:1px solid #f1c8c3}
+body.dark-mode #dashboard-view .trip-photo-upload{background:#172d20;border-color:#456b50}
+body.dark-mode #dashboard-view .trip-photo-upload small{color:#b8cbbd}
+body.dark-mode #dashboard-view .trip-photo-preview{border-color:#456b50}
+body.dark-mode #dashboard-view .trip-card-photo-empty{background:#1c5637;color:#d8f5df}
+body.dark-mode #dashboard-view .trip-card-actions .reject-action{background:#47221f;color:#ffd8d2;border-color:#79423b}
