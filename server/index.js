@@ -614,9 +614,9 @@ app.get('/api/users', requireAuth, requireRoles('admin', 'direction'), async (_r
   try {
     if (firebaseConfigured) {
       const users = await firestoreAuth.listUsers(300);
-      return res.json({ users: users.map(user => ({ id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role], active: user.active })) });
+      return res.json({ users: users.map(user => ({ id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role], active: user.active, subjects: Array.isArray(user.subjects) ? user.subjects : [] })) });
     }
-    const rows = db.prepare('SELECT id, display_name, email, role, active FROM users ORDER BY display_name LIMIT 300').all();
+    const rows = db.prepare('SELECT id, display_name, email, role, active, subjects FROM users ORDER BY display_name LIMIT 300').all();
     res.json({ users: rows.map(user => ({ id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role], active: Boolean(user.active), subjects: (() => { try { return JSON.parse(user.subjects || '[]'); } catch { return []; } })() })) });
   } catch (error) { next(error); }
 });
