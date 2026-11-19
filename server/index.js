@@ -355,6 +355,7 @@ async function sendPushToUserIds(userIds, notification) {
       tokens,
       notification: { title: notification.title, body: notification.body },
       webpush: { notification: {
+        title: notification.title, body: notification.body,
         icon: '/icon.svg', badge: '/icon.svg',
         requireInteraction: true,
         vibrate: [180, 80, 180]
