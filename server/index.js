@@ -1010,8 +1010,8 @@ app.post('/api/trips/:id/approve', requireAuth, requireCsrf, requireRoles('admin
       const result = await firestoreSchool.approveTrip(tripId, req.auth.user.id);
       if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem não encontrada.' });
       if (result.error) return res.status(409).json({ error: 'A viagem não está aguardando aprovação.' });
-      await notifyRoles(['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'], { title: 'Viagem aprovada', body: tripNotificationDetails(tripDetails) });
-      return res.json({ message: 'Viagem aprovada.' });
+      const delivery = await notifyRoles(['admin', 'direction', 'secretariat', 'teacher', 'pedagogue', 'guardian', 'student'], { title: 'Viagem aprovada', body: tripNotificationDetails(tripDetails) });
+      return res.json({ message: 'Viagem aprovada.' + pushDeliveryMessage(delivery) });
     }
     if (tripDetails.status === 'draft' && req.auth.user.role === 'admin') {
       const classes = db.prepare('SELECT COUNT(*) AS total FROM trip_classes WHERE trip_id = ?').get(tripId).total;
@@ -1022,8 +1022,8 @@ app.post('/api/trips/:id/approve', requireAuth, requireCsrf, requireRoles('admin
     if (tripDetails.status !== 'pending_approval') return res.status(409).json({ error: 'A viagem não está aguardando aprovação.' });
     db.prepare("UPDATE trips SET status = 'approved', approved_by = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(req.auth.user.id, tripId);
     audit(req.auth.user.id, 'approve', 'trip', tripId);
-    await notifyRoles(['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'], { title: 'Viagem aprovada', body: tripNotificationDetails(tripDetails) });
-    res.json({ message: 'Viagem aprovada.' });
+    const delivery = await notifyRoles(['admin', 'direction', 'secretariat', 'teacher', 'pedagogue', 'guardian', 'student'], { title: 'Viagem aprovada', body: tripNotificationDetails(tripDetails) });
+    res.json({ message: 'Viagem aprovada.' + pushDeliveryMessage(delivery) });
   } catch (error) { next(error); }
 });
 
