@@ -8,7 +8,7 @@
     "start": "node server/index.js",
     "test": "node --test",
     "seed:test-data": "node scripts/seed-test-data.js",
-    "check": "node --check server/index.js && node --check server/db.js && node --check server/firebase.js && node --check server/firestore-store.js && node --check server/firestore-auth.js && node --check server/firestore-school.js && node --check server/security.js && node --check server/access.js && node --check server/rate-limit.js && node --check public/js/app.js"
+    "check": "node --check server/index.js && node --check server/db.js && node --check server/firebase.js && node --check server/firestore-store.js && node --check server/firestore-auth.js && node --check server/firestore-school.js && node --check server/security.js && node --check server/access.js && node --check server/rate-limit.js && node --check scripts/seed-test-data.js && node --check public/js/app.js"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
