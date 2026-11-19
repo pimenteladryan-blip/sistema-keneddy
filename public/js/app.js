@@ -183,7 +183,7 @@ async function loadLinkableUsers() {
   try {
     const data = await api('/api/linkable-users');
     const guardians = data.users.filter(user => user.role === 'guardian' && user.active);
-    const teachers = data.users.filter(user => user.role === 'teacher' && user.active);
+    const teachers = data.users.filter(user => ['teacher', 'pedagogue', 'direction'].includes(user.role) && user.active);
     const guardianList = document.querySelector('#guardians-list');
     const guardianCount = document.querySelector('#guardians-count');
     if (guardianList && guardianCount) {
@@ -200,8 +200,8 @@ async function loadLinkableUsers() {
     if (previousGuardian) guardianSelect.value = previousGuardian;
     const teacherSelect = document.querySelector('#trip-staff-user');
     const previousTeacher = teacherSelect.value;
-    teacherSelect.innerHTML = '<option value="">Selecione um professor</option>' + teachers.map(user =>
-      '<option value="' + user.id + '">' + escapeHtml(user.name + ' · ' + user.email) + '</option>'
+    teacherSelect.innerHTML = '<option value="">Selecione um integrante</option>' + teachers.map(user =>
+      '<option value="' + user.id + '">' + escapeHtml((user.roleLabel || user.role) + ' · ' + user.name + ' · ' + user.email) + '</option>'
     ).join('');
     if (previousTeacher) teacherSelect.value = previousTeacher;
   } catch (error) {
@@ -363,14 +363,17 @@ function presenceLabel(value) {
 async function loadTripParticipants(tripId, area) {
   area.textContent = 'Carregando participantes...';
   try {
-    const data = await api('/api/trips/' + Number(tripId) + '/participants');
+    const [data, staffData] = await Promise.all([
+      api('/api/trips/' + Number(tripId) + '/participants'),
+      api('/api/trips/' + Number(tripId) + '/staff')
+    ]);
     const tripStatus = area.dataset.tripStatus || '';
     const canAuthorize = currentUser?.role === 'guardian' && ['approved', 'open'].includes(tripStatus);
     const canMarkAttendance = currentUser && ['admin', 'direction', 'secretariat', 'teacher'].includes(currentUser.role) &&
       ['approved', 'open'].includes(tripStatus);
     const canRecordPaper = currentUser && ['admin', 'direction', 'secretariat'].includes(currentUser.role) &&
       ['approved', 'open'].includes(tripStatus);
-    area.innerHTML = data.participants.length ? data.participants.map(item => {
+    area.innerHTML = (data.participants.length ? data.participants.map(item => {
       let controls = '';
       if (canAuthorize && item.authorization_status !== 'paper_recorded') {
         controls += '<div class="participant-actions">' +
@@ -403,7 +406,11 @@ async function loadTripParticipants(tripId, area) {
         '<small class="participant-guardian">Responsável: ' + escapeHtml(item.guardian_name || 'Responsável não cadastrado') + '</small>' +
         '<small class="participant-authorization">Autorização: ' + escapeHtml(authorizationLabel(item.authorization_status)) + '</small>' +
         '</div>' + controls + '</article>';
-    }).join('') : '<p class="muted">Nenhum participante vinculado a esta viagem.</p>';
+    }).join('') : '<p class="muted">Nenhum participante vinculado a esta viagem.</p>') +
+      '<section class="trip-staff-section"><div class="trip-staff-heading"><h3>Equipe da viagem</h3><span>' + (staffData.staff || []).length + ' integrante(s)</span></div>' +
+      ((staffData.staff || []).length ? '<div class="trip-staff-list">' + staffData.staff.map(member =>
+        '<article class="trip-staff-member"><span class="trip-staff-avatar">' + escapeHtml(String(member.name || 'E').trim().split(/\\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase()) + '</span><span><strong>' + escapeHtml(member.name) + '</strong><small>' + escapeHtml(member.role_label || member.role) + '</small></span></article>'
+      ).join('') + '</div>' : '<p class="muted">Nenhum professor, pedagogo ou diretor vinculado a esta viagem ainda.</p>') + '</section>';
     area.dataset.loaded = 'true';
   } catch (error) { if (error.name === 'AbortError') return;
     area.textContent = error.message;
