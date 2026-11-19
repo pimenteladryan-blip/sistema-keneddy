@@ -962,3 +962,72 @@ body.dark-mode .dashboard .button-secondary {
 }
 .auth-card #registration-form .field-hint{display:block;margin:0 0 2px;line-height:1.5}
 .auth-card #registration-message{overflow-wrap:anywhere}
+
+
+/* Participantes de viagem: lista compacta e alinhada ao cartão */
+.dashboard .trip-card-actions {
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:7px;
+}
+.dashboard .trip-card-actions .participants-toggle,
+.dashboard .trip-card-actions [data-trip-action="participants"] {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:auto;
+  min-height:30px;
+  margin:0;
+  padding:5px 11px;
+  border:1px solid #cbdccf;
+  border-radius:8px;
+  background:#f3f8f4;
+  color:#28633c;
+  font-size:11px;
+  font-weight:700;
+  box-shadow:none;
+}
+.dashboard .trip-card-actions [data-trip-action="participants"]:hover {
+  background:#e8f2ea;
+  box-shadow:none;
+}
+.dashboard .participants-area {
+  gap:7px;
+  margin-top:7px;
+  padding:9px 10px;
+  border:1px solid #e1e9e2;
+  border-radius:9px;
+  background:#f8faf8;
+}
+.dashboard .participant-row {
+  gap:7px 12px;
+  padding:5px 0;
+  border-bottom:1px solid #e8efe9;
+}
+.dashboard .participant-details { gap:3px; }
+.dashboard .participant-details .participant-name { font-size:12px; line-height:1.3; }
+.dashboard .participant-details .participant-class,
+.dashboard .participant-details .participant-guardian,
+.dashboard .participant-details .participant-authorization {
+  font-size:10px;
+  line-height:1.35;
+}
+body.dark-mode .dashboard .trip-card-actions [data-trip-action="participants"] {
+  border-color:#3a5943;
+  background:#1b3021;
+  color:#b9e1c4;
+}
+body.dark-mode .dashboard .trip-card-actions [data-trip-action="participants"]:hover {
+  background:#25412d;
+}
+body.dark-mode .dashboard .participants-area {
+  border-color:#304238;
+  background:#15231a;
+}
+body.dark-mode .dashboard .participant-row { border-bottom-color:#304238; }
+@media(max-width:520px) {
+  .dashboard .participants-area { padding:8px; }
+  .dashboard .participant-details .participant-name { font-size:11px; }
+}
