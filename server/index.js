@@ -522,11 +522,8 @@ app.post('/api/users', requireAuth, requireCsrf, requireRoles(...USER_MANAGERS),
       : [];
     if (name.length < 3 || !validEmail(email) || !VALID_ROLES.includes(role) ||
         password.length < 14 || password.length > 200 ||
-        rawSubjects.length > 1000 || subjects.length > 20 ||
-        (role === 'teacher' && !subjects.length)) {
-      return res.status(400).json({ error: role === 'teacher'
-        ? 'Informe nome, e-mail, senha e ao menos uma disciplina válida.'
-        : 'Informe nome, e-mail, perfil e senha com pelo menos 14 caracteres.' });
+        rawSubjects.length > 1000 || subjects.length > 20) {
+      return res.status(400).json({ error: 'Informe nome, e-mail, perfil e senha com pelo menos 14 caracteres.' });
     }
     if (req.auth.user.role === 'secretariat' && !['teacher', 'guardian', 'student'].includes(role)) return res.status(403).json({ error: 'A secretaria não pode criar contas administrativas ou de direção.' });
     if (req.auth.user.role === 'direction' && role === 'admin') return res.status(403).json({ error: 'Somente um administrador pode criar outro administrador.' });
