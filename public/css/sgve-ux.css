@@ -435,3 +435,34 @@ html body:not(.dark-mode) #dashboard-view input::placeholder,
 html body:not(.dark-mode) #dashboard-view textarea::placeholder{
   color:#17633f!important;opacity:.75;
 }
+
+
+/* Notification center popover */
+#dashboard-view .dashboard-brand{position:relative}
+#dashboard-view .notification-popover{position:absolute;top:calc(100% + 12px);right:54px;z-index:10020;width:min(360px,calc(100vw - 28px));max-height: min(440px,70vh);overflow:hidden;border:1px solid #d7e4da;border-radius:16px;background:#fff;color:#245238;box-shadow:0 14px 38px rgba(15,45,26,.16)}
+#dashboard-view .notification-popover.hidden{display:none!important}
+#dashboard-view .notification-popover-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;border-bottom:1px solid #e5ece6}
+#dashboard-view .notification-popover-head strong{font-size:14px;color:#245238}
+#dashboard-view .notification-popover-head button{border:0;background:transparent;color:#287247;font-size:11px;font-weight:750;cursor:pointer}
+#dashboard-view .notification-popover-list{max-height:350px;overflow:auto;padding:4px 12px}
+#dashboard-view .notification-entry{display:flex;gap:10px;padding:12px 5px;border-bottom:1px solid #edf1ed}
+#dashboard-view .notification-entry:last-child{border-bottom:0}
+#dashboard-view .notification-entry-dot{width:8px;height:8px;flex:0 0 8px;margin-top:5px;border-radius:50%;background:#2d8651}
+#dashboard-view .notification-entry.is-read .notification-entry-dot{background:#fff;border:1px solid #8aa995}
+#dashboard-view .notification-entry strong{display:block;font-size:12px;color:#245238}
+#dashboard-view .notification-entry p{margin:3px 0;color:#477356;font-size:11px}
+#dashboard-view .notification-entry small,#dashboard-view .notification-empty{color:#66816e;font-size:10px}
+#dashboard-view .notification-entry.is-read{opacity:.72}
+#dashboard-view .notification-empty{padding:18px 8px;text-align:center}
+#dashboard-view .header-notification-count.is-empty{display:none}
+body.dark-mode #dashboard-view .notification-popover{background:#10271b;border-color:#315640;color:#edf7ef}
+body.dark-mode #dashboard-view .notification-popover-head{border-color:#315640}
+body.dark-mode #dashboard-view .notification-popover-head strong,
+body.dark-mode #dashboard-view .notification-entry strong{color:#edf7ef}
+body.dark-mode #dashboard-view .notification-popover-head button{color:#9be4b2}
+body.dark-mode #dashboard-view .notification-entry{border-color:#244b35}
+body.dark-mode #dashboard-view .notification-entry p,
+body.dark-mode #dashboard-view .notification-entry small,
+body.dark-mode #dashboard-view .notification-empty{color:#b3cbbb}
+body.dark-mode #dashboard-view .notification-entry-dot{background:#59d98a}
+@media(max-width:560px){#dashboard-view .notification-popover{right:42px;top:calc(100% + 8px)}}
