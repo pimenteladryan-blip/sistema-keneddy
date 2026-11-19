@@ -159,7 +159,12 @@ async function updateTrip(id, data, actorUserId) {
   await audit(actorUserId, 'update', 'trip', Number(id));
 }
 async function deleteTrip(id, actorUserId) {
-  await store.remove('trips', numericId(id, 'Viagem'));
+  const tripId = numericId(id, 'Viagem');
+  for (const collectionName of ['tripClasses', 'tripStudents', 'tripStaff']) {
+    const related = await store.list(collectionName, { filters: [{ field: 'trip_id', op: '==', value: Number(tripId) }], limit: 1000 });
+    await Promise.all(related.map(item => store.remove(collectionName, item.id)));
+  }
+  await store.remove('trips', tripId);
   await audit(actorUserId, 'delete', 'trip', Number(id));
 }
 
