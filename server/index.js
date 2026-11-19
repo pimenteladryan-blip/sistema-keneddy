@@ -852,18 +852,33 @@ app.get('/api/users', requireAuth, requireRoles('admin', 'direction'), async (_r
 });
 
 
-function tripInput(body) {
+function tripInputError(body) {
   const title = cleanText(body.title, 120);
   const destination = cleanText(body.destination, 160);
   const purpose = cleanText(body.educational_purpose, 500);
   const departure = new Date(body.departure_at);
   const returning = new Date(body.return_at);
   const capacity = Number(body.capacity);
-  if (title.length < 3 || destination.length < 2 || purpose.length < 8 ||
-      !Number.isFinite(departure.getTime()) || !Number.isFinite(returning.getTime()) ||
-      returning <= departure || !Number.isInteger(capacity) || capacity < 1 || capacity > 5000) return null;
+  if (title.length < 3) return 'Informe um título com pelo menos 3 caracteres.';
+  if (destination.length < 2) return 'Informe o destino da viagem.';
+  if (purpose.length < 8) return 'Descreva o objetivo pedagógico com pelo menos 8 caracteres.';
+  if (!Number.isFinite(departure.getTime())) return 'Confira a data e o horário de saída.';
+  if (!Number.isFinite(returning.getTime())) return 'Confira a data e o horário de retorno.';
+  if (returning <= departure) return 'O retorno precisa ser depois da saída.';
+  if (!Number.isInteger(capacity) || capacity < 1 || capacity > 5000) return 'A capacidade deve ser um número inteiro entre 1 e 5.000.';
   const imageData = typeof body.image_data === 'string' ? body.image_data : '';
-  if (imageData && (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(imageData) || imageData.length > 760000)) return null;
+  if (imageData && (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(imageData) || imageData.length > 760000)) return 'A foto não pôde ser validada. Escolha outra imagem menor.';
+  return '';
+}
+function tripInput(body) {
+  if (tripInputError(body)) return null;
+  const title = cleanText(body.title, 120);
+  const destination = cleanText(body.destination, 160);
+  const purpose = cleanText(body.educational_purpose, 500);
+  const departure = new Date(body.departure_at);
+  const returning = new Date(body.return_at);
+  const capacity = Number(body.capacity);
+  const imageData = typeof body.image_data === 'string' ? body.image_data : '';
   return { title, destination, purpose, departure: departure.toISOString(), returning: returning.toISOString(), capacity, imageData };
 }
 function vehicleInput(body) {
@@ -919,7 +934,7 @@ app.get('/api/trips', requireAuth, async (req, res, next) => {
 });
 app.post('/api/trips', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
   const data = tripInput(req.body);
-  if (!data) return res.status(400).json({ error: 'Confira título, destino, objetivo, horários e capacidade da viagem.' });
+  if (!data) return res.status(400).json({ error: tripInputError(req.body) || 'Confira os dados da viagem.' });
   try {
     let id;
     if (firebaseConfigured) {
@@ -941,7 +956,7 @@ app.post('/api/trips', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS
 app.put('/api/trips/:id', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
   const id = Number(req.params.id);
   const data = tripInput(req.body);
-  if (!Number.isSafeInteger(id) || id < 1 || !data) return res.status(400).json({ error: 'Confira os dados e a foto da viagem (imagem até 550 KB).' });
+  if (!Number.isSafeInteger(id) || id < 1 || !data) return res.status(400).json({ error: !data ? (tripInputError(req.body) || 'Confira os dados da viagem.') : 'Identificador da viagem inválido.' });
   try {
     if (firebaseConfigured) {
       const trip = await firestoreSchool.getTrip(id);
