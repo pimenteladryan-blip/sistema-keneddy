@@ -1234,7 +1234,16 @@ app.get('/api/trips/:id/participants', requireAuth, async (req, res, next) => {
     }
     const user = req.auth.user;
     let rows;
-    const query = 'SELECT ts.student_id, s.full_name, ts.authorization_status, ts.departure_present, ts.return_present FROM trip_students ts JOIN students s ON s.id = ts.student_id WHERE ts.trip_id = ? AND s.active = 1';
+    const query = `SELECT ts.student_id, s.full_name,
+      c.grade || ' · ' || CASE c.course WHEN 'adm' THEN 'Técnico ADM' WHEN 'ds' THEN 'Técnico DS' ELSE 'Regular' END ||
+      ' · Turma ' || c.section || ' · ' || c.school_year AS class_label,
+      COALESCE((SELECT GROUP_CONCAT(u.display_name, ', ')
+        FROM student_guardians sg JOIN users u ON u.id = sg.guardian_user_id
+        WHERE sg.student_id = s.id), 'Responsável não cadastrado') AS guardian_name,
+      ts.authorization_status, ts.departure_present, ts.return_present
+      FROM trip_students ts JOIN students s ON s.id = ts.student_id
+      JOIN classes c ON c.id = s.class_id
+      WHERE ts.trip_id = ? AND s.active = 1`;
     if (hasRole(user, RECORD_MANAGERS)) {
       rows = db.prepare(query + ' ORDER BY s.full_name').all(tripId);
     } else if (user.role === 'teacher') {
