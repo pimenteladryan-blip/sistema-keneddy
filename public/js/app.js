@@ -23,6 +23,7 @@ function showDashboard(user) {
   dashboardView.classList.remove('hidden');
   document.querySelector('#welcome-title').textContent = 'Olá, ' + user.name + '!';
   document.querySelector('#user-role').textContent = 'Perfil de acesso: ' + (user.roleLabel || user.role);
+  updateProfileMenu(user);
   const canManage = ['admin', 'direction', 'secretariat'].includes(user.role);
   if (!canManage) lastReport = null;
   document.querySelector('#class-form').classList.toggle('hidden', !canManage);
@@ -412,6 +413,8 @@ function renderHome() {
   const notifications = dashboardTrips.filter(t => ['pending_approval','approved','open'].includes(t.status)).sort((a,b)=>new Date(a.departure_at)-new Date(b.departure_at)).slice(0,4);
   const notif = document.querySelector('#home-notifications');
   document.querySelector('#home-notification-count').textContent = String(notifications.length);
+  const headerCount = document.querySelector('#header-notification-count');
+  if (headerCount) headerCount.textContent = String(notifications.length);
   notif.innerHTML = notifications.length ? notifications.map(t => {
     const label = t.status === 'pending_approval' ? 'Aguardando aprovação' : (t.status === 'approved' ? 'Viagem aprovada' : 'Inscrições abertas');
     return '<article class="home-notification"><span class="notification-mark">↗</span><div><strong>'+escapeHtml(t.title)+'</strong><p>'+escapeHtml(label)+' · '+escapeHtml(t.destination)+'</p><small>'+escapeHtml(dateLabel(t.departure_at))+'</small></div></article>';
@@ -951,6 +954,55 @@ window.addEventListener('appinstalled', () => {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(() => {}));
 }
+function updateProfileMenu(user) {
+  const initials = String(user.name || 'U').trim().split(/\\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase();
+  document.querySelector('#profile-avatar-initials').textContent = initials || 'U';
+  document.querySelector('#profile-menu-name').textContent = user.name || 'Minha conta';
+  document.querySelector('#profile-menu-role').textContent = user.roleLabel || user.role || '';
+  const image = document.querySelector('#profile-avatar-image');
+  const savedPhoto = localStorage.getItem('sgve-profile-photo:' + String(user.email || user.id || user.name));
+  image.hidden = !savedPhoto;
+  image.src = savedPhoto || '';
+  document.querySelector('#profile-avatar-initials').hidden = Boolean(savedPhoto);
+}
+const profileMenuButton = document.querySelector('#profile-menu-button');
+const profileDropdown = document.querySelector('#profile-dropdown');
+profileMenuButton.addEventListener('click', () => {
+  const opening = profileDropdown.classList.contains('hidden');
+  profileDropdown.classList.toggle('hidden', !opening);
+  profileMenuButton.setAttribute('aria-expanded', String(opening));
+});
+document.addEventListener('click', event => {
+  if (!event.target.closest('.profile-menu-wrap')) {
+    profileDropdown.classList.add('hidden');
+    profileMenuButton.setAttribute('aria-expanded', 'false');
+  }
+});
+document.querySelector('#add-profile-photo-button').addEventListener('click', () => document.querySelector('#profile-photo-input').click());
+document.querySelector('#profile-photo-input').addEventListener('change', event => {
+  const file = event.target.files && event.target.files[0];
+  if (!file || !currentUser) return;
+  if (!file.type.startsWith('image/')) { window.alert('Escolha um arquivo de imagem.'); return; }
+  if (file.size > 2 * 1024 * 1024) { window.alert('A foto deve ter no máximo 2 MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const key = 'sgve-profile-photo:' + String(currentUser.email || currentUser.id || currentUser.name);
+    try { localStorage.setItem(key, String(reader.result)); updateProfileMenu(currentUser); }
+    catch { window.alert('Não foi possível salvar a foto neste dispositivo.'); }
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+});
+document.querySelector('#header-notification-button').addEventListener('click', () => {
+  document.querySelector('#home-notifications')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+document.querySelector('#change-profile-button').addEventListener('click', async () => {
+  profileDropdown.classList.add('hidden');
+  logoutButton.disabled = true;
+  try { await api('/api/auth/logout', { method: 'POST', body: '{}' }); if (window.firebase?.apps?.length) await firebase.auth().signOut(); showLogin(); }
+  catch (error) { if (error.name === 'AbortError') return; window.alert(error.message); }
+  finally { logoutButton.disabled = false; }
+});
 logoutButton.addEventListener('click', async () => {
   logoutButton.disabled = true;
   try { await api('/api/auth/logout', { method: 'POST', body: '{}' }); if (window.firebase?.apps?.length) await firebase.auth().signOut(); showLogin(); }
