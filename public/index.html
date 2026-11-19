@@ -10,11 +10,11 @@
   <title>SGVE | Sistema de Gerenciamento de Viagens Escolares</title>
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/sgve-modern.css?v=20261119-2">
-  <link rel="stylesheet" href="/css/sgve-ux.css?v=20261120-trip-crud">
+  <link rel="stylesheet" href="/css/sgve-ux.css?v=20261120-dashboard-center-password">
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
   <script src="/firebase-config.js" defer></script>
-  <script src="/js/app.js?v=20261120-trip-crud" defer></script>
+  <script src="/js/app.js?v=20261120-dashboard-center-password" defer></script>
 </head>
 <body>
   <main class="page-shell">
@@ -67,9 +67,9 @@
           <select id="registration-role" name="role" required>
             <option value="teacher">Professor</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
           </select>
-          <label for="registration-password">Criar senha</label><input id="registration-password" name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required>
-          <small class="field-hint">Use uma senha própria do sistema com pelo menos 14 caracteres. Ela será gerenciada pelo Firebase Authentication e nunca será mostrada ao administrador.</small>
-          <label for="registration-password-confirm">Confirmar senha</label><input id="registration-password-confirm" name="password_confirm" type="password" minlength="14" maxlength="200" autocomplete="new-password" required>
+          <label for="registration-password">Criar senha</label><input id="registration-password" name="password" type="password" minlength="8" maxlength="14" autocomplete="new-password" required>
+          <small class="field-hint">Use uma senha com no mínimo 8 e no máximo 14 caracteres. Ela será gerenciada pelo Firebase Authentication e nunca será mostrada ao administrador.</small>
+          <label for="registration-password-confirm">Confirmar senha</label><input id="registration-password-confirm" name="password_confirm" type="password" minlength="8" maxlength="14" autocomplete="new-password" required>
           <button type="submit" id="registration-submit">Criar conta e enviar solicitação</button>
           <p id="registration-message" class="message" role="status" aria-live="polite"></p>
           <button type="button" class="link-button secondary-link" id="hide-registration">Voltar para entrar</button>
