@@ -2054,3 +2054,134 @@ body.dark-mode #dashboard-view .trip-staff-member {
   #dashboard-view .attendance-section .small-action { min-height:28px!important; }
   #dashboard-view .trip-staff-list { grid-template-columns:minmax(0,1fr)!important; }
 }
+
+
+/* Participantes v2: linha compacta e chamada lado a lado, sem cartões empilhados. */
+#dashboard-view .participant-row {
+  display:grid!important;
+  grid-template-columns:minmax(145px,.8fr) minmax(0,1.7fr)!important;
+  align-items:center!important;
+  gap:8px 12px!important;
+  padding:7px 9px!important;
+  border-radius:9px!important;
+  background:#f7fbf6!important;
+  box-shadow:none!important;
+}
+#dashboard-view .participant-details {
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:2px 6px!important;
+}
+#dashboard-view .participant-details .participant-name {
+  font-size:12px!important;
+  line-height:1.2!important;
+}
+#dashboard-view .participant-details .participant-class {
+  padding:2px 6px!important;
+  font-size:9px!important;
+}
+#dashboard-view .participant-details .participant-guardian,
+#dashboard-view .participant-details .participant-authorization {
+  grid-column:1/-1!important;
+  font-size:9px!important;
+  line-height:1.2!important;
+}
+#dashboard-view .participant-controls {
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:center!important;
+  gap:5px!important;
+  min-width:0!important;
+}
+#dashboard-view .participant-controls > .participant-actions,
+#dashboard-view .participant-controls > .attendance-section {
+  min-width:0!important;
+  margin:0!important;
+}
+#dashboard-view .participant-controls > .participant-actions {
+  grid-column:1/-1!important;
+  display:flex!important;
+  flex-wrap:nowrap!important;
+}
+#dashboard-view .participant-controls .small-action {
+  min-height:25px!important;
+  padding:3px 6px!important;
+  font-size:9px!important;
+  line-height:1.1!important;
+}
+#dashboard-view .participant-controls .attendance-section {
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+  gap:3px!important;
+  padding:5px 6px!important;
+  border:1px solid #dceade!important;
+  border-radius:7px!important;
+  background:#fff!important;
+}
+#dashboard-view .participant-controls .attendance-section h4 {
+  font-size:9px!important;
+  line-height:1.1!important;
+}
+#dashboard-view .participant-controls .attendance-section p {
+  font-size:9px!important;
+  line-height:1.1!important;
+}
+#dashboard-view .participant-controls .attendance-section .participant-actions {
+  display:flex!important;
+  gap:3px!important;
+  width:100%!important;
+}
+#dashboard-view .participant-controls .attendance-section .small-action {
+  flex:1 1 0!important;
+  min-width:0!important;
+  min-height:24px!important;
+  padding:3px 4px!important;
+  font-size:8px!important;
+}
+body.dark-mode #dashboard-view .participant-row {
+  background:#0d3927!important;
+  border-color:#245b3d!important;
+}
+body.dark-mode #dashboard-view .participant-details .participant-name { color:#edf7ef!important; }
+body.dark-mode #dashboard-view .participant-details .participant-class {
+  background:#174b32!important;
+  color:#d5efdc!important;
+}
+body.dark-mode #dashboard-view .participant-details .participant-guardian,
+body.dark-mode #dashboard-view .participant-details .participant-authorization { color:#bcd7c4!important; }
+body.dark-mode #dashboard-view .participant-controls .attendance-section {
+  background:#103b29!important;
+  border-color:#245b3d!important;
+}
+body.dark-mode #dashboard-view .participant-controls .attendance-section h4,
+body.dark-mode #dashboard-view .participant-controls .attendance-section p,
+body.dark-mode #dashboard-view .participant-controls .attendance-section p strong { color:#d5efdc!important; }
+body.dark-mode #dashboard-view .participant-controls .small-action {
+  background:#174b32!important;
+  border-color:#326b4a!important;
+  color:#e7f5ea!important;
+}
+body.dark-mode #dashboard-view .participant-controls .small-action.reject-action {
+  background:#51312e!important;
+  border-color:#80514b!important;
+  color:#ffe9e5!important;
+}
+@media(max-width:650px) {
+  #dashboard-view .participant-row {
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:5px!important;
+    padding:7px 8px!important;
+  }
+  #dashboard-view .participant-details {
+    grid-template-columns:minmax(0,1fr) auto!important;
+  }
+  #dashboard-view .participant-controls {
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:4px!important;
+  }
+  #dashboard-view .participant-controls .attendance-section { padding:4px!important; }
+  #dashboard-view .participant-controls .attendance-section .small-action {
+    min-height:23px!important;
+    font-size:8px!important;
+  }
+}
