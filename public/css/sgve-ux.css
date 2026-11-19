@@ -17,15 +17,16 @@
 #dashboard-view .notification-bell .bell-icon{display:block;width:23px;height:23px;fill:currentColor;stroke:none}
 #dashboard-view .profile-avatar{width:44px;height:44px;border:2px solid #c7e6ce;background:var(--sg2);color:white}
 #dashboard-view .dashboard-welcome-banner{grid-column:2;grid-row:2;display:flex;align-items:center;gap:20px;min-height:76px;padding:14px 20px;border:1px solid #cce5d1;border-radius:16px;background:#d9f0dd;color:#17452e;overflow:hidden}
-#dashboard-view .school-banner-copy{display:grid;gap:5px;flex:1;min-width:0}
+#dashboard-view .school-banner-copy{display:grid;gap:5px;flex:1;min-width:0;text-align:center;justify-items:center}
 #dashboard-view .school-banner-copy strong{font-size:14px}
 #dashboard-view .school-banner-copy span{font-size:11px;color:#5c7765}
 #dashboard-view .banner-years{flex:0 0 auto;padding:0 22px;border-left:2px solid #8fc6a0;font-size:27px;font-weight:850;color:var(--sg)}
 #dashboard-view .banner-years small{font-size:11px;font-weight:600}
-#dashboard-view .dashboard-welcome-banner:after{content:"🚌";font-size:40px;line-height:1;padding:0 12px}
+#dashboard-view .dashboard-welcome-banner:after{content:none;display:none}
+#dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{width:54px;height:54px;flex:0 0 54px;color:#08794d;filter:drop-shadow(0 3px 2px #075b3b18)}
 #dashboard-view .tabs{grid-column:1;grid-row:1 / span 3;position:sticky;top:16px;display:flex;flex-direction:column;align-self:stretch;gap:7px;min-height:calc(100vh - 32px);margin:0;padding:20px 14px;border:0;border-radius:18px;background:var(--sg)}
 #dashboard-view .sgve-brand-lockup{display:flex;align-items:center;gap:10px;margin:0 0 24px;padding:0 3px 22px;border-bottom:1px solid #ffffff35;color:white}
-#dashboard-view .sgve-brand-bus{font-size:34px;line-height:1}
+#dashboard-view .sgve-brand-illustration{width:42px;height:42px;flex:0 0 42px;color:#c9f1d2}
 #dashboard-view .sgve-brand-lockup strong,#dashboard-view .sgve-brand-lockup small{display:block}
 #dashboard-view .sgve-brand-lockup strong{font-size:22px;font-weight:900}
 #dashboard-view .sgve-brand-lockup small{margin-top:2px;font-size:9px;line-height:1.3;color:#d4eadb}
