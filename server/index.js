@@ -478,7 +478,18 @@ app.post('/api/users', requireAuth, requireCsrf, requireRoles(...USER_MANAGERS),
     const email = String(req.body.email || '').trim().toLowerCase();
     const role = String(req.body.role || '');
     const password = String(req.body.password || '');
-    if (name.length < 3 || !validEmail(email) || !VALID_ROLES.includes(role) || password.length < 14 || password.length > 200) return res.status(400).json({ error: 'Informe nome, e-mail, perfil e senha com pelo menos 14 caracteres.' });
+    const rawSubjects = typeof req.body.subjects === 'string' ? req.body.subjects : '';
+    const subjects = role === 'teacher'
+      ? [...new Set(rawSubjects.split(',').map(value => cleanText(value, 50)).filter(Boolean))]
+      : [];
+    if (name.length < 3 || !validEmail(email) || !VALID_ROLES.includes(role) ||
+        password.length < 14 || password.length > 200 ||
+        rawSubjects.length > 1000 || subjects.length > 20 ||
+        (role === 'teacher' && !subjects.length)) {
+      return res.status(400).json({ error: role === 'teacher'
+        ? 'Informe nome, e-mail, senha e ao menos uma disciplina válida.'
+        : 'Informe nome, e-mail, perfil e senha com pelo menos 14 caracteres.' });
+    }
     if (req.auth.user.role === 'secretariat' && !['teacher', 'guardian', 'student'].includes(role)) return res.status(403).json({ error: 'A secretaria não pode criar contas administrativas ou de direção.' });
     if (req.auth.user.role === 'direction' && role === 'admin') return res.status(403).json({ error: 'Somente um administrador pode criar outro administrador.' });
     if (firebaseConfigured) {
@@ -487,7 +498,7 @@ app.post('/api/users', requireAuth, requireCsrf, requireRoles(...USER_MANAGERS),
       });
       try {
         const id = await firestoreAuth.createFirebaseUser({
-          display_name: name, email, firebase_uid: identity.uid, role,
+          display_name: name, email, firebase_uid: identity.uid, role, subjects,
           active: true, actor_user_id: req.auth.user.id
         });
         return res.status(201).json({
@@ -500,7 +511,7 @@ app.post('/api/users', requireAuth, requireCsrf, requireRoles(...USER_MANAGERS),
       }
     }
     const passwordHash = await hashPassword(password);
-    const result = db.prepare('INSERT INTO users (display_name, email, password_hash, role) VALUES (?, ?, ?, ?)').run(name, email, passwordHash, role);
+    const result = db.prepare('INSERT INTO users (display_name, email, password_hash, role, subjects) VALUES (?, ?, ?, ?, ?)').run(name, email, passwordHash, role, JSON.stringify(subjects));
     audit(req.auth.user.id, 'create', 'user', result.lastInsertRowid);
     res.status(201).json({ user: { id: Number(result.lastInsertRowid), name, email, role, roleLabel: ROLE_LABELS[role] }, message: 'Conta criada.' });
   } catch (error) {
@@ -605,7 +616,7 @@ app.get('/api/users', requireAuth, requireRoles('admin', 'direction'), async (_r
       return res.json({ users: users.map(user => ({ id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role], active: user.active })) });
     }
     const rows = db.prepare('SELECT id, display_name, email, role, active FROM users ORDER BY display_name LIMIT 300').all();
-    res.json({ users: rows.map(user => ({ id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role], active: Boolean(user.active) })) });
+    res.json({ users: rows.map(user => ({ id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role], active: Boolean(user.active), subjects: (() => { try { return JSON.parse(user.subjects || '[]'); } catch { return []; } })() })) });
   } catch (error) { next(error); }
 });
 
