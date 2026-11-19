@@ -177,3 +177,46 @@ html body.dark-mode #dashboard-view .count-pill{background:#1b3b29!important;col
 html body.dark-mode #dashboard-view .home-icon{background:#205438!important;color:#bff0ce!important}
 html body.dark-mode #dashboard-view .home-text-button{color:#8ee9ad!important}
 html body.dark-mode #dashboard-view .button-secondary{background:#1b3b29!important;color:#eaf5ed!important;border-color:#315640!important}
+
+
+/* Mobile module navigation: visible horizontal overflow cue, without hiding modules. */
+@media(max-width:900px){
+  #dashboard-view .tabs{
+    position:fixed!important;overflow-x:auto!important;overflow-y:hidden!important;
+    flex-wrap:nowrap!important;scrollbar-width:thin;scrollbar-color:#9bd8b0 transparent;
+    scroll-padding-inline:12px 76px;overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;padding-right:76px!important;
+  }
+  #dashboard-view .tabs::after{
+    content:"Mais ›";position:fixed;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));
+    z-index:2;display:flex;align-items:center;justify-content:center;
+    width:58px;height:44px;border-radius:12px 16px 0 0;
+    background:linear-gradient(90deg,#075b3b00 0%,#075b3b 35%);
+    color:#eaffef;font-size:11px;font-weight:850;letter-spacing:.02em;
+    pointer-events:none;padding-left:9px;
+  }
+  body.dark-mode #dashboard-view .tabs::after{
+    background:linear-gradient(90deg,#052d2000 0%,#052d20 35%);color:#eaffef
+  }
+  #dashboard-view .tabs .tab{scroll-snap-align:start}
+}
+@media(min-width:901px){
+  #dashboard-view .tabs{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#7dbb91 transparent}
+  #dashboard-view .tabs .tab{flex:0 0 auto}
+}
+
+/* Destination imagery on upcoming trip cards. */
+#dashboard-view .upcoming-trip{grid-template-columns:minmax(120px,34%) minmax(0,1fr);align-items:stretch}
+#dashboard-view .upcoming-trip-photo{display:block;width:100%;height:100%;min-height:112px;object-fit:cover}
+#dashboard-view .trip-photo-placeholder{display:flex;min-height:112px;flex-direction:column;align-items:center;justify-content:center;gap:7px;background:linear-gradient(145deg,#d7efdd,#a9d9b8);color:#075b3b}
+#dashboard-view .trip-photo-placeholder span{font-size:30px}
+#dashboard-view .trip-photo-placeholder small{font-size:9px;font-weight:850;letter-spacing:.12em;color:#075b3b}
+#dashboard-view .upcoming-trip-body{display:flex;min-width:0;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px}
+#dashboard-view .trip-photo-credit{font-size:8px!important;line-height:1.25;opacity:.75}
+body.dark-mode #dashboard-view .trip-photo-placeholder{background:linear-gradient(145deg,#1c5637,#0c3422);color:#d8f5df}
+body.dark-mode #dashboard-view .trip-photo-placeholder small{color:#d8f5df}
+@media(max-width:560px){
+  #dashboard-view .upcoming-trip{grid-template-columns:112px minmax(0,1fr);min-height:112px}
+  #dashboard-view .upcoming-trip-photo{min-height:112px}
+  #dashboard-view .trip-photo-placeholder{min-height:112px}
+}
