@@ -381,16 +381,28 @@ async function loadTripParticipants(tripId, area) {
         controls += '<div class="participant-actions"><button type="button" class="small-action" data-participant-action="paper-authorization" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Registrar autorização em papel</button></div>';
       }
       if (canMarkAttendance) {
-        controls += '<div class="participant-actions">' +
-          '<button type="button" class="small-action" data-participant-action="attendance" data-checkpoint="departure" data-present="true" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Presente na saída</button>' +
-          '<button type="button" class="small-action reject-action" data-participant-action="attendance" data-checkpoint="departure" data-present="false" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Ausente na saída</button>' +
-          '<button type="button" class="small-action" data-participant-action="attendance" data-checkpoint="return" data-present="true" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Presente no retorno</button>' +
-          '<button type="button" class="small-action reject-action" data-participant-action="attendance" data-checkpoint="return" data-present="false" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">Ausente no retorno</button></div>';
+        const attendanceButton = (checkpoint, present, label, current) =>
+          '<button type="button" class="small-action ' + (present ? '' : 'reject-action') +
+          (current === present ? ' is-selected' : '') + '" data-participant-action="attendance" data-checkpoint="' + checkpoint +
+          '" data-present="' + present + '" data-trip-id="' + Number(tripId) + '" data-student-id="' + item.student_id + '">' +
+          (current === present ? '✓ ' : '') + label + '</button>';
+        controls += '<section class="attendance-section"><h4>Chamada da ida</h4><p>' +
+          'Situação: <strong>' + escapeHtml(presenceLabel(item.departure_present)) + '</strong></p><div class="participant-actions">' +
+          attendanceButton('departure', true, 'Presente', item.departure_present) +
+          attendanceButton('departure', false, 'Ausente', item.departure_present) +
+          '</div></section>' +
+          '<section class="attendance-section"><h4>Chamada da volta</h4><p>' +
+          'Situação: <strong>' + escapeHtml(presenceLabel(item.return_present)) + '</strong></p><div class="participant-actions">' +
+          attendanceButton('return', true, 'Presente', item.return_present) +
+          attendanceButton('return', false, 'Ausente', item.return_present) +
+          '</div></section>';
       }
-      return '<article class="data-row participant-row"><div class="participant-details"><strong>' + escapeHtml(item.full_name) + '</strong>' +
-        '<span>Autorização: ' + escapeHtml(authorizationLabel(item.authorization_status)) + '</span>' +
-        '<small>Saída: ' + escapeHtml(presenceLabel(item.departure_present)) + ' · Retorno: ' + escapeHtml(presenceLabel(item.return_present)) + '</small></div>' +
-        controls + '</article>';
+      return '<article class="participant-row"><div class="participant-details">' +
+        '<strong class="participant-name">' + escapeHtml(item.full_name) + '</strong>' +
+        '<span class="participant-class">' + escapeHtml(item.class_label || 'Turma não informada') + '</span>' +
+        '<small class="participant-guardian">Responsável: ' + escapeHtml(item.guardian_name || 'Responsável não cadastrado') + '</small>' +
+        '<small class="participant-authorization">Autorização: ' + escapeHtml(authorizationLabel(item.authorization_status)) + '</small>' +
+        '</div>' + controls + '</article>';
     }).join('') : '<p class="muted">Nenhum participante vinculado a esta viagem.</p>';
     area.dataset.loaded = 'true';
   } catch (error) { if (error.name === 'AbortError') return;
