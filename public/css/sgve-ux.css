@@ -1574,3 +1574,146 @@ body.dark-mode #dashboard-view .journey-track{border-color:#4f8d62!important}
     padding-left:5px!important;
   }
 }
+
+/* Correção global de recortes e espaçamentos em todos os módulos.
+   Mantém o conteúdo fluido em telas estreitas e evita que elementos filhos
+   imponham largura maior que a área disponível. */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+body {
+  overflow-x: hidden;
+}
+#dashboard-view,
+#dashboard-view > *,
+#dashboard-view .module-panel,
+#dashboard-view .module-panel > *,
+#dashboard-view .home-grid,
+#dashboard-view .home-card,
+#dashboard-view .data-list,
+#dashboard-view .data-row,
+#dashboard-view .inline-form,
+#dashboard-view .section-heading,
+#dashboard-view .section-heading > div {
+  min-width: 0;
+  max-width: 100%;
+}
+#dashboard-view .module-panel {
+  width: 100%;
+  overflow: visible;
+}
+#dashboard-view .module-panel .section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  height: auto;
+  min-height: 0;
+  margin: 0 0 14px;
+  padding: 0;
+}
+#dashboard-view .module-panel .section-heading > div {
+  flex: 1 1 180px;
+}
+#dashboard-view .module-panel .section-heading .count-pill {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0 9px;
+}
+#dashboard-view .module-panel .inline-form {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+}
+#dashboard-view .module-panel label,
+#dashboard-view .module-panel input,
+#dashboard-view .module-panel select,
+#dashboard-view .module-panel textarea,
+#dashboard-view .module-panel button {
+  min-width: 0;
+  max-width: 100%;
+}
+#dashboard-view .module-panel input,
+#dashboard-view .module-panel select,
+#dashboard-view .module-panel textarea {
+  width: 100%;
+}
+#dashboard-view .module-panel .data-row > *,
+#dashboard-view .module-panel .student-card-main,
+#dashboard-view .module-panel .participant-details {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#dashboard-view .module-panel .report-table-wrap,
+#dashboard-view .module-panel .table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+#dashboard-view .module-panel img,
+#dashboard-view .module-panel svg {
+  max-width: 100%;
+}
+@media (max-width: 900px) {
+  #dashboard-view {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+  #dashboard-view .module-panel {
+    margin: 0;
+    padding: 0;
+  }
+  #dashboard-view .module-panel .section-heading {
+    margin-bottom: 12px;
+  }
+  #dashboard-view .module-panel .inline-form {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+}
+@media (max-width: 560px) {
+  #dashboard-view {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+  #dashboard-view .module-panel .section-heading {
+    align-items: flex-start;
+    gap: 7px 10px;
+    margin-bottom: 11px;
+  }
+  #dashboard-view .module-panel .section-heading h3 {
+    font-size: clamp(19px, 5.5vw, 22px);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+  #dashboard-view .module-panel .section-heading .eyebrow {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  #dashboard-view .module-panel .inline-form {
+    padding: 14px;
+    border-radius: 14px;
+  }
+  #dashboard-view .module-panel .inline-form button {
+    width: 100%;
+  }
+  #dashboard-view .module-panel .data-row {
+    flex-wrap: wrap;
+  }
+  #dashboard-view .tabs {
+    max-width: 100vw;
+    padding-right: max(9px, env(safe-area-inset-right));
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    padding-left: max(9px, env(safe-area-inset-left));
+  }
+}
