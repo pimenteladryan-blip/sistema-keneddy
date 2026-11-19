@@ -40,7 +40,8 @@ function publicUser(user) {
     display_name: user.display_name,
     email: user.email,
     role: user.role,
-    active: user.active === true
+    active: user.active === true,
+    subjects: Array.isArray(user.subjects) ? user.subjects : []
   };
 }
 
@@ -64,7 +65,7 @@ async function listUsers(limit = 300) {
   return users.map(publicUser);
 }
 
-async function createUser({ display_name, email, password_hash, role, active = true, actor_user_id = null }) {
+async function createUser({ display_name, email, password_hash, role, active = true, subjects = [], actor_user_id = null }) {
   const name = typeof display_name === 'string' ? display_name.trim() : '';
   const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
   const validEmail = normalizedEmail.length <= 254 &&
@@ -73,7 +74,8 @@ async function createUser({ display_name, email, password_hash, role, active = t
     /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(password_hash);
   if (name.length < 3 || name.length > 100 || !validEmail ||
       !validPasswordHash || !['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'].includes(role) ||
-      typeof active !== 'boolean') {
+      typeof active !== 'boolean' || !Array.isArray(subjects) || subjects.length > 20 ||
+      subjects.some(subject => typeof subject !== 'string' || !subject.trim() || subject.length > 50)) {
     const error = new Error('Os dados da conta são inválidos.');
     error.code = 'invalid-user';
     throw error;
@@ -84,12 +86,13 @@ async function createUser({ display_name, email, password_hash, role, active = t
     password_hash,
     role,
     active,
+    subjects: role === 'teacher' ? [...new Set(subjects.map(subject => subject.trim()))] : [],
     created_at: now,
     updated_at: now
   }, actor_user_id == null ? null : { actor_user_id, action: 'create', entity_type: 'user' });
 }
 
-async function createFirebaseUser({ display_name, email, firebase_uid, role, active = true, actor_user_id = null }) {
+async function createFirebaseUser({ display_name, email, firebase_uid, role, active = true, subjects = [], actor_user_id = null }) {
   const name = typeof display_name === 'string' ? display_name.trim() : '';
   const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
   if (name.length < 3 || name.length > 100 ||
@@ -97,7 +100,8 @@ async function createFirebaseUser({ display_name, email, firebase_uid, role, act
       normalizedEmail.length > 254 ||
       typeof firebase_uid !== 'string' || !firebase_uid || firebase_uid.length > 128 ||
       !['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'].includes(role) ||
-      typeof active !== 'boolean') {
+      typeof active !== 'boolean' || !Array.isArray(subjects) || subjects.length > 20 ||
+      subjects.some(subject => typeof subject !== 'string' || !subject.trim() || subject.length > 50)) {
     const error = new Error('Os dados da conta Firebase são inválidos.');
     error.code = 'invalid-user';
     throw error;
@@ -105,6 +109,7 @@ async function createFirebaseUser({ display_name, email, firebase_uid, role, act
   const now = new Date().toISOString();
   return store.createUnique('users', 'email', normalizedEmail, {
     display_name: name, firebase_uid, role, active,
+    subjects: role === 'teacher' ? [...new Set(subjects.map(subject => subject.trim()))] : [],
     created_at: now, updated_at: now
   }, actor_user_id == null ? null : {
     actor_user_id: Number(actor_user_id), action: 'create', entity_type: 'user'
