@@ -889,3 +889,48 @@ body.dark-mode #dashboard-view .notification-channels i{background:#65d990!impor
  #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{display:none!important}
  #dashboard-view .dashboard-welcome-banner>.banner-years{grid-column:1!important;grid-row:2!important;justify-self:center!important;border:0!important;padding:0!important}
 }
+
+
+/* Centralização geométrica do banner: elementos laterais ocupam colunas próprias. */
+#dashboard-view .dashboard-welcome-banner{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr)!important;
+  align-items:center!important;
+  column-gap:12px!important;
+}
+#dashboard-view .dashboard-welcome-banner>.school-banner-copy{
+  grid-column:2!important;
+  grid-row:1!important;
+  width:100%!important;
+  min-width:0!important;
+  justify-self:stretch!important;
+  text-align:center!important;
+  justify-items:center!important;
+}
+#dashboard-view .dashboard-welcome-banner>.banner-years{
+  grid-column:3!important;
+  grid-row:1!important;
+  justify-self:end!important;
+  text-align:center!important;
+}
+#dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{
+  grid-column:1!important;
+  grid-row:1!important;
+  justify-self:start!important;
+}
+@media(max-width:600px){
+  #dashboard-view .dashboard-welcome-banner{
+    grid-template-columns:48px minmax(0,1fr) auto!important;
+    column-gap:8px!important;
+  }
+  #dashboard-view .dashboard-welcome-banner>.school-banner-copy{
+    grid-column:2!important;
+  }
+  #dashboard-view .dashboard-welcome-banner>.banner-years{
+    grid-column:3!important;
+    padding:0 0 0 8px!important;
+  }
+  #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{
+    width:44px!important;height:44px!important;flex-basis:44px!important;
+  }
+}
