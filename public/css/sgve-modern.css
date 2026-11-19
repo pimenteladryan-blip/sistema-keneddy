@@ -255,3 +255,6 @@ html body #dashboard-view .home-card:nth-child(4) { background: #dff0e5 !importa
 #dashboard-view .profile-dropdown button:hover{background:#dceedd!important}
 #dashboard-view .profile-dropdown .profile-logout{color:#a23c35!important}
 @media(max-width:560px){#dashboard-view .welcome-row{gap:8px!important;padding:12px!important}#dashboard-view .header-actions{gap:8px!important}#dashboard-view .profile-avatar{width:42px!important;height:42px!important;min-width:42px!important}#dashboard-view .notification-bell{width:40px!important;height:40px!important}}
+
+#dashboard-view .notification-bell .bell-icon{display:block!important;width:23px!important;height:23px!important;min-width:23px!important;fill:#075b3b!important;stroke:none!important;opacity:1!important;visibility:visible!important}
+#dashboard-view .notification-bell{color:#075b3b!important}
