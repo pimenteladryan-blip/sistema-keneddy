@@ -472,6 +472,44 @@ app.post('/api/students/:id/guardians', requireAuth, requireCsrf, requireRoles(.
   } catch (error) { next(error); }
 });
 
+app.get('/api/teachers', requireAuth, requireRoles(...USER_MANAGERS), async (_req, res, next) => {
+  try {
+    const teachers = firebaseConfigured
+      ? await firestoreSchool.listTeachers()
+      : db.prepare('SELECT id, name, subjects FROM teachers WHERE active = 1 ORDER BY name LIMIT 1000').all()
+        .map(item => ({ ...item, subjects: (() => { try { return JSON.parse(item.subjects || '[]'); } catch { return []; } })() }));
+    res.json({ teachers });
+  } catch (error) { next(error); }
+});
+
+app.post('/api/teachers', requireAuth, requireCsrf, requireRoles(...USER_MANAGERS), async (req, res, next) => {
+  try {
+    const name = cleanText(req.body.name, 100);
+    const rawSubjects = Array.isArray(req.body.subjects)
+      ? req.body.subjects.join(',')
+      : String(req.body.subjects || '');
+    const subjects = [...new Set(rawSubjects.split(',').map(value => cleanText(value, 60)).filter(Boolean))];
+    if (name.length < 3 || rawSubjects.length > 1200 || !subjects.length || subjects.length > 30) {
+      return res.status(400).json({ error: 'Informe o nome do professor e ao menos uma disciplina válida.' });
+    }
+    let id;
+    if (firebaseConfigured) {
+      id = await firestoreSchool.createTeacher(name, subjects, req.auth.user.id);
+    } else {
+      const result = db.prepare('INSERT INTO teachers (name, subjects, created_by) VALUES (?, ?, ?)')
+        .run(name, JSON.stringify(subjects), req.auth.user.id);
+      id = Number(result.lastInsertRowid);
+      audit(req.auth.user.id, 'create', 'teacher', id);
+    }
+    res.status(201).json({ teacher: { id, name, subjects, active: true }, message: 'Professor cadastrado.' });
+  } catch (error) {
+    if (error.code === 'already-exists' || /UNIQUE constraint failed/i.test(error.message || '')) {
+      return res.status(409).json({ error: 'Já existe um professor com esse nome.' });
+    }
+    next(error);
+  }
+});
+
 app.post('/api/users', requireAuth, requireCsrf, requireRoles(...USER_MANAGERS), async (req, res, next) => {
   try {
     const name = cleanText(req.body.name, 100);
