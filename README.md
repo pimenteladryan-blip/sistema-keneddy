@@ -28,6 +28,7 @@ Para verificar a sintaxe JavaScript:
 
 ```bash
 npm run check
+npm test
 ```
 
 ## Configuração Firebase
