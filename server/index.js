@@ -14,6 +14,7 @@ const { db, audit } = firebaseConfigured ? { db: null, audit: () => {} } : requi
 const { getAuth } = require('firebase-admin/auth');
 const firestoreAuth = require('./firestore-auth');
 const firestoreSchool = require('./firestore-school');
+const firestoreStore = require('./firestore-store');
 const { hashPassword, verifyPassword, randomToken, sha256 } = require('./security');
 const { randomInt } = require('node:crypto');
 const { createMemoryRateLimiter } = require('./rate-limit');
@@ -372,6 +373,88 @@ async function sendPushToUserIds(userIds, notification) {
   }
   return { sent, devices, disabled: false };
 }
+
+const TRIP_REMINDER_WINDOW_MS = 45 * 1000;
+let tripReminderCheckRunning = false;
+function tripReminderMessage(trip, checkpoint) {
+  const isReturn = checkpoint === 'return';
+  const when = isReturn ? trip.return_at : trip.departure_at;
+  const label = when ? new Date(when).toLocaleTimeString('pt-BR', {
+    hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo'
+  }) : '';
+  return {
+    title: isReturn ? 'Hora do retorno!' : 'Hora da viagem!',
+    body: (trip.title || 'Viagem escolar') + ' • ' + (isReturn
+      ? 'Retorno previsto para agora' : 'Saída prevista para agora') +
+      (label ? ' (' + label + ')' : '') + '. Confira as orientações no SGVE.',
+    url: '/'
+  };
+}
+async function tripReminderRecipients(tripId) {
+  if (firebaseConfigured) {
+    const [links, staff, students, guardians, users] = await Promise.all([
+      firestoreStore.list('tripStudents', { filters: [{ field: 'trip_id', op: '==', value: Number(tripId) }], limit: 1000 }),
+      firestoreStore.list('tripStaff', { filters: [{ field: 'trip_id', op: '==', value: Number(tripId) }], limit: 500 }),
+      firestoreStore.list('students', { limit: 2000 }),
+      firestoreStore.list('studentGuardians', { limit: 2000 }),
+      firestoreStore.list('users', { limit: 2000 })
+    ]);
+    const studentIds = new Set(links.map(item => Number(item.student_id)));
+    const ids = new Set(staff.map(item => Number(item.user_id)));
+    students.filter(item => studentIds.has(Number(item.id)) && item.active !== false)
+      .forEach(item => { if (item.user_id) ids.add(Number(item.user_id)); });
+    guardians.filter(item => studentIds.has(Number(item.student_id)))
+      .forEach(item => { if (item.guardian_user_id) ids.add(Number(item.guardian_user_id)); });
+    const activeIds = new Set(users.filter(item => item.active === true).map(item => Number(item.id)));
+    return [...ids].filter(id => activeIds.has(id) && Number.isSafeInteger(id) && id > 0);
+  }
+  const rows = db.prepare(`
+    SELECT DISTINCT u.id
+    FROM users u
+    LEFT JOIN trip_staff tsf ON tsf.user_id = u.id AND tsf.trip_id = ?
+    LEFT JOIN trip_students ts ON ts.trip_id = ?
+    LEFT JOIN students s ON s.id = ts.student_id AND s.user_id = u.id AND s.active = 1
+    LEFT JOIN student_guardians sg ON sg.student_id = ts.student_id AND sg.guardian_user_id = u.id
+    WHERE u.active = 1 AND (tsf.user_id IS NOT NULL OR s.user_id IS NOT NULL OR sg.guardian_user_id IS NOT NULL)
+  `).all(Number(tripId), Number(tripId));
+  return rows.map(row => Number(row.id));
+}
+async function processTripTimeNotifications() {
+  if (tripReminderCheckRunning) return;
+  tripReminderCheckRunning = true;
+  try {
+    const now = Date.now();
+    const from = new Date(now - TRIP_REMINDER_WINDOW_MS).toISOString();
+    const to = new Date(now + TRIP_REMINDER_WINDOW_MS).toISOString();
+    const trips = firebaseConfigured
+      ? await firestoreStore.list('trips', { limit: 1000 })
+      : db.prepare("SELECT id, title, departure_at, return_at, status, departure_notified_at, return_notified_at FROM trips WHERE status IN ('approved','open')").all();
+    for (const trip of trips) {
+      if (!['approved', 'open'].includes(trip.status)) continue;
+      for (const checkpoint of ['departure', 'return']) {
+        const field = checkpoint === 'departure' ? 'departure_at' : 'return_at';
+        const marker = checkpoint === 'departure' ? 'departure_notified_at' : 'return_notified_at';
+        const scheduled = new Date(trip[field]).getTime();
+        if (!Number.isFinite(scheduled) || trip[marker] || scheduled < Date.parse(from) || scheduled > Date.parse(to)) continue;
+        const recipients = await tripReminderRecipients(trip.id);
+        if (recipients.length) {
+          const result = await sendPushToUserIds(recipients, tripReminderMessage(trip, checkpoint));
+          console.info('Aviso de horário da viagem:', checkpoint, '| viagem:', trip.id, '| dispositivos aceitos:', result.sent);
+        } else {
+          console.info('Aviso de horário da viagem sem destinatários registrados:', checkpoint, '| viagem:', trip.id);
+        }
+        const timestamp = new Date().toISOString();
+        if (firebaseConfigured) await firestoreStore.update('trips', trip.id, { [marker]: timestamp, updated_at: timestamp });
+        else db.prepare('UPDATE trips SET ' + marker + ' = ? WHERE id = ?').run(timestamp, Number(trip.id));
+      }
+    }
+  } catch (error) {
+    console.error('Falha ao verificar avisos de horário das viagens:', error.message);
+  } finally {
+    tripReminderCheckRunning = false;
+  }
+}
+
 async function notifyRoles(roles, notification) {
   try {
     if (!firebaseConfigured || !firestore) {
@@ -1517,7 +1600,13 @@ app.use((error, _req, res, _next) => {
   console.error(error);
   res.status(500).json({ error: 'Ocorreu um erro interno.' });
 });
-bootstrapAdmin().then(() => app.listen(PORT, () => console.log('SGVE disponível na porta ' + PORT))).catch(error => {
+bootstrapAdmin().then(() => {
+  app.listen(PORT, () => {
+    console.log('SGVE disponível na porta ' + PORT);
+    processTripTimeNotifications();
+    setInterval(processTripTimeNotifications, 30000).unref();
+  });
+}).catch(error => {
   console.error('Falha ao preparar o SGVE:', error.message);
   process.exit(1);
 });
