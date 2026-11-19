@@ -8,7 +8,7 @@ A proposta é reunir, em um só lugar, informações sobre viagens, estudantes, 
 
 **[ABRIR SGVE | Sistema hospedado no Render](https://sistema-keneddy.onrender.com/)**
 
-Hospedagem principal: **Render (Web Service)**. O endereço acima abre a versão do sistema hospedada no Render. A demonstração estática antiga do GitHub Pages pode continuar disponível separadamente em [GitHub Pages](https://pimenteladryan-blip.github.io/sistema-keneddy/).
+Hospedagem principal: **Render (Web Service)**. O endereço acima abre a versão atual do sistema.
 
 ## Funcionalidades
 
