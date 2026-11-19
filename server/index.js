@@ -29,7 +29,7 @@ app.disable('x-powered-by');
 app.use(helmet({ contentSecurityPolicy: { directives: {
   defaultSrc: ["'self'"], scriptSrc: ["'self'", 'https://www.gstatic.com'], styleSrc: ["'self'"],
   imgSrc: ["'self'", 'data:'],
-  connectSrc: ["'self'", 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://www.googleapis.com'],
+  connectSrc: ["'self'", 'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://www.googleapis.com', 'https://firebaseinstallations.googleapis.com', 'https://fcmregistrations.googleapis.com', 'https://fcm.googleapis.com'],
   frameSrc: ["'self'", 'https://svge-14ec7.firebaseapp.com'], objectSrc: ["'none'"],
   frameAncestors: ["'none'"], upgradeInsecureRequests: isProduction ? [] : null
 } } }));
