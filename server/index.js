@@ -198,7 +198,7 @@ app.post('/api/registration-requests', async (req, res, next) => {
     const decoded = await getAuth(firebaseApp).verifyIdToken(idToken, true);
     if (decoded.aud !== projectId || decoded.iss !== 'https://securetoken.google.com/' + projectId ||
         decoded.firebase?.sign_in_provider !== 'password' ||
-        decoded.email !== email || typeof decoded.uid !== 'string') {
+        String(decoded.email || '').trim().toLowerCase() !== email || typeof decoded.uid !== 'string') {
       return res.status(401).json({ error: 'Não foi possível confirmar a conta Firebase deste e-mail.' });
     }
     await firestoreAuth.createFirebaseRegistrationRequest({
