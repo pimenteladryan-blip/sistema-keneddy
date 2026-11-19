@@ -237,15 +237,18 @@
           <form id="user-form" class="inline-form">
             <label>Nome<input name="name" maxlength="100" required></label>
             <label>E-mail<input name="email" type="email" maxlength="254" required></label>
-            <label>Perfil<select name="role" required>
+            <label>Perfil<select name="role" id="user-role" required>
               <option value="teacher">Professor</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
               <option value="secretariat" data-admin-only>Secretaria</option><option value="direction" data-admin-only>Direção</option><option value="admin" data-admin-only>Administrador</option>
             </select></label>
+            <label id="teacher-subjects-field" class="hidden">Disciplinas (separe por vírgula)<input name="subjects" maxlength="1000" placeholder="Ex.: Matemática, Física, Ciências"></label>
             <label>Senha inicial<input name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
             <button type="submit">Criar conta</button>
           </form>
           <p id="user-message" class="message" role="status"></p>
-          <p class="privacy-note">A senha deve ter pelo menos 14 caracteres. Entregue as credenciais de forma privada e nunca as envie pelo repositório.</p>
+          <p class="privacy-note">Para professores, informe também as disciplinas. A senha deve ter pelo menos 14 caracteres e deve ser entregue de forma privada.</p>
+          <div class="section-heading guardian-list-heading"><div><h4>Professores cadastrados</h4><p class="section-subtitle">Professores ativos e suas disciplinas.</p></div></div>
+          <div id="teachers-list" class="data-list"><p class="muted">Carregando professores...</p></div>
           <section id="registration-requests-section" class="registration-requests-section hidden">
             <div class="section-heading"><div><p class="eyebrow green">ANÁLISE DE ACESSO</p><h3>Solicitações pendentes</h3><p class="section-subtitle">Somente o administrador pode aprovar ou rejeitar cadastros.</p></div><span id="registration-requests-count" class="count-pill">0</span></div>
             <p id="registration-requests-message" class="message" role="status"></p>
