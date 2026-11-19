@@ -86,6 +86,7 @@
         <nav class="tabs" aria-label="Módulos do sistema">
           <button type="button" class="tab active" data-tab="classes-panel">Turmas</button>
           <button type="button" class="tab" data-tab="students-panel" id="students-tab">Estudantes</button>
+          <button type="button" class="tab" data-tab="teachers-panel" id="teachers-tab">Professores</button>
           <button type="button" class="tab" data-tab="trips-panel">Viagens</button>
           <button type="button" class="tab" data-tab="vehicles-panel" id="vehicles-tab">Transportes</button>
           <button type="button" class="tab" data-tab="reports-panel" id="reports-tab">Relatórios</button>
@@ -215,6 +216,16 @@
           <p id="report-message" class="message" role="status"></p>
           <p class="privacy-note">O relatório mostra apenas totais e dados operacionais da viagem. Não exporta nomes, contatos ou documentos de estudantes.</p>
         </section>
+        <section id="teachers-panel" class="module-panel hidden">
+          <div class="section-heading"><div><p class="eyebrow green">EQUIPE ESCOLAR</p><h3>Professores</h3><p class="section-subtitle">Cadastre os professores e suas disciplinas. O acesso por e-mail é gerenciado separadamente em Contas.</p></div><span id="teachers-count" class="count-pill">0</span></div>
+          <form id="teacher-form" class="inline-form">
+            <label>Nome completo<input name="name" maxlength="100" autocomplete="name" placeholder="Nome do professor" required></label>
+            <label>Disciplinas (separe por vírgula)<input name="subjects" maxlength="1200" placeholder="Ex.: Matemática, Física, Ciências" required></label>
+            <button type="submit">Cadastrar professor</button>
+          </form>
+          <p id="teacher-message" class="message" role="status" aria-live="polite"></p>
+          <div id="teachers-list" class="data-list"><p class="muted">Carregando professores...</p></div>
+        </section>
         <section id="guardians-panel" class="module-panel hidden">
           <div class="section-heading">
             <div><p class="eyebrow green">FAMÍLIA E COMUNIDADE</p><h3>Cadastro de responsáveis</h3><p class="section-subtitle">Crie o acesso da família e depois vincule-o ao estudante.</p></div>
@@ -241,14 +252,11 @@
               <option value="teacher">Professor</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
               <option value="secretariat" data-admin-only>Secretaria</option><option value="direction" data-admin-only>Direção</option><option value="admin" data-admin-only>Administrador</option>
             </select></label>
-            <label id="teacher-subjects-field" class="hidden">Disciplinas (separe por vírgula)<input name="subjects" maxlength="1000" placeholder="Ex.: Matemática, Física, Ciências"></label>
             <label>Senha inicial<input name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
             <button type="submit">Criar conta</button>
           </form>
           <p id="user-message" class="message" role="status"></p>
-          <p class="privacy-note">Para professores, informe também as disciplinas. A senha deve ter pelo menos 14 caracteres e deve ser entregue de forma privada.</p>
-          <div class="section-heading guardian-list-heading"><div><h4>Professores cadastrados</h4><p class="section-subtitle">Professores ativos e suas disciplinas.</p></div></div>
-          <div id="teachers-list" class="data-list"><p class="muted">Carregando professores...</p></div>
+          <p class="privacy-note">Cadastre aqui o e-mail e o perfil de acesso de cada pessoa. A senha inicial deve ter pelo menos 14 caracteres e ser entregue de forma privada.</p>
           <section id="registration-requests-section" class="registration-requests-section hidden">
             <div class="section-heading"><div><p class="eyebrow green">ANÁLISE DE ACESSO</p><h3>Solicitações pendentes</h3><p class="section-subtitle">Somente o administrador pode aprovar ou rejeitar cadastros.</p></div><span id="registration-requests-count" class="count-pill">0</span></div>
             <p id="registration-requests-message" class="message" role="status"></p>
