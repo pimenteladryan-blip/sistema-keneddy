@@ -348,6 +348,70 @@ async function createRegistrationRequest({ display_name, email, password_hash, r
   }, ['rejected']);
 }
 
+async function createFirebaseRegistrationRequest({ display_name, email, firebase_uid, role }) {
+  const name = typeof display_name === 'string' ? display_name.trim() : '';
+  const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  if (name.length < 3 || name.length > 100 ||
+      !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(normalizedEmail) ||
+      normalizedEmail.length > 254 ||
+      typeof firebase_uid !== 'string' || !firebase_uid || firebase_uid.length > 128 ||
+      !['teacher', 'guardian', 'student'].includes(role)) {
+    const error = new Error('Os dados da solicitação são inválidos.');
+    error.code = 'invalid-request';
+    throw error;
+  }
+  if (await findUserByEmail(normalizedEmail)) {
+    const error = new Error('Este e-mail já possui uma conta.');
+    error.code = 'already-exists';
+    throw error;
+  }
+  const now = new Date().toISOString();
+  return store.upsertUnique('registrationRequests', 'email', normalizedEmail, {
+    display_name: name, email: normalizedEmail, firebase_uid, role,
+    status: 'pending', reviewed_by: null, reviewed_at: null, created_at: now
+  }, {
+    display_name: name, firebase_uid, role, status: 'pending',
+    reviewed_by: null, reviewed_at: null, created_at: now
+  }, ['rejected']);
+}
+
+async function reviewFirebaseRegistrationRequest(id, reviewerId, decision, verifiedFirebaseUser) {
+  const reviewer = Number(reviewerId);
+  if (!Number.isSafeInteger(reviewer) || reviewer < 1 ||
+      !['approved', 'rejected'].includes(decision)) throw new TypeError('Revisão inválida.');
+  const request = await store.get('registrationRequests', id);
+  if (!request || request.status !== 'pending' || !request.firebase_uid) {
+    const error = new Error('Solicitação não encontrada ou já analisada.');
+    error.code = 'not-found';
+    throw error;
+  }
+  if (decision === 'approved') {
+    if (!verifiedFirebaseUser || verifiedFirebaseUser.uid !== request.firebase_uid ||
+        verifiedFirebaseUser.emailVerified !== true ||
+        String(verifiedFirebaseUser.email || '').toLowerCase() !== request.email) {
+      const error = new Error('O e-mail desta pessoa ainda não foi verificado.');
+      error.code = 'email-not-verified';
+      throw error;
+    }
+    const userId = await store.createUnique('users', 'email', request.email, {
+      display_name: request.display_name,
+      firebase_uid: request.firebase_uid,
+      role: request.role,
+      active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }, { actor_user_id: reviewer, action: 'approve_registration', entity_type: 'registration_request' });
+    await store.update('registrationRequests', id, {
+      status: 'approved', reviewed_by: reviewer, reviewed_at: new Date().toISOString()
+    });
+    return userId;
+  }
+  await store.update('registrationRequests', id, {
+    status: 'rejected', reviewed_by: reviewer, reviewed_at: new Date().toISOString()
+  });
+  return null;
+}
+
 async function listPendingRegistrationRequests() {
   return store.list('registrationRequests', {
     filters: [{ field: 'status', op: '==', value: 'pending' }],
@@ -441,6 +505,10 @@ module.exports = {
   consumeRateLimit,
   resetRateLimit,
   createRegistrationRequest,
+  createFirebaseRegistrationRequest,
+  reviewFirebaseRegistrationRequest,
+  createFirebaseUser,
+  setFirebaseUid,
   listPendingRegistrationRequests,
   reviewRegistrationRequest
 };
