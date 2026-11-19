@@ -1125,6 +1125,30 @@ window.addEventListener('appinstalled', () => {
 
 let pushMessageHandlerReady = false;
 let pushVapidKey = '';
+
+async function displayForegroundPush(messaging, registration) {
+  if (pushMessageHandlerReady) return;
+  messaging.onMessage(async payload => {
+    const title = payload.notification?.title || payload.data?.title || 'SGVE';
+    const body = payload.notification?.body || payload.data?.body || 'Você recebeu uma nova atualização.';
+    try {
+      const readyRegistration = registration || await navigator.serviceWorker.ready;
+      await readyRegistration.showNotification(title, {
+        body,
+        icon: '/icon.svg',
+        badge: '/icon.svg',
+        requireInteraction: true,
+        vibrate: [180, 80, 180],
+        data: { url: payload.fcmOptions?.link || payload.data?.url || '/' }
+      });
+    } catch (error) {
+      console.warn('Não foi possível exibir o aviso do SGVE:', error);
+    }
+    const currentStatus = document.querySelector('#push-status');
+    if (currentStatus) currentStatus.textContent = 'Notificação recebida: ' + title;
+  });
+  pushMessageHandlerReady = true;
+}
 async function enableDevicePush() {
   const button = document.querySelector('#enable-push-button');
   const status = document.querySelector('#push-status');
@@ -1163,16 +1187,7 @@ async function enableDevicePush() {
     });
     if (!token) throw new Error('O Firebase não retornou um identificador para este dispositivo.');
     await api('/api/push/register', { method: 'POST', body: JSON.stringify({ token }) });
-    if (!pushMessageHandlerReady) {
-      messaging.onMessage(payload => {
-        const title = payload.notification?.title || 'SGVE';
-        const body = payload.notification?.body || 'Você recebeu uma nova atualização.';
-        try { new Notification(title, { body, icon: '/icon.svg', tag: 'sgve-foreground' }); } catch {}
-        const currentStatus = document.querySelector('#push-status');
-        if (currentStatus) currentStatus.textContent = 'Notificação recebida: ' + title;
-      });
-      pushMessageHandlerReady = true;
-    }
+    await displayForegroundPush(messaging, registration);
     button.textContent = 'Notificações ativadas';
     button.hidden = true;
     document.querySelector('#disable-push-button').hidden = false;
@@ -1202,14 +1217,7 @@ async function syncExistingDevicePush() {
     enableButton.hidden = true;
     disableButton.hidden = false;
     status.textContent = 'Notificações ativadas neste dispositivo. Você não precisa repetir essa etapa.';
-    if (!pushMessageHandlerReady) {
-      messaging.onMessage(payload => {
-        const title = payload.notification?.title || 'SGVE';
-        const body = payload.notification?.body || 'Você recebeu uma nova atualização.';
-        try { new Notification(title, { body, icon: '/icon.svg', tag: 'sgve-foreground' }); } catch {}
-      });
-      pushMessageHandlerReady = true;
-    }
+    await displayForegroundPush(messaging, registration);
   } catch (error) {
     console.warn('Não foi possível restaurar o registro de notificações:', error.message);
   }
