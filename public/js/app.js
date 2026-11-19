@@ -703,6 +703,9 @@ document.querySelector('#trips-list').addEventListener('click', async event => {
 document.querySelectorAll('.tab').forEach(button => button.addEventListener('click', () => {
   document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab === button));
   document.querySelectorAll('.module-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== button.dataset.tab));
+  if (window.matchMedia('(max-width: 900px)').matches) {
+    button.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+  }
 }));
 document.querySelector('#class-form').addEventListener('submit', async event => {
   event.preventDefault();
