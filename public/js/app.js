@@ -855,6 +855,11 @@ registrationForm.addEventListener('submit', async event => {
   registrationMessage.textContent = '';
   registrationMessage.classList.remove('error-text');
   const values = Object.fromEntries(new FormData(registrationForm).entries());
+  if (values.password.length < 8 || values.password.length > 14) {
+    showMessage('#registration-message', 'A senha deve ter entre 8 e 14 caracteres.', true);
+    document.querySelector('#registration-password').focus();
+    return;
+  }
   if (values.password !== values.password_confirm) {
     showMessage('#registration-message', 'As senhas não coincidem.', true);
     return;
