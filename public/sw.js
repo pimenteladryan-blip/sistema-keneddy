@@ -1,8 +1,9 @@
 'use strict';
 
-const CACHE_NAME = 'sgve-static-v1';
+const CACHE_NAME = 'sgve-static-v2';
 const STATIC_ASSETS = [
   '/css/styles.css',
+  '/css/sgve-modern.css',
   '/js/app.js',
   '/manifest.webmanifest',
   '/icon.svg'
