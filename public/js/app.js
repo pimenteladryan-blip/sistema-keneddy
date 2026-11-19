@@ -955,7 +955,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(() => {}));
 }
 function updateProfileMenu(user) {
-  const initials = String(user.name || 'U').trim().split(/\\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase();
+  const initials = String(user.name || 'U').trim().split(/\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase();
   document.querySelector('#profile-avatar-initials').textContent = initials || 'U';
   document.querySelector('#profile-menu-name').textContent = user.name || 'Minha conta';
   document.querySelector('#profile-menu-role').textContent = user.roleLabel || user.role || '';
