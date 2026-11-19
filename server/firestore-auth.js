@@ -379,37 +379,70 @@ async function reviewFirebaseRegistrationRequest(id, reviewerId, decision, verif
   const reviewer = Number(reviewerId);
   if (!Number.isSafeInteger(reviewer) || reviewer < 1 ||
       !['approved', 'rejected'].includes(decision)) throw new TypeError('Revisão inválida.');
-  const request = await store.get('registrationRequests', id);
-  if (!request || request.status !== 'pending' || !request.firebase_uid) {
-    const error = new Error('Solicitação não encontrada ou já analisada.');
-    error.code = 'not-found';
-    throw error;
-  }
-  if (decision === 'approved') {
+  const db = require('./firebase').firestore;
+  if (!db) throw new Error('Firestore não configurado.');
+  const requestRef = db.collection('registration_requests').doc(String(id));
+  const auditRef = db.collection('audit_logs').doc();
+  const counterRef = db.collection('_sgve_counters').doc('users');
+  return db.runTransaction(async transaction => {
+    const requestSnapshot = await transaction.get(requestRef);
+    if (!requestSnapshot.exists || requestSnapshot.data().status !== 'pending' ||
+        !requestSnapshot.data().firebase_uid) {
+      const error = new Error('Solicitação não encontrada ou já analisada.');
+      error.code = 'not-found';
+      throw error;
+    }
+    const request = requestSnapshot.data();
+    const now = new Date().toISOString();
+    if (decision === 'rejected') {
+      transaction.update(requestRef, {
+        status: 'rejected', reviewed_by: reviewer, reviewed_at: now
+      });
+      transaction.create(auditRef, {
+        actor_user_id: reviewer, action: 'reject_registration',
+        entity_type: 'registration_request', entity_id: String(id), created_at: now
+      });
+      return null;
+    }
     if (!verifiedFirebaseUser || verifiedFirebaseUser.uid !== request.firebase_uid ||
         verifiedFirebaseUser.emailVerified !== true ||
-        String(verifiedFirebaseUser.email || '').toLowerCase() !== request.email) {
+        String(verifiedFirebaseUser.email || '').trim().toLowerCase() !== request.email) {
       const error = new Error('O e-mail desta pessoa ainda não foi verificado.');
       error.code = 'email-not-verified';
       throw error;
     }
-    const userId = await store.createUnique('users', 'email', request.email, {
+    const digest = crypto.createHash('sha256').update(request.email).digest('hex');
+    const indexRef = db.collection('_sgve_unique_indexes').doc('users_email_' + digest);
+    const [indexSnapshot, counterSnapshot] = await Promise.all([
+      transaction.get(indexRef), transaction.get(counterRef)
+    ]);
+    if (indexSnapshot.exists) {
+      const error = new Error('Já existe uma conta com este e-mail.');
+      error.code = 'already-exists';
+      throw error;
+    }
+    const userId = (counterSnapshot.exists ? Number(counterSnapshot.data().value) : 0) + 1;
+    if (!Number.isSafeInteger(userId) || userId < 1) throw new Error('Contador de usuários inválido.');
+    transaction.create(db.collection('users').doc(String(userId)), {
       display_name: request.display_name,
+      email: request.email,
       firebase_uid: request.firebase_uid,
       role: request.role,
       active: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }, { actor_user_id: reviewer, action: 'approve_registration', entity_type: 'registration_request' });
-    await store.update('registrationRequests', id, {
-      status: 'approved', reviewed_by: reviewer, reviewed_at: new Date().toISOString()
+      created_at: now,
+      updated_at: now
+    });
+    transaction.set(counterRef, { value: userId, updated_at: now });
+    transaction.create(indexRef, { documentId: String(userId), value: request.email });
+    transaction.update(requestRef, {
+      status: 'approved', reviewed_by: reviewer, reviewed_at: now
+    });
+    transaction.create(auditRef, {
+      actor_user_id: reviewer, action: 'approve_registration',
+      entity_type: 'registration_request', entity_id: String(id), created_at: now
     });
     return userId;
-  }
-  await store.update('registrationRequests', id, {
-    status: 'rejected', reviewed_by: reviewer, reviewed_at: new Date().toISOString()
   });
-  return null;
 }
 
 async function listPendingRegistrationRequests() {

@@ -24,7 +24,7 @@ Sistema de Gerenciamento de Viagens Escolares do Colégio Estadual Presidente Ke
 
 ## Executar localmente
 
-Requer Node.js 20 ou superior.
+Requer Node.js 22.5 ou superior.
 
 ```bash
 npm start
