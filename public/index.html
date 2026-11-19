@@ -10,7 +10,7 @@
   <title>SGVE | Sistema de Gerenciamento de Viagens Escolares</title>
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/sgve-modern.css?v=20261118-4">
-  <link rel="stylesheet" href="/css/sgve-ux.css?v=20261118-4">
+  <link rel="stylesheet" href="/css/sgve-ux.css?v=20261118-5">
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
   <script src="/firebase-config.js" defer></script>
@@ -35,7 +35,7 @@
       <div class="brand-footer">SGVE · Sistema de Gerenciamento de Viagens Escolares</div>
     </section>
     <section class="content-panel">
-      <div class="topline"><span class="status-dot"></span><span>SGVE · SISTEMA DE GERENCIAMENTO DE VIAGENS ESCOLARES</span><button type="button" class="theme-toggle" id="theme-toggle" aria-label="Mudar para tema escuro" aria-pressed="false">☾ <span>Tema escuro</span></button></div>
+      <div class="topline"><span class="status-dot"></span><span>SGVE · SISTEMA DE GERENCIAMENTO DE VIAGENS ESCOLARES</span></div>
       <section id="login-view" class="auth-card">
         <div class="login-school-mark"><span class="login-mark">SGVE</span><span><strong>SGVE · CEPK</strong><small>Sistema de Gerenciamento de Viagens Escolares</small></span></div>
         <p class="eyebrow green">SISTEMA DE GERENCIAMENTO DE VIAGENS ESCOLARES</p><h2>Bem-vindo ao SGVE</h2>
@@ -79,7 +79,7 @@
       <section id="dashboard-view" class="dashboard hidden">
         <header class="welcome-row">
           <div class="sgve-brand-lockup" aria-label="SGVE Sistema de Gerenciamento de Viagens Escolares"><span class="sgve-brand-bus" aria-hidden="true">🚌</span><span><strong>SGVE</strong><small>Sistema de Gerenciamento<br>de Viagens Escolares</small></span></div>
-          <div class="dashboard-brand"><div class="header-actions"><button type="button" class="notification-bell" id="header-notification-button" aria-label="Notificações"><svg class="bell-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 22a2.25 2.25 0 0 0 2.24-2h-4.48A2.25 2.25 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3a1.5 1.5 0 0 0-3 0v1.16A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/></svg><span id="header-notification-count" class="header-notification-count">0</span></button><div class="profile-menu-wrap"><button type="button" class="profile-avatar" id="profile-menu-button" aria-label="Menu da conta" aria-expanded="false"><span id="profile-avatar-initials">U</span><img id="profile-avatar-image" alt="" hidden></button><div class="profile-dropdown hidden" id="profile-dropdown"><div class="profile-dropdown-heading"><strong id="profile-menu-name">Minha conta</strong><small id="profile-menu-role">Perfil</small></div><button type="button" id="change-profile-button">⇄　Trocar perfil</button><button type="button" id="add-profile-photo-button">▧　Adicionar / alterar foto</button><button type="button" id="logout-button" class="profile-logout">↪　Sair</button></div><input type="file" id="profile-photo-input" accept="image/*" hidden></div></div></div>
+          <div class="dashboard-brand"><div class="header-actions"><button type="button" class="theme-toggle dashboard-theme-toggle" id="theme-toggle" aria-label="Mudar para tema escuro" aria-pressed="false">☾ <span>Tema escuro</span></button><button type="button" class="notification-bell" id="header-notification-button" aria-label="Notificações"><svg class="bell-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 22a2.25 2.25 0 0 0 2.24-2h-4.48A2.25 2.25 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3a1.5 1.5 0 0 0-3 0v1.16A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/></svg><span id="header-notification-count" class="header-notification-count">0</span></button><div class="profile-menu-wrap"><button type="button" class="profile-avatar" id="profile-menu-button" aria-label="Menu da conta" aria-expanded="false"><span id="profile-avatar-initials">U</span><img id="profile-avatar-image" alt="" hidden></button><div class="profile-dropdown hidden" id="profile-dropdown"><div class="profile-dropdown-heading"><strong id="profile-menu-name">Minha conta</strong><small id="profile-menu-role">Perfil</small></div><button type="button" id="change-profile-button">⇄　Trocar perfil</button><button type="button" id="add-profile-photo-button">▧　Adicionar / alterar foto</button><button type="button" id="logout-button" class="profile-logout">↪　Sair</button></div><input type="file" id="profile-photo-input" accept="image/*" hidden></div></div></div>
         </header>
         <div class="dashboard-welcome-banner">
           <div class="welcome-greeting"><h2 id="welcome-title">Olá!</h2><p id="user-role" class="muted"></p></div>
