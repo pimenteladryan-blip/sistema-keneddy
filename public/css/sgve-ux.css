@@ -635,3 +635,113 @@ body.dark-mode #dashboard-view .push-send-form input,body.dark-mode #dashboard-v
 /* Remove os ícones antigos duplicados gerados pelo CSS legado da navegação. */
 #dashboard-view .tabs .tab::before{content:none!important;display:none!important}
 #dashboard-view .tabs .tab .tab-icon{display:inline-grid;place-items:center;flex:0 0 20px;width:20px;height:20px;font-size:16px;line-height:1;color:inherit}
+
+
+/* Refinamento do painel inicial: faixa institucional central e cartões preenchidos com conteúdo útil. */
+#dashboard-view .dashboard-welcome-banner{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;
+  align-items:center!important;
+  min-height:104px!important;
+  padding:18px 24px!important;
+  gap:14px!important;
+  background:#dcefdc!important;
+  border:1px solid #c5e2ca!important;
+  box-shadow:0 8px 24px rgba(7,91,59,.07)!important;
+}
+#dashboard-view .school-banner-copy{
+  grid-column:2!important;
+  grid-row:1!important;
+  justify-self:center!important;
+  width:min(100%,620px)!important;
+  gap:6px!important;
+  text-align:center!important;
+}
+#dashboard-view .school-banner-kicker{
+  color:#397653!important;
+  font-size:9px!important;
+  font-weight:850!important;
+  letter-spacing:.16em!important;
+}
+#dashboard-view .school-banner-copy strong{
+  color:#12472f!important;
+  font-size:clamp(14px,1.35vw,19px)!important;
+  line-height:1.35!important;
+  letter-spacing:-.025em!important;
+}
+#dashboard-view .school-banner-copy span{color:#567762!important;font-size:11px!important}
+#dashboard-view .banner-years{
+  grid-column:3!important;
+  grid-row:1!important;
+  justify-self:end!important;
+  padding:7px 0 7px 20px!important;
+  border-left:1px solid #a8cdb0!important;
+  color:#08764a!important;
+  font-size:29px!important;
+}
+#dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{
+  grid-column:1!important;
+  grid-row:1!important;
+  justify-self:start!important;
+  width:62px!important;height:62px!important;
+  padding:9px!important;
+  border-radius:17px!important;
+  background:#c7e7ce!important;
+  color:#08764a!important;
+}
+#dashboard-view .notices-card,#dashboard-view .notifications-card{display:flex!important;flex-direction:column!important}
+#dashboard-view .notice-highlight{
+  display:flex;align-items:center;gap:10px;
+  margin-top:auto;padding:12px 11px;
+  border:1px solid #cfe5d2;border-radius:13px;
+  background:#dff0e1;
+}
+#dashboard-view .notice-highlight-icon{
+  display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;
+  border-radius:10px;background:#c7e7ce;color:#08764a;font-size:18px;
+}
+#dashboard-view .notice-highlight strong,#dashboard-view .notification-footer strong{
+  display:block;color:#174b32;font-size:10px;font-weight:850;
+}
+#dashboard-view .notice-highlight p,#dashboard-view .notification-footer p{
+  margin:4px 0 0;color:#627b69;font-size:9px;line-height:1.45;
+}
+#dashboard-view .notice-topics{
+  display:flex;flex-wrap:wrap;gap:5px;margin-top:9px;
+}
+#dashboard-view .notice-topics span{
+  padding:5px 8px;border:1px solid #cfe5d2;border-radius:999px;
+  background:#edf7ed;color:#477052;font-size:8px;font-weight:750;
+}
+#dashboard-view .notification-footer{
+  display:flex;align-items:center;gap:10px;
+  margin-top:auto;padding:12px 11px;
+  border:1px solid #cfe5d2;border-radius:13px;background:#dff0e1;
+}
+#dashboard-view .notification-footer-icon{
+  display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;
+  border-radius:10px;background:#c7e7ce;color:#08764a;font-size:18px;
+}
+#dashboard-view .notification-channels{
+  display:flex;flex-wrap:wrap;gap:8px 13px;margin-top:10px;
+  color:#5b7865;font-size:8px;font-weight:750;
+}
+#dashboard-view .notification-channels span{display:inline-flex;align-items:center;gap:5px}
+#dashboard-view .notification-channels i{
+  width:6px;height:6px;border-radius:50%;background:#27a66a;
+  box-shadow:0 0 0 3px #cce9d2;
+}
+@media(max-width:900px){
+  #dashboard-view .dashboard-welcome-banner{grid-template-columns:1fr auto!important;min-height:88px!important;padding:14px!important}
+  #dashboard-view .school-banner-copy{grid-column:1!important;grid-row:1!important;justify-self:center!important}
+  #dashboard-view .banner-years{grid-column:2!important;grid-row:1!important;padding-left:12px!important;font-size:23px!important}
+  #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{display:none!important}
+}
+@media(max-width:560px){
+  #dashboard-view .dashboard-welcome-banner{grid-template-columns:1fr!important;padding:15px 13px!important}
+  #dashboard-view .school-banner-copy{grid-column:1!important;grid-row:1!important}
+  #dashboard-view .banner-years{grid-column:1!important;grid-row:2!important;justify-self:center!important;border:0!important;padding:2px 0 0!important;font-size:20px!important}
+  #dashboard-view .school-banner-copy strong{font-size:14px!important}
+  #dashboard-view .notice-highlight,#dashboard-view .notification-footer{margin-top:12px}
+}
