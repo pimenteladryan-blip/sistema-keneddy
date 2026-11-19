@@ -774,6 +774,15 @@ function driverInput(body) {
   if (name.length < 3) return null;
   return { name };
 }
+function tripNotificationDetails(trip) {
+  const title = cleanText(trip?.title || 'Viagem escolar', 100);
+  const destination = cleanText(trip?.destination || 'Destino não informado', 100);
+  const departure = trip?.departure_at ? new Date(trip.departure_at) : null;
+  const dateLabel = departure && !Number.isNaN(departure.getTime())
+    ? departure.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Sao_Paulo' })
+    : 'data a confirmar';
+  return title + ' • ' + destination + ' • saída: ' + dateLabel;
+}
 function getTripStatusLabel(status) {
   return ({ draft: 'Rascunho', pending_approval: 'Aguardando aprovação', approved: 'Aprovada',
     open: 'Inscrições abertas', completed: 'Concluída', cancelled: 'Cancelada' })[status] || status;
@@ -938,21 +947,24 @@ app.post('/api/trips/:id/submit', requireAuth, requireCsrf, requireRoles(...RECO
   const tripId = Number(req.params.id);
   if (!Number.isInteger(tripId) || tripId < 1) return res.status(400).json({ error: 'Viagem inválida.' });
   try {
+    const tripDetails = firebaseConfigured
+      ? await firestoreSchool.getTrip(tripId)
+      : db.prepare('SELECT id, title, destination, departure_at, status FROM trips WHERE id = ?').get(tripId);
+    if (!tripDetails) return res.status(404).json({ error: 'Viagem não encontrada.' });
     if (firebaseConfigured) {
       const result = await firestoreSchool.submitTrip(tripId, req.auth.user.id);
       if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem não encontrada.' });
       if (result.error === 'no-classes') return res.status(400).json({ error: 'Vincule pelo menos uma turma antes de enviar para aprovação.' });
       if (result.error) return res.status(409).json({ error: 'Somente rascunhos podem ser enviados para aprovação.' });
-      await notifyRoles(['admin', 'direction'], { title: 'Viagem aguardando aprovação', body: 'Uma viagem foi enviada para análise no SGVE.' });
+      await notifyRoles(['admin', 'direction'], { title: 'Viagem aguardando aprovação', body: tripNotificationDetails(tripDetails) });
       return res.json({ message: 'Viagem enviada para aprovação da direção.' });
     }
-    const trip = db.prepare('SELECT id, status FROM trips WHERE id = ?').get(tripId);
-    if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
-    if (trip.status !== 'draft') return res.status(409).json({ error: 'Somente rascunhos podem ser enviados para aprovação.' });
+    if (tripDetails.status !== 'draft') return res.status(409).json({ error: 'Somente rascunhos podem ser enviados para aprovação.' });
     const classes = db.prepare('SELECT COUNT(*) AS total FROM trip_classes WHERE trip_id = ?').get(tripId).total;
     if (!classes) return res.status(400).json({ error: 'Vincule pelo menos uma turma antes de enviar para aprovação.' });
     db.prepare("UPDATE trips SET status = 'pending_approval', updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(tripId);
     audit(req.auth.user.id, 'submit_for_approval', 'trip', tripId);
+    await notifyRoles(['admin', 'direction'], { title: 'Viagem aguardando aprovação', body: tripNotificationDetails(tripDetails) });
     res.json({ message: 'Viagem enviada para aprovação da direção.' });
   } catch (error) { next(error); }
 });
@@ -960,18 +972,21 @@ app.post('/api/trips/:id/approve', requireAuth, requireCsrf, requireRoles('admin
   const tripId = Number(req.params.id);
   if (!Number.isInteger(tripId) || tripId < 1) return res.status(400).json({ error: 'Viagem inválida.' });
   try {
+    const tripDetails = firebaseConfigured
+      ? await firestoreSchool.getTrip(tripId)
+      : db.prepare('SELECT id, title, destination, departure_at, status FROM trips WHERE id = ?').get(tripId);
+    if (!tripDetails) return res.status(404).json({ error: 'Viagem não encontrada.' });
     if (firebaseConfigured) {
       const result = await firestoreSchool.approveTrip(tripId, req.auth.user.id);
       if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem não encontrada.' });
       if (result.error) return res.status(409).json({ error: 'A viagem não está aguardando aprovação.' });
-      await notifyRoles(['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'], { title: 'Viagem aprovada', body: 'Uma viagem escolar foi aprovada no SGVE.' });
+      await notifyRoles(['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'], { title: 'Viagem aprovada', body: tripNotificationDetails(tripDetails) });
       return res.json({ message: 'Viagem aprovada.' });
     }
-    const trip = db.prepare("SELECT id, status FROM trips WHERE id = ?").get(tripId);
-    if (!trip) return res.status(404).json({ error: 'Viagem não encontrada.' });
-    if (trip.status !== 'pending_approval') return res.status(409).json({ error: 'A viagem não está aguardando aprovação.' });
+    if (tripDetails.status !== 'pending_approval') return res.status(409).json({ error: 'A viagem não está aguardando aprovação.' });
     db.prepare("UPDATE trips SET status = 'approved', approved_by = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(req.auth.user.id, tripId);
     audit(req.auth.user.id, 'approve', 'trip', tripId);
+    await notifyRoles(['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'], { title: 'Viagem aprovada', body: tripNotificationDetails(tripDetails) });
     res.json({ message: 'Viagem aprovada.' });
   } catch (error) { next(error); }
 });
