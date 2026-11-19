@@ -1077,6 +1077,65 @@ window.addEventListener('appinstalled', () => {
   deferredInstallPrompt = null;
   installButton.hidden = true;
 });
+
+let pushMessageHandlerReady = false;
+async function enableDevicePush() {
+  const button = document.querySelector('#enable-push-button');
+  const status = document.querySelector('#push-status');
+  button.disabled = true;
+  button.textContent = 'Ativando...';
+  try {
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+      throw new Error('Este navegador não oferece suporte a notificações push.');
+    }
+    if (!window.firebase || !window.SGVE_FIREBASE_CONFIG) throw new Error('Firebase não está configurado nesta página.');
+    if (!firebase.apps.length) firebase.initializeApp(window.SGVE_FIREBASE_CONFIG);
+    const config = await api('/api/push/config');
+    if (!config.enabled || !config.vapidKey) throw new Error('Falta configurar a chave Web Push do Firebase no Render.');
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') throw new Error('Permissão de notificações não concedida no navegador.');
+    const registration = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
+    const messaging = firebase.messaging();
+    const token = await messaging.getToken({ vapidKey: config.vapidKey, serviceWorkerRegistration: registration });
+    if (!token) throw new Error('O Firebase não conseguiu registrar este dispositivo.');
+    await api('/api/push/register', { method: 'POST', body: JSON.stringify({ token }) });
+    if (!pushMessageHandlerReady) {
+      messaging.onMessage(payload => {
+        const title = payload.notification?.title || 'SGVE';
+        const body = payload.notification?.body || 'Você recebeu uma nova atualização.';
+        try { new Notification(title, { body, icon: '/icon.svg' }); } catch {}
+        const status = document.querySelector('#push-status');
+        if (status) status.textContent = 'Notificação recebida: ' + title;
+      });
+      pushMessageHandlerReady = true;
+    }
+    button.textContent = 'Notificações ativadas';
+    status.textContent = 'Este dispositivo está habilitado para receber avisos.';
+  } catch (error) {
+    button.textContent = 'Ativar notificações no celular';
+    status.textContent = error.message;
+  } finally { button.disabled = false; }
+}
+document.querySelector('#enable-push-button')?.addEventListener('click', enableDevicePush);
+document.querySelector('#push-send-form')?.addEventListener('submit', async event => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const button = form.querySelector('button[type="submit"]');
+  const message = document.querySelector('#push-send-message');
+  const values = new FormData(form);
+  button.disabled = true;
+  message.textContent = 'Enviando...';
+  try {
+    const result = await api('/api/push/send', {
+      method: 'POST',
+      body: JSON.stringify({ title: values.get('title'), body: values.get('body'), audience: values.get('audience') })
+    });
+    message.textContent = 'Enviada para ' + result.sent + ' dispositivo(s) com notificações ativadas.';
+    form.reset();
+  } catch (error) { message.textContent = error.message; }
+  finally { button.disabled = false; }
+});
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(() => {}));
 }
