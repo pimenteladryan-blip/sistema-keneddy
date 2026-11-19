@@ -1081,3 +1081,54 @@ body.dark-mode #dashboard-view #trips-panel>.section-heading .count-pill{
   #dashboard-view #trips-panel>.section-heading{min-height:72px!important;padding:12px 14px!important}
   #dashboard-view #trips-panel>.section-heading h3{font-size:21px!important}
 }
+
+
+/* Ajuste final do conjunto castelo + ônibus e títulos integrados ao fundo de cada módulo. */
+#dashboard-view .dashboard-welcome-banner>.sgve-castle-illustration{
+  position:absolute!important;display:block!important;left:12px!important;top:50%!important;
+  transform:translateY(-50%)!important;width:62px!important;height:58px!important;
+  color:#43845b!important;filter:drop-shadow(0 2px 2px #075b3b12);
+}
+#dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{
+  left:82px!important;top:50%!important;transform:translateY(-50%)!important;width:58px!important;height:58px!important;
+}
+#dashboard-view .dashboard-welcome-banner>.banner-route-detail{display:none!important}
+
+/* Cabeçalhos de todos os módulos sem etiqueta recortada ou faixa com fundo diferente. */
+#dashboard-view .module-panel .section-heading{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;
+  width:100%!important;min-height:0!important;margin:0 0 18px!important;padding:0!important;
+  border:0!important;border-radius:0!important;background:transparent!important;background-image:none!important;box-shadow:none!important;
+}
+#dashboard-view .module-panel .section-heading>div{
+  display:grid!important;align-content:center!important;gap:4px!important;min-width:0!important;
+}
+#dashboard-view .module-panel .section-heading .eyebrow{
+  display:block!important;width:max-content!important;max-width:100%!important;margin:0!important;padding:0!important;
+  border:0!important;border-radius:0!important;background:transparent!important;background-image:none!important;box-shadow:none!important;
+  color:#43805a!important;font-size:9px!important;font-weight:850!important;letter-spacing:.15em!important;line-height:1.3!important;
+}
+#dashboard-view .module-panel .section-heading h3,
+#dashboard-view .module-panel .section-heading h4{
+  margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;color:#174b32!important;
+}
+#dashboard-view .module-panel .section-heading h3{font-size:25px!important;line-height:1.2!important}
+#dashboard-view .module-panel .section-heading .section-subtitle{margin:3px 0 0!important;background:transparent!important}
+#dashboard-view .module-panel .section-heading .count-pill{
+  flex:0 0 auto!important;background:#e3f1e5!important;border-color:#cfe2d2!important;
+}
+body.dark-mode #dashboard-view .module-panel .section-heading .eyebrow{color:#9ed7ad!important}
+body.dark-mode #dashboard-view .module-panel .section-heading h3,
+body.dark-mode #dashboard-view .module-panel .section-heading h4{color:#edf7ef!important}
+body.dark-mode #dashboard-view .module-panel .section-heading .count-pill{
+  background:#153323!important;border-color:#315f43!important;color:#c8ead0!important;
+}
+@media(max-width:900px){
+  #dashboard-view .dashboard-welcome-banner>.sgve-castle-illustration{left:8px!important;width:48px!important;height:48px!important}
+  #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{left:62px!important;width:46px!important;height:46px!important}
+}
+@media(max-width:560px){
+  #dashboard-view .dashboard-welcome-banner>.sgve-castle-illustration,
+  #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{display:none!important}
+  #dashboard-view .module-panel .section-heading h3{font-size:21px!important}
+}
