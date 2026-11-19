@@ -124,7 +124,7 @@ async function listTeachers() {
 }
 
 async function createTeacher(name, subjects, actorUserId) {
-  const id = await store.createWithNumericId('teachers', {
+  const id = await store.createUnique('teachers', 'name_key', name, {
     name, subjects, active: true,
     created_by: Number(actorUserId),
     created_at: new Date().toISOString(),
