@@ -129,3 +129,36 @@ body{background:linear-gradient(135deg,#e8f5e9 0%,#dcefe2 35%,#edf6df 68%,#dff1e
   .dashboard .module-panel{background:linear-gradient(155deg,#eff8ed,#e3f2e5 60%,#edf5df)}
   .home-card{box-shadow:0 5px 18px #174a2b0a}
 }
+
+
+/* SGVE palette refinement: flat light-green surfaces and solid dark-green mobile bar */
+body{background:#eaf4e9!important}
+.content-panel{background:#edf6eb!important}
+.dashboard .welcome-row{background:#e3f1e3!important}
+.dashboard .dashboard-welcome-banner{background:#dcefdc!important}
+.dashboard .module-panel{background:#edf6eb!important}
+.dashboard .tabs{background:#dceedd!important}
+.home-card:nth-child(1){background:#e8f4e8!important}
+.home-card:nth-child(2){background:#e1f0e2!important}
+.home-card:nth-child(3){background:#eaf3df!important}
+.home-card:nth-child(4){background:#dff0e5!important}
+.dashboard .inline-form{background:#e6f2e6!important}
+.dashboard input,.dashboard select{background:#f0f7ed!important}
+.dashboard .data-row,.dashboard .trip-card,.upcoming-trip{background:#e8f3e8!important}
+.upcoming-trip-body{background:#e8f3e8!important}
+.calendar-day{background:#e5f1e4!important}
+.calendar-day.has-trip{background:#bfe1c3!important}
+.calendar-selected{background:#dfefdf!important}
+@media(max-width:900px){
+  .dashboard .tabs{
+    background:#075b3b!important;
+    border-color:#064b32!important;
+    box-shadow:0 -7px 24px #073c291f!important;
+  }
+  .dashboard .tab{color:#e4f4e8!important}
+  .dashboard .tab.active,.dashboard .tab:hover{
+    background:#d5ebd8!important;
+    color:#075b3b!important;
+    box-shadow:none!important;
+  }
+}
