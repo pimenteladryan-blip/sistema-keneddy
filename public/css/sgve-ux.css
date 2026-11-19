@@ -596,7 +596,7 @@ body.dark-mode #dashboard-view .push-send-form input,body.dark-mode #dashboard-v
 
 
 /* Viagens: participantes e equipe embaixo, usando a largura inteira */
-#dashboard-view .trip-card { grid-template-columns: minmax(120px,190px) minmax(0,1fr); }
+#dashboard-view .trip-card { display:grid; grid-template-columns: minmax(120px,190px) minmax(0,1fr); align-items:start; gap:12px; }
 #dashboard-view .trip-card-main { min-width:0; }
 #dashboard-view .trip-card-actions { grid-column:1/-1; display:flex; flex-wrap:wrap; gap:8px; }
 #dashboard-view .participants-area { grid-column:1/-1; width:100%; min-width:0; }
@@ -610,4 +610,4 @@ body.dark-mode #dashboard-view .push-send-form input,body.dark-mode #dashboard-v
 #dashboard-view .trip-staff-member strong,#dashboard-view .trip-staff-member small { display:block; overflow-wrap:anywhere; }
 #dashboard-view .trip-staff-member strong { color:#174b32; font-size:12px; }
 #dashboard-view .trip-staff-member small { margin-top:3px; color:#64806b; font-size:10px; }
-@media(max-width:650px) { #dashboard-view .trip-card { grid-template-columns:minmax(0,1fr); } #dashboard-view .trip-card-actions,#dashboard-view .participants-area { grid-column:1; } }
+#media(max-width:650px) { #dashboard-view .trip-card { grid-template-columns:minmax(0,1fr); } #dashboard-view .trip-card-actions,#dashboard-view .participants-area { grid-column:1; } }
