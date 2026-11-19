@@ -630,3 +630,8 @@ body.dark-mode #dashboard-view .push-send-form input,body.dark-mode #dashboard-v
 #dashboard-view .calendar-day .calendar-count{position:absolute;top:2px;right:3px;min-width:12px;height:12px;padding:0 3px;border-radius:8px;background:#0b8050;color:white;font-size:8px;line-height:12px}
 #dashboard-view .calendar-day.selected .calendar-count{background:#c8f1d2;color:#075c3a}
 #dashboard-view .calendar-selected{min-height:42px;padding:11px 12px;border:1px solid #dcece0;border-radius:12px;background:#f4faf5;color:#597264;font-size:11px}
+
+
+/* Remove os ícones antigos duplicados gerados pelo CSS legado da navegação. */
+#dashboard-view .tabs .tab::before{content:none!important;display:none!important}
+#dashboard-view .tabs .tab .tab-icon{display:inline-grid;place-items:center;flex:0 0 20px;width:20px;height:20px;font-size:16px;line-height:1;color:inherit}
