@@ -934,3 +934,150 @@ body.dark-mode #dashboard-view .notification-channels i{background:#65d990!impor
     width:44px!important;height:44px!important;flex-basis:44px!important;
   }
 }
+
+
+/* Composição definitiva do banner institucional: texto no centro geométrico e detalhe de rota ao lado do ônibus. */
+#dashboard-view .dashboard-welcome-banner{
+  position:relative!important;
+  display:block!important;
+  min-height:116px!important;
+  padding:16px 170px 16px 170px!important;
+  overflow:hidden!important;
+}
+#dashboard-view .dashboard-welcome-banner>.school-banner-copy{
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  transform:translate(-50%,-50%)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:min(620px,calc(100% - 340px))!important;
+  max-width:620px!important;
+  min-width:0!important;
+  margin:0!important;
+  text-align:center!important;
+}
+#dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{
+  position:absolute!important;
+  display:block!important;
+  left:22px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:58px!important;
+  height:58px!important;
+}
+#dashboard-view .dashboard-welcome-banner>.banner-route-detail{
+  position:absolute!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  left:91px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:66px!important;
+  gap:2px!important;
+  color:#43845b!important;
+}
+#dashboard-view .banner-route-detail svg{display:block;width:58px;height:34px;overflow:visible}
+#dashboard-view .banner-route-detail span{font-size:7px;font-weight:850;letter-spacing:.09em;white-space:nowrap}
+#dashboard-view .dashboard-welcome-banner>.banner-years{
+  position:absolute!important;
+  display:block!important;
+  right:22px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+}
+#dashboard-view #trips-panel>.section-heading{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  width:100%!important;
+  min-height:82px!important;
+  margin:0 0 16px!important;
+  padding:15px 20px!important;
+  border:1px solid #d1e5d4!important;
+  border-radius:16px!important;
+  background:#e3f1e5!important;
+  box-shadow:none!important;
+}
+#dashboard-view #trips-panel>.section-heading>div{display:grid!important;gap:4px!important}
+#dashboard-view #trips-panel>.section-heading .eyebrow{
+  display:block!important;
+  width:max-content!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#43805a!important;
+  font-size:9px!important;
+  font-weight:850!important;
+  letter-spacing:.15em!important;
+}
+#dashboard-view #trips-panel>.section-heading h3{
+  margin:0!important;
+  color:#174b32!important;
+  font-size:25px!important;
+  line-height:1.2!important;
+}
+#dashboard-view #trips-panel>.section-heading .count-pill{
+  flex:0 0 auto!important;
+  background:#f7fbf7!important;
+  border-color:#cfe2d2!important;
+}
+body.dark-mode #dashboard-view #trips-panel>.section-heading{
+  background:#123b28!important;
+  border-color:#315f43!important;
+}
+body.dark-mode #dashboard-view #trips-panel>.section-heading .eyebrow{color:#9ed7ad!important}
+body.dark-mode #dashboard-view #trips-panel>.section-heading h3{color:#edf7ef!important}
+body.dark-mode #dashboard-view #trips-panel>.section-heading .count-pill{
+  background:#0b2b1d!important;border-color:#315f43!important;color:#c8ead0!important;
+}
+@media(max-width:900px){
+  #dashboard-view .dashboard-welcome-banner{
+    min-height:100px!important;
+    padding:12px 120px 12px 150px!important;
+  }
+  #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{left:12px!important;width:48px!important;height:48px!important}
+  #dashboard-view .dashboard-welcome-banner>.banner-route-detail{display:none!important}
+  #dashboard-view .dashboard-welcome-banner>.school-banner-copy{width:calc(100% - 270px)!important}
+  #dashboard-view .dashboard-welcome-banner>.banner-years{right:12px!important}
+}
+@media(max-width:560px){
+  #dashboard-view .dashboard-welcome-banner{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:5px!important;
+    min-height:0!important;
+    padding:16px 12px!important;
+  }
+  #dashboard-view .dashboard-welcome-banner>.school-banner-copy{
+    position:static!important;
+    left:auto!important;top:auto!important;
+    transform:none!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    text-align:center!important;
+  }
+  #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration,
+  #dashboard-view .dashboard-welcome-banner>.banner-route-detail{display:none!important}
+  #dashboard-view .dashboard-welcome-banner>.banner-years{
+    position:static!important;
+    right:auto!important;top:auto!important;
+    transform:none!important;
+    margin:2px 0 0!important;
+    padding:0!important;
+    border:0!important;
+    font-size:19px!important;
+  }
+  #dashboard-view #trips-panel>.section-heading{min-height:72px!important;padding:12px 14px!important}
+  #dashboard-view #trips-panel>.section-heading h3{font-size:21px!important}
+}
