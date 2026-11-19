@@ -368,3 +368,70 @@
   #dashboard-view .home-card { border-radius: 17px !important; }
   #dashboard-view .tabs .tab { min-height: 46px !important; }
 }
+
+
+/* Theme switch lives in the authenticated dashboard header. */
+#dashboard-view .dashboard-theme-toggle{
+  display:inline-flex!important;align-items:center;justify-content:center;gap:7px;
+  min-height:42px;padding:0 13px;border:1px solid #d7e7db;border-radius:999px;
+  background:#f2f8f3;color:#145c3b;font-size:12px;font-weight:750;
+  white-space:nowrap;box-shadow:0 2px 8px #173c2808
+}
+#dashboard-view .dashboard-theme-toggle:hover{background:#e5f2e8;border-color:#a9cdb4}
+#dashboard-view .dashboard-theme-toggle:focus-visible{outline:3px solid #26865355;outline-offset:3px}
+body.dark-mode #dashboard-view{background:#101c15;color:#e8f1eb}
+body.dark-mode #dashboard-view .welcome-row{background:#14251b;border-color:#294333}
+body.dark-mode #dashboard-view .welcome-row h2,
+body.dark-mode #dashboard-view .welcome-row .eyebrow{color:#e5f1e8}
+body.dark-mode #dashboard-view .welcome-row .muted{color:#b4c7ba}
+body.dark-mode #dashboard-view .dashboard-theme-toggle{background:#203b2b;border-color:#42694e;color:#d9f0df}
+body.dark-mode #dashboard-view .dashboard-theme-toggle:hover{background:#294a36}
+body.dark-mode #dashboard-view .dashboard-welcome-banner{background:#193426;border-color:#315b40}
+body.dark-mode #dashboard-view .dashboard-welcome-banner strong,
+body.dark-mode #dashboard-view .dashboard-welcome-banner .banner-years{color:#d9f0df}
+body.dark-mode #dashboard-view .dashboard-welcome-banner span:not(.banner-years){color:#b2c8b8}
+body.dark-mode #dashboard-view .module-panel{background:#14251b;border-color:#294333;color:#e7eee9}
+body.dark-mode #dashboard-view .home-card,
+body.dark-mode #dashboard-view .calendar-card,
+body.dark-mode #dashboard-view .notices-card,
+body.dark-mode #dashboard-view .notifications-card,
+body.dark-mode #dashboard-view .upcoming-card{background:#1a3022!important;border-color:#345440!important;color:#e7eee9!important}
+body.dark-mode #dashboard-view h3,
+body.dark-mode #dashboard-view h4,
+body.dark-mode #dashboard-view .home-card-heading h4,
+body.dark-mode #dashboard-view .section-heading h3,
+body.dark-mode #dashboard-view strong{color:#e8f3eb}
+body.dark-mode #dashboard-view p,
+body.dark-mode #dashboard-view small,
+body.dark-mode #dashboard-view .muted,
+body.dark-mode #dashboard-view .section-subtitle,
+body.dark-mode #dashboard-view .home-card-heading p,
+body.dark-mode #dashboard-view .notice-item p{color:#b5c9ba}
+body.dark-mode #dashboard-view .notice-item,
+body.dark-mode #dashboard-view .home-notification,
+body.dark-mode #dashboard-view .calendar-selected,
+body.dark-mode #dashboard-view .trip-card,
+body.dark-mode #dashboard-view .overview-card,
+body.dark-mode #dashboard-view .data-row{background:#203a2a!important;border-color:#3a5a44!important;color:#e7eee9}
+body.dark-mode #dashboard-view .calendar-grid button,
+body.dark-mode #dashboard-view .calendar-controls button{background:#203a2a;border-color:#3a5a44;color:#e7eee9}
+body.dark-mode #dashboard-view .calendar-grid button:hover,
+body.dark-mode #dashboard-view .calendar-grid button.active{background:#287449;color:#fff}
+body.dark-mode #dashboard-view input,
+body.dark-mode #dashboard-view select,
+body.dark-mode #dashboard-view textarea{background:#102017!important;border-color:#3a5a44!important;color:#edf5ef!important}
+body.dark-mode #dashboard-view input::placeholder,
+body.dark-mode #dashboard-view textarea::placeholder{color:#9eb5a5}
+body.dark-mode #dashboard-view .tabs{background:#082f22;border-color:#294333}
+body.dark-mode #dashboard-view .tabs .tab{color:#c6d9cc}
+body.dark-mode #dashboard-view .tabs .tab.active,
+body.dark-mode #dashboard-view .tabs .tab:hover{background:#28583b;color:#fff}
+body.dark-mode #dashboard-view .profile-dropdown{background:#172b1e;border-color:#345440;color:#e8f3eb}
+body.dark-mode #dashboard-view .profile-dropdown button{color:#e8f3eb}
+body.dark-mode #dashboard-view .profile-dropdown button:hover{background:#24432e}
+body.dark-mode #dashboard-view .notification-bell{background:#203b2b;color:#d9f0df}
+body.dark-mode #dashboard-view .profile-avatar{background:#08794d;color:#fff}
+@media(max-width:760px){
+ #dashboard-view .dashboard-theme-toggle{min-height:38px;padding:0 10px;font-size:11px}
+ #dashboard-view .dashboard-theme-toggle span{display:none}
+}
