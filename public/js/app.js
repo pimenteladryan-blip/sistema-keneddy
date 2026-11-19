@@ -421,13 +421,10 @@ function renderHome() {
   }).join('') : '<p class="home-empty">Nenhuma atualização de viagem no momento.</p>';
   const cards = document.querySelector('#home-upcoming');
   cards.innerHTML = upcoming.length ? upcoming.slice(0,3).map((t,i) => {
-    const destinationKey = String(t.destination || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    const isSaoPaulo = destinationKey.includes('sao paulo');
-    const photo = isSaoPaulo
-      ? '<img class="upcoming-trip-photo" src="https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/NeoQuimicaArena_%282%29.jpg/1280px-NeoQuimicaArena_%282%29.jpg" alt="Neo Química Arena, em São Paulo" loading="lazy">'
-      : '<div class="trip-photo-placeholder trip-photo-'+(i+1)+'"><span>🚌</span><small>VIAGEM ESCOLAR</small></div>';
-    const photoCredit = isSaoPaulo ? '<small class="trip-photo-credit">Foto: FotografoWallacyFerrari · CC BY 4.0</small>' : '';
-    return '<article class="upcoming-trip">'+photo+'<div class="upcoming-trip-body"><span class="trip-date-chip">'+escapeHtml(new Date(t.departure_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}))+'</span><strong>'+escapeHtml(t.title)+'</strong><p>'+escapeHtml(t.destination)+'</p><small>'+escapeHtml(tripStatusLabel(t.status))+'</small>'+photoCredit+'</div></article>';
+    const photo = t.image_data
+      ? '<img class="upcoming-trip-photo" src="' + escapeHtml(t.image_data) + '" alt="Foto da viagem para ' + escapeHtml(t.destination) + '" loading="lazy">'
+      : '<div class="trip-photo-placeholder trip-photo-'+(i+1)+'"><span>🚌</span><small>FOTO NÃO CADASTRADA</small></div>';
+    return '<article class="upcoming-trip">'+photo+'<div class="upcoming-trip-body"><span class="trip-date-chip">'+escapeHtml(new Date(t.departure_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}))+'</span><strong>'+escapeHtml(t.title)+'</strong><p>'+escapeHtml(t.destination)+'</p><small>'+escapeHtml(tripStatusLabel(t.status))+'</small></div></article>';
   }).join('') : '<p class="home-empty">As próximas viagens aparecerão aqui quando forem cadastradas.</p>';
   renderCalendar();
 }
@@ -473,7 +470,11 @@ async function loadTrips() {
       if (canManage && trip.status === 'draft') action = '<button type="button" class="small-action" data-trip-action="submit" data-trip-id="' + trip.id + '">Enviar para aprovação</button>';
       if (currentUser && ['admin', 'direction'].includes(currentUser.role) && trip.status === 'pending_approval') action = '<button type="button" class="small-action" data-trip-action="approve" data-trip-id="' + trip.id + '">Aprovar viagem</button>';
       const participantsButton = '<button type="button" class="small-action button-secondary" data-trip-action="participants" data-trip-id="' + trip.id + '">Participantes</button>';
-      return '<article class="trip-card"><div class="trip-card-main"><div class="trip-title-row"><strong>' + escapeHtml(trip.title) + '</strong><span class="status-pill status-' + escapeHtml(trip.status) + '">' + escapeHtml(trip.statusLabel) + '</span></div><p>' + escapeHtml(trip.destination) + '</p><small>Saída: ' + escapeHtml(dateLabel(trip.departure_at)) + '</small><small>Retorno: ' + escapeHtml(dateLabel(trip.return_at)) + '</small><small>Participantes: ' + trip.participant_count + ' / ' + trip.capacity + '</small><small>Veículo: ' + escapeHtml(trip.vehicle_name || 'Não atribuído') + '</small>' + (canManage ? '<small>Condutor: ' + escapeHtml(trip.driver_name || 'Não atribuído') + '</small>' : '') + '</div><div class="trip-card-actions">' + action + participantsButton + '</div><div class="participants-area hidden" data-trip-participants="' + trip.id + '" data-trip-status="' + escapeHtml(trip.status) + '"></div></article>';
+      const editActions = canManage && trip.status === 'draft'
+        ? '<button type="button" class="small-action" data-trip-action="edit" data-trip-id="' + trip.id + '">Editar</button><button type="button" class="small-action reject-action" data-trip-action="delete" data-trip-id="' + trip.id + '">Excluir</button>'
+        : '';
+      const photo = trip.image_data ? '<img class="trip-card-photo" src="' + escapeHtml(trip.image_data) + '" alt="Foto da viagem ' + escapeHtml(trip.destination) + '">' : '<div class="trip-card-photo-empty">🚌<small>Adicione uma foto</small></div>';
+      return '<article class="trip-card">' + photo + '<div class="trip-card-main"><div class="trip-title-row"><strong>' + escapeHtml(trip.title) + '</strong><span class="status-pill status-' + escapeHtml(trip.status) + '">' + escapeHtml(trip.statusLabel) + '</span></div><p>' + escapeHtml(trip.destination) + '</p><small>Saída: ' + escapeHtml(dateLabel(trip.departure_at)) + '</small><small>Retorno: ' + escapeHtml(dateLabel(trip.return_at)) + '</small><small>Participantes: ' + trip.participant_count + ' / ' + trip.capacity + '</small><small>Veículo: ' + escapeHtml(trip.vehicle_name || 'Não atribuído') + '</small>' + (canManage ? '<small>Condutor: ' + escapeHtml(trip.driver_name || 'Não atribuído') + '</small>' : '') + '</div><div class="trip-card-actions">' + action + participantsButton + '</div><div class="participants-area hidden" data-trip-participants="' + trip.id + '" data-trip-status="' + escapeHtml(trip.status) + '"></div></article>';
     }).join('') : '<p class="muted">Nenhuma viagem cadastrada.</p>';
     const options = '<option value="">Selecione uma viagem</option>' + data.trips.filter(t => t.status === 'draft').map(t =>
       '<option value="' + t.id + '">' + escapeHtml(t.title + ' · ' + t.destination) + '</option>'
@@ -517,16 +518,70 @@ document.querySelector('#registration-requests-list').addEventListener('click', 
     button.disabled = false;
   }
 });
+let editingTripId = null;
+async function optimizeTripImage(file) {
+  if (!file) return '';
+  if (!['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('Escolha uma imagem JPG, PNG ou WebP.');
+  const bitmap = await createImageBitmap(file);
+  const canvas = document.createElement('canvas');
+  const scale = Math.min(1, 1400 / bitmap.width, 1000 / bitmap.height);
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  const context = canvas.getContext('2d');
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  let quality = 0.78;
+  let data = canvas.toDataURL('image/webp', quality);
+  while (data.length > 740000 && quality > 0.42) {
+    quality -= 0.08;
+    data = canvas.toDataURL('image/webp', quality);
+  }
+  if (data.length > 740000) throw new Error('Essa imagem ficou muito grande. Escolha uma foto menor.');
+  return data;
+}
+function resetTripEditor() {
+  editingTripId = null;
+  const form = document.querySelector('#trip-form');
+  form.reset();
+  document.querySelector('#trip-image-data').value = '';
+  document.querySelector('#trip-photo-input').value = '';
+  document.querySelector('#trip-photo-preview').classList.add('hidden');
+  document.querySelector('#trip-submit-button').textContent = 'Criar rascunho';
+  document.querySelector('#trip-cancel-edit').classList.add('hidden');
+}
+function localDateTimeValue(value) {
+  const date = new Date(value);
+  const offset = date.getTimezoneOffset() * 60000;
+  return new Date(date.getTime() - offset).toISOString().slice(0,16);
+}
+document.querySelector('#trip-photo-input').addEventListener('change', async event => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  try {
+    const data = await optimizeTripImage(file);
+    document.querySelector('#trip-image-data').value = data;
+    const preview = document.querySelector('#trip-photo-preview');
+    preview.src = data;
+    preview.classList.remove('hidden');
+  } catch (error) {
+    event.target.value = '';
+    showMessage('#trip-message', error.message, true);
+  }
+});
+document.querySelector('#trip-cancel-edit').addEventListener('click', resetTripEditor);
 document.querySelector('#trip-form').addEventListener('submit', async event => {
   event.preventDefault();
   const form = event.currentTarget;
   const payload = Object.fromEntries(new FormData(form).entries());
   payload.capacity = Number(payload.capacity);
+  payload.image_data = document.querySelector('#trip-image-data').value || '';
   payload.departure_at = new Date(payload.departure_at).toISOString();
   payload.return_at = new Date(payload.return_at).toISOString();
   try {
-    const result = await api('/api/trips', { method: 'POST', body: JSON.stringify(payload) });
-    form.reset();
+    const result = await api(editingTripId ? '/api/trips/' + editingTripId : '/api/trips', {
+      method: editingTripId ? 'PUT' : 'POST', body: JSON.stringify(payload)
+    });
+    resetTripEditor();
     showMessage('#trip-message', result.message);
     await loadTrips();
   } catch (error) { if (error.name === 'AbortError') return; showMessage('#trip-message', error.message, true); }
@@ -681,6 +736,39 @@ document.querySelector('#trips-list').addEventListener('click', async event => {
 
   const button = event.target.closest('[data-trip-action]');
   if (!button) return;
+  if (button.dataset.tripAction === 'edit') {
+    const trip = dashboardTrips.find(item => String(item.id) === String(button.dataset.tripId));
+    if (!trip) return;
+    editingTripId = Number(trip.id);
+    const form = document.querySelector('#trip-form');
+    form.elements.title.value = trip.title || '';
+    form.elements.destination.value = trip.destination || '';
+    form.elements.educational_purpose.value = trip.educational_purpose || '';
+    form.elements.departure_at.value = localDateTimeValue(trip.departure_at);
+    form.elements.return_at.value = localDateTimeValue(trip.return_at);
+    form.elements.capacity.value = trip.capacity || 40;
+    document.querySelector('#trip-image-data').value = trip.image_data || '';
+    const preview = document.querySelector('#trip-photo-preview');
+    if (trip.image_data) { preview.src = trip.image_data; preview.classList.remove('hidden'); }
+    else preview.classList.add('hidden');
+    document.querySelector('#trip-submit-button').textContent = 'Salvar alterações';
+    document.querySelector('#trip-cancel-edit').classList.remove('hidden');
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  if (button.dataset.tripAction === 'delete') {
+    if (!confirm('Excluir este rascunho de viagem? Essa ação não pode ser desfeita.')) return;
+    button.disabled = true;
+    try {
+      const result = await api('/api/trips/' + button.dataset.tripId, { method: 'DELETE' });
+      showMessage('#trip-message', result.message);
+      await loadTrips();
+    } catch (error) {
+      showMessage('#trip-message', error.message, true);
+      button.disabled = false;
+    }
+    return;
+  }
   if (button.dataset.tripAction === 'participants') {
     const area = button.closest('.trip-card').querySelector('.participants-area');
     area.classList.toggle('hidden');
