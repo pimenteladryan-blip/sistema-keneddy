@@ -10,7 +10,7 @@
   <title>SGVE | Sistema de Gerenciamento de Viagens Escolares</title>
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/sgve-modern.css?v=20261118-4">
-  <link rel="stylesheet" href="/css/sgve-ux.css?v=20261119-1">
+  <link rel="stylesheet" href="/css/sgve-ux.css?v=20261119-2">
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
   <script src="/firebase-config.js" defer></script>
@@ -78,15 +78,15 @@
       </section>
       <section id="dashboard-view" class="dashboard hidden">
         <header class="welcome-row">
-          <div class="sgve-brand-lockup" aria-label="SGVE Sistema de Gerenciamento de Viagens Escolares"><span class="sgve-brand-bus" aria-hidden="true">🚌</span><span><strong>SGVE</strong><small>Sistema de Gerenciamento<br>de Viagens Escolares</small></span></div>
+          
           <div class="dashboard-brand"><div class="header-actions"><button type="button" class="theme-toggle dashboard-theme-toggle" id="theme-toggle" aria-label="Mudar para tema escuro" aria-pressed="false">☾ <span>Tema escuro</span></button><button type="button" class="notification-bell" id="header-notification-button" aria-label="Notificações"><svg class="bell-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 22a2.25 2.25 0 0 0 2.24-2h-4.48A2.25 2.25 0 0 0 12 22Zm7-6V11a7 7 0 0 0-5.5-6.84V3a1.5 1.5 0 0 0-3 0v1.16A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2Z"/></svg><span id="header-notification-count" class="header-notification-count">0</span></button><div class="profile-menu-wrap"><button type="button" class="profile-avatar" id="profile-menu-button" aria-label="Menu da conta" aria-expanded="false"><span id="profile-avatar-initials">U</span><img id="profile-avatar-image" alt="" hidden></button><div class="profile-dropdown hidden" id="profile-dropdown"><div class="profile-dropdown-heading"><strong id="profile-menu-name">Minha conta</strong><small id="profile-menu-role">Perfil</small></div><button type="button" id="change-profile-button">⇄　Trocar perfil</button><button type="button" id="add-profile-photo-button">▧　Adicionar / alterar foto</button><button type="button" id="logout-button" class="profile-logout">↪　Sair</button></div><input type="file" id="profile-photo-input" accept="image/*" hidden></div></div></div>
         </header>
         <div class="dashboard-welcome-banner">
-          <div class="welcome-greeting"><h2 id="welcome-title">Olá!</h2><p id="user-role" class="muted"></p></div>
-          <div><strong>Organização que aproxima conhecimento e experiências.</strong><span>Gestão de viagens escolares · Colégio Estadual Presidente Kennedy</span></div>
+          <div class="school-banner-copy"><strong>Organização que aproxima conhecimento e experiências.</strong><span>Gestão de viagens escolares · Colégio Estadual Presidente Kennedy</span></div>
           <span class="banner-years">62 <small>anos</small></span>
         </div>
         <nav class="tabs" aria-label="Módulos do sistema">
+          <div class="sgve-brand-lockup" aria-label="SGVE Sistema de Gerenciamento de Viagens Escolares"><span class="sgve-brand-bus" aria-hidden="true">🚌</span><span><strong>SGVE</strong><small>Sistema de Gerenciamento<br>de Viagens Escolares</small></span></div>
           <button type="button" class="tab active" data-tab="home-panel">⌂ Início</button>
           <button type="button" class="tab" data-tab="classes-panel">Turmas</button>
           <button type="button" class="tab" data-tab="students-panel" id="students-tab">Estudantes</button>
@@ -108,7 +108,8 @@
             <section class="home-card calendar-card"><div class="home-card-heading"><div><span class="home-icon">▦</span><div><h4>Calendário de viagens</h4><p>Datas de saída programadas</p></div></div><div class="calendar-controls"><button type="button" id="calendar-prev" aria-label="Mês anterior">‹</button><button type="button" id="calendar-next" aria-label="Próximo mês">›</button></div></div><div class="calendar-month" id="calendar-month"></div><div class="calendar-grid" id="calendar-grid"></div><div class="calendar-selected" id="calendar-selected">Selecione uma data marcada para ver a viagem.</div></section>
             <section class="home-card upcoming-card"><div class="home-card-heading"><div><span class="home-icon">⌁</span><div><h4>Próximas viagens</h4><p>Planejamento e destinos</p></div></div><button type="button" class="home-text-button" data-open-tab="trips-panel">Ver todas →</button></div><div id="home-upcoming" class="upcoming-grid"><p class="muted">Carregando viagens...</p></div></section>
           </div>
-        </section>
+                    <section class="home-card classes-shortcut-card"><div class="home-card-heading"><div><span class="home-icon">♟</span><div><h4>Turmas</h4><p>Organização das classes</p></div></div><button type="button" class="home-text-button" data-open-tab="classes-panel">Ver todas →</button></div><div class="class-shortcut-grid"><button type="button" data-open-tab="classes-panel">♜ <span>Ensino Fundamental</span> <b>›</b></button><button type="button" data-open-tab="classes-panel">♜ <span>Ensino Médio</span> <b>›</b></button><button type="button" data-open-tab="classes-panel">♜ <span>Técnico DS</span> <b>›</b></button><button type="button" data-open-tab="classes-panel">♜ <span>Regular</span> <b>›</b></button></div></section>
+          </section>
         <section id="classes-panel" class="module-panel hidden">
           <div class="section-heading"><div><p class="eyebrow green">ORGANIZAÇÃO ESCOLAR</p><h3>Turmas</h3></div><span id="classes-count" class="count-pill">0</span></div>
           <form id="class-form" class="inline-form">
