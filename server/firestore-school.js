@@ -419,10 +419,23 @@ async function listTripParticipantsForUser(tripId, user) {
   const id = numericId(tripId, 'Viagem');
   const trip = await getTrip(id);
   if (!trip) return null;
-  const participations = await store.list('tripStudents', {
-    filters: [{ field: 'trip_id', op: '==', value: id }],
-    limit: 5000
-  });
+  // Compatibilidade com registros antigos: algumas versões gravaram trip_id como texto.
+  // Consulta os dois formatos e normaliza antes de montar a lista.
+  const [numericParticipations, legacyParticipations] = await Promise.all([
+    store.list('tripStudents', {
+      filters: [{ field: 'trip_id', op: '==', value: id }],
+      limit: 5000
+    }),
+    store.list('tripStudents', {
+      filters: [{ field: 'trip_id', op: '==', value: String(id) }],
+      limit: 5000
+    })
+  ]);
+  const participationsByStudent = new Map();
+  for (const item of [...numericParticipations, ...legacyParticipations]) {
+    if (Number(item.trip_id) === id) participationsByStudent.set(Number(item.student_id), item);
+  }
+  const participations = [...participationsByStudent.values()];
   let allowedStudentIds = null;
   if (['admin', 'direction', 'secretariat'].includes(user.role)) {
     allowedStudentIds = new Set(participations.map(item => Number(item.student_id)));
