@@ -328,3 +328,43 @@
 @media(min-width:761px){
  #dashboard-view .tabs{display:flex!important;flex-wrap:wrap!important}
 }
+
+
+/* SGVE desktop/tablet refinement: give the workspace room and prevent compressed columns. */
+@media (min-width: 1200px) {
+  #dashboard-view .welcome-row { margin-left: 252px !important; padding: 18px 48px !important; min-height: 92px !important; }
+  #dashboard-view .dashboard-welcome-banner { margin: 24px 48px 22px 292px !important; min-height: 96px !important; }
+  #dashboard-view .module-panel { margin: 0 48px 22px 292px !important; padding: 28px !important; }
+  #dashboard-view .home-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 18px !important; }
+  #dashboard-view .home-card { min-height: 250px; padding: 22px !important; }
+  #dashboard-view .upcoming-card { grid-column: span 2; }
+  #dashboard-view .calendar-card { grid-column: span 1; grid-row: span 2; }
+  #dashboard-view .upcoming-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  #dashboard-view .home-card-heading h4 { font-size: 19px !important; }
+  #dashboard-view .notice-item strong, #dashboard-view .home-notification strong { font-size: 13px !important; }
+  #dashboard-view .notice-item p, #dashboard-view .home-notification p { font-size: 12px !important; }
+  #dashboard-view .dashboard-welcome-banner { grid-template-columns: minmax(0,1fr) minmax(240px,auto) !important; }
+}
+@media (min-width: 761px) and (max-width: 1199px) {
+  #dashboard-view .welcome-row { margin: 0 !important; padding: 16px 24px !important; }
+  #dashboard-view .dashboard-welcome-banner { margin: 18px 24px !important; }
+  #dashboard-view .module-panel { margin: 0 24px 20px !important; padding: 22px !important; }
+  #dashboard-view .tabs {
+    position: sticky !important; inset: auto !important; top: 0 !important;
+    z-index: 20 !important; width: auto !important; height: auto !important;
+    min-height: 60px !important; margin: 0 !important; padding: 8px 18px !important;
+    display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important;
+    align-items: center !important; gap: 8px !important; overflow-x: auto !important;
+    border-radius: 0 !important; background: #075b3b !important;
+  }
+  #dashboard-view .tabs::before, #dashboard-view .tabs::after { display: none !important; }
+  #dashboard-view .tabs .tab { flex: 0 0 auto !important; width: auto !important; min-width: 100px !important; }
+  #dashboard-view .home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  #dashboard-view .upcoming-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 761px) {
+  #dashboard-view .dashboard-welcome-banner { border-radius: 20px !important; }
+  #dashboard-view .module-panel { border-radius: 18px !important; }
+  #dashboard-view .home-card { border-radius: 17px !important; }
+  #dashboard-view .tabs .tab { min-height: 46px !important; }
+}
