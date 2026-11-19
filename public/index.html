@@ -10,7 +10,7 @@
   <title>SGVE | Sistema de Gerenciamento de Viagens Escolares</title>
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/sgve-modern.css?v=20261119-2">
-  <link rel="stylesheet" href="/css/sgve-ux.css?v=20261119-participantes-alinhamento-v4">
+  <link rel="stylesheet" href="/css/sgve-ux.css?v=20261119-paineis-perfil-v1">
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js" defer></script>
@@ -124,7 +124,8 @@
           <button type="button" class="tab" data-tab="users-panel" id="users-tab"><span class="tab-icon" aria-hidden="true">⚙</span><span>Contas</span></button>
         </nav>
         <section id="home-panel" class="module-panel home-panel">
-          <div class="home-heading"><div><p class="eyebrow green">SEU PAINEL ESCOLAR</p><h3>Início</h3><p class="section-subtitle">Avisos, atualizações e o calendário das próximas experiências.</p></div><span class="home-date" id="home-today"></span></div>
+          <div class="home-heading"><div><p class="eyebrow green" id="home-role-eyebrow">SEU PAINEL ESCOLAR</p><h3 id="home-role-title">Início</h3><p class="section-subtitle" id="home-role-description">Avisos, atualizações e o calendário das próximas experiências.</p></div><span class="home-date" id="home-today"></span></div>
+          <div class="home-role-stats" id="home-role-stats" aria-live="polite"></div>
           <div class="home-grid">
             <section class="home-card notices-card"><div class="home-card-heading"><div><span class="home-icon">▤</span><div><h4>Mural de avisos</h4><p>Comunicados importantes</p></div></div><span class="home-tag">ESCOLA</span></div>
               <article class="notice-item"><span class="notice-dot"></span><div><strong>Organize-se para as próximas viagens</strong><p>Consulte as datas no calendário e acompanhe os comunicados da equipe escolar.</p><small>Comunicado geral · SGVE</small></div></article>
