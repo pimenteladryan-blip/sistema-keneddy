@@ -73,7 +73,7 @@ async function createUser({ display_name, email, password_hash, role, active = t
   const validPasswordHash = typeof password_hash === 'string' &&
     /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(password_hash);
   if (name.length < 3 || name.length > 100 || !validEmail ||
-      !validPasswordHash || !['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'].includes(role) ||
+      !validPasswordHash || !['admin', 'direction', 'secretariat', 'teacher', 'pedagogue', 'guardian', 'student'].includes(role) ||
       typeof active !== 'boolean' || !Array.isArray(subjects) || subjects.length > 20 ||
       subjects.some(subject => typeof subject !== 'string' || !subject.trim() || subject.length > 50)) {
     const error = new Error('Os dados da conta são inválidos.');
@@ -99,7 +99,7 @@ async function createFirebaseUser({ display_name, email, firebase_uid, role, act
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail) ||
       normalizedEmail.length > 254 ||
       typeof firebase_uid !== 'string' || !firebase_uid || firebase_uid.length > 128 ||
-      !['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'].includes(role) ||
+      !['admin', 'direction', 'secretariat', 'teacher', 'pedagogue', 'guardian', 'student'].includes(role) ||
       typeof active !== 'boolean' || !Array.isArray(subjects) || subjects.length > 20 ||
       subjects.some(subject => typeof subject !== 'string' || !subject.trim() || subject.length > 50)) {
     const error = new Error('Os dados da conta Firebase são inválidos.');
@@ -360,7 +360,7 @@ async function createFirebaseRegistrationRequest({ display_name, email, firebase
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail) ||
       normalizedEmail.length > 254 ||
       typeof firebase_uid !== 'string' || !firebase_uid || firebase_uid.length > 128 ||
-      !['teacher', 'guardian', 'student'].includes(role)) {
+      !['teacher', 'pedagogue', 'guardian', 'student'].includes(role)) {
     const error = new Error('Os dados da solicitação são inválidos.');
     error.code = 'invalid-request';
     throw error;
