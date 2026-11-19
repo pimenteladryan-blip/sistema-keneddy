@@ -798,12 +798,16 @@ document.querySelector('#trips-list').addEventListener('click', async event => {
     return;
   }
   button.disabled = true;
+  const originalLabel = button.textContent;
+  button.textContent = button.dataset.tripAction === 'approve' ? 'Aprovando...' : 'Enviando...';
   try {
     const result = await api('/api/trips/' + button.dataset.tripId + '/' + button.dataset.tripAction, { method: 'POST', body: '{}' });
     showMessage('#trip-message', result.message);
     await loadTrips();
-  } catch (error) { if (error.name === 'AbortError') return;
+  } catch (error) {
+    if (error.name === 'AbortError') return;
     showMessage('#trip-message', error.message, true);
+    button.textContent = originalLabel;
     button.disabled = false;
   }
 });
@@ -1085,39 +1089,57 @@ async function enableDevicePush() {
   const status = document.querySelector('#push-status');
   button.disabled = true;
   button.textContent = 'Ativando...';
+  status.textContent = 'Verificando as permissões deste dispositivo...';
   try {
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-      throw new Error('Este navegador não oferece suporte a notificações push.');
+    if (!window.isSecureContext || !('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+      throw new Error('Este navegador não oferece suporte a notificações push. Abra o SGVE no Chrome atualizado usando HTTPS.');
+    }
+    if (Notification.permission === 'denied') {
+      throw new Error('As notificações estão bloqueadas para o SGVE. No Android, abra as configurações do site no Chrome, entre em Permissões > Notificações e permita. Depois volte e tente novamente.');
     }
     if (!window.firebase || !window.SGVE_FIREBASE_CONFIG) throw new Error('Firebase não está configurado nesta página.');
     if (!firebase.apps.length) firebase.initializeApp(window.SGVE_FIREBASE_CONFIG);
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') throw new Error('Permissão de notificações não concedida no navegador.');
+    // A permissão é solicitada diretamente no clique do usuário, antes de qualquer chamada de rede.
+    const permission = Notification.permission === 'granted'
+      ? 'granted' : await Notification.requestPermission();
+    if (permission !== 'granted') {
+      throw new Error('Você não autorizou as notificações. Permita o aviso do navegador para continuar.');
+    }
+    status.textContent = 'Preparando o serviço de notificações...';
     const config = await api('/api/push/config');
-    if (!config.enabled || !config.vapidKey) throw new Error('Falta configurar a chave Web Push do Firebase no Render.');
-    pushVapidKey = config.vapidKey;
-    const registration = await navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' });
+    if (!config.enabled || !config.vapidKey) throw new Error('O servidor ainda não recebeu a chave Web Push do Firebase. Verifique FCM_WEB_PUSH_VAPID_KEY no Render.');
+    if (typeof firebase.messaging.isSupported === 'function' && !(await firebase.messaging.isSupported())) {
+      throw new Error('O serviço de mensagens do Firebase não é compatível com este navegador ou dispositivo.');
+    }
+    const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' });
+    await navigator.serviceWorker.ready;
+    await registration.update().catch(() => {});
     const messaging = firebase.messaging();
-    const token = await messaging.getToken({ vapidKey: config.vapidKey, serviceWorkerRegistration: registration });
-    if (!token) throw new Error('O Firebase não conseguiu registrar este dispositivo.');
+    status.textContent = 'Conectando este celular ao Firebase...';
+    const token = await messaging.getToken({
+      vapidKey: config.vapidKey.trim(),
+      serviceWorkerRegistration: registration
+    });
+    if (!token) throw new Error('O Firebase não retornou um identificador para este dispositivo.');
     await api('/api/push/register', { method: 'POST', body: JSON.stringify({ token }) });
     if (!pushMessageHandlerReady) {
       messaging.onMessage(payload => {
         const title = payload.notification?.title || 'SGVE';
         const body = payload.notification?.body || 'Você recebeu uma nova atualização.';
-        try { new Notification(title, { body, icon: '/icon.svg' }); } catch {}
-        const status = document.querySelector('#push-status');
-        if (status) status.textContent = 'Notificação recebida: ' + title;
+        try { new Notification(title, { body, icon: '/icon.svg', tag: 'sgve-foreground' }); } catch {}
+        const currentStatus = document.querySelector('#push-status');
+        if (currentStatus) currentStatus.textContent = 'Notificação recebida: ' + title;
       });
       pushMessageHandlerReady = true;
     }
     button.textContent = 'Notificações ativadas';
     button.hidden = true;
     document.querySelector('#disable-push-button').hidden = false;
-    status.textContent = 'Este dispositivo está habilitado para receber avisos.';
+    status.textContent = 'Pronto! Este dispositivo está habilitado para receber avisos, mesmo com o SGVE fechado.';
   } catch (error) {
-    button.textContent = 'Ativar notificações no celular';
-    status.textContent = error.message;
+    button.textContent = 'Tentar ativar novamente';
+    const code = error.code ? ' (' + error.code + ')' : '';
+    status.textContent = (error.message || 'Não foi possível ativar as notificações.') + code;
   } finally { button.disabled = false; }
 }
 document.querySelector('#enable-push-button')?.addEventListener('click', enableDevicePush);
