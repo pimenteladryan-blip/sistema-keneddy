@@ -1401,7 +1401,7 @@ app.post('/api/trips/:id/participants/:studentId/paper-authorization',
   });
 
 app.post('/api/trips/:id/participants/:studentId/attendance', requireAuth, requireCsrf,
-  requireRoles(...RECORD_MANAGERS, 'teacher'), async (req, res, next) => {
+  requireRoles(...RECORD_MANAGERS, 'teacher', 'pedagogue'), async (req, res, next) => {
     const tripId = Number(req.params.id);
     const studentId = Number(req.params.studentId);
     const { checkpoint, present } = req.body;
