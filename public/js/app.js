@@ -32,6 +32,7 @@ function showDashboard(user) {
   document.querySelector('#trip-form').classList.toggle('hidden', !canManage);
   document.querySelector('#trip-assignment').classList.toggle('hidden', !canManage);
   document.querySelector('#users-tab').classList.toggle('hidden', !canManage);
+  document.querySelector('#teachers-tab').classList.toggle('hidden', !canManage);
   document.querySelector('#guardians-tab').classList.toggle('hidden', !canManage);
   document.querySelector('#vehicles-tab').classList.toggle('hidden', !canManage);
   document.querySelector('#reports-tab').classList.toggle('hidden', !canManage);
@@ -44,6 +45,7 @@ function showDashboard(user) {
   loadTrips();
   if (canManage) {
     loadLinkableUsers();
+    loadTeachers();
     loadVehicles();
     loadDrivers();
     loadReports();
@@ -177,15 +179,6 @@ async function loadLinkableUsers() {
     const data = await api('/api/linkable-users');
     const guardians = data.users.filter(user => user.role === 'guardian' && user.active);
     const teachers = data.users.filter(user => user.role === 'teacher' && user.active);
-    const teachersList = document.querySelector('#teachers-list');
-    if (teachersList) {
-      teachersList.innerHTML = teachers.length ? teachers.map(user =>
-        '<article class="data-row"><div><strong>' + escapeHtml(user.name) + '</strong><small>' +
-        escapeHtml(user.email) + '</small><small>Disciplinas: ' +
-        escapeHtml(Array.isArray(user.subjects) && user.subjects.length ? user.subjects.join(', ') : 'Não informadas') +
-        '</small></div><span>Professor ativo</span></article>'
-      ).join('') : '<p class="muted">Nenhum professor cadastrado ainda.</p>';
-    }
     const guardianList = document.querySelector('#guardians-list');
     const guardianCount = document.querySelector('#guardians-count');
     if (guardianList && guardianCount) {
@@ -210,6 +203,23 @@ async function loadLinkableUsers() {
     if (error.name === 'AbortError') return;
     showMessage('#student-guardian-message', error.message, true);
     showMessage('#trip-staff-message', error.message, true);
+  }
+}
+async function loadTeachers() {
+  const list = document.querySelector('#teachers-list');
+  const count = document.querySelector('#teachers-count');
+  if (!list || !count) return;
+  try {
+    const data = await api('/api/teachers');
+    count.textContent = String(data.teachers.length);
+    list.innerHTML = data.teachers.length ? data.teachers.map(teacher =>
+      '<article class="data-row"><div><strong>' + escapeHtml(teacher.name) + '</strong><small>Disciplinas: ' +
+      escapeHtml(Array.isArray(teacher.subjects) && teacher.subjects.length ? teacher.subjects.join(', ') : 'Não informadas') +
+      '</small></div><span>Professor cadastrado</span></article>'
+    ).join('') : '<p class="muted">Nenhum professor cadastrado ainda.</p>';
+  } catch (error) {
+    if (error.name === 'AbortError') return;
+    list.textContent = error.message;
   }
 }
 async function loadVehicles() {
@@ -740,13 +750,20 @@ document.querySelector('#guardian-form').addEventListener('submit', async event 
     showMessage('#guardian-message', error.message, true);
   }
 });
-const userRoleSelect = document.querySelector('#user-form-role');
-const teacherSubjectsField = document.querySelector('#teacher-subjects-field');
-function toggleTeacherSubjects() {
-  teacherSubjectsField.classList.toggle('hidden', userRoleSelect.value !== 'teacher');
-}
-userRoleSelect.addEventListener('change', toggleTeacherSubjects);
-toggleTeacherSubjects();
+document.querySelector('#teacher-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const payload = Object.fromEntries(new FormData(form).entries());
+  try {
+    const result = await api('/api/teachers', { method: 'POST', body: JSON.stringify(payload) });
+    form.reset();
+    showMessage('#teacher-message', result.message);
+    await loadTeachers();
+  } catch (error) {
+    if (error.name === 'AbortError') return;
+    showMessage('#teacher-message', error.message, true);
+  }
+});
 document.querySelector('#user-form').addEventListener('submit', async event => {
   event.preventDefault();
   const form = event.currentTarget;
@@ -754,7 +771,6 @@ document.querySelector('#user-form').addEventListener('submit', async event => {
   try {
     const result = await api('/api/users', { method: 'POST', body: JSON.stringify(payload) });
     form.reset();
-    toggleTeacherSubjects();
     showMessage('#user-message', result.message + ' Perfil: ' + result.user.roleLabel);
     await loadLinkableUsers();
   } catch (error) { if (error.name === 'AbortError') return; showMessage('#user-message', error.message, true); }
