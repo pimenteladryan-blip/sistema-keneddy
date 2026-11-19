@@ -451,11 +451,11 @@ async function reviewFirebaseRegistrationRequest(id, reviewerId, decision, verif
 }
 
 async function listPendingRegistrationRequests() {
-  return store.list('registrationRequests', {
+  const requests = await store.list('registrationRequests', {
     filters: [{ field: 'status', op: '==', value: 'pending' }],
-    orderBy: { field: 'created_at', direction: 'asc' },
     limit: 200
   });
+  return requests.sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || '')));
 }
 
 async function reviewRegistrationRequest(id, reviewerId, decision) {
