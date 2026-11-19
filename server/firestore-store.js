@@ -118,7 +118,8 @@ const UNIQUE_FIELDS = Object.freeze({
   users: ['email'],
   registrationRequests: ['email'],
   vehicles: ['name_key'],
-  drivers: ['name_key']
+  drivers: ['name_key'],
+  teachers: ['name_key']
 });
 
 function uniqueIndexRef(name, field, value) {
