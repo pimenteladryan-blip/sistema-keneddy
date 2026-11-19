@@ -147,10 +147,28 @@ async function bootstrapAdmin() {
   if (!password) return;
   if (!validEmail(email) || password.length < 14) throw new Error('Configure ADMIN_EMAIL válido e ADMIN_PASSWORD com pelo menos 14 caracteres.');
   if (firebaseConfigured) {
-    if (await firestoreAuth.findUserByEmail(email)) return;
-    const passwordHash = await hashPassword(password);
-    await firestoreAuth.createUser({ display_name: name || 'Administrador', email, password_hash: passwordHash, role: 'admin', active: true });
-    console.log('Conta administrativa inicial criada no Firestore a partir das variáveis de ambiente.');
+    let identity;
+    try {
+      identity = await getAuth(firebaseApp).getUserByEmail(email);
+    } catch (error) {
+      if (error.code !== 'auth/user-not-found') throw error;
+      identity = await getAuth(firebaseApp).createUser({
+        email, password, displayName: name || 'Administrador', emailVerified: true
+      });
+    }
+    const existing = await firestoreAuth.findUserByEmail(email);
+    if (existing) {
+      if (existing.firebase_uid && existing.firebase_uid !== identity.uid) {
+        throw new Error('A conta administrativa no Firestore está vinculada a outro usuário Firebase.');
+      }
+      if (!existing.firebase_uid) await firestoreAuth.setFirebaseUid(existing.id, identity.uid);
+      return;
+    }
+    await firestoreAuth.createFirebaseUser({
+      display_name: name || 'Administrador', email, firebase_uid: identity.uid,
+      role: 'admin', active: true
+    });
+    console.log('Conta administrativa inicial vinculada ao Firebase Authentication e Firestore.');
     return;
   }
   if (db.prepare('SELECT id FROM users WHERE email = ?').get(email)) return;
@@ -164,41 +182,34 @@ app.get('/api/health', (_req, res) => res.json({ status: 'ok', service: 'SGVE', 
 app.post('/api/registration-requests', async (req, res, next) => {
   try {
     if (!sameOrigin(req)) return res.status(403).json({ error: 'Origem não permitida.' });
+    if (!firebaseConfigured) return res.status(503).json({ error: 'Firebase Authentication não está configurado.' });
     const name = cleanText(req.body.name, 100);
     const email = String(req.body.email || '').trim().toLowerCase();
     const role = String(req.body.role || '');
-    const password = String(req.body.password || '');
-    if (name.length < 3 || !validEmail(email) || !['teacher', 'guardian', 'student'].includes(role) ||
-        password.length < 14 || password.length > 200) {
-      return res.status(400).json({ error: 'Informe nome, e-mail, perfil e senha com pelo menos 14 caracteres.' });
+    const idToken = typeof req.body.idToken === 'string' ? req.body.idToken : '';
+    if (name.length < 3 || !validEmail(email) ||
+        !['teacher', 'guardian', 'student'].includes(role) ||
+        !idToken || idToken.length > 12000) {
+      return res.status(400).json({ error: 'Confira nome, e-mail, perfil e autenticação da conta.' });
     }
     const allowedIp = await consumeAttempts('registration-ip', [String(req.ip || 'unknown')], REGISTRATION_WINDOW_MS, 20);
     const allowedEmail = allowedIp && await consumeAttempts('registration-email', [email], REGISTRATION_WINDOW_MS, MAX_REGISTRATION_ATTEMPTS);
-    if (!allowedIp || !allowedEmail) {
-      return res.status(429).json({ error: 'Muitas solicitações. Aguarde um pouco e tente novamente.' });
+    if (!allowedIp || !allowedEmail) return res.status(429).json({ error: 'Muitas solicitações. Aguarde um pouco e tente novamente.' });
+    const decoded = await getAuth(firebaseApp).verifyIdToken(idToken, true);
+    if (decoded.aud !== projectId || decoded.iss !== 'https://securetoken.google.com/' + projectId ||
+        decoded.firebase?.sign_in_provider !== 'password' ||
+        decoded.email !== email || typeof decoded.uid !== 'string') {
+      return res.status(401).json({ error: 'Não foi possível confirmar a conta Firebase deste e-mail.' });
     }
-    const existingUser = firebaseConfigured
-      ? await firestoreAuth.findUserByEmail(email)
-      : db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-    if (existingUser) return res.status(409).json({ error: 'Este e-mail já possui uma conta. Tente entrar ou fale com a secretaria.' });
-    const previousRequest = firebaseConfigured ? null
-      : db.prepare('SELECT id, status FROM registration_requests WHERE email = ?').get(email);
-    if (previousRequest?.status === 'pending') {
-      return res.status(409).json({ error: 'Já existe uma solicitação pendente para este e-mail.' });
-    }
-    const passwordHash = await hashPassword(password);
-    const verificationCode = createVerificationCode();
-    if (firebaseConfigured) {
-      await firestoreAuth.createRegistrationRequest({ display_name: name, email, password_hash: passwordHash, role, verification_code: verificationCode });
-    } else if (previousRequest?.status === 'rejected') {
-      db.prepare("UPDATE registration_requests SET display_name = ?, password_hash = ?, role = ?, verification_code = ?, status = 'pending', reviewed_by = NULL, reviewed_at = NULL, created_at = CURRENT_TIMESTAMP WHERE id = ?")
-        .run(name, passwordHash, role, verificationCode, previousRequest.id);
-    } else {
-      db.prepare('INSERT INTO registration_requests (display_name, email, password_hash, role, verification_code) VALUES (?, ?, ?, ?, ?)').run(name, email, passwordHash, role, verificationCode);
-    }
-    res.status(201).json({ message: 'Solicitação enviada. Informe o código ao administrador para conferir seu cadastro. A conta só será liberada após a aprovação.', verificationCode });
+    await firestoreAuth.createFirebaseRegistrationRequest({
+      display_name: name, email, firebase_uid: decoded.uid, role
+    });
+    res.status(201).json({
+      message: 'Conta criada. Enviamos um e-mail de verificação. Confirme o endereço para que o administrador possa analisar sua solicitação.'
+    });
   } catch (error) {
-    if (String(error.message).includes('UNIQUE') || error.code === 'already-pending' || error.code === 'already-exists') return res.status(409).json({ error: 'Já existe uma solicitação para este e-mail.' });
+    if (error.code === 'already-pending' || error.code === 'already-exists') return res.status(409).json({ error: 'Já existe uma solicitação ou conta para este e-mail.' });
+    if (error.code === 'auth/id-token-expired' || error.code === 'auth/argument-error' || error.code === 'auth/invalid-id-token' || error.code === 'auth/revoked-id-token') return res.status(401).json({ error: 'A autenticação expirou. Tente novamente.' });
     next(error);
   }
 });
@@ -278,6 +289,46 @@ app.post('/api/auth/google', async (req, res, next) => {
     if (error.code === 'auth/id-token-expired' || error.code === 'auth/argument-error' ||
         error.code === 'auth/invalid-id-token' || error.code === 'auth/revoked-id-token') {
       return res.status(401).json({ error: 'A sessão Google expirou. Entre novamente.' });
+    }
+    next(error);
+  }
+});
+app.post('/api/auth/firebase', async (req, res, next) => {
+  try {
+    if (!sameOrigin(req)) return res.status(403).json({ error: 'Origem não permitida.' });
+    if (!firebaseConfigured) return res.status(503).json({ error: 'Firebase Authentication não está configurado no servidor.' });
+    const allowedIp = await consumeAttempts('firebase-login-ip', [String(req.ip || 'unknown')], LOGIN_WINDOW_MS, 60);
+    if (!allowedIp) return res.status(429).json({ error: 'Muitas tentativas. Aguarde alguns minutos.' });
+    const idToken = typeof req.body.idToken === 'string' ? req.body.idToken : '';
+    const requestedRole = typeof req.body.role === 'string' ? req.body.role : '';
+    if (!idToken || idToken.length > 12000 || !ROLE_LABELS[requestedRole]) return res.status(400).json({ error: 'Token ou perfil inválido.' });
+    const decoded = await getAuth(firebaseApp).verifyIdToken(idToken, true);
+    if (decoded.aud !== projectId || decoded.iss !== 'https://securetoken.google.com/' + projectId ||
+        decoded.email_verified !== true || typeof decoded.email !== 'string') {
+      return res.status(401).json({ error: 'Confirme seu e-mail antes de entrar.' });
+    }
+    const user = await firestoreAuth.findUserByEmail(decoded.email);
+    if (!user || user.active !== true) return res.status(403).json({ error: 'Sua conta ainda não foi aprovada pela administração.' });
+    if (user.firebase_uid && user.firebase_uid !== decoded.uid) return res.status(403).json({ error: 'Esta conta não corresponde à identidade Firebase cadastrada.' });
+    if (user.role !== requestedRole) return res.status(403).json({ error: 'O perfil selecionado não corresponde a esta conta.' });
+    const now = Date.now();
+    const token = randomToken(32);
+    const csrfToken = randomToken(24);
+    const expiresAt = new Date(now + SESSION_HOURS * 3600000).toISOString();
+    await resetAttempts('firebase-login-ip', [String(req.ip || 'unknown')]);
+    await firestoreAuth.deleteExpiredSessions(new Date(now).toISOString());
+    await firestoreAuth.createSessionWithAudit({
+      token_hash: sha256(token), csrf_token: csrfToken, user_id: Number(user.id),
+      expires_at: expiresAt,
+      action: decoded.firebase?.sign_in_provider === 'google.com' ? 'login_google' : 'login_password'
+    });
+    setSessionCookie(res, token);
+    res.json({ user: { id: Number(user.id), name: user.display_name, email: user.email,
+      role: user.role, roleLabel: ROLE_LABELS[user.role] }, csrfToken });
+  } catch (error) {
+    if (error.code === 'auth/id-token-expired' || error.code === 'auth/argument-error' ||
+        error.code === 'auth/invalid-id-token' || error.code === 'auth/revoked-id-token') {
+      return res.status(401).json({ error: 'A sessão Firebase expirou. Entre novamente.' });
     }
     next(error);
   }
@@ -429,11 +480,25 @@ app.post('/api/users', requireAuth, requireCsrf, requireRoles(...USER_MANAGERS),
     if (name.length < 3 || !validEmail(email) || !VALID_ROLES.includes(role) || password.length < 14 || password.length > 200) return res.status(400).json({ error: 'Informe nome, e-mail, perfil e senha com pelo menos 14 caracteres.' });
     if (req.auth.user.role === 'secretariat' && !['teacher', 'guardian', 'student'].includes(role)) return res.status(403).json({ error: 'A secretaria não pode criar contas administrativas ou de direção.' });
     if (req.auth.user.role === 'direction' && role === 'admin') return res.status(403).json({ error: 'Somente um administrador pode criar outro administrador.' });
-    const passwordHash = await hashPassword(password);
     if (firebaseConfigured) {
-      const id = await firestoreAuth.createUser({ display_name: name, email, password_hash: passwordHash, role, active: true, actor_user_id: req.auth.user.id });
-      return res.status(201).json({ user: { id: Number(id), name, email, role, roleLabel: ROLE_LABELS[role], active: true }, message: 'Conta criada.' });
+      const identity = await getAuth(firebaseApp).createUser({
+        email, password, displayName: name, emailVerified: false
+      });
+      try {
+        const id = await firestoreAuth.createFirebaseUser({
+          display_name: name, email, firebase_uid: identity.uid, role,
+          active: true, actor_user_id: req.auth.user.id
+        });
+        return res.status(201).json({
+          user: { id: Number(id), name, email, role, roleLabel: ROLE_LABELS[role], active: true },
+          message: 'Conta criada no Firebase. No primeiro acesso, a pessoa deverá confirmar o e-mail.'
+        });
+      } catch (error) {
+        await getAuth(firebaseApp).deleteUser(identity.uid).catch(() => {});
+        throw error;
+      }
     }
+    const passwordHash = await hashPassword(password);
     const result = db.prepare('INSERT INTO users (display_name, email, password_hash, role) VALUES (?, ?, ?, ?)').run(name, email, passwordHash, role);
     audit(req.auth.user.id, 'create', 'user', result.lastInsertRowid);
     res.status(201).json({ user: { id: Number(result.lastInsertRowid), name, email, role, roleLabel: ROLE_LABELS[role] }, message: 'Conta criada.' });
@@ -445,8 +510,20 @@ app.post('/api/users', requireAuth, requireCsrf, requireRoles(...USER_MANAGERS),
 app.get('/api/registration-requests', requireAuth, requireRoles('admin'), async (_req, res, next) => {
   try {
     if (firebaseConfigured) {
-      const requests = await firestoreAuth.listPendingRegistrationRequests();
-      return res.json({ requests: requests.map(item => ({ id: item.id, name: item.display_name, email: item.email, role: item.role, verification_code: item.verification_code, status: item.status, created_at: item.created_at, roleLabel: ROLE_LABELS[item.role] })) });
+      const pending = await firestoreAuth.listPendingRegistrationRequests();
+      const verified = [];
+      for (const item of pending) {
+        if (!item.firebase_uid) continue;
+        try {
+          const identity = await getAuth(firebaseApp).getUser(item.firebase_uid);
+          if (identity.emailVerified === true && String(identity.email || '').toLowerCase() === item.email) {
+            verified.push({ id: item.id, name: item.display_name, email: item.email,
+              role: item.role, status: item.status, created_at: item.created_at,
+              roleLabel: ROLE_LABELS[item.role] });
+          }
+        } catch {}
+      }
+      return res.json({ requests: verified });
     }
     const requests = db.prepare("SELECT id, display_name AS name, email, role, verification_code, status, created_at FROM registration_requests WHERE status = 'pending' ORDER BY created_at ASC LIMIT 200").all();
     res.json({ requests: requests.map(item => ({ ...item, roleLabel: ROLE_LABELS[item.role] })) });
@@ -457,10 +534,15 @@ app.post('/api/registration-requests/:id/approve', requireAuth, requireCsrf, req
     try {
       const id = req.params.id;
       if (!/^\d+$/.test(id) || Number(id) < 1) return res.status(400).json({ error: 'Solicitação inválida.' });
-      const userId = await firestoreAuth.reviewRegistrationRequest(id, req.auth.user.id, 'approved');
+      const pending = await firestoreAuth.listPendingRegistrationRequests();
+      const request = pending.find(item => item.id === id);
+      if (!request?.firebase_uid) return res.status(404).json({ error: 'Solicitação não encontrada ou já analisada.' });
+      const identity = await getAuth(firebaseApp).getUser(request.firebase_uid);
+      const userId = await firestoreAuth.reviewFirebaseRegistrationRequest(id, req.auth.user.id, 'approved', identity);
       return res.json({ message: 'Cadastro aprovado. A pessoa já pode entrar com o e-mail e a senha cadastrados.', userId });
     } catch (error) {
       if (error.code === 'not-found') return res.status(404).json({ error: 'Solicitação não encontrada ou já analisada.' });
+      if (error.code === 'email-not-verified') return res.status(409).json({ error: 'O e-mail precisa ser verificado antes da aprovação.' });
       if (error.code === 'already-exists') return res.status(409).json({ error: 'Já existe uma conta com este e-mail.' });
       return next(error);
     }
@@ -488,7 +570,7 @@ app.post('/api/registration-requests/:id/reject', requireAuth, requireCsrf, requ
     try {
       const id = req.params.id;
       if (!/^\d+$/.test(id) || Number(id) < 1) return res.status(400).json({ error: 'Solicitação inválida.' });
-      await firestoreAuth.reviewRegistrationRequest(id, req.auth.user.id, 'rejected');
+      await firestoreAuth.reviewFirebaseRegistrationRequest(id, req.auth.user.id, 'rejected', null);
       return res.json({ message: 'Solicitação rejeitada.' });
     } catch (error) {
       if (error.code === 'not-found') return res.status(404).json({ error: 'Solicitação não encontrada ou já analisada.' });
