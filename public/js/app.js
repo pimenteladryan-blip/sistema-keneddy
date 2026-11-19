@@ -369,7 +369,7 @@ async function loadTripParticipants(tripId, area) {
     ]);
     const tripStatus = area.dataset.tripStatus || '';
     const canAuthorize = currentUser?.role === 'guardian' && ['approved', 'open'].includes(tripStatus);
-    const canMarkAttendance = currentUser && ['admin', 'direction', 'secretariat', 'teacher'].includes(currentUser.role) &&
+    const canMarkAttendance = currentUser && ['admin', 'direction', 'secretariat', 'teacher', 'pedagogue'].includes(currentUser.role) &&
       ['approved', 'open'].includes(tripStatus);
     const canRecordPaper = currentUser && ['admin', 'direction', 'secretariat'].includes(currentUser.role) &&
       ['approved', 'open'].includes(tripStatus);
@@ -409,7 +409,7 @@ async function loadTripParticipants(tripId, area) {
     }).join('') : '<p class="muted">Nenhum participante vinculado a esta viagem.</p>') +
       '<section class="trip-staff-section"><div class="trip-staff-heading"><h3>Equipe da viagem</h3><span>' + (staffData.staff || []).length + ' integrante(s)</span></div>' +
       ((staffData.staff || []).length ? '<div class="trip-staff-list">' + staffData.staff.map(member =>
-        '<article class="trip-staff-member"><span class="trip-staff-avatar">' + escapeHtml(String(member.name || 'E').trim().split(/\\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase()) + '</span><span><strong>' + escapeHtml(member.name) + '</strong><small>' + escapeHtml(member.role_label || member.role) + '</small></span></article>'
+        '<article class="trip-staff-member"><span class="trip-staff-avatar">' + escapeHtml(String(member.name || 'E').trim().split(/\s+/).slice(0,2).map(part => part[0]).join('').toUpperCase()) + '</span><span><strong>' + escapeHtml(member.name) + '</strong><small>' + escapeHtml(member.role_label || member.role) + '</small></span></article>'
       ).join('') + '</div>' : '<p class="muted">Nenhum professor, pedagogo ou diretor vinculado a esta viagem ainda.</p>') + '</section>';
     area.dataset.loaded = 'true';
   } catch (error) { if (error.name === 'AbortError') return;
