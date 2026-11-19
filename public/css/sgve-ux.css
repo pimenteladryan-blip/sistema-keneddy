@@ -834,3 +834,58 @@ body.dark-mode #dashboard-view .notification-channels i{background:#65d990!impor
   #dashboard-view .banner-years{position:relative!important;right:auto!important;top:auto!important;transform:none!important;border:0!important;padding:0!important;margin-top:4px!important}
   #dashboard-view .dashboard-welcome-banner{display:flex!important;flex-direction:column!important;gap:4px!important}
 }
+
+
+/* Centralização por grade: coluna central independente das laterais. */
+#dashboard-view .dashboard-welcome-banner{
+  display:grid!important;
+  grid-template-columns:minmax(64px,1fr) minmax(0,2fr) minmax(64px,1fr)!important;
+  align-items:center!important;
+  justify-items:stretch!important;
+  gap:10px!important;
+  padding:14px 20px!important;
+}
+#dashboard-view .dashboard-welcome-banner .school-banner-copy{
+  position:static!important;
+  inset:auto!important;
+  transform:none!important;
+  grid-column:2!important;
+  grid-row:1!important;
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  justify-self:stretch!important;
+  margin:0!important;
+  text-align:center!important;
+  justify-items:center!important;
+}
+#dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{
+  position:static!important;
+  inset:auto!important;
+  transform:none!important;
+  grid-column:1!important;
+  grid-row:1!important;
+  justify-self:start!important;
+  margin:0!important;
+}
+#dashboard-view .dashboard-welcome-banner>.banner-years{
+  position:static!important;
+  inset:auto!important;
+  transform:none!important;
+  grid-column:3!important;
+  grid-row:1!important;
+  justify-self:end!important;
+  margin:0!important;
+}
+@media(max-width:900px){
+ #dashboard-view .dashboard-welcome-banner{grid-template-columns:44px minmax(0,1fr) auto!important;padding:12px!important}
+ #dashboard-view .dashboard-welcome-banner .school-banner-copy{grid-column:2!important;width:100%!important}
+ #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{display:block!important;width:38px!important;height:38px!important}
+ #dashboard-view .dashboard-welcome-banner>.banner-years{grid-column:3!important;font-size:20px!important;padding:0 0 0 9px!important}
+}
+@media(max-width:560px){
+ #dashboard-view .dashboard-welcome-banner{grid-template-columns:1fr!important;gap:5px!important;padding:14px!important}
+ #dashboard-view .dashboard-welcome-banner .school-banner-copy{grid-column:1!important;grid-row:1!important}
+ #dashboard-view .dashboard-welcome-banner>.sgve-bus-illustration{display:none!important}
+ #dashboard-view .dashboard-welcome-banner>.banner-years{grid-column:1!important;grid-row:2!important;justify-self:center!important;border:0!important;padding:0!important}
+}
