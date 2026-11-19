@@ -419,21 +419,15 @@ async function listTripParticipantsForUser(tripId, user) {
   const id = numericId(tripId, 'Viagem');
   const trip = await getTrip(id);
   if (!trip) return null;
-  // Compatibilidade com registros antigos: algumas versões gravaram trip_id como texto.
-  // Consulta os dois formatos e normaliza antes de montar a lista.
-  const [numericParticipations, legacyParticipations] = await Promise.all([
-    store.list('tripStudents', {
-      filters: [{ field: 'trip_id', op: '==', value: id }],
-      limit: 5000
-    }),
-    store.list('tripStudents', {
-      filters: [{ field: 'trip_id', op: '==', value: String(id) }],
-      limit: 5000
-    })
-  ]);
+  // Lê a coleção de relações e normaliza o trip_id em memória.
+  // Isso contempla dados antigos com trip_id numérico ou textual sem depender
+  // do tipo exato gravado no Firestore para a consulta.
+  const allParticipations = await store.list('tripStudents', { limit: 5000 });
   const participationsByStudent = new Map();
-  for (const item of [...numericParticipations, ...legacyParticipations]) {
-    if (Number(item.trip_id) === id) participationsByStudent.set(Number(item.student_id), item);
+  for (const item of allParticipations) {
+    if (Number(item.trip_id) === id) {
+      participationsByStudent.set(Number(item.student_id), item);
+    }
   }
   const participations = [...participationsByStudent.values()];
   let allowedStudentIds = null;
