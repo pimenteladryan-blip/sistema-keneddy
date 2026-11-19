@@ -14,6 +14,7 @@ let currentUser = null;
 let lastReport = null;
 let dashboardTrips = [];
 let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let selectedCalendarDate = '';
 
 function showDashboard(user) {
   sessionController.abort();
@@ -24,6 +25,7 @@ function showDashboard(user) {
   document.querySelector('#welcome-title').textContent = 'Olá, ' + user.name + '!';
   document.querySelector('#user-role').textContent = 'Perfil de acesso: ' + (user.roleLabel || user.role);
   updateProfileMenu(user);
+  syncExistingDevicePush();
   const canManage = ['admin', 'direction', 'secretariat'].includes(user.role);
   if (!canManage) lastReport = null;
   document.querySelector('#class-form').classList.toggle('hidden', !canManage);
@@ -478,14 +480,22 @@ function renderCalendar() {
   dashboardTrips.forEach(t=>{const key=localDateKey(t.departure_at); if(key){if(!tripDates.has(key))tripDates.set(key,[]);tripDates.get(key).push(t);}});
   let markup=labels.map(x=>'<span class="calendar-weekday">'+x+'</span>').join('');
   for(let i=0;i<offset;i++) markup+='<span class="calendar-day empty"></span>';
+  const todayKey=localDateKey(new Date().toISOString());
   for(let day=1;day<=days;day++){
     const key=[year,String(month+1).padStart(2,'0'),String(day).padStart(2,'0')].join('-');
     const trips=tripDates.get(key)||[];
-    markup+='<button type="button" class="calendar-day '+(trips.length?'has-trip':'')+'" data-calendar-date="'+key+'" aria-label="'+day+' de '+title.textContent+(trips.length?', '+trips.length+' viagem(ns)':'')+'">'+day+(trips.length?'<i></i>':'')+'</button>';
+    const classes=['calendar-day'];
+    if(trips.length) classes.push('has-trip');
+    if(key===todayKey) classes.push('is-today');
+    if(key===selectedCalendarDate) classes.push('selected');
+    const count=trips.length>1?'<small class="calendar-count">'+trips.length+'</small>':'';
+    markup+='<button type="button" class="'+classes.join(' ')+'" data-calendar-date="'+key+'" aria-label="'+day+' de '+title.textContent+(trips.length?', '+trips.length+' viagem(ns)':'')+'"><span>'+day+'</span>'+(trips.length?'<i></i>':'')+count+'</button>';
   }
   grid.innerHTML=markup;
 }
 function showCalendarDate(key) {
+  selectedCalendarDate=key;
+  renderCalendar();
   const matches=dashboardTrips.filter(t=>localDateKey(t.departure_at)===key);
   const target=document.querySelector('#calendar-selected');
   const date=new Date(key+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long'});
@@ -1172,6 +1182,37 @@ async function enableDevicePush() {
     const code = error.code ? ' (' + error.code + ')' : '';
     status.textContent = (error.message || 'Não foi possível ativar as notificações.') + code;
   } finally { button.disabled = false; }
+}
+async function syncExistingDevicePush() {
+  const enableButton = document.querySelector('#enable-push-button');
+  const disableButton = document.querySelector('#disable-push-button');
+  const status = document.querySelector('#push-status');
+  if (!enableButton || !disableButton || !('Notification' in window) || Notification.permission !== 'granted') return;
+  try {
+    if (!window.firebase || !window.SGVE_FIREBASE_CONFIG || !('serviceWorker' in navigator)) return;
+    if (!firebase.apps.length) firebase.initializeApp(window.SGVE_FIREBASE_CONFIG);
+    const config = await api('/api/push/config');
+    if (!config.enabled || !config.vapidKey) return;
+    const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' });
+    await navigator.serviceWorker.ready;
+    const messaging = firebase.messaging();
+    const token = await messaging.getToken({ vapidKey: config.vapidKey.trim(), serviceWorkerRegistration: registration });
+    if (!token) return;
+    await api('/api/push/register', { method: 'POST', body: JSON.stringify({ token }) });
+    enableButton.hidden = true;
+    disableButton.hidden = false;
+    status.textContent = 'Notificações ativadas neste dispositivo. Você não precisa repetir essa etapa.';
+    if (!pushMessageHandlerReady) {
+      messaging.onMessage(payload => {
+        const title = payload.notification?.title || 'SGVE';
+        const body = payload.notification?.body || 'Você recebeu uma nova atualização.';
+        try { new Notification(title, { body, icon: '/icon.svg', tag: 'sgve-foreground' }); } catch {}
+      });
+      pushMessageHandlerReady = true;
+    }
+  } catch (error) {
+    console.warn('Não foi possível restaurar o registro de notificações:', error.message);
+  }
 }
 document.querySelector('#enable-push-button')?.addEventListener('click', enableDevicePush);
 document.querySelector('#disable-push-button')?.addEventListener('click', async () => {
