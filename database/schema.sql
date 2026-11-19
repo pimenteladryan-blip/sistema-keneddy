@@ -104,6 +104,8 @@ CREATE TABLE IF NOT EXISTS trips (
   created_by INTEGER NOT NULL REFERENCES users(id),
   approved_by INTEGER REFERENCES users(id),
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  departure_notified_at TEXT,
+  return_notified_at TEXT,
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_trips_departure ON trips(departure_at);
