@@ -115,6 +115,24 @@ async function linkGuardian(studentId, guardianEmail, relationship, actorUserId 
   );
 }
 
+async function listTeachers() {
+  const teachers = await store.list('teachers', {
+    filters: [{ field: 'active', op: '==', value: true }],
+    limit: 1000
+  });
+  return teachers.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+}
+
+async function createTeacher(name, subjects, actorUserId) {
+  const id = await store.createWithNumericId('teachers', {
+    name, subjects, active: true,
+    created_by: Number(actorUserId),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }, { actor_user_id: actorUserId, action: 'create', entity_type: 'teacher' });
+  return Number(id);
+}
+
 async function createTrip(data, createdBy) {
   const id = await store.createWithNumericId('trips', {
     title: data.title, destination: data.destination,
@@ -479,6 +497,8 @@ async function setTripAttendance(tripId, studentId, actorUser, checkpoint, prese
 }
 
 module.exports = {
+  listTeachers,
+  createTeacher,
   audit, listClasses, createClass, getClass, createStudent,
   listStudentsForUser, linkGuardian, linkStudentAccount, createTrip, getTrip,
   listTripsForUser, linkTripClass, linkTripStudent,
