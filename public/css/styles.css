@@ -319,3 +319,85 @@ body.dark-mode .verification-code-badge{border-color:#42694e;background:#1b3826;
   .verification-code-badge{font-size:11px;letter-spacing:.13em}
   select{min-height:48px;font-size:14px}
 }
+
+
+/* Cabeçalho retangular padronizado em todos os módulos */
+.module-panel .section-heading{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin:0 0 18px;padding:15px 18px;
+  border:1px solid #cfe4d2;border-radius:12px;
+  background:linear-gradient(105deg,#e4f2e4 0%,#d5ead8 100%);
+}
+.module-panel .section-heading .eyebrow{
+  margin:0 0 5px;color:#4c8054;font-size:9px;font-weight:850;letter-spacing:.15em;
+}
+.module-panel .section-heading h3{
+  color:#174d30;font-size:22px;line-height:1.15;font-weight:850;letter-spacing:-.04em;
+}
+.module-panel .section-heading .section-subtitle{color:#56745c}
+.module-panel .section-heading .count-pill{
+  flex:0 0 auto;background:#c5e1c9;color:#245f38;border:1px solid #b5d7bb;
+}
+/* Três passos claros para organizar uma viagem */
+.trip-workflow{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 20px;
+}
+.trip-workflow-link{
+  display:flex;align-items:center;gap:10px;min-width:0;min-height:76px;padding:12px;
+  border:1px solid #dce9de;border-radius:11px;background:#fbfdfb;color:#234b31;
+  text-decoration:none;transition:border-color .18s,background .18s,transform .18s;
+}
+.trip-workflow-link:hover{
+  border-color:#9bc9a2;background:#f0f8f0;transform:translateY(-1px);
+}
+.trip-workflow-number{
+  display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;
+  border-radius:9px;background:#e1f0e3;color:#347348;font-size:10px;font-weight:900;
+}
+.trip-workflow-link>span:nth-child(2){display:grid;gap:4px;min-width:0;flex:1}
+.trip-workflow-link strong{font-size:11px;line-height:1.25}
+.trip-workflow-link small{color:#788a7d;font-size:9px;line-height:1.4}
+.trip-workflow-link>b{color:#6a9a70;font-size:17px}
+#trip-form,#trip-assignment,#trips-list{scroll-margin-top:18px}
+.assignment-area h4{
+  display:flex;align-items:center;gap:9px;margin:0 0 13px;font-size:14px;
+}
+.trip-stage-tag{
+  display:inline-flex;align-items:center;justify-content:center;min-height:22px;padding:0 8px;
+  border-radius:6px;background:#e5f2e6;color:#347348;font-size:8px;font-weight:900;letter-spacing:.08em;
+}
+.trip-list-heading{
+  display:flex;align-items:center;gap:10px;margin:22px 0 10px;padding-top:17px;
+  border-top:1px solid var(--line);
+}
+.trip-list-heading>div{display:grid;gap:3px}
+.trip-list-heading strong{font-size:13px;color:var(--ink)}
+.trip-list-heading small{font-size:10px;color:var(--muted)}
+body.dark-mode .module-panel .section-heading{
+  background:linear-gradient(105deg,#1c3b29 0%,#244a31 100%);
+  border-color:#365c40;
+}
+body.dark-mode .module-panel .section-heading .eyebrow{color:#a9d6a9}
+body.dark-mode .module-panel .section-heading h3{color:#eff8ed}
+body.dark-mode .module-panel .section-heading .section-subtitle{color:#c0d9c1}
+body.dark-mode .module-panel .section-heading .count-pill{
+  background:#2b5034;color:#d5efd5;border-color:#426b4a;
+}
+body.dark-mode .trip-workflow-link{
+  background:#17271d;border-color:#35513a;color:#e6f2e6;
+}
+body.dark-mode .trip-workflow-link:hover{background:#203a29;border-color:#5d8b63}
+body.dark-mode .trip-workflow-number,body.dark-mode .trip-stage-tag{
+  background:#284b31;color:#bde2bb;
+}
+body.dark-mode .trip-workflow-link small{color:#afc2b0}
+body.dark-mode .trip-workflow-link>b{color:#a8d4a5}
+body.dark-mode .trip-list-heading{border-color:#304238}
+@media(max-width:760px){
+  .module-panel .section-heading{padding:13px 14px;margin-bottom:15px}
+  .module-panel .section-heading h3{font-size:20px}
+  .trip-workflow{grid-template-columns:1fr;gap:7px;margin-bottom:16px}
+  .trip-workflow-link{min-height:64px;padding:10px 12px}
+  .trip-workflow-link strong{font-size:11px}
+  .trip-workflow-link small{font-size:9px}
+}
