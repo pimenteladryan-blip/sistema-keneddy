@@ -162,3 +162,57 @@ body{background:#eaf4e9!important}
     box-shadow:none!important;
   }
 }
+
+
+/* Final mobile navigation override: dark solid dock, light solid workspace */
+@media screen and (max-width: 900px) {
+  #dashboard-view .tabs,
+  .dashboard nav.tabs {
+    position: fixed !important;
+    inset: auto 0 0 0 !important;
+    z-index: 99999 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 9px 10px calc(9px + env(safe-area-inset-bottom)) !important;
+    background: #075b3b !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 15px 15px 0 0 !important;
+    box-shadow: 0 -5px 20px rgba(5,50,30,.16) !important;
+  }
+  #dashboard-view .tabs .tab,
+  .dashboard nav.tabs .tab {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-height: 46px !important;
+    color: #eff9f0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+  #dashboard-view .tabs .tab.active,
+  #dashboard-view .tabs .tab:hover,
+  .dashboard nav.tabs .tab.active {
+    color: #075b3b !important;
+    background: #d8edd9 !important;
+    background-image: none !important;
+  }
+  #dashboard-view { padding-bottom: 76px !important; }
+  #dashboard-view .module-panel { background: #edf6eb !important; }
+}
+html body,
+html body .page-shell,
+html body .content-panel,
+html body #dashboard-view .module-panel {
+  background-color: #edf6eb !important;
+  background-image: none !important;
+}
+html body #dashboard-view .dashboard-welcome-banner { background: #dcefdc !important; }
+html body #dashboard-view .home-card:nth-child(1) { background: #e8f4e8 !important; }
+html body #dashboard-view .home-card:nth-child(2) { background: #e1f0e2 !important; }
+html body #dashboard-view .home-card:nth-child(3) { background: #eaf3df !important; }
+html body #dashboard-view .home-card:nth-child(4) { background: #dff0e5 !important; }
