@@ -371,7 +371,8 @@ async function notifyRoles(roles, notification) {
     if (!firebaseConfigured || !firestore) return;
     const users = await firestore.collection('users').where('active', '==', true).get();
     const ids = users.docs.filter(doc => roles.includes(doc.data().role)).map(doc => Number(doc.id));
-    await sendPushToUserIds(ids, notification);
+    const result = await sendPushToUserIds(ids, notification);
+    console.info('Notificação automática:', notification.title, '| usuários:', ids.length, '| dispositivos aceitos:', result.sent, '| push desativado:', result.disabled);
   } catch (error) { console.error('Falha ao enviar push automático:', error.message); }
 }
 app.get('/api/push/config', requireAuth, (req, res) => {
@@ -816,14 +817,21 @@ app.post('/api/trips', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS
   const data = tripInput(req.body);
   if (!data) return res.status(400).json({ error: 'Confira título, destino, objetivo, horários e capacidade da viagem.' });
   try {
+    let id;
     if (firebaseConfigured) {
-      const id = await firestoreSchool.createTrip(data, req.auth.user.id);
-      return res.status(201).json({ id, message: 'Viagem criada como rascunho.' });
+      id = await firestoreSchool.createTrip(data, req.auth.user.id);
+    } else {
+      const result = db.prepare('INSERT INTO trips (title, destination, educational_purpose, departure_at, return_at, capacity, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)').
+        run(data.title, data.destination, data.purpose, data.departure, data.returning, data.capacity, req.auth.user.id);
+      id = Number(result.lastInsertRowid);
+      audit(req.auth.user.id, 'create', 'trip', id);
     }
-    const result = db.prepare('INSERT INTO trips (title, destination, educational_purpose, departure_at, return_at, capacity, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)').
-      run(data.title, data.destination, data.purpose, data.departure, data.returning, data.capacity, req.auth.user.id);
-    audit(req.auth.user.id, 'create', 'trip', result.lastInsertRowid);
-    res.status(201).json({ id: Number(result.lastInsertRowid), message: 'Viagem criada como rascunho.' });
+    const createdTrip = { title: data.title, destination: data.destination, departure_at: data.departure };
+    await notifyRoles(['admin', 'direction'], {
+      title: 'Nova viagem cadastrada',
+      body: tripNotificationDetails(createdTrip)
+    });
+    res.status(201).json({ id, message: 'Viagem criada como rascunho.' });
   } catch (error) { next(error); }
 });
 app.put('/api/trips/:id', requireAuth, requireCsrf, requireRoles(...RECORD_MANAGERS), async (req, res, next) => {
@@ -977,11 +985,22 @@ app.post('/api/trips/:id/approve', requireAuth, requireCsrf, requireRoles('admin
       : db.prepare('SELECT id, title, destination, departure_at, status FROM trips WHERE id = ?').get(tripId);
     if (!tripDetails) return res.status(404).json({ error: 'Viagem não encontrada.' });
     if (firebaseConfigured) {
+      if (tripDetails.status === 'draft' && req.auth.user.role === 'admin') {
+        const submitted = await firestoreSchool.submitTrip(tripId, req.auth.user.id);
+        if (submitted.error === 'no-classes') return res.status(400).json({ error: 'Vincule pelo menos uma turma antes de aprovar a viagem.' });
+        if (submitted.error) return res.status(409).json({ error: 'Não foi possível preparar o rascunho para aprovação.' });
+      }
       const result = await firestoreSchool.approveTrip(tripId, req.auth.user.id);
       if (result.error === 'not-found') return res.status(404).json({ error: 'Viagem não encontrada.' });
       if (result.error) return res.status(409).json({ error: 'A viagem não está aguardando aprovação.' });
       await notifyRoles(['admin', 'direction', 'secretariat', 'teacher', 'guardian', 'student'], { title: 'Viagem aprovada', body: tripNotificationDetails(tripDetails) });
       return res.json({ message: 'Viagem aprovada.' });
+    }
+    if (tripDetails.status === 'draft' && req.auth.user.role === 'admin') {
+      const classes = db.prepare('SELECT COUNT(*) AS total FROM trip_classes WHERE trip_id = ?').get(tripId).total;
+      if (!classes) return res.status(400).json({ error: 'Vincule pelo menos uma turma antes de aprovar a viagem.' });
+      db.prepare("UPDATE trips SET status = 'pending_approval', updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(tripId);
+      tripDetails.status = 'pending_approval';
     }
     if (tripDetails.status !== 'pending_approval') return res.status(409).json({ error: 'A viagem não está aguardando aprovação.' });
     db.prepare("UPDATE trips SET status = 'approved', approved_by = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(req.auth.user.id, tripId);
