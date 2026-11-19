@@ -1905,82 +1905,6 @@ html body.light-mode #login-screen:not(.is-hidden):not([hidden]) .login-brand-pa
 }
 </style>
 
-<style id="sgve-unified-module-headings-and-trip-navigation">
-/* Cabeçalho retangular unificado para todas as áreas do sistema */
-#app-shell .page-view .page-heading{
-  display:flex!important;align-items:center!important;justify-content:flex-start!important;
-  min-height:112px!important;margin:0 0 20px!important;padding:20px 24px!important;
-  border:1px solid #c9e3ce!important;border-radius:15px!important;
-  background:linear-gradient(105deg,#dff0df 0%,#cfe8d2 100%)!important;
-  box-shadow:0 7px 20px rgba(29,82,47,.07)!important;
-}
-#app-shell .page-view .page-heading>div{min-width:0}
-#app-shell .page-view .page-heading .eyebrow{
-  margin:0 0 7px!important;color:#39744a!important;font-size:9px!important;
-  font-weight:850!important;letter-spacing:.16em!important;
-}
-#app-shell .page-view .page-heading h1{
-  margin:0!important;color:#174d30!important;font-size:clamp(25px,3vw,32px)!important;
-  line-height:1.08!important;font-weight:850!important;letter-spacing:-.045em!important;
-}
-#app-shell .page-view .page-heading .subheading{
-  margin:7px 0 0!important;color:#456b50!important;font-size:11px!important;
-}
-body.dark-mode #app-shell .page-view .page-heading{
-  background:linear-gradient(105deg,#1c3b29 0%,#244a31 100%)!important;
-  border-color:#365c40!important;box-shadow:0 8px 22px rgba(0,0,0,.16)!important;
-}
-body.dark-mode #app-shell .page-view .page-heading .eyebrow{color:#a9d6a9!important}
-body.dark-mode #app-shell .page-view .page-heading h1{color:#eff8ed!important}
-body.dark-mode #app-shell .page-view .page-heading .subheading{color:#c0d9c1!important}
-/* Atalhos organizados por etapa dentro de Viagens */
-#app-shell .trip-navigation{
-  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;
-  margin:0 0 18px;
-}
-#app-shell .trip-shortcut{
-  display:flex;align-items:center;gap:11px;min-width:0;min-height:82px;
-  padding:13px 12px;border:1px solid #d7e7d8;border-radius:12px;
-  background:#fff;color:#234b31;text-align:left;
-  box-shadow:0 4px 14px rgba(29,82,47,.045);
-  transition:transform .18s,border-color .18s,box-shadow .18s;
-}
-#app-shell .trip-shortcut:hover{transform:translateY(-2px);border-color:#9bc9a2;box-shadow:0 8px 18px rgba(29,82,47,.09)}
-#app-shell .trip-shortcut-number{
-  display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;
-  border-radius:10px;background:#e6f3e6;color:#347348;font-size:11px;font-weight:900;
-}
-#app-shell .trip-shortcut-copy{display:grid;gap:5px;min-width:0;flex:1}
-#app-shell .trip-shortcut-copy strong{font-size:11px;line-height:1.25}
-#app-shell .trip-shortcut-copy small{color:#738777;font-size:9px;line-height:1.4}
-#app-shell .trip-shortcut-arrow{align-self:flex-start;color:#6c9a70;font-size:17px}
-#app-shell .trip-section-card{scroll-margin-top:22px}
-body.dark-mode #app-shell .trip-shortcut{
-  background:#17271d!important;border-color:#35513a!important;color:#e6f2e6!important;
-  box-shadow:0 5px 16px rgba(0,0,0,.14)!important;
-}
-body.dark-mode #app-shell .trip-shortcut-number{background:#284b31!important;color:#bde2bb!important}
-body.dark-mode #app-shell .trip-shortcut-copy small{color:#afc2b0!important}
-body.dark-mode #app-shell .trip-shortcut-arrow{color:#a8d4a5!important}
-@media(max-width:1050px){
-  #app-shell .trip-navigation{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-@media(max-width:760px){
-  #app-shell .page-view .page-heading{min-height:96px!important;margin-bottom:16px!important;padding:17px 18px!important;border-radius:13px!important}
-  #app-shell .page-view .page-heading h1{font-size:25px!important}
-  #app-shell .trip-navigation{gap:8px;margin-bottom:15px}
-  #app-shell .trip-shortcut{min-height:76px;padding:10px 9px;gap:8px;border-radius:10px}
-  #app-shell .trip-shortcut-number{flex-basis:29px;width:29px;height:29px;font-size:10px}
-  #app-shell .trip-shortcut-copy strong{font-size:10px}
-  #app-shell .trip-shortcut-copy small{font-size:8px}
-  #app-shell .trip-shortcut-arrow{font-size:14px}
-}
-@media(max-width:390px){
-  #app-shell .trip-navigation{grid-template-columns:1fr}
-  #app-shell .trip-shortcut{min-height:65px}
-}
-</style>
-
 </head>
 <body>
 <section class="login-screen" id="login-screen" aria-hidden="false">
@@ -2074,13 +1998,7 @@ body.dark-mode #app-shell .trip-shortcut-arrow{color:#a8d4a5!important}
       </section>
       <section class="page-view" id="page-viagens">
 <div class="page-heading"><div><p class="eyebrow">PLANEJAMENTO ESCOLAR</p><h1>Viagens</h1><p class="subheading">Cadastre e acompanhe viagens demonstrativas.</p></div></div>
- <nav class="trip-navigation" aria-label="Atalhos das viagens">
-   <button type="button" class="trip-shortcut" data-trip-target="trip-create-section"><span class="trip-shortcut-number">01</span><span class="trip-shortcut-copy"><strong>Planejar viagem</strong><small>Preencha os dados e organize os custos</small></span><span class="trip-shortcut-arrow">↘</span></button>
-   <button type="button" class="trip-shortcut" data-trip-target="trip-list-section"><span class="trip-shortcut-number">02</span><span class="trip-shortcut-copy"><strong>Consultar viagens</strong><small>Veja os registros e as situações</small></span><span class="trip-shortcut-arrow">↘</span></button>
-   <button type="button" class="trip-shortcut" data-trip-target="trip-attendance-section"><span class="trip-shortcut-number">03</span><span class="trip-shortcut-copy"><strong>Lista de presença</strong><small>Confira a saída e o retorno</small></span><span class="trip-shortcut-arrow">↘</span></button>
-   <button type="button" class="trip-shortcut" data-trip-target="trip-alarm-panel"><span class="trip-shortcut-number">04</span><span class="trip-shortcut-copy"><strong>Lembrete pessoal</strong><small>Configure um aviso para acordar</small></span><span class="trip-shortcut-arrow">↘</span></button>
- </nav>
-<div class="panel trip-section-card" id="trip-create-section" style="margin-bottom:16px"><div class="panel-heading"><div><p class="eyebrow">ETAPA 1</p><h2>Adicionar viagem</h2></div></div>
+<div class="panel" style="margin-bottom:16px"><div class="panel-heading"><div><p class="eyebrow">NOVA VIAGEM</p><h2>Adicionar viagem</h2></div></div>
 <form id="trip-form" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end">
 <label style="display:grid;gap:6px;font-size:11px;font-weight:700">Nome da viagem<input id="trip-name" required maxlength="70" placeholder="Ex.: Visita ao museu" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
 <label style="display:grid;gap:6px;font-size:11px;font-weight:700">Destino<input id="trip-destination" required maxlength="80" placeholder="Destino" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></label>
@@ -2093,12 +2011,12 @@ body.dark-mode #app-shell .trip-shortcut-arrow{color:#a8d4a5!important}
 <fieldset class="trip-payment-methods"><legend>Formas de pagamento aceitas</legend><label><input type="checkbox" name="trip-payment-method" value="Pix" checked> Pix</label><label><input type="checkbox" name="trip-payment-method" value="Dinheiro" checked> Dinheiro</label><label><input type="checkbox" name="trip-payment-method" value="Cartão"> Cartão</label><label><input type="checkbox" name="trip-payment-method" value="Boleto"> Boleto</label></fieldset>
 <button class="login-submit" type="submit" style="height:40px;margin:0">Adicionar viagem</button>
 </form><p id="trip-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div>
-<div class="panel trip-section-card" id="trip-list-section"><div class="panel-heading"><div><p class="eyebrow">ETAPA 2</p><h2>Viagens cadastradas</h2></div><span class="status planned" id="trip-count">3 viagens</span></div>
-<div class="table-wrap"><table><thead><tr><th>Foto</th><th>Viagem</th><th>Destino</th><th>Data</th><th>Alunos</th><th>Valor</th><th>Pagamento</th><th>Situação</th><th>Participação</th><th>Ações</th></tr></thead><tbody id="trip-table-body"></tbody></table></div></div><div class="panel trip-section-card" id="trip-alarm-panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">ETAPA 4 · OPCIONAL</p><h2>Lembrete para a viagem</h2></div></div>
+<div class="panel"><div class="panel-heading"><div><p class="eyebrow">REGISTROS</p><h2>Viagens cadastradas</h2></div><span class="status planned" id="trip-count">3 viagens</span></div>
+<div class="table-wrap"><table><thead><tr><th>Foto</th><th>Viagem</th><th>Destino</th><th>Data</th><th>Alunos</th><th>Valor</th><th>Pagamento</th><th>Situação</th><th>Participação</th><th>Ações</th></tr></thead><tbody id="trip-table-body"></tbody></table></div></div><div class="panel" id="trip-alarm-panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">LEMBRETE PESSOAL</p><h2>Alarme para acordar</h2></div></div>
 <p class="alarm-explainer">Escolha uma viagem, ative o aviso e defina a hora em que deseja ser lembrado(a) de acordar.</p>
 <div class="alarm-controls"><label>Viagem<select id="alarm-trip"></select></label><label>Horário para acordar<input id="alarm-time" type="time" value="06:00"></label><label class="alarm-optin"><input id="alarm-enabled" type="checkbox"> Quero receber o alarme nesta viagem</label><button type="button" class="login-submit" id="save-alarm" style="width:auto;margin:0;padding:0 18px">Salvar meu alarme</button></div>
 <p id="alarm-feedback" class="inline-feedback" role="status"></p><p class="alarm-note">O aviso e o som funcionam enquanto o SGVE estiver aberto ou ativo. Permita notificações no navegador para receber o aviso visual.</p></div>
-<div class="panel trip-section-card" id="trip-attendance-section" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">ETAPA 3</p><h2>Presença na saída e no retorno</h2></div></div>
+<div class="panel" style="margin-top:16px"><div class="panel-heading"><div><p class="eyebrow">CONTROLE DE PRESENÇA</p><h2>Lista de saída e retorno</h2></div></div>
 <label style="display:grid;gap:6px;max-width:300px;font-size:11px;font-weight:700">Viagem<select id="attendance-trip" style="height:40px;padding:8px;border:1px solid #dfe8e1;border-radius:7px"></select></label>
 <div class="table-wrap" style="margin-top:12px"><table><thead><tr><th>Estudante</th><th>Turma</th><th>Presença</th></tr></thead><tbody id="attendance-table-body"></tbody></table></div>
 <p id="attendance-feedback" role="status" style="font-size:10px;color:#26734a;margin:10px 0 0"></p></div></section>
@@ -4009,15 +3927,6 @@ body.light-mode .notification-button{
 }
 .notification-button:focus-visible{outline:2px solid currentColor!important;outline-offset:3px;border-radius:4px!important}
 </style>
-
-<script id="sgve-trip-shortcuts">
-document.addEventListener('click',function(event){
-  const shortcut=event.target.closest('[data-trip-target]');
-  if(!shortcut)return;
-  const target=document.getElementById(shortcut.dataset.tripTarget);
-  if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
-});
-</script>
 
 </body>
 </html>
