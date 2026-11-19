@@ -14,7 +14,7 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 // O Firebase exibe automaticamente notificações recebidas em segundo plano.
 
-const CACHE_NAME = 'sgve-static-v3';
+const CACHE_NAME = 'sgve-static-v4';
 const STATIC_ASSETS = [
   '/css/styles.css',
   '/css/sgve-modern.css',
