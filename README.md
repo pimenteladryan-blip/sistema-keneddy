@@ -2,7 +2,7 @@
 
 Integrantes: Adryan Matheus Pimentel, Gustavo Panqueves e Pedro Henrique Ribas.
 
-Fluxograma: https://github.com/pimenteladryan-blip/sistema-keneddy/blob/main/file_00000000b02c820e946d87f6eadf6646.png
+Fluxograma: https://github.com/pimenteladryan-blip/sistema-keneddy/blob/main/fluxograma_sgve.png
 
 O **SGVE** é um sistema demonstrativo desenvolvido para apoiar a organização de viagens escolares do **Colégio Estadual Presidente Kennedy (CEPK)**, em Ponta Grossa/PR.
 
