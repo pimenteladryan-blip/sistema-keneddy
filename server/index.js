@@ -572,6 +572,8 @@ app.get('/api/students', requireAuth, async (req, res, next) => {
     let rows;
     if (hasRole(req.auth.user, RECORD_MANAGERS)) {
       rows = db.prepare('SELECT s.id, s.full_name, s.class_id, c.grade, c.course, c.section, c.level, s.active FROM students s JOIN classes c ON c.id = s.class_id WHERE s.active = 1 ORDER BY s.full_name LIMIT 500').all();
+    } else if (['teacher', 'pedagogue'].includes(req.auth.user.role)) {
+      rows = db.prepare('SELECT s.id, s.full_name, s.class_id, c.grade, c.course, c.section, c.level, s.active FROM students s JOIN classes c ON c.id = s.class_id WHERE s.active = 1 ORDER BY s.full_name LIMIT 500').all();
     } else if (req.auth.user.role === 'guardian') {
       rows = db.prepare('SELECT s.id, s.full_name, s.class_id, c.grade, c.course, c.section, c.level, s.active FROM students s JOIN classes c ON c.id = s.class_id JOIN student_guardians sg ON sg.student_id = s.id WHERE sg.guardian_user_id = ? AND s.active = 1 ORDER BY s.full_name').all(req.auth.user.id);
     } else if (req.auth.user.role === 'student') {
