@@ -1,5 +1,5 @@
 # SGVE | Sistema de Gerenciamento de Viagens Escolares
-Fluxograma: https://github.com/pimenteladryan-blip/sistema-keneddy/blob/main/sistema_kennedy_fluxograma_completo_3_partes.pdf
+Fluxograma: https://github.com/pimenteladryan-blip/sistema-keneddy/blob/main/file_00000000efd0820e8a8d08e4f7a6233f.png
 O **SGVE** é um sistema demonstrativo desenvolvido para apoiar a organização de viagens escolares do **Colégio Estadual Presidente Kennedy (CEPK)**, em Ponta Grossa/PR.
 
 A proposta é reunir, em um só lugar, informações sobre viagens, estudantes, autorizações, transporte, professores, presença e relatórios, com acesso organizado conforme o perfil de cada usuário.
