@@ -3146,3 +3146,49 @@ body.dark-mode #dashboard-view .upcoming-trip small{color:#b8cdbd!important}
   #dashboard-view .upcoming-trip{grid-template-columns:88px minmax(0,1fr)!important}
   #dashboard-view .upcoming-trip img,#dashboard-view .upcoming-trip .trip-photo-placeholder{width:88px!important;height:72px!important}
 }
+
+
+/* Correções de layout após a adaptação desktop/mobile CEPK */
+#dashboard-view .home-grid>.upcoming-card{grid-area:upcoming!important}
+#dashboard-view .home-grid>.notices-card{grid-area:notices!important}
+#dashboard-view .home-grid>.calendar-card{grid-area:calendar!important}
+#dashboard-view .home-grid>.notifications-card{grid-area:notifications!important}
+#dashboard-view .home-grid>.classes-shortcut-card{grid-area:classes!important}
+#dashboard-view .home-grid{display:grid!important;min-width:0!important}
+#dashboard-view .home-grid>.home-card{min-width:0!important;max-width:100%!important}
+#dashboard-view .upcoming-trip-body{min-width:0!important;overflow-wrap:anywhere!important}
+#dashboard-view .upcoming-trip strong{overflow-wrap:anywhere!important}
+#dashboard-view .calendar-grid{min-width:0!important}
+#dashboard-view .calendar-day{min-width:0!important;overflow:hidden!important}
+@media(max-width:900px){
+  #dashboard-view .welcome-row{
+    width:100%!important;margin:0!important;padding:12px 14px!important;
+    box-sizing:border-box!important;
+  }
+  #dashboard-view .dashboard-welcome-banner{
+    width:100%!important;margin:0 0 12px!important;box-sizing:border-box!important;
+  }
+  #dashboard-view .module-panel{
+    width:100%!important;max-width:100%!important;
+    margin:0 0 12px!important;box-sizing:border-box!important;
+  }
+  #dashboard-view .home-panel{padding:0!important}
+  #dashboard-view .home-grid{
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-areas:"upcoming" "notices" "calendar" "notifications" "classes"!important;
+  }
+  #dashboard-view .home-grid>.upcoming-card{grid-area:upcoming!important}
+  #dashboard-view .home-grid>.notices-card{grid-area:notices!important}
+  #dashboard-view .home-grid>.calendar-card{grid-area:calendar!important}
+  #dashboard-view .home-grid>.notifications-card{grid-area:notifications!important}
+  #dashboard-view .home-grid>.classes-shortcut-card{grid-area:classes!important}
+  #dashboard-view .tabs{left:9px!important;right:9px!important}
+}
+@media(max-width:560px){
+  #dashboard-view .home-heading{flex-wrap:wrap!important}
+  #dashboard-view .home-date{margin-left:auto!important}
+  #dashboard-view .upcoming-trip{min-width:0!important}
+  #dashboard-view .upcoming-trip-body{min-width:0!important}
+  #dashboard-view .home-card-heading{min-width:0!important;flex-wrap:wrap!important}
+  #dashboard-view .home-card-heading>div{min-width:0!important}
+}
