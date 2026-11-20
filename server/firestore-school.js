@@ -56,7 +56,7 @@ async function createStudent(fullName, classId, actorUserId = null) {
 
 async function listStudentsForUser(user) {
   let students;
-  if (['admin', 'direction', 'secretariat'].includes(user.role)) {
+  if (['admin', 'direction', 'secretariat', 'teacher', 'pedagogue'].includes(user.role)) {
     students = await store.list('students', {
       filters: [{ field: 'active', op: '==', value: true }],
       limit: 500
