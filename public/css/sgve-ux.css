@@ -2656,3 +2656,127 @@ body.dark-mode #dashboard-view .report-table tbody tr{background:#103522!importa
 @media(prefers-reduced-motion:reduce){
   #dashboard-view *{transition:none!important}
 }
+
+
+/* Acabamento geral: alinhamento central, cantos suaves e espaçamento consistente. */
+#dashboard-view{
+  box-sizing:border-box!important;
+  align-items:stretch!important;
+}
+#dashboard-view .welcome-row,
+#dashboard-view .dashboard-welcome-banner,
+#dashboard-view .module-panel,
+#dashboard-view .tabs{
+  box-sizing:border-box!important;
+}
+#dashboard-view .welcome-row,
+#dashboard-view .dashboard-welcome-banner{
+  width:100%!important;
+  max-width:1480px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  border-radius:20px!important;
+}
+#dashboard-view .module-panel{
+  width:100%!important;
+  max-width:1480px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  border-radius:20px!important;
+}
+#dashboard-view .home-panel{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+}
+#dashboard-view .home-heading,
+#dashboard-view .home-role-stats,
+#dashboard-view .home-grid{
+  width:100%!important;
+  max-width:1360px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+#dashboard-view .home-grid{
+  justify-items:stretch!important;
+  align-items:stretch!important;
+}
+#dashboard-view .home-card,
+#dashboard-view .home-stat-card,
+#dashboard-view .trip-card,
+#dashboard-view .vehicle-card,
+#dashboard-view .participant-row,
+#dashboard-view .data-row,
+#dashboard-view .report-stat,
+#dashboard-view .inline-form,
+#dashboard-view .assignment-area,
+#dashboard-view .report-table-wrap,
+#dashboard-view .trip-staff-section{
+  border-radius:18px!important;
+  overflow-wrap:anywhere;
+}
+#dashboard-view .home-card{
+  padding:clamp(14px,1.5vw,20px)!important;
+}
+#dashboard-view .home-stat-card{
+  min-height:94px!important;
+  padding:16px 18px!important;
+}
+#dashboard-view .tabs{
+  border-radius:20px!important;
+  overflow:hidden!important;
+}
+#dashboard-view .tab{
+  border-radius:12px!important;
+}
+#dashboard-view button,
+#dashboard-view input,
+#dashboard-view select,
+#dashboard-view textarea{
+  border-radius:12px;
+}
+#dashboard-view .section-heading{
+  align-items:center!important;
+}
+#dashboard-view .home-card-heading{
+  align-items:center!important;
+}
+#dashboard-view .home-card-heading>div{
+  min-width:0!important;
+}
+#dashboard-view .home-icon{
+  border-radius:11px!important;
+}
+#dashboard-view .profile-avatar,
+#dashboard-view .notification-bell,
+#dashboard-view .theme-toggle{
+  border-radius:50%!important;
+}
+#dashboard-view .profile-dropdown,
+#dashboard-view .notification-popover{
+  border-radius:17px!important;
+  overflow:hidden!important;
+}
+@media(max-width:900px){
+  #dashboard-view .welcome-row,
+  #dashboard-view .dashboard-welcome-banner,
+  #dashboard-view .module-panel,
+  #dashboard-view .home-heading,
+  #dashboard-view .home-role-stats,
+  #dashboard-view .home-grid{
+    max-width:100%!important;
+  }
+  #dashboard-view .module-panel{
+    padding:clamp(12px,2.5vw,18px)!important;
+  }
+}
+@media(max-width:620px){
+  #dashboard-view .welcome-row,
+  #dashboard-view .dashboard-welcome-banner,
+  #dashboard-view .module-panel,
+  #dashboard-view .home-card{
+    border-radius:16px!important;
+  }
+  #dashboard-view .home-card{padding:13px!important}
+  #dashboard-view .home-stat-card{border-radius:15px!important}
+}
