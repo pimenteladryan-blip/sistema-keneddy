@@ -2515,3 +2515,144 @@ body.dark-mode #dashboard-view .participant-controls .small-action.reject-action
 body.dark-mode #dashboard-view .home-stat-card{background:#10271b;border-color:#315640}
 body.dark-mode #dashboard-view .home-stat-card span{color:#b3cbbb}
 body.dark-mode #dashboard-view .home-stat-card strong{color:#a8efb4}
+
+
+/* Soft UI Kennedy: acabamento sutil, mantendo a identidade verde existente. */
+:root{
+  --kennedy-soft-bg:#edf5ee;
+  --kennedy-soft-light:#ffffff;
+  --kennedy-soft-shadow:rgba(28,76,46,.10);
+  --kennedy-soft-inset:rgba(32,83,49,.055);
+}
+#dashboard-view .module-panel{
+  border-radius:20px!important;
+  padding:clamp(12px,1.8vw,22px)!important;
+  background:var(--kennedy-soft-bg)!important;
+  box-shadow:inset 2px 2px 5px var(--kennedy-soft-inset),inset -2px -2px 6px #ffffffb8!important;
+}
+#dashboard-view .home-card,
+#dashboard-view .home-stat-card,
+#dashboard-view .data-row,
+#dashboard-view .report-stat,
+#dashboard-view .trip-card,
+#dashboard-view .vehicle-card,
+#dashboard-view .participant-row,
+#dashboard-view .trip-staff-member{
+  border:1px solid #dce9de!important;
+  border-radius:16px!important;
+  background:linear-gradient(145deg,#ffffff,#f1f7f1)!important;
+  box-shadow:5px 5px 13px rgba(31,76,45,.075),-4px -4px 11px rgba(255,255,255,.92)!important;
+  transition:box-shadow .18s ease,transform .18s ease,border-color .18s ease!important;
+}
+#dashboard-view .home-card:hover,
+#dashboard-view .home-stat-card:hover,
+#dashboard-view .data-row:hover,
+#dashboard-view .trip-card:hover{
+  border-color:#c8dfcd!important;
+  box-shadow:7px 7px 16px rgba(31,76,45,.10),-5px -5px 12px #fff!important;
+}
+#dashboard-view .section-heading{
+  padding:4px 3px 10px!important;
+}
+#dashboard-view .section-heading h3,
+#dashboard-view .home-heading h3{
+  letter-spacing:-.035em!important;
+}
+#dashboard-view .home-icon,
+#dashboard-view .student-avatar,
+#dashboard-view .count-pill{
+  border:1px solid #d5e8d8!important;
+  background:linear-gradient(145deg,#fafffa,#dcefe0)!important;
+  box-shadow:2px 2px 5px rgba(35,83,49,.10),-2px -2px 5px #fff!important;
+}
+#dashboard-view .tab{
+  border:1px solid transparent!important;
+  transition:background .18s ease,box-shadow .18s ease,transform .18s ease!important;
+}
+#dashboard-view .tab.active{
+  border-color:#c4e8cb!important;
+  box-shadow:inset 2px 2px 4px rgba(25,91,48,.10),inset -2px -2px 4px rgba(255,255,255,.65)!important;
+}
+#dashboard-view button:not(.tab):not(.dashboard-theme-toggle):not(.notification-bell){
+  transition:transform .16s ease,box-shadow .16s ease,filter .16s ease!important;
+}
+#dashboard-view button:not(.tab):not(.dashboard-theme-toggle):not(.notification-bell):active{
+  transform:translateY(1px)!important;
+  box-shadow:inset 2px 2px 5px rgba(22,72,39,.13)!important;
+}
+#dashboard-view input,
+#dashboard-view select,
+#dashboard-view textarea{
+  border:1px solid #d8e7da!important;
+  border-radius:12px!important;
+  background:#f4f9f4!important;
+  box-shadow:inset 2px 2px 5px rgba(30,76,43,.075),inset -2px -2px 5px #ffffff!important;
+}
+#dashboard-view input:focus,
+#dashboard-view select:focus,
+#dashboard-view textarea:focus{
+  outline:2px solid #9bd5a8!important;
+  outline-offset:1px!important;
+  box-shadow:inset 1px 1px 3px rgba(30,76,43,.06),0 0 0 3px rgba(76,166,99,.10)!important;
+}
+#dashboard-view .inline-form,
+#dashboard-view .assignment-area,
+#dashboard-view .report-table-wrap,
+#dashboard-view .trip-staff-section{
+  border:1px solid #dce9de!important;
+  border-radius:17px!important;
+  background:#edf5ee!important;
+  box-shadow:inset 2px 2px 5px rgba(31,76,45,.055),inset -2px -2px 6px #ffffffb8!important;
+}
+#dashboard-view .report-table{
+  border-collapse:separate!important;
+  border-spacing:0 5px!important;
+}
+#dashboard-view .report-table tbody tr{
+  background:#fff!important;
+  box-shadow:2px 2px 6px rgba(31,76,45,.06)!important;
+}
+#dashboard-view .report-table tbody td:first-child{border-radius:10px 0 0 10px!important}
+#dashboard-view .report-table tbody td:last-child{border-radius:0 10px 10px 0!important}
+body.dark-mode #dashboard-view .module-panel{
+  background:#0a2418!important;
+  box-shadow:inset 2px 2px 5px rgba(0,0,0,.22),inset -2px -2px 6px rgba(40,91,59,.12)!important;
+}
+body.dark-mode #dashboard-view .home-card,
+body.dark-mode #dashboard-view .home-stat-card,
+body.dark-mode #dashboard-view .data-row,
+body.dark-mode #dashboard-view .report-stat,
+body.dark-mode #dashboard-view .trip-card,
+body.dark-mode #dashboard-view .vehicle-card,
+body.dark-mode #dashboard-view .participant-row,
+body.dark-mode #dashboard-view .trip-staff-member{
+  border-color:#24553a!important;
+  background:linear-gradient(145deg,#103522,#0b2b1c)!important;
+  box-shadow:4px 4px 10px rgba(0,0,0,.18),-3px -3px 8px rgba(42,94,62,.10)!important;
+}
+body.dark-mode #dashboard-view .home-icon,
+body.dark-mode #dashboard-view .student-avatar,
+body.dark-mode #dashboard-view .count-pill{
+  border-color:#286344!important;
+  background:linear-gradient(145deg,#16462e,#0e3321)!important;
+  box-shadow:2px 2px 5px rgba(0,0,0,.18),-2px -2px 5px rgba(44,100,66,.10)!important;
+}
+body.dark-mode #dashboard-view .inline-form,
+body.dark-mode #dashboard-view .assignment-area,
+body.dark-mode #dashboard-view .report-table-wrap,
+body.dark-mode #dashboard-view .trip-staff-section{
+  border-color:#24553a!important;
+  background:#0a2418!important;
+  box-shadow:inset 2px 2px 5px rgba(0,0,0,.18),inset -2px -2px 6px rgba(42,94,62,.10)!important;
+}
+body.dark-mode #dashboard-view input,
+body.dark-mode #dashboard-view select,
+body.dark-mode #dashboard-view textarea{
+  background:#092317!important;
+  border-color:#285b40!important;
+  box-shadow:inset 2px 2px 5px rgba(0,0,0,.20),inset -2px -2px 5px rgba(42,94,62,.08)!important;
+}
+body.dark-mode #dashboard-view .report-table tbody tr{background:#103522!important}
+@media(prefers-reduced-motion:reduce){
+  #dashboard-view *{transition:none!important}
+}
