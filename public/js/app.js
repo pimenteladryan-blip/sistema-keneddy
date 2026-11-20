@@ -78,27 +78,39 @@ function showDashboard(user) {
   updateProfileMenu(user);
   syncExistingDevicePush();
   const canManage = ['admin', 'direction', 'secretariat'].includes(user.role);
+  const roleModules = {
+    admin: ['home-panel', 'classes-panel', 'students-panel', 'teachers-panel', 'trips-panel', 'vehicles-panel', 'reports-panel', 'guardians-panel', 'users-panel'],
+    direction: ['home-panel', 'classes-panel', 'students-panel', 'teachers-panel', 'trips-panel', 'vehicles-panel', 'reports-panel', 'guardians-panel', 'users-panel'],
+    secretariat: ['home-panel', 'classes-panel', 'students-panel', 'teachers-panel', 'trips-panel', 'vehicles-panel', 'reports-panel', 'guardians-panel', 'users-panel'],
+    teacher: ['home-panel', 'classes-panel', 'students-panel', 'trips-panel'],
+    pedagogue: ['home-panel', 'classes-panel', 'students-panel', 'trips-panel'],
+    guardian: ['home-panel', 'trips-panel'],
+    student: ['home-panel', 'trips-panel']
+  };
+  const allowedModules = roleModules[user.role] || ['home-panel'];
   if (!canManage) lastReport = null;
+  document.querySelectorAll('.tabs .tab[data-tab]').forEach(tab => {
+    const allowed = allowedModules.includes(tab.dataset.tab);
+    tab.classList.toggle('hidden', !allowed);
+    tab.setAttribute('aria-hidden', String(!allowed));
+  });
+  document.querySelectorAll('.module-panel').forEach(panel => {
+    const allowed = allowedModules.includes(panel.id);
+    panel.classList.toggle('hidden', !allowed || panel.id !== 'home-panel');
+  });
   document.querySelector('#class-form').classList.toggle('hidden', !canManage);
   document.querySelector('#student-form').classList.toggle('hidden', !canManage);
   document.querySelector('#student-account-form').classList.toggle('hidden', !canManage);
   document.querySelector('#student-guardian-form').classList.toggle('hidden', !canManage);
   document.querySelector('#trip-staff-form').classList.toggle('hidden', !canManage);
-  document.querySelector('#students-tab').classList.toggle('hidden', ['teacher', 'pedagogue'].includes(user.role));
   document.querySelector('#trip-form').classList.toggle('hidden', !canManage);
   document.querySelector('#trip-assignment').classList.toggle('hidden', !canManage);
-  document.querySelector('#users-tab').classList.toggle('hidden', !canManage);
-  document.querySelector('#teachers-tab').classList.toggle('hidden', !canManage);
-  document.querySelector('#guardians-tab').classList.toggle('hidden', !canManage);
-  document.querySelector('#vehicles-tab').classList.toggle('hidden', !canManage);
-  document.querySelector('#reports-tab').classList.toggle('hidden', !canManage);
   document.querySelector('#registration-requests-section').classList.toggle('hidden', user.role !== 'admin');
   document.querySelectorAll('[data-admin-only]').forEach(option => { option.hidden = user.role !== 'admin'; });
   document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tab === 'home-panel'));
-  document.querySelectorAll('.module-panel').forEach(panel => panel.classList.toggle('hidden', panel.id !== 'home-panel'));
   renderHome();
   loadClasses();
-  if (!['teacher', 'pedagogue'].includes(user.role)) loadStudents();
+  if (canManage || ['teacher', 'pedagogue'].includes(user.role)) loadStudents();
   loadTrips();
   if (canManage) {
     loadLinkableUsers();
@@ -602,9 +614,13 @@ async function loadTrips() {
       }
       if (currentUser && ['admin', 'direction'].includes(currentUser.role) && trip.status === 'pending_approval') action = '<button type="button" class="small-action" data-trip-action="approve" data-trip-id="' + trip.id + '">Aprovar viagem</button>';
       const participantsButton = '<button type="button" class="small-action button-secondary" data-trip-action="participants" data-trip-id="' + trip.id + '" aria-expanded="false">Ver participantes</button>';
-      const editActions = canManage && trip.status === 'draft'
-        ? '<button type="button" class="small-action" data-trip-action="edit" data-trip-id="' + trip.id + '">Editar</button><button type="button" class="small-action reject-action" data-trip-action="delete" data-trip-id="' + trip.id + '">Excluir</button>'
-        : '';
+      const canEdit = currentUser && (
+        (['admin', 'direction'].includes(currentUser.role) && ['draft', 'pending_approval', 'approved', 'open'].includes(trip.status)) ||
+        (currentUser.role === 'secretariat' && trip.status === 'draft')
+      );
+      const canDelete = currentUser && ['admin', 'direction', 'secretariat'].includes(currentUser.role) && trip.status === 'draft';
+      const editActions = (canEdit ? '<button type="button" class="small-action" data-trip-action="edit" data-trip-id="' + trip.id + '">Editar</button>' : '') +
+        (canDelete ? '<button type="button" class="small-action reject-action" data-trip-action="delete" data-trip-id="' + trip.id + '">Excluir</button>' : '');
       const photo = trip.image_data ? '<img class="trip-card-photo" src="' + escapeHtml(trip.image_data) + '" alt="Foto da viagem ' + escapeHtml(trip.destination) + '">' : '<div class="trip-card-photo-empty">🚌<small>Adicione uma foto</small></div>';
       return '<article class="trip-card">' + photo + '<div class="trip-card-main"><div class="trip-title-row"><strong>' + escapeHtml(trip.title) + '</strong><span class="status-pill status-' + escapeHtml(trip.status) + '">' + escapeHtml(trip.statusLabel) + '</span></div><p>' + escapeHtml(trip.destination) + '</p><small>Saída: ' + escapeHtml(dateLabel(trip.departure_at)) + '</small><small>Retorno: ' + escapeHtml(dateLabel(trip.return_at)) + '</small><small>Participantes: ' + trip.participant_count + ' / ' + trip.capacity + '</small><small>Veículo: ' + escapeHtml(trip.vehicle_name || 'Não atribuído') + '</small>' + (canManage ? '<small>Condutor: ' + escapeHtml(trip.driver_name || 'Não atribuído') + '</small>' : '') + '</div><div class="trip-card-actions">' + action + editActions + participantsButton + '</div><div class="participants-area hidden" data-trip-participants="' + trip.id + '" data-trip-status="' + escapeHtml(trip.status) + '"></div></article>';
     }).join('') : '<p class="muted">Nenhuma viagem cadastrada.</p>';
