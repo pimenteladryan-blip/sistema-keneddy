@@ -857,20 +857,30 @@ app.get('/api/users', requireAuth, requireRoles('admin', 'direction'), async (_r
 app.patch('/api/users/:id', requireAuth, requireCsrf, requireRoles('admin'), async (req, res, next) => {
   try {
     const id = Number(req.params.id), name = cleanText(req.body.name, 100), role = String(req.body.role || ''), active = req.body.active;
-    if (!Number.isSafeInteger(id) || id < 1 || name.length < 3 || !VALID_ROLES.includes(role) || typeof active !== 'boolean') return res.status(400).json({ error: 'Confira os dados da conta.' });
+    const password = typeof req.body.password === 'string' ? req.body.password : '';
+    if (!Number.isSafeInteger(id) || id < 1 || name.length < 3 || !VALID_ROLES.includes(role) || typeof active !== 'boolean' || (password && (password.length < 14 || password.length > 200))) return res.status(400).json({ error: 'Confira os dados da conta. A nova senha deve ter pelo menos 14 caracteres.' });
     if (id === Number(req.auth.user.id) && !active) return res.status(400).json({ error: 'Você não pode desativar sua própria conta.' });
     if (firebaseConfigured) {
       const target = await firestoreAuth.findUserById(id);
       if (!target) return res.status(404).json({ error: 'Conta não encontrada.' });
       if (target.role === 'admin' && (role !== 'admin' || !active) && (await firestoreAuth.listUsers(300)).filter(u => u.role === 'admin' && u.active).length <= 1) return res.status(400).json({ error: 'Mantenha pelo menos um administrador ativo.' });
       const updated = await firestoreAuth.updateManagedUser(id, { display_name: name, role, active }, req.auth.user.id);
-      if (target.firebase_uid) await getAuth(firebaseApp).updateUser(target.firebase_uid, { displayName: name, disabled: !active });
+      if (target.firebase_uid) {
+        const identityChanges = { displayName: name, disabled: !active };
+        if (password) identityChanges.password = password;
+        await getAuth(firebaseApp).updateUser(target.firebase_uid, identityChanges);
+      }
       return res.json({ message: 'Conta atualizada.', user: { id, name, email: updated.email, role, roleLabel: ROLE_LABELS[role], active } });
     }
     const target = db.prepare('SELECT id, email, role FROM users WHERE id = ?').get(id);
     if (!target) return res.status(404).json({ error: 'Conta não encontrada.' });
     if (target.role === 'admin' && (role !== 'admin' || !active) && db.prepare("SELECT COUNT(*) AS n FROM users WHERE role='admin' AND active=1").get().n <= 1) return res.status(400).json({ error: 'Mantenha pelo menos um administrador ativo.' });
-    db.prepare('UPDATE users SET display_name=?, role=?, active=? WHERE id=?').run(name, role, active ? 1 : 0, id);
+    if (password) {
+      const passwordHash = await hashPassword(password);
+      db.prepare('UPDATE users SET display_name=?, role=?, active=?, password_hash=? WHERE id=?').run(name, role, active ? 1 : 0, passwordHash, id);
+    } else {
+      db.prepare('UPDATE users SET display_name=?, role=?, active=? WHERE id=?').run(name, role, active ? 1 : 0, id);
+    }
     if (!active) db.prepare('DELETE FROM sessions WHERE user_id=?').run(id);
     audit(req.auth.user.id, 'update', 'user', id);
     return res.json({ message: 'Conta atualizada.', user: { id, name, email: target.email, role, roleLabel: ROLE_LABELS[role], active } });
