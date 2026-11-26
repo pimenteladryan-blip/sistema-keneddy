@@ -2805,3 +2805,38 @@ body.dark-mode #dashboard-view .report-table tbody tr{background:#103522!importa
     touch-action: pan-x !important;
   }
 }
+
+
+/* Navegação mobile: garantir que o dock seja realmente rolável no toque. */
+@media (max-width: 900px) {
+  html body #dashboard-view nav.tabs {
+    display: flex !important;
+    flex-flow: row nowrap !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    overflow-x: scroll !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-x: contain !important;
+    touch-action: pan-x !important;
+    scrollbar-width: auto !important;
+    scroll-behavior: smooth !important;
+    pointer-events: auto !important;
+  }
+  html body #dashboard-view nav.tabs > .tab {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    width: max-content !important;
+    min-width: max-content !important;
+    white-space: nowrap !important;
+    touch-action: pan-x !important;
+    pointer-events: auto !important;
+  }
+  html body #dashboard-view nav.tabs::before,
+  html body #dashboard-view nav.tabs::after {
+    pointer-events: none !important;
+  }
+}
