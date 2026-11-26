@@ -309,8 +309,18 @@
             <label>Nome<input name="name" maxlength="100" required></label>
             <label>E-mail<input name="email" type="email" maxlength="254" required></label>
             <label>Perfil<select name="role" id="user-form-role" required>
-              <option value="teacher">Professor</option><option value="guardian">Responsável</option><option value="student">Estudante</option>
-              <option value="secretariat" data-admin-only>Secretaria</option><option value="direction" data-admin-only>Direção</option><option value="admin" data-admin-only>Administrador</option>
+              <option value="">Selecione o perfil da conta</option>
+              <optgroup label="Equipe escolar">
+                <option value="admin" data-admin-only>Administrador</option>
+                <option value="direction" data-admin-only>Direção</option>
+                <option value="secretariat" data-admin-only>Secretaria</option>
+                <option value="teacher">Professor</option>
+                <option value="pedagogue">Pedagogo</option>
+              </optgroup>
+              <optgroup label="Comunidade escolar">
+                <option value="guardian">Responsável</option>
+                <option value="student">Estudante</option>
+              </optgroup>
             </select></label>
             <label>Senha inicial<input name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" required></label>
             <button type="submit">Criar conta</button>
