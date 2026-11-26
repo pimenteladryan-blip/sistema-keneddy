@@ -118,7 +118,7 @@ function showDashboard(user) {
     loadDrivers();
     loadReports();
   }
-  if (user.role === 'admin') loadRegistrationRequests();
+  if (user.role === 'admin') { loadRegistrationRequests(); loadManagedUsers(); }
 }
 function clearDashboardData() {
   dashboardView.querySelectorAll('form').forEach(form => form.reset());
@@ -241,6 +241,43 @@ async function loadStudents() {
   } catch (error) { if (error.name === 'AbortError') return; list.textContent = error.message; }
 }
 
+
+
+let managedUsersCache = [];
+async function loadManagedUsers() {
+  const list = document.querySelector('#managed-users-list');
+  if (!list || currentUser?.role !== 'admin') return;
+  try {
+    const data = await api('/api/users');
+    managedUsersCache = data.users || [];
+    renderManagedUsers();
+  } catch (error) { if (error.name !== 'AbortError') list.textContent = error.message; }
+}
+function renderManagedUsers() {
+  const list = document.querySelector('#managed-users-list');
+  const query = (document.querySelector('#managed-users-search')?.value || '').trim().toLocaleLowerCase('pt-BR');
+  const users = managedUsersCache.filter(u => [u.name,u.email,u.roleLabel].some(v => String(v || '').toLocaleLowerCase('pt-BR').includes(query)));
+  document.querySelector('#managed-users-count').textContent = String(managedUsersCache.length);
+  list.innerHTML = users.length ? users.map(u => '<article class="data-row managed-user-row"><div class="managed-user-info"><strong>'+escapeHtml(u.name)+'</strong><small>'+escapeHtml(u.email)+'</small><small>'+escapeHtml(u.roleLabel || u.role)+' · '+(u.active?'Ativa':'Desativada')+'</small></div><span class="account-presence '+(u.online?'is-online':'')+'"><i></i>'+(u.online?'Online':'Offline')+'</span><div class="managed-user-actions"><button type="button" class="small-action" data-edit-user="'+u.id+'">Editar</button><button type="button" class="small-action button-danger" data-delete-user="'+u.id+'">Excluir</button></div></article>').join('') : '<p class="muted">Nenhuma conta encontrada.</p>';
+}
+document.querySelector('#managed-users-search')?.addEventListener('input', renderManagedUsers);
+document.querySelector('#managed-users-list')?.addEventListener('click', async event => {
+  const edit = event.target.closest('[data-edit-user]'), del = event.target.closest('[data-delete-user]');
+  if (edit) {
+    const user = managedUsersCache.find(u => String(u.id) === edit.dataset.editUser); if (!user) return;
+    const name = prompt('Nome da conta:', user.name); if (name === null) return;
+    const role = prompt('Perfil: admin, direction, secretariat, teacher, pedagogue, guardian ou student', user.role); if (role === null) return;
+    const active = confirm('Manter esta conta ATIVA? Toque em Cancelar para desativar.');
+    try { const result = await api('/api/users/'+user.id,{method:'PATCH',body:JSON.stringify({name,role,active})}); showMessage('#managed-users-message',result.message); await loadManagedUsers(); }
+    catch(error){ showMessage('#managed-users-message',error.message,true); }
+  }
+  if (del) {
+    const user = managedUsersCache.find(u => String(u.id) === del.dataset.deleteUser); if (!user) return;
+    if (!confirm('Excluir definitivamente a conta de '+user.name+' ('+user.email+')? Esta ação não pode ser desfeita.')) return;
+    try { const result = await api('/api/users/'+user.id,{method:'DELETE'}); showMessage('#managed-users-message',result.message); await loadManagedUsers(); }
+    catch(error){ showMessage('#managed-users-message',error.message,true); }
+  }
+});
 
 async function loadLinkableUsers() {
   if (!currentUser || !['admin', 'direction', 'secretariat'].includes(currentUser.role)) return;
