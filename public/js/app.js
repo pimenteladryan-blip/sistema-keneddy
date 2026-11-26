@@ -266,9 +266,18 @@ document.querySelector('#managed-users-list')?.addEventListener('click', async e
   if (edit) {
     const user = managedUsersCache.find(u => String(u.id) === edit.dataset.editUser); if (!user) return;
     const name = prompt('Nome da conta:', user.name); if (name === null) return;
-    const role = prompt('Perfil: admin, direction, secretariat, teacher, pedagogue, guardian ou student', user.role); if (role === null) return;
+    const roleOptions = ['admin','direction','secretariat','teacher','pedagogue','guardian','student'];
+    const roleLabels = {admin:'Administrador',direction:'Direção',secretariat:'Secretaria',teacher:'Professor',pedagogue:'Pedagogo',guardian:'Responsável',student:'Estudante'};
+    const roleText = roleOptions.map((key,index) => (index+1)+ ' - '+roleLabels[key]).join('\\n');
+    const roleChoice = prompt('Escolha o tipo de conta digitando o número:\\n'+roleText+'\\n\\nAtual: '+roleLabels[user.role], String(roleOptions.indexOf(user.role)+1));
+    if (roleChoice === null) return;
+    const roleIndex = Number(roleChoice)-1;
+    if (!Number.isInteger(roleIndex) || !roleOptions[roleIndex]) { showMessage('#managed-users-message','Tipo de conta inválido.',true); return; }
+    const password = prompt('Nova senha (opcional). Deixe em branco para manter a atual. Mínimo de 14 caracteres:','');
+    if (password === null) return;
+    if (password && password.length < 14) { showMessage('#managed-users-message','A nova senha precisa ter pelo menos 14 caracteres.',true); return; }
     const active = confirm('Manter esta conta ATIVA? Toque em Cancelar para desativar.');
-    try { const result = await api('/api/users/'+user.id,{method:'PATCH',body:JSON.stringify({name,role,active})}); showMessage('#managed-users-message',result.message); await loadManagedUsers(); }
+    try { const result = await api('/api/users/'+user.id,{method:'PATCH',body:JSON.stringify({name,role:roleOptions[roleIndex],active,password})}); showMessage('#managed-users-message',result.message); await loadManagedUsers(); }
     catch(error){ showMessage('#managed-users-message',error.message,true); }
   }
   if (del) {
