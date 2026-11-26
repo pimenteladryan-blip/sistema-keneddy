@@ -161,6 +161,45 @@ async function setUserActive(id, active) {
   return true;
 }
 
+
+async function listOnlineUserIds(now = new Date().toISOString()) {
+  const sessions = await store.list('sessions', { limit: 5000 });
+  return [...new Set(sessions.filter(s => typeof s.expires_at === 'string' && s.expires_at > now)
+    .map(s => Number(s.user_id)).filter(id => Number.isSafeInteger(id) && id > 0))];
+}
+async function updateManagedUser(id, { display_name, role, active }, actor_user_id) {
+  const user = await findUserById(id);
+  if (!user) return null;
+  const name = typeof display_name === 'string' ? display_name.trim() : '';
+  const roles = ['admin','direction','secretariat','teacher','pedagogue','guardian','student'];
+  if (name.length < 3 || name.length > 100 || !roles.includes(role) || typeof active !== 'boolean') {
+    const error = new Error('Confira nome, perfil e situação da conta.'); error.code = 'invalid-user'; throw error;
+  }
+  await store.update('users', user.id, { display_name: name, role, active, updated_at: new Date().toISOString() });
+  const db = require('./firebase').firestore;
+  if (db) {
+    await db.collection('audit_logs').add({ actor_user_id: Number(actor_user_id), action: 'update', entity_type: 'user', entity_id: String(user.id), created_at: new Date().toISOString() });
+    if (!active) {
+      const sessions = await store.list('sessions', { filters: [{ field: 'user_id', op: '==', value: Number(user.id) }], limit: 500 });
+      await Promise.all(sessions.map(s => store.remove('sessions', s.id)));
+    }
+  }
+  return { ...user, display_name: name, role, active };
+}
+async function deleteManagedUser(id, actor_user_id) {
+  const user = await findUserById(id);
+  if (!user) return null;
+  const db = require('./firebase').firestore;
+  const sessions = await store.list('sessions', { filters: [{ field: 'user_id', op: '==', value: Number(user.id) }], limit: 500 });
+  await Promise.all(sessions.map(s => store.remove('sessions', s.id)));
+  if (db) {
+    const digest = crypto.createHash('sha256').update(String(user.email).trim().toLowerCase()).digest('hex');
+    await db.collection('_sgve_unique_indexes').doc('users_email_' + digest).delete().catch(() => {});
+  }
+  await store.remove('users', user.id);
+  if (db) await db.collection('audit_logs').add({ actor_user_id: Number(actor_user_id), action: 'delete', entity_type: 'user', entity_id: String(user.id), created_at: new Date().toISOString() });
+  return user;
+}
 async function createAuditLog({ actor_user_id = null, action, entity_type, entity_id = null }) {
   if (typeof action !== 'string' || !action.trim() || action.length > 80 ||
       typeof entity_type !== 'string' || !entity_type.trim() || entity_type.length > 80 ||
@@ -530,6 +569,9 @@ module.exports = {
   findUserByEmail,
   findUserById,
   listUsers,
+  listOnlineUserIds,
+  updateManagedUser,
+  deleteManagedUser,
   createUser,
   importUserWithId,
   setUserActive,
