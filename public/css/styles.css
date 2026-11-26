@@ -546,3 +546,143 @@ body.dark-mode .module-panel .participants-toggle{border-color:#3a5943;backgroun
 body.dark-mode .module-panel .participants-toggle:hover{background:#25412d}
 body.dark-mode .module-panel .trip-participants{border-color:#304238;background:#15231a}
 @media(max-width:520px){.module-panel .trip-participants ul{grid-template-columns:1fr}}
+
+
+/* Ajuste final: paleta única do Sistema Kennedy */
+:root{
+  --green:#087344;
+  --green-dark:#06452f;
+  --green-soft:#e8f4ed;
+  --accent:#8bd34e;
+  --ink:#183326;
+  --muted:#68796f;
+  --line:#dce8df;
+}
+/* Oculta qualquer botão antigo de autenticação Google, caso ainda esteja no HTML publicado. */
+#google-login-button,
+.google-login-button,
+[data-auth-provider="google"]{display:none!important}
+
+/* Uma única família de verdes e neutros em toda a interface. */
+body{background:#f4f8f5;color:var(--ink)}
+.content-panel{background:transparent}
+.auth-card,.module-panel,.tabs,.overview-card,.data-row,.trip-card{
+  border-color:var(--line);
+}
+button:not(.tab):not(.link-button):not(.theme-toggle):not(.button-secondary):not(.participants-toggle){
+  background:var(--green);
+  color:#fff;
+}
+button:not(.tab):not(.link-button):not(.theme-toggle):not(.button-secondary):not(.participants-toggle):hover{
+  background:var(--green-dark);
+}
+.link-button,.tab{color:var(--green)}
+.link-button:hover,.tab:hover,.tab.active{
+  background:var(--green-soft);
+  color:var(--green-dark);
+}
+.button-secondary,.theme-toggle,.participants-toggle{
+  border-color:var(--line);
+  background:#fff;
+  color:var(--green-dark);
+}
+.button-secondary:hover,.theme-toggle:hover,.participants-toggle:hover{
+  border-color:#b9d6c1;
+  background:var(--green-soft);
+  color:var(--green-dark);
+}
+.auth-card{border-color:var(--line);background:#fff}
+.module-panel{background:#fff;color:var(--ink)}
+.module-panel .section-heading{
+  border-color:#d4e6d8;
+  background:linear-gradient(105deg,#edf6ef 0%,#e5f1e8 100%);
+}
+.module-panel .section-heading .eyebrow{color:#548064}
+.module-panel .section-heading h3{color:var(--green-dark)}
+.module-panel .section-heading .count-pill{
+  border-color:#cfe3d3;background:var(--green-soft);color:var(--green-dark);
+}
+.module-panel .inline-form,
+.module-panel .assignment-area .inline-form{
+  border-color:#e2ece4;background:#f7faf7;
+}
+.module-panel .data-row,
+.module-panel .trip-card,
+.module-panel .assignment-area,
+.module-panel .trip-list-heading,
+.module-panel .trip-workflow-link{
+  border-color:#e0eae2;background:#fbfdfb;
+}
+.module-panel .trip-workflow-number,
+.module-panel .trip-stage-tag,
+.module-panel .count-pill,
+.verification-code-badge{
+  border-color:#cfe3d3;background:var(--green-soft);color:var(--green-dark);
+}
+.module-panel .trip-workflow-link:hover{border-color:#a9cbb2;background:#f0f7f1}
+.module-panel .privacy-note{border-left-color:#b9d8c1;background:#f7faf7}
+.status-approved,.status-open,.student-status-pill{background:#e8f4ed;color:#17633f}
+.status-pending_approval{background:#f2f4e8;color:#66713a}
+.status-completed{background:#edf1f5;color:#526477}
+/* Tema escuro preserva a mesma identidade, apenas com superfícies escuras. */
+body.dark-mode{
+  --green:#72bd8d;
+  --green-dark:#a7d9b8;
+  --green-soft:#1d3829;
+  --ink:#e7eee9;
+  --muted:#a5b3a9;
+  --line:#304238;
+  background:#0c1711;color:var(--ink);
+}
+body.dark-mode .content-panel{background:#0c1711}
+body.dark-mode .auth-card,
+body.dark-mode .module-panel,
+body.dark-mode .tabs,
+body.dark-mode .overview-card,
+body.dark-mode .data-row,
+body.dark-mode .trip-card{
+  border-color:var(--line);background:#15231a;color:var(--ink);
+}
+body.dark-mode .module-panel .section-heading{
+  border-color:#365c40;background:#1c3b29;
+}
+body.dark-mode .module-panel .section-heading .eyebrow{color:#a9d6a9}
+body.dark-mode .module-panel .section-heading h3,
+body.dark-mode .module-panel .section-heading .section-subtitle{color:#e7eee9}
+body.dark-mode .module-panel .inline-form,
+body.dark-mode .module-panel .assignment-area,
+body.dark-mode .module-panel .assignment-area .inline-form,
+body.dark-mode .module-panel .trip-list-heading,
+body.dark-mode .module-panel .trip-workflow-link,
+body.dark-mode .module-panel .privacy-note{
+  border-color:var(--line);background:#17271d;color:var(--ink);
+}
+body.dark-mode .module-panel input,
+body.dark-mode .module-panel select,
+body.dark-mode input,body.dark-mode select{
+  border-color:#405b49;background:#101c15;color:#edf5ef;
+}
+body.dark-mode .button-secondary,
+body.dark-mode .theme-toggle,
+body.dark-mode .participants-toggle{
+  border-color:#405b49;background:#17251c;color:#d9f0df;
+}
+body.dark-mode .button-secondary:hover,
+body.dark-mode .theme-toggle:hover,
+body.dark-mode .participants-toggle:hover{background:#20382a;color:#d9f0df}
+body.dark-mode .link-button,body.dark-mode .tab{color:#b9e1c4}
+body.dark-mode .link-button:hover,
+body.dark-mode .tab:hover,body.dark-mode .tab.active{
+  background:#1d3829;color:#d5f0dd;
+}
+body.dark-mode .module-panel .trip-workflow-number,
+body.dark-mode .module-panel .trip-stage-tag,
+body.dark-mode .module-panel .count-pill,
+body.dark-mode .verification-code-badge{
+  border-color:#42694e;background:#1d3829;color:#c9efd3;
+}
+body.dark-mode .module-panel .trip-workflow-link:hover{border-color:#5d8b63;background:#203a29}
+body.dark-mode .module-panel .privacy-note{border-left-color:#42694e;background:#17271d}
+@media(max-width:760px){
+  .content-panel{background:transparent}
+}
