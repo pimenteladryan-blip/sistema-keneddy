@@ -5,7 +5,6 @@ const loginForm = document.querySelector('#login-form');
 const loginButton = document.querySelector('#login-button');
 const loginMessage = document.querySelector('#login-message');
 const logoutButton = document.querySelector('#logout-button');
-const googleLoginButton = document.querySelector('#google-login-button');
 const installButton = document.querySelector('#pwa-install');
 let deferredInstallPrompt = null;
 let csrfToken = '';
@@ -1163,38 +1162,6 @@ loginForm.addEventListener('submit', async event => {
   } finally {
     loginButton.disabled = false;
     loginButton.textContent = 'Entrar';
-  }
-});
-googleLoginButton.addEventListener('click', async () => {
-  loginMessage.textContent = '';
-  if (!document.querySelector('#login-role').value) {
-    loginMessage.textContent = 'Selecione seu perfil antes de continuar.';
-    return;
-  }
-  googleLoginButton.disabled = true;
-  googleLoginButton.textContent = 'Conectando ao Google...';
-  try {
-    if (!window.firebase || !window.SGVE_FIREBASE_CONFIG) throw new Error('O login Google não está configurado nesta página.');
-    if (!firebase.apps.length) firebase.initializeApp(window.SGVE_FIREBASE_CONFIG);
-    const provider = new firebase.auth.GoogleAuthProvider();
-    const credential = await firebase.auth().signInWithPopup(provider);
-    const idToken = await credential.user.getIdToken(true);
-    const data = await api('/api/auth/firebase', {
-      method: 'POST',
-      body: JSON.stringify({ idToken, role: document.querySelector('#login-role').value })
-    });
-    await firebase.auth().signOut();
-    csrfToken = data.csrfToken;
-    showDashboard(data.user);
-  } catch (error) {
-    if (error.name === 'AbortError') return;
-    try { if (window.firebase?.apps?.length) await firebase.auth().signOut(); } catch {}
-    loginMessage.textContent = error.code === 'auth/popup-closed-by-user'
-      ? 'A janela de login foi fechada antes da conclusão.'
-      : (error.message || 'Não foi possível entrar com Google.');
-  } finally {
-    googleLoginButton.disabled = false;
-    googleLoginButton.textContent = 'Entrar com Google';
   }
 });
 window.addEventListener('beforeinstallprompt', event => {
