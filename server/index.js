@@ -845,11 +845,56 @@ app.get('/api/linkable-users', requireAuth, requireRoles(...USER_MANAGERS), asyn
 app.get('/api/users', requireAuth, requireRoles('admin', 'direction'), async (_req, res, next) => {
   try {
     if (firebaseConfigured) {
-      const users = await firestoreAuth.listUsers(300);
-      return res.json({ users: users.map(user => ({ id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role], active: user.active, subjects: Array.isArray(user.subjects) ? user.subjects : [] })) });
+      const users = await firestoreAuth.listUsers(300); const online = new Set(await firestoreAuth.listOnlineUserIds());
+      return res.json({ users: users.map(user => ({ id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role], active: user.active, online: online.has(Number(user.id)), subjects: Array.isArray(user.subjects) ? user.subjects : [] })) });
     }
     const rows = db.prepare('SELECT id, display_name, email, role, active, subjects FROM users ORDER BY display_name LIMIT 300').all();
-    res.json({ users: rows.map(user => ({ id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role], active: Boolean(user.active), subjects: (() => { try { return JSON.parse(user.subjects || '[]'); } catch { return []; } })() })) });
+    const online = new Set(db.prepare('SELECT DISTINCT user_id FROM sessions WHERE expires_at > ?').all(new Date().toISOString()).map(row => Number(row.user_id)));
+    res.json({ users: rows.map(user => ({ id: user.id, name: user.display_name, email: user.email, role: user.role, roleLabel: ROLE_LABELS[user.role], active: Boolean(user.active), online: online.has(Number(user.id)), subjects: (() => { try { return JSON.parse(user.subjects || '[]'); } catch { return []; } })() })) });
+  } catch (error) { next(error); }
+});
+
+app.patch('/api/users/:id', requireAuth, requireCsrf, requireRoles('admin'), async (req, res, next) => {
+  try {
+    const id = Number(req.params.id), name = cleanText(req.body.name, 100), role = String(req.body.role || ''), active = req.body.active;
+    if (!Number.isSafeInteger(id) || id < 1 || name.length < 3 || !VALID_ROLES.includes(role) || typeof active !== 'boolean') return res.status(400).json({ error: 'Confira os dados da conta.' });
+    if (id === Number(req.auth.user.id) && !active) return res.status(400).json({ error: 'Você não pode desativar sua própria conta.' });
+    if (firebaseConfigured) {
+      const target = await firestoreAuth.findUserById(id);
+      if (!target) return res.status(404).json({ error: 'Conta não encontrada.' });
+      if (target.role === 'admin' && (role !== 'admin' || !active) && (await firestoreAuth.listUsers(300)).filter(u => u.role === 'admin' && u.active).length <= 1) return res.status(400).json({ error: 'Mantenha pelo menos um administrador ativo.' });
+      const updated = await firestoreAuth.updateManagedUser(id, { display_name: name, role, active }, req.auth.user.id);
+      if (target.firebase_uid) await getAuth(firebaseApp).updateUser(target.firebase_uid, { displayName: name, disabled: !active });
+      return res.json({ message: 'Conta atualizada.', user: { id, name, email: updated.email, role, roleLabel: ROLE_LABELS[role], active } });
+    }
+    const target = db.prepare('SELECT id, email, role FROM users WHERE id = ?').get(id);
+    if (!target) return res.status(404).json({ error: 'Conta não encontrada.' });
+    if (target.role === 'admin' && (role !== 'admin' || !active) && db.prepare("SELECT COUNT(*) AS n FROM users WHERE role='admin' AND active=1").get().n <= 1) return res.status(400).json({ error: 'Mantenha pelo menos um administrador ativo.' });
+    db.prepare('UPDATE users SET display_name=?, role=?, active=? WHERE id=?').run(name, role, active ? 1 : 0, id);
+    if (!active) db.prepare('DELETE FROM sessions WHERE user_id=?').run(id);
+    audit(req.auth.user.id, 'update', 'user', id);
+    return res.json({ message: 'Conta atualizada.', user: { id, name, email: target.email, role, roleLabel: ROLE_LABELS[role], active } });
+  } catch (error) { next(error); }
+});
+app.delete('/api/users/:id', requireAuth, requireCsrf, requireRoles('admin'), async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: 'Conta inválida.' });
+    if (id === Number(req.auth.user.id)) return res.status(400).json({ error: 'Você não pode excluir sua própria conta.' });
+    if (firebaseConfigured) {
+      const target = await firestoreAuth.findUserById(id);
+      if (!target) return res.status(404).json({ error: 'Conta não encontrada.' });
+      if (target.role === 'admin' && (await firestoreAuth.listUsers(300)).filter(u => u.role === 'admin' && u.active).length <= 1) return res.status(400).json({ error: 'Mantenha pelo menos um administrador ativo.' });
+      await firestoreAuth.deleteManagedUser(id, req.auth.user.id);
+      if (target.firebase_uid) await getAuth(firebaseApp).deleteUser(target.firebase_uid).catch(error => { if (error.code !== 'auth/user-not-found') throw error; });
+      return res.json({ message: 'Conta excluída.' });
+    }
+    const target = db.prepare('SELECT id, role FROM users WHERE id=?').get(id);
+    if (!target) return res.status(404).json({ error: 'Conta não encontrada.' });
+    if (target.role === 'admin' && db.prepare("SELECT COUNT(*) AS n FROM users WHERE role='admin' AND active=1").get().n <= 1) return res.status(400).json({ error: 'Mantenha pelo menos um administrador ativo.' });
+    db.prepare('DELETE FROM sessions WHERE user_id=?').run(id); db.prepare('DELETE FROM users WHERE id=?').run(id);
+    audit(req.auth.user.id, 'delete', 'user', id);
+    return res.json({ message: 'Conta excluída.' });
   } catch (error) { next(error); }
 });
 
