@@ -1078,3 +1078,28 @@ body.dark-mode .inline-form, body.dark-mode .privacy-note {
 .managed-user-actions{display:flex;gap:7px}
 .button-danger{background:#fff0f0!important;color:#b42318!important;border:1px solid #f3c7c4!important}
 @media(max-width:600px){.managed-user-row{align-items:flex-start}.managed-user-actions{width:100%}.managed-user-actions button{flex:1}}
+
+/* Editor de contas em modal */
+.account-modal-open{overflow:hidden}
+.account-edit-modal{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(8,25,15,.58);backdrop-filter:blur(4px)}
+.account-edit-modal.hidden{display:none!important}
+.account-edit-dialog{width:min(100%,500px);max-height:min(88vh,760px);overflow:auto;padding:25px;border:1px solid #dce9df;border-radius:18px;background:#fff;box-shadow:0 24px 80px #001b0d40;animation:accountModalIn .18s ease-out}
+.account-edit-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px}
+.account-edit-header h3{margin:5px 0;font-size:23px;color:#173b28}
+.account-edit-header .section-subtitle{margin:0;overflow-wrap:anywhere}
+.account-modal-close{width:36px;min-width:36px;height:36px;min-height:36px!important;padding:0;border:1px solid #e1e9e3;background:#f6faf7!important;color:#52675a!important;font-size:24px;line-height:1;box-shadow:none!important}
+.account-edit-form{display:grid;gap:16px}
+.account-edit-form>label:not(.account-active-toggle),.account-password-field label{display:grid;gap:7px;color:#354b3c;font-size:13px;font-weight:700}
+.account-edit-form input:not([type=checkbox]),.account-edit-form select{width:100%;min-height:46px;padding:0 12px;border:1px solid #d7e4da;border-radius:10px;background:#fbfdfb;color:#1c3023;font:inherit;box-sizing:border-box}
+.account-edit-form input:focus,.account-edit-form select:focus{outline:0;border-color:#39875a;box-shadow:0 0 0 3px #39875a20}
+.account-password-field{display:grid;gap:6px}.account-password-field small{color:#718078;font-size:11px;line-height:1.5}
+.account-edit-form .account-active-toggle{display:flex;align-items:center;gap:9px;padding:12px 13px;border:1px solid #e2ebe4;border-radius:10px;background:#f7faf7;color:#3c5142;font-size:13px;font-weight:650}
+.account-edit-form .account-active-toggle input{width:17px;height:17px;accent-color:#087344}
+.account-edit-actions{display:flex;justify-content:flex-end;gap:9px;padding-top:5px}.account-edit-actions button{min-width:130px}
+@keyframes accountModalIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+body.dark-mode .account-edit-dialog{border-color:#35513e;background:#14231a}
+body.dark-mode .account-edit-header h3,body.dark-mode .account-edit-form>label,body.dark-mode .account-password-field label{color:#e3eee6}
+body.dark-mode .account-edit-form input:not([type=checkbox]),body.dark-mode .account-edit-form select{border-color:#405b49;background:#101c15;color:#edf5ef}
+body.dark-mode .account-edit-form .account-active-toggle{border-color:#304238;background:#17291e;color:#d5e1d8}
+body.dark-mode .account-modal-close{border-color:#405b49;background:#17251c!important;color:#d5e1d8!important}
+@media(max-width:520px){.account-edit-modal{align-items:flex-end;padding:10px}.account-edit-dialog{width:100%;max-height:90vh;padding:21px 17px;border-radius:17px 17px 12px 12px}.account-edit-actions{flex-direction:column-reverse}.account-edit-actions button{width:100%}}
