@@ -333,6 +333,21 @@
             <p id="managed-users-message" class="message" role="status" aria-live="polite"></p>
             <div id="managed-users-list" class="data-list"><p class="muted">Carregando contas...</p></div>
           </section>
+
+          <div id="account-edit-modal" class="account-edit-modal hidden" aria-hidden="true">
+            <section class="account-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="account-edit-title">
+              <header class="account-edit-header"><div><span class="eyebrow green">ADMINISTRAÇÃO DE ACESSO</span><h3 id="account-edit-title">Editar conta</h3><p id="account-edit-subtitle" class="section-subtitle"></p></div><button type="button" class="account-modal-close" data-close-account-modal aria-label="Fechar">×</button></header>
+              <form id="account-edit-form" class="account-edit-form">
+                <input type="hidden" name="user_id">
+                <label>Nome completo<input name="name" maxlength="100" required></label>
+                <label>Tipo de conta<select name="role" required><option value="admin" data-admin-only>Administrador</option><option value="direction" data-admin-only>Direção</option><option value="secretariat" data-admin-only>Secretaria</option><option value="teacher">Professor</option><option value="pedagogue">Pedagogo</option><option value="guardian">Responsável</option><option value="student">Estudante</option></select></label>
+                <div class="account-password-field"><label>Nova senha<input name="password" type="password" minlength="14" maxlength="200" autocomplete="new-password" placeholder="Digite somente se quiser trocar"></label><small>Deixe em branco para manter a senha atual. Mínimo de 14 caracteres.</small></div>
+                <label class="account-active-toggle"><input name="active" type="checkbox"> Conta ativa</label>
+                <p id="account-edit-message" class="message" role="status" aria-live="polite"></p>
+                <footer class="account-edit-actions"><button type="button" class="button-secondary" data-close-account-modal>Cancelar</button><button type="submit">Salvar alterações</button></footer>
+              </form>
+            </section>
+          </div>
           <section id="registration-requests-section" class="registration-requests-section hidden">
             <div class="section-heading"><div><p class="eyebrow green">ANÁLISE DE ACESSO</p><h3>Solicitações pendentes</h3><p class="section-subtitle">Somente o administrador pode aprovar ou rejeitar cadastros.</p></div><span id="registration-requests-count" class="count-pill">0</span></div>
             <p id="registration-requests-message" class="message" role="status"></p>
