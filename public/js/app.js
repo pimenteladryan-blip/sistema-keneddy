@@ -261,32 +261,44 @@ function renderManagedUsers() {
   list.innerHTML = users.length ? users.map(u => '<article class="data-row managed-user-row"><div class="managed-user-info"><strong>'+escapeHtml(u.name)+'</strong><small>'+escapeHtml(u.email)+'</small><small>'+escapeHtml(u.roleLabel || u.role)+' · '+(u.active?'Ativa':'Desativada')+'</small></div><span class="account-presence '+(u.online?'is-online':'')+'"><i></i>'+(u.online?'Online':'Offline')+'</span><div class="managed-user-actions"><button type="button" class="small-action" data-edit-user="'+u.id+'">Editar</button><button type="button" class="small-action button-danger" data-delete-user="'+u.id+'">Excluir</button></div></article>').join('') : '<p class="muted">Nenhuma conta encontrada.</p>';
 }
 document.querySelector('#managed-users-search')?.addEventListener('input', renderManagedUsers);
-document.querySelector('#managed-users-list')?.addEventListener('click', async event => {
-  const edit = event.target.closest('[data-edit-user]'), del = event.target.closest('[data-delete-user]');
-  if (edit) {
-    const user = managedUsersCache.find(u => String(u.id) === edit.dataset.editUser); if (!user) return;
-    const name = prompt('Nome da conta:', user.name); if (name === null) return;
-    const roleOptions = ['admin','direction','secretariat','teacher','pedagogue','guardian','student'];
-    const roleLabels = {admin:'Administrador',direction:'Direção',secretariat:'Secretaria',teacher:'Professor',pedagogue:'Pedagogo',guardian:'Responsável',student:'Estudante'};
-    const roleText = roleOptions.map((key,index) => (index+1)+ ' - '+roleLabels[key]).join('\\n');
-    const roleChoice = prompt('Escolha o tipo de conta digitando o número:\\n'+roleText+'\\n\\nAtual: '+roleLabels[user.role], String(roleOptions.indexOf(user.role)+1));
-    if (roleChoice === null) return;
-    const roleIndex = Number(roleChoice)-1;
-    if (!Number.isInteger(roleIndex) || !roleOptions[roleIndex]) { showMessage('#managed-users-message','Tipo de conta inválido.',true); return; }
-    const password = prompt('Nova senha (opcional). Deixe em branco para manter a atual. Mínimo de 14 caracteres:','');
-    if (password === null) return;
-    if (password && password.length < 14) { showMessage('#managed-users-message','A nova senha precisa ter pelo menos 14 caracteres.',true); return; }
-    const active = confirm('Manter esta conta ATIVA? Toque em Cancelar para desativar.');
-    try { const result = await api('/api/users/'+user.id,{method:'PATCH',body:JSON.stringify({name,role:roleOptions[roleIndex],active,password})}); showMessage('#managed-users-message',result.message); await loadManagedUsers(); }
-    catch(error){ showMessage('#managed-users-message',error.message,true); }
-  }
-  if (del) {
-    const user = managedUsersCache.find(u => String(u.id) === del.dataset.deleteUser); if (!user) return;
-    if (!confirm('Excluir definitivamente a conta de '+user.name+' ('+user.email+')? Esta ação não pode ser desfeita.')) return;
-    try { const result = await api('/api/users/'+user.id,{method:'DELETE'}); showMessage('#managed-users-message',result.message); await loadManagedUsers(); }
-    catch(error){ showMessage('#managed-users-message',error.message,true); }
-  }
+
+function openUserEditor(user) {
+ const modal=document.querySelector('#account-edit-modal'), form=document.querySelector('#account-edit-form');
+ if(!modal||!form)return;
+ form.elements.user_id.value=user.id; form.elements.name.value=user.name||'';
+ form.elements.role.value=user.role||'teacher'; form.elements.password.value='';
+ form.elements.active.checked=!!user.active;
+ document.querySelector('#account-edit-subtitle').textContent=user.email||'Editar dados da conta';
+ document.querySelector('#account-edit-message').textContent='';
+ modal.classList.remove('hidden'); modal.setAttribute('aria-hidden','false');
+ document.body.classList.add('account-modal-open'); setTimeout(()=>form.elements.name.focus(),40);
+}
+function closeUserEditor(){
+ const modal=document.querySelector('#account-edit-modal'); if(!modal)return;
+ modal.classList.add('hidden'); modal.setAttribute('aria-hidden','true');
+ document.body.classList.remove('account-modal-open'); document.querySelector('#account-edit-form')?.reset();
+}
+document.querySelector('#managed-users-list')?.addEventListener('click',async event=>{
+ const edit=event.target.closest('[data-edit-user]'), del=event.target.closest('[data-delete-user]');
+ if(edit){const user=managedUsersCache.find(u=>String(u.id)===edit.dataset.editUser);if(user)openUserEditor(user);}
+ if(del){const user=managedUsersCache.find(u=>String(u.id)===del.dataset.deleteUser);if(!user)return;
+  if(!confirm('Excluir definitivamente a conta de '+user.name+' ('+user.email+')? Esta ação não pode ser desfeita.'))return;
+  try{const result=await api('/api/users/'+user.id,{method:'DELETE'});showMessage('#managed-users-message',result.message);await loadManagedUsers();}
+  catch(error){showMessage('#managed-users-message',error.message,true);}
+ }
 });
+document.querySelectorAll('[data-close-account-modal]').forEach(btn=>btn.addEventListener('click',closeUserEditor));
+document.querySelector('#account-edit-modal')?.addEventListener('click',e=>{if(e.target.id==='account-edit-modal')closeUserEditor();});
+document.querySelector('#account-edit-form')?.addEventListener('submit',async e=>{
+ e.preventDefault();const form=e.currentTarget,data=new FormData(form),id=data.get('user_id'),password=String(data.get('password')||'');
+ if(password&&password.length<14){showMessage('#account-edit-message','A nova senha precisa ter pelo menos 14 caracteres.',true);return;}
+ const submit=form.querySelector('[type="submit"]');submit.disabled=true;
+ try{const result=await api('/api/users/'+id,{method:'PATCH',body:JSON.stringify({name:String(data.get('name')||'').trim(),role:String(data.get('role')),active:form.elements.active.checked,password})});
+ showMessage('#managed-users-message',result.message);closeUserEditor();await loadManagedUsers();}
+ catch(error){showMessage('#account-edit-message',error.message,true);}finally{submit.disabled=false;}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('#account-edit-modal')?.classList.contains('hidden'))closeUserEditor();});
+
 
 async function loadLinkableUsers() {
   if (!currentUser || !['admin', 'direction', 'secretariat'].includes(currentUser.role)) return;
