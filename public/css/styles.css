@@ -1031,3 +1031,35 @@ body.dark-mode .dashboard .participant-row { border-bottom-color:#304238; }
   .dashboard .participants-area { padding:8px; }
   .dashboard .participant-details .participant-name { font-size:11px; }
 }
+
+
+/* Padronização visual Kennedy: uma paleta institucional consistente. */
+:root {
+  --green: #087344;
+  --green-dark: #06452f;
+  --green-soft: #e8f4ed;
+  --accent: #8bd34e;
+  --ink: #17251e;
+  --muted: #728078;
+  --line: #e3eae5;
+  --surface: #ffffff;
+  --page-bg: #f3f6f3;
+  --panel-soft: #f7faf8;
+}
+body { background: var(--page-bg); color: var(--ink); }
+.module-panel, .data-row, .trip-card, .report-stat { background-color: var(--surface); }
+.inline-form, .privacy-note { background-color: var(--panel-soft); }
+button:not(.tab):not(.theme-toggle):not(.link-button):not(.button-secondary) { background-color: var(--green); }
+button:not(.tab):not(.theme-toggle):not(.link-button):not(.button-secondary):hover { background-color: var(--green-dark); }
+body.dark-mode {
+  --ink: #edf5ef; --muted: #a5b3a9; --line: #304238;
+  --surface: #15251b; --page-bg: #0c1711; --panel-soft: #17251c;
+  --green-soft: #183323;
+}
+body.dark-mode .module-panel, body.dark-mode .data-row,
+body.dark-mode .trip-card, body.dark-mode .report-stat {
+  background-color: var(--surface); color: var(--ink);
+}
+body.dark-mode .inline-form, body.dark-mode .privacy-note {
+  background-color: var(--panel-soft); color: var(--ink);
+}
