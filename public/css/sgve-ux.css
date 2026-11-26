@@ -2780,3 +2780,28 @@ body.dark-mode #dashboard-view .report-table tbody tr{background:#103522!importa
   #dashboard-view .home-card{padding:13px!important}
   #dashboard-view .home-stat-card{border-radius:15px!important}
 }
+
+
+/* Fix definitivo: a barra inferior precisa permitir gesto horizontal no celular. */
+@media screen and (max-width: 900px) {
+  #dashboard-view .tabs,
+  #dashboard-view nav.tabs {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    touch-action: pan-x !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-x: contain !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    min-width: 0 !important;
+    scrollbar-width: thin !important;
+    scroll-behavior: smooth;
+    pointer-events: auto !important;
+  }
+  #dashboard-view .tabs .tab,
+  #dashboard-view nav.tabs .tab {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    touch-action: pan-x !important;
+  }
+}
