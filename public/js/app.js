@@ -655,6 +655,8 @@ document.querySelector('#calendar-next').addEventListener('click',()=>{calendarM
 document.querySelector('#calendar-grid').addEventListener('click',event=>{const day=event.target.closest('[data-calendar-date]');if(day)showCalendarDate(day.dataset.calendarDate);});
 document.querySelector('#dashboard-view').addEventListener('click',event=>{const link=event.target.closest('[data-open-tab]');if(!link)return;const target=link.dataset.openTab;document.querySelector('.tab[data-tab="'+target+'"]')?.click();});
 
+const approvingTripIds = new Set();
+
 async function loadTrips() {
   const list = document.querySelector('#trips-list');
   try {
@@ -991,11 +993,19 @@ document.querySelector('#trips-list').addEventListener('click', async event => {
     if (opening) area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     return;
   }
+  const actionName = button.dataset.tripAction;
+  const tripKey = String(button.dataset.tripId);
+  if (button.disabled || (actionName === 'approve' && approvingTripIds.has(tripKey))) return;
+  if (actionName === 'approve') approvingTripIds.add(tripKey);
   button.disabled = true;
   const originalLabel = button.textContent;
-  button.textContent = button.dataset.tripAction === 'approve' ? 'Aprovando...' : 'Enviando...';
+  button.textContent = actionName === 'approve' ? 'Aprovando...' : 'Enviando...';
   try {
-    const result = await api('/api/trips/' + button.dataset.tripId + '/' + button.dataset.tripAction, { method: 'POST', body: '{}' });
+    const result = await api('/api/trips/' + button.dataset.tripId + '/' + actionName, { method: 'POST', body: '{}' });
+    if (actionName === 'approve') {
+      const cached = dashboardTrips.find(item => String(item.id) === tripKey);
+      if (cached) { cached.status = 'approved'; cached.statusLabel = 'Aprovada'; }
+    }
     showMessage('#trip-message', result.message);
     await loadTrips();
   } catch (error) {
@@ -1003,6 +1013,8 @@ document.querySelector('#trips-list').addEventListener('click', async event => {
     showMessage('#trip-message', error.message, true);
     button.textContent = originalLabel;
     button.disabled = false;
+  } finally {
+    if (actionName === 'approve') approvingTripIds.delete(tripKey);
   }
 });
 
