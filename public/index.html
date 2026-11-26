@@ -9,9 +9,6 @@
   <meta name="description" content="Sistema de Gerenciamento de Viagens Escolares">
   <title>SGVE | Colégio Presidente Kennedy</title>
   <link rel="stylesheet" href="/css/styles.css">
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js" defer></script>
-  <script src="/firebase-config.js" defer></script>
   <script src="/js/app.js" defer></script>
 </head>
 <body>
@@ -66,7 +63,6 @@
           <label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="username" maxlength="254" required>
           <label for="password">Senha</label><input id="password" name="password" type="password" autocomplete="current-password" maxlength="200" required>
           <button type="submit" id="login-button">Entrar</button>
-          <button type="button" id="google-login-button" class="button-secondary">Entrar com Google</button>
           <button type="button" id="pwa-install" class="button-secondary" hidden>Instalar SGVE</button>
           <p id="login-message" class="message" role="alert" aria-live="polite"></p>
         </form>
