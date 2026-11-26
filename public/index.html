@@ -327,6 +327,12 @@
           </form>
           <p id="user-message" class="message" role="status"></p>
           <p class="privacy-note">Cadastre aqui o e-mail e o perfil de acesso de cada pessoa. A senha inicial deve ter pelo menos 14 caracteres e ser entregue de forma privada.</p>
+          <section id="account-management" class="account-management">
+            <div class="section-heading"><div><p class="eyebrow green">ADMINISTRAÇÃO</p><h3>Gerenciar contas</h3><p class="section-subtitle">Consulte, edite e remova os acessos cadastrados.</p></div><span id="managed-users-count" class="count-pill">0</span></div>
+            <label class="account-search">Pesquisar contas<input id="managed-users-search" type="search" placeholder="Nome, e-mail ou perfil"></label>
+            <p id="managed-users-message" class="message" role="status" aria-live="polite"></p>
+            <div id="managed-users-list" class="data-list"><p class="muted">Carregando contas...</p></div>
+          </section>
           <section id="registration-requests-section" class="registration-requests-section hidden">
             <div class="section-heading"><div><p class="eyebrow green">ANÁLISE DE ACESSO</p><h3>Solicitações pendentes</h3><p class="section-subtitle">Somente o administrador pode aprovar ou rejeitar cadastros.</p></div><span id="registration-requests-count" class="count-pill">0</span></div>
             <p id="registration-requests-message" class="message" role="status"></p>
