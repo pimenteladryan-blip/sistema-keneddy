@@ -1186,6 +1186,9 @@ app.post('/api/trips/:id/approve', requireAuth, requireCsrf, requireRoles('admin
       ? await firestoreSchool.getTrip(tripId)
       : db.prepare('SELECT id, title, destination, departure_at, status FROM trips WHERE id = ?').get(tripId);
     if (!tripDetails) return res.status(404).json({ error: 'Viagem não encontrada.' });
+    if (tripDetails.status === 'approved' || tripDetails.status === 'open') {
+      return res.json({ message: 'Esta viagem já está aprovada. Nenhuma ação adicional foi realizada.', alreadyApproved: true });
+    }
     if (firebaseConfigured) {
       if (tripDetails.status === 'draft' && req.auth.user.role === 'admin') {
         const submitted = await firestoreSchool.submitTrip(tripId, req.auth.user.id);
@@ -1205,7 +1208,14 @@ app.post('/api/trips/:id/approve', requireAuth, requireCsrf, requireRoles('admin
       tripDetails.status = 'pending_approval';
     }
     if (tripDetails.status !== 'pending_approval') return res.status(409).json({ error: 'A viagem não está aguardando aprovação.' });
-    db.prepare("UPDATE trips SET status = 'approved', approved_by = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(req.auth.user.id, tripId);
+    const update = db.prepare("UPDATE trips SET status = 'approved', approved_by = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'pending_approval'").run(req.auth.user.id, tripId);
+    if (!update.changes) {
+      const latest = db.prepare('SELECT status FROM trips WHERE id = ?').get(tripId);
+      if (latest && ['approved', 'open'].includes(latest.status)) {
+        return res.json({ message: 'Esta viagem já está aprovada. Nenhuma ação adicional foi realizada.', alreadyApproved: true });
+      }
+      return res.status(409).json({ error: 'A situação da viagem mudou. Atualize a lista e tente novamente.' });
+    }
     audit(req.auth.user.id, 'approve', 'trip', tripId);
     const delivery = await notifyRoles(['admin', 'direction', 'secretariat', 'teacher', 'pedagogue', 'guardian', 'student'], { title: 'Viagem aprovada', body: tripNotificationDetails(tripDetails) });
     res.json({ message: 'Viagem aprovada.' + pushDeliveryMessage(delivery) });
